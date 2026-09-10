@@ -1,19 +1,29 @@
 import 'package:flutter/material.dart';
+import "package:myttmi/routes/cyber_page_route.dart";
 
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/storage/session_storage.dart';
-import 'package:myttmi/core/ui/prism_background.dart';
+import 'package:myttmi/features/shell/app_shell.dart';
 import 'package:myttmi/features/shell/splash_gate.dart';
+import 'package:myttmi/features/shell/tab_auto_refresh.dart';
+import 'package:myttmi/features/player/api/player_api.dart';
+import 'package:myttmi/features/player/models/player_dashboard_model.dart';
+import 'package:myttmi/features/profile/api/profile_api.dart';
+import 'package:myttmi/features/profile/models/profile_model.dart';
+import 'package:myttmi/features/notifications/api/notifications_api.dart';
 
 import '../../../routes/app_routes.dart';
-import '../../data/audio_service.dart';
-import '../../domain/song.dart';
 
-import '../widget/top_bar.dart';
-import '../widget/next_match_card.dart';
-import '../widget/swipe_cards_banner.dart';
-import '../widget/ef_nav_bar.dart';
+import '../widget/spin_header.dart';
+import '../widget/spin_player_card.dart';
+import '../widget/spin_next_match_panel.dart';
+import '../widget/spin_stats_row.dart';
+import '../widget/spin_section_label.dart';
+import '../widget/spin_mode_row.dart';
 
+/// Pestaña "Inicio" del shell — ya no arma su propio Scaffold/fondo/nav, eso
+/// lo maneja AppShell. Cambiar a otra pestaña se pide vía AppShellScope en
+/// vez de empujar una segunda pantalla encima.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -21,102 +31,92 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  late final PageController _cardController;
-  final AudioService _audio = AudioService();
+class _HomeScreenState extends State<HomeScreen>
+    with TabAutoRefreshMixin<HomeScreen> {
+  @override
+  int get tabIndex => 0;
 
-  final List<String> _cards = const [
-    "assets/images/background.png",
-    "assets/images/background1.png",
-    "assets/images/background2.png",
-    "assets/images/background3.png",
-  ];
+  @override
+  void onTabActivated() => _load();
 
-  final List<Song> _playlist = const [
-    Song(title: "ali madisson - carnaval", assetPath: "audio/carnaval.mp3"),
-    Song(title: "shakira - soltera", assetPath: "audio/soltera.mp3"),
-  ];
+  final _playerApi = PlayerApi();
+  final _profileApi = ProfileApi();
+  final _notificationsApi = NotificationsApi();
 
-  int _currentIndex = 0;
-  final ValueNotifier<String> _nowPlayingTitle = ValueNotifier<String>("");
-  int _navIndex = 0;
+  UserProfile? _profile;
+  PlayerDashboard? _dashboard;
+  int _unreadCount = 0;
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _cardController = PageController(viewportFraction: 1.0);
-
-    _audio.init(onComplete: _playNext);
-
-    Future.delayed(const Duration(seconds: 1), () async {
-      if (_playlist.isNotEmpty) await _playAt(0);
-    });
+    _load();
   }
 
-  Future<void> _playAt(int index) async {
-    if (_playlist.isEmpty) return;
-
-    _currentIndex = index.clamp(0, _playlist.length - 1);
-    final song = _playlist[_currentIndex];
-
-    _nowPlayingTitle.value = song.title;
-    await _audio.play(song, volume: 0.5);
-  }
-
-  Future<void> _playNext() async {
-    if (_playlist.isEmpty) return;
-    final next = (_currentIndex + 1) % _playlist.length;
-    await _playAt(next);
-  }
-
-  @override
-  void dispose() {
-    _nowPlayingTitle.dispose();
-    _cardController.dispose();
-    _audio.dispose();
-    super.dispose();
-  }
-
-  void _onNavTap(int i) {
-    setState(() => _navIndex = i);
-
-    switch (i) {
-      case 0:
-        Navigator.pushNamed(context, AppRoutes.calendar);
-        break;
-      case 1:
-        Navigator.pushNamed(context, AppRoutes.ranking);
-        break;
-      case 2:
-        Navigator.pushNamed(context, AppRoutes.stats);
-        break;
-      case 3:
-        Navigator.pushNamed(context, AppRoutes.tournaments);
-        break;
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    try {
+      final results = await Future.wait([
+        _profileApi.getMe(),
+        _playerApi.getDashboard(),
+        _notificationsApi.getUnreadCount(),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _profile = results[0] as UserProfile;
+        _dashboard = results[1] as PlayerDashboard;
+        _unreadCount = results[2] as int;
+      });
+    } catch (_) {
+      // Silencioso: la pantalla igual se puede usar sin estos datos.
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
+  }
+
+  void _goOpponentProfile() {
+    final nm = _dashboard?.nextMatch;
+    if (nm?.opponentId == null) return;
+    Navigator.pushNamed(
+      context,
+      AppRoutes.playerProfile,
+      arguments: {
+        "userId": nm!.opponentId,
+        "playerName": nm.opponentName ?? "Jugador",
+      },
+    );
   }
 
   Future<void> _confirmLogout() async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text("Cerrar sesión", style: TextStyle(color: AppColors.text)),
+        backgroundColor: AppColors.scorifyDeep,
+        title: const Text(
+          "Cerrar sesión",
+          style: TextStyle(color: AppColors.scorifyText),
+        ),
         content: Text(
           "¿Quieres cerrar sesión y volver al login?",
-          style: TextStyle(color: AppColors.text.withOpacity(0.85)),
+          style: TextStyle(color: AppColors.scorifyText.withOpacity(0.85)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text("Cancelar", style: TextStyle(color: AppColors.text.withOpacity(0.85))),
+            child: Text(
+              "Cancelar",
+              style: TextStyle(color: AppColors.scorifyText.withOpacity(0.85)),
+            ),
           ),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.electric.withOpacity(0.18),
-              foregroundColor: AppColors.text,
+              backgroundColor: AppColors.scorifyMint.withOpacity(0.18),
+              foregroundColor: AppColors.scorifyText,
               elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
             ),
             onPressed: () => Navigator.pop(context, true),
             icon: const Icon(Icons.logout),
@@ -132,127 +132,185 @@ class _HomeScreenState extends State<HomeScreen> {
 
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => const SplashGate()),
+        CyberPageRoute(builder: (_) => const SplashGate()),
         (route) => false,
       );
     }
   }
 
+  Future<void> _openSettings() async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: AppColors.scorifyDeep.withOpacity(0.95),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (_) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10),
+              ListTile(
+                leading: const Icon(
+                  Icons.person_outline,
+                  color: AppColors.scorifyText,
+                ),
+                title: const Text(
+                  "Perfil",
+                  style: TextStyle(color: AppColors.scorifyText),
+                ),
+                onTap: () => Navigator.pop(context, "profile"),
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.history,
+                  color: AppColors.scorifyText,
+                ),
+                title: const Text(
+                  "Historial",
+                  style: TextStyle(color: AppColors.scorifyText),
+                ),
+                onTap: () => Navigator.pop(context, "history"),
+              ),
+              ListTile(
+                leading: const Icon(Icons.logout, color: AppColors.scorifyText),
+                title: const Text(
+                  "Cerrar sesión",
+                  style: TextStyle(color: AppColors.scorifyText),
+                ),
+                onTap: () => Navigator.pop(context, "logout"),
+              ),
+              const SizedBox(height: 6),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (!mounted) return;
+
+    if (action == "profile") {
+      Navigator.pushNamed(context, AppRoutes.profile);
+    } else if (action == "history") {
+      Navigator.pushNamed(context, AppRoutes.history);
+    } else if (action == "logout") {
+      await _confirmLogout();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    const String meta = "jueves 05 febrero • 19:30 • Club Deportivo San Miguel";
-    const String tickerText = "mesa 5";
+    final nm = _dashboard?.nextMatch;
+    final hasNextMatch = nm != null;
 
-    return Scaffold(
-      backgroundColor: AppColors.dark,
-      extendBody: true,
+    final matchTitle = hasNextMatch
+        ? (nm.opponentName ?? "Rival por definir")
+        : "Sin partidos programados";
+    final matchSubtitle = hasNextMatch
+        ? "${nm.tournamentName}\n${nm.queueLabel}"
+        : (_loading
+              ? "Cargando…"
+              : "Inscribite a un campeonato para entrar al fixture");
 
-      bottomNavigationBar: EFBottomNav(
-        currentIndex: _navIndex,
-        onTap: _onNavTap,
-        items: const [
-          EFNavItem(label: "Calendario", icon: Icons.calendar_month_rounded),
-          EFNavItem(label: "Ranking", icon: Icons.emoji_events_rounded),
-          EFNavItem(label: "Estadísticas", icon: Icons.bar_chart_rounded),
-          EFNavItem(label: "Campeonatos", icon: Icons.sports_tennis_rounded),
-        ],
-      ),
+    final stats = _dashboard?.stats;
+    final played = stats?.matchesPlayed ?? 0;
 
-      // ✅ BACKGROUND EXACTO CONCEPTO (deep blue glow)
-      body: PrismBackground(
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          SpinHeader(
+            notificationsCount: _unreadCount,
+            onNotifications: () =>
+                Navigator.pushNamed(context, AppRoutes.notifications),
+            onSettings: _openSettings,
+          ),
+
+          const SizedBox(height: 16),
+
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 20),
               children: [
-                TopBar(
-                  playerName: "Jose Curihual",
-                  playerRanking: "Ranking 60",
-                  onMessages: () {},
-                  onNotifications: () {},
-                  onSettings: () async {
-                    final action = await showModalBottomSheet<String>(
-                      context: context,
-                      backgroundColor: AppColors.surface.withOpacity(0.95),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-                      ),
-                      builder: (_) {
-                        return SafeArea(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const SizedBox(height: 10),
-                              ListTile(
-                                leading: const Icon(Icons.person_outline, color: AppColors.text),
-                                title: const Text("Perfil", style: TextStyle(color: AppColors.text)),
-                                onTap: () => Navigator.pop(context, "profile"),
-                              ),
-                              ListTile(
-                                leading: const Icon(Icons.logout, color: AppColors.text),
-                                title: const Text("Cerrar sesión", style: TextStyle(color: AppColors.text)),
-                                onTap: () => Navigator.pop(context, "logout"),
-                              ),
-                              const SizedBox(height: 6),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-
-                    if (!mounted) return;
-
-                    if (action == "profile") {
-                      Navigator.pushNamed(context, AppRoutes.profile);
-                    } else if (action == "logout") {
-                      await _confirmLogout();
-                    }
-                  },
-                  messagesCount: 3,
-                  notificationsCount: 8,
+                SpinPlayerCard(
+                  userId: _profile?.idUser,
+                  playerName: (_profile?.displayName.isNotEmpty ?? false)
+                      ? _profile!.displayName
+                      : "Jugador",
+                  details:
+                      [
+                            _profile?.category,
+                            _profile?.club,
+                            if (_profile?.age != null) "${_profile!.age} años",
+                          ]
+                          .whereType<String>()
+                          .where((s) => s.trim().isNotEmpty)
+                          .toList(),
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
                 ),
 
                 const SizedBox(height: 14),
 
-                Expanded(
-                  child: Column(
-                    children: [
-                      ValueListenableBuilder<String>(
-                        valueListenable: _nowPlayingTitle,
-                        builder: (context, title, _) {
-                          final songLine = title.isEmpty ? "🎵 —" : "🎵 $title";
-
-                          return NextMatchCard(
-                            title: "Próximo Partido",
-                            playerName: "Ignacio Peña",
-                            rankingAndPlace: "Ranking(54) - MyTTM Team",
-                            meta: meta,
-                            tickerText: tickerText,
-                            nowPlayingText: songLine,
-                            liquidEvery: const Duration(seconds: 3),
-                            onTap: () {},
-                          );
-                        },
-                      ),
-
-                      const SizedBox(height: 14),
-
-                      Expanded(
-                        child: SwipeCardsBanner(
-                          controller: _cardController,
-                          images: _cards,
-                          onTap: () {},
-                        ),
-                      ),
-                    ],
-                  ),
+                SpinNextMatchPanel(
+                  opponentId: nm?.opponentId,
+                  title: matchTitle,
+                  subtitle: matchSubtitle,
+                  onTap: nm?.opponentId != null
+                      ? _goOpponentProfile
+                      : () => AppShellScope.of(context)?.switchTab(3),
                 ),
 
+                const SizedBox(height: 14),
+
+                SpinStatsRow(
+                  stats: [
+                    SpinStat(label: "PJ", value: "$played"),
+                    SpinStat(label: "G", value: "${stats?.matchesWon ?? 0}"),
+                    SpinStat(label: "P", value: "${stats?.matchesLost ?? 0}"),
+                    SpinStat(
+                      label: "%",
+                      value: played == 0
+                          ? "—"
+                          : "${(stats!.winRate * 100).round()}",
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 22),
+
+                const SpinSectionLabel(text: "Modos de juego"),
                 const SizedBox(height: 10),
+
+                SpinModeRow(
+                  icon: Icons.emoji_events_rounded,
+                  title: "Campeonatos",
+                  subtitle: "Torneos abiertos cerca tuyo",
+                  accent: AppColors.scorifyMint,
+                  onTap: () => AppShellScope.of(context)?.switchTab(3),
+                ),
+                const SizedBox(height: 10),
+
+                SpinModeRow(
+                  icon: Icons.calendar_month_rounded,
+                  title: "Calendario",
+                  subtitle: "Fixture y resultados",
+                  accent: AppColors.scorifyMint,
+                  onTap: () => AppShellScope.of(context)?.switchTab(1),
+                ),
+                const SizedBox(height: 10),
+
+                SpinModeRow(
+                  icon: Icons.bar_chart_rounded,
+                  title: "Rendimiento",
+                  subtitle: "Stats y progreso",
+                  accent: AppColors.scorifyMint,
+                  onTap: () => AppShellScope.of(context)?.switchTab(2),
+                ),
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }

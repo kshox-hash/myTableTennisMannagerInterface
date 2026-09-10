@@ -1,241 +1,250 @@
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
+import 'package:myttmi/core/constants/app_typography.dart';
+import 'package:myttmi/core/storage/session_storage.dart';
+import 'package:myttmi/core/ui/glass_card.dart';
+import 'package:myttmi/core/ui/list_states.dart';
+import 'package:myttmi/core/ui/top_header.dart';
+import 'package:myttmi/features/profile/api/profile_api.dart';
+import 'package:myttmi/features/profile/models/profile_model.dart';
+import 'package:myttmi/features/ranking/api/ranking_api.dart';
+import 'package:myttmi/features/shell/tab_auto_refresh.dart';
 
-class StatsScreen extends StatelessWidget {
-  const StatsScreen({super.key});
+class StatsScreen extends StatefulWidget {
+  // false cuando vive embebido dentro de una sub-pestaña (p.ej. "Mi
+  // rendimiento") que ya muestra su propio encabezado.
+  final bool showHeader;
+
+  const StatsScreen({super.key, this.showHeader = true});
+
+  @override
+  State<StatsScreen> createState() => _StatsScreenState();
+}
+
+class _StatsScreenState extends State<StatsScreen>
+    with TabAutoRefreshMixin<StatsScreen> {
+  @override
+  int get tabIndex => 2;
+
+  @override
+  void onTabActivated() => _load();
+
+  final _profileApi = ProfileApi();
+  final _rankingApi = RankingApi();
+
+  PlayerStats? _stats;
+  int? _myRankingPosition;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final results = await Future.wait([
+        _profileApi.getStats(),
+        _rankingApi.getGlobal(),
+        SessionStorage().getUserId(),
+      ]);
+      if (!mounted) return;
+      final stats = results[0] as PlayerStats;
+      final ranking = results[1] as List;
+      final myId = results[2] as String?;
+      final mine = ranking
+          .cast<dynamic>()
+          .where((r) => r.idUser == myId)
+          .toList();
+      setState(() {
+        _stats = stats;
+        _myRankingPosition = mine.isNotEmpty
+            ? mine.first.rankingPosition as int
+            : null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.primary,
-              AppColors.primary,
-              AppColors.deep,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: ListView(
-              physics: const BouncingScrollPhysics(),
-              children: [
-                // HEADER
-                Row(
-                  children: [
-                    _GlassIconButton(
-                      icon: Icons.arrow_back,
-                      onTap: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text(
-                        "Estadísticas",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          if (widget.showHeader) ...[
+            const TopHeader(title: "Estadísticas", showBack: false),
+            const SizedBox(height: 16),
+          ],
+          Expanded(
+            child: _loading
+                ? const LoadingState()
+                : _error != null
+                ? ErrorStateView(
+                    message: "No pudimos cargar tus estadísticas.\n$_error",
+                    onRetry: _load,
+                  )
+                : RefreshIndicator(
+                    color: AppColors.scorifyMint,
+                    onRefresh: _load,
+                    child: ListView(
+                      physics: const BouncingScrollPhysics(),
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _StatKpi(
+                                label: "Partidos",
+                                value: "${_stats?.matchesPlayed ?? 0}",
+                                icon: Icons.sports_tennis_rounded,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _StatKpi(
+                                label: "Victorias",
+                                value: "${_stats?.matchesWon ?? 0}",
+                                icon: Icons.emoji_events_rounded,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _StatKpi(
+                                label: "Win rate",
+                                value:
+                                    "${((_stats?.winRate ?? 0) * 100).round()}%",
+                                icon: Icons.trending_up_rounded,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _StatKpi(
+                                label: "Ranking",
+                                value: _myRankingPosition != null
+                                    ? "#$_myRankingPosition"
+                                    : "—",
+                                icon: Icons.leaderboard_rounded,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 18),
+                        Text("Sets", style: AppTypography.h2),
+                        const SizedBox(height: 12),
+                        GlassCard(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      "${_stats?.setsWon ?? 0}",
+                                      style: AppTypography.displayMd.copyWith(
+                                        color: AppColors.scorifyMint,
+                                      ),
+                                    ),
+                                    Text(
+                                      "Ganados",
+                                      style: AppTypography.bodyMuted,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                width: 1,
+                                height: 40,
+                                color: Colors.white.withOpacity(0.10),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      "${_stats?.setsLost ?? 0}",
+                                      style: AppTypography.displayMd.copyWith(
+                                        color: AppColors.scorifyNegative,
+                                      ),
+                                    ),
+                                    Text(
+                                      "Perdidos",
+                                      style: AppTypography.bodyMuted,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if ((_stats?.matchesPlayed ?? 0) == 0) ...[
+                          const SizedBox(height: 24),
+                          const EmptyState(
+                            icon: Icons.sports_tennis_rounded,
+                            message: "Todavía no jugaste ningún partido.",
+                          ),
+                        ],
+                      ],
                     ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // KPIs
-                Row(
-                  children: const [
-                    Expanded(
-                      child: _StatKpi(
-                        label: "Partidos",
-                        value: "128",
-                        icon: Icons.sports_tennis,
-                        accent: AppColors.accent,
-                      ),
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: _StatKpi(
-                        label: "Victorias",
-                        value: "78",
-                        icon: Icons.emoji_events,
-                        accent: Color(0xFF6EE7B7),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 12),
-
-                Row(
-                  children: const [
-                    Expanded(
-                      child: _StatKpi(
-                        label: "Win Rate",
-                        value: "61%",
-                        icon: Icons.trending_up,
-                        accent: Color(0xFFFFD166),
-                      ),
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: _StatKpi(
-                        label: "Ranking",
-                        value: "#60",
-                        icon: Icons.leaderboard,
-                        accent: Color(0xFFB388FF),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 18),
-
-                // RENDIMIENTO MENSUAL
-                const _SectionTitle("Rendimiento mensual"),
-                const SizedBox(height: 12),
-                _GlassCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      _BarChartRow(month: "Ene", value: 0.6),
-                      _BarChartRow(month: "Feb", value: 0.7),
-                      _BarChartRow(month: "Mar", value: 0.5),
-                      _BarChartRow(month: "Abr", value: 0.8),
-                      _BarChartRow(month: "May", value: 0.65),
-                    ],
                   ),
-                ),
-
-                const SizedBox(height: 18),
-
-                // RACHAS
-                const _SectionTitle("Rachas"),
-                const SizedBox(height: 12),
-                Row(
-                  children: const [
-                    Expanded(
-                      child: _StreakCard(
-                        title: "Mejor racha",
-                        value: "7",
-                        subtitle: "victorias seguidas",
-                        accent: Color(0xFF6EE7B7),
-                        icon: Icons.local_fire_department,
-                      ),
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: _StreakCard(
-                        title: "Racha actual",
-                        value: "3",
-                        subtitle: "victorias",
-                        accent: AppColors.accent,
-                        icon: Icons.flash_on,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 18),
-
-                // COMPARACIÓN
-                const _SectionTitle("Comparación de temporada"),
-                const SizedBox(height: 12),
-                _GlassCard(
-                  child: Column(
-                    children: const [
-                      _CompareRow(
-                        label: "Win Rate",
-                        current: "61%",
-                        previous: "55%",
-                        positive: true,
-                      ),
-                      SizedBox(height: 10),
-                      _CompareRow(
-                        label: "Ranking promedio",
-                        current: "62",
-                        previous: "74",
-                        positive: true,
-                      ),
-                      SizedBox(height: 10),
-                      _CompareRow(
-                        label: "Partidos / mes",
-                        current: "10.6",
-                        previous: "12.1",
-                        positive: false,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                    UI                                     */
-/* -------------------------------------------------------------------------- */
-
 class _StatKpi extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
-  final Color accent;
 
   const _StatKpi({
     required this.label,
     required this.value,
     required this.icon,
-    required this.accent,
   });
 
   @override
   Widget build(BuildContext context) {
-    return _GlassCard(
+    return GlassCard(
       padding: const EdgeInsets.all(14),
       child: Row(
         children: [
           Container(
             width: 44,
             height: 44,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: accent.withOpacity(0.18),
+              color: AppColors.scorifyMint.withOpacity(0.14),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: accent.withOpacity(0.35)),
+              border: Border.all(color: AppColors.scorifyCardBorder),
             ),
-            child: Icon(icon, color: accent),
+            child: Icon(icon, color: AppColors.scorifyMint),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.75),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 12,
-                  ),
-                ),
+                Text(label, style: AppTypography.bodyMuted),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: AppTypography.monoStrong.copyWith(
                     fontSize: 18,
-                    fontWeight: FontWeight.w900,
+                    color: AppColors.scorifyText,
                   ),
                 ),
               ],
@@ -243,245 +252,6 @@ class _StatKpi extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _BarChartRow extends StatelessWidget {
-  final String month;
-  final double value; // 0.0 - 1.0
-
-  const _BarChartRow({
-    required this.month,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 36,
-            child: Text(
-              month,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Container(
-              height: 10,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: value,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.accent,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            "${(value * 100).round()}%",
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.75),
-              fontWeight: FontWeight.w800,
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StreakCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final String subtitle;
-  final Color accent;
-  final IconData icon;
-
-  const _StreakCard({
-    required this.title,
-    required this.value,
-    required this.subtitle,
-    required this.accent,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return _GlassCard(
-      child: Column(
-        children: [
-          Icon(icon, color: accent, size: 28),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            subtitle,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontWeight: FontWeight.w800,
-              fontSize: 12,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            title,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.55),
-              fontWeight: FontWeight.w800,
-              fontSize: 11,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CompareRow extends StatelessWidget {
-  final String label;
-  final String current;
-  final String previous;
-  final bool positive;
-
-  const _CompareRow({
-    required this.label,
-    required this.current,
-    required this.previous,
-    required this.positive,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = positive ? const Color(0xFF6EE7B7) : const Color(0xFFF87171);
-    final icon = positive ? Icons.arrow_upward : Icons.arrow_downward;
-
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
-        Text(
-          current,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Icon(icon, color: color, size: 16),
-        const SizedBox(width: 8),
-        Text(
-          previous,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.6),
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  final String text;
-  const _SectionTitle(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.w900,
-        fontSize: 14,
-      ),
-    );
-  }
-}
-
-class _GlassIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _GlassIconButton({
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white.withOpacity(0.10),
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: SizedBox(
-          width: 44,
-          height: 44,
-          child: Icon(icon, color: Colors.white),
-        ),
-      ),
-    );
-  }
-}
-
-class _GlassCard extends StatelessWidget {
-  final Widget child;
-  final EdgeInsets padding;
-
-  const _GlassCard({
-    required this.child,
-    this.padding = const EdgeInsets.all(14),
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: padding,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.10)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.20),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: child,
     );
   }
 }

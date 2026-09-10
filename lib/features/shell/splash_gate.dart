@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
+import "package:myttmi/routes/cyber_page_route.dart";
+import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/storage/session_storage.dart";
+import "package:myttmi/core/ui/brand_logo.dart";
 import "package:myttmi/features/auth/presentation/login_screen.dart";
-import "package:myttmi/features/admin/home/presentation/admin_home_screen.dart";
-
-import "package:myttmi/features/home/presentation/home_screen.dart";
-
+import "package:myttmi/features/shell/app_shell.dart";
 
 class SplashGate extends StatefulWidget {
   const SplashGate({super.key});
@@ -27,31 +27,45 @@ class _SplashGateState extends State<SplashGate> {
 
     if (!mounted) return;
 
-    if (token == null || token.isEmpty || role == null || role.isEmpty) {
+    // Esta app es solo para jugadores — una sesión admin vieja (de antes de
+    // sacar esas pantallas) no debe quedar atrapada acá.
+    if (token == null || token.isEmpty || role != "player") {
+      await storage.clear();
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const  LoginScreen()),
+        CyberPageRoute(builder: (_) => const LoginScreen()),
       );
       return;
     }
 
-    if (role == "admin") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const AdminHomeScreen()),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
-    }
+    Navigator.pushReplacement(
+      context,
+      CyberPageRoute(builder: (_) => const AppShell()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
+      backgroundColor: AppColors.scorifyBg,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            BrandLogo(markSize: 64, showWordmark: false),
+            SizedBox(height: 24),
+            SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: AppColors.scorifyMint,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

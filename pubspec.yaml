@@ -30,7 +30,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  audioplayers: ^6.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -60,18 +59,8 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
   assets:
-      - assets/images/background.png
-      - assets/images/background1.png
-      - assets/images/background2.png
-      - assets/images/background3.png
-      - assets/audio/soltera.mp3
-      - assets/audio/vuelve.mp3
-      - assets/audio/overcoming.mp3
-      - assets/audio/ultima.mp3
-      - assets/audio/carnaval.mp3
-  #   - images/a_dot_ham.jpeg
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -98,3 +87,47 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: assets/fonts/Montserrat-Variable.ttf
+          weight: 300
+        - asset: assets/fonts/Montserrat-Variable.ttf
+          weight: 400
+        - asset: assets/fonts/Montserrat-Variable.ttf
+          weight: 500
+        - asset: assets/fonts/Montserrat-Variable.ttf
+          weight: 600
+        - asset: assets/fonts/Montserrat-Variable.ttf
+          weight: 700
+        - asset: assets/fonts/Montserrat-Variable.ttf
+          weight: 800
+    - family: Teko
+      fonts:
+        - asset: assets/fonts/Teko-Variable.ttf
+          weight: 400
+        - asset: assets/fonts/Teko-Variable.ttf
+          weight: 500
+        - asset: assets/fonts/Teko-Variable.ttf
+          weight: 600
+        - asset: assets/fonts/Teko-Variable.ttf
+          weight: 700
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope-Variable.ttf
+          weight: 400
+        - asset: assets/fonts/Manrope-Variable.ttf
+          weight: 500
+        - asset: assets/fonts/Manrope-Variable.ttf
+          weight: 600
+        - asset: assets/fonts/Manrope-Variable.ttf
+          weight: 700
+        - asset: assets/fonts/Manrope-Variable.ttf
+          weight: 800
+    - family: IBM Plex Mono
+      fonts:
+        - asset: assets/fonts/IBMPlexMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/IBMPlexMono-SemiBold.ttf
+          weight: 600

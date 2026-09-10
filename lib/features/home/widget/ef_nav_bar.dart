@@ -11,16 +11,14 @@ class EFNavItem {
   });
 }
 
+/// Barra de navegación inferior plana — ícono + etiqueta, sin badge
+/// elevado ni textura, con un indicador fino arriba de la pestaña activa.
 class EFBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
   final List<EFNavItem> items;
 
-  /// Si quieres que se vea EXACTO como la barra morada (plana),
-  /// usa un color sólido acá.
   final Color? backgroundColor;
-
-  /// Alto de la barra
   final double height;
 
   const EFBottomNav({
@@ -29,17 +27,18 @@ class EFBottomNav extends StatelessWidget {
     required this.onTap,
     required this.items,
     this.backgroundColor,
-    this.height = 64,
+    this.height = 62,
   });
 
   @override
   Widget build(BuildContext context) {
-    final bg = backgroundColor ?? AppColors.primary; // o AppColors.deep
-    final inactive = AppColors.text.withOpacity(0.70);
+    final bg = backgroundColor ?? AppColors.scorifyDeep;
 
-    return Material(
-      color: bg,
-      elevation: 10, // sombra suave como “pegada” abajo
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: bg,
+        border: const Border(top: BorderSide(color: Color(0xFF1A1A1A))),
+      ),
       child: SafeArea(
         top: false,
         child: SizedBox(
@@ -47,37 +46,56 @@ class EFBottomNav extends StatelessWidget {
           child: Row(
             children: List.generate(items.length, (i) {
               final item = items[i];
-              final isActive = i == currentIndex;
-
               return Expanded(
-                child: InkWell(
+                child: _NavTab(
+                  item: item,
+                  isActive: i == currentIndex,
                   onTap: () => onTap(i),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        item.icon,
-                        size: 24,
-                        color: isActive ? AppColors.electric : inactive,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: isActive ? FontWeight.w900 : FontWeight.w700,
-                          color: isActive ? AppColors.electric : inactive,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               );
             }),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _NavTab extends StatelessWidget {
+  final EFNavItem item;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _NavTab({required this.item, required this.isActive, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isActive ? AppColors.scorifyMint : AppColors.scorifyText.withOpacity(0.45);
+
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            height: 2,
+            width: 22,
+            margin: const EdgeInsets.only(bottom: 6),
+            color: isActive ? AppColors.scorifyMint : Colors.transparent,
+          ),
+          Icon(item.icon, size: 21, color: color),
+          const SizedBox(height: 4),
+          Text(
+            item.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: isActive ? FontWeight.w900 : FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
       ),
     );
   }

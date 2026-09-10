@@ -1,119 +1,130 @@
 import "package:flutter/material.dart";
-//LOGIN
-import "package:myttmi/features/auth/presentation/login_screen.dart";
-//WIDGETS
-import "package:myttmi/features/shell/splash_gate.dart";
-import "package:myttmi/features/calendar/presentation/calendar_screen.dart";
-import "package:myttmi/features/stats/presentation/stats_screen.dart";
-//PLAYER
-import "package:myttmi/features/tournament/presentation/tournaments_screen.dart";
-import "package:myttmi/features/tournament/presentation/tournament_detail_screen.dart";
-import "package:myttmi/features/competition/presentation/groups_view_screen.dart";
-import "package:myttmi/features/home/presentation/home_screen.dart";
-import "package:myttmi/features/profile/presentation/profile_screen.dart";
-import "package:myttmi/features/ranking/presentation/ranking_screen.dart";
-//ADMIN
-import "package:myttmi/features/admin/tournaments/models/admin_tournaments_model.dart";
-import "package:myttmi/features/admin/tournaments/presentation/admin_tournaments_screen.dart";
-import "package:myttmi/features/admin/tournaments/presentation/admin_tournaments_detail_screen.dart";
-import "package:myttmi/features/admin/tournaments/presentation/admin_tournaments_create_screen.dart";
-import "package:myttmi/features/competition/presentation/admin_generate_groups_screen.dart";
 
+// LOGIN
+import "package:myttmi/features/auth/presentation/login_screen.dart";
+
+// PLAYER
+import "package:myttmi/features/tournament/presentation/tournament_detail_screen.dart";
+import "package:myttmi/features/profile/presentation/profile_screen.dart";
+import "package:myttmi/features/tournament/models/tournament_model.dart";
+import "package:myttmi/features/tournament/presentation/my_category_screen.dart";
+import "package:myttmi/features/tournament/presentation/tournament_matches_screen.dart";
+import "package:myttmi/features/tournament/presentation/match_detail_screen.dart";
+import "package:myttmi/features/tournament/presentation/tournament_players_screen.dart";
+import "package:myttmi/features/tournament/presentation/tournament_tables_screen.dart";
+import "package:myttmi/features/profile/presentation/player_profile_screen.dart";
+import "package:myttmi/features/tournament/presentation/history_screen.dart";
+import "package:myttmi/features/notifications/presentation/notifications_screen.dart";
+import "package:myttmi/routes/cyber_page_route.dart";
 
 class AppRoutes {
-  static const splash = "/splash";
   static const login = "/login";
 
-  static const home = "/home";
-  static const calendar = "/calendar";
-  static const ranking = "/ranking";
-  static const stats = "/stats";
   static const profile = "/profile";
+  static const notifications = "/notifications";
+  static const history = "/history";
 
-  // tournaments routes
-  static const tournaments = "/tournaments";
   static const tournamentDetail = "/tournament/detail";
-
-  static const adminTournaments = "/admin/tournaments";
-  static const adminTournamentDetail = "/admin/tournament/detail";
-  static const adminCreateTournament = "/admin/tournament/create";
-  static const createTournament = "/admin/tournament/create"; 
-
-  // competition routes
-  static const adminGenerateGroups = "/competition/admin-generate-groups";
-  static const groupsView = "/competition/groups-view";
+  static const tournamentPlayers = "/tournament/players";
+  static const tournamentMatches = "/tournament/matches";
+  static const tournamentTables = "/tournament/tables";
+  static const matchDetail = "/match/detail";
+  static const myCategory = "/tournament/my-category";
+  static const playerProfile = "/player/profile";
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case splash:
-        return MaterialPageRoute(builder: (_) => const SplashGate());
-
       case login:
-        return MaterialPageRoute(builder: (_) => const LoginScreen());
-
-      case home:
-        return MaterialPageRoute(builder: (_) => const HomeScreen());
+        return CyberPageRoute(builder: (_) => const LoginScreen());
 
       case profile:
-        return MaterialPageRoute(builder: (_) => const ProfileScreen());
+        return CyberPageRoute(builder: (_) => const ProfileScreen());
 
-      case calendar:
-        return MaterialPageRoute(builder: (_) => const CalendarScreen());
+      case history:
+        return CyberPageRoute(builder: (_) => const HistoryScreen());
 
-      case ranking:
-        return MaterialPageRoute(builder: (_) => const RankingScreen());
+      case notifications:
+        return CyberPageRoute(builder: (_) => const NotificationsScreen());
 
-      case stats:
-        return MaterialPageRoute(builder: (_) => const StatsScreen());
+      case tournamentDetail:
+        {
+          final t = settings.arguments as Tournament;
+          return CyberPageRoute(
+            builder: (_) => TournamentDetailScreen(tournament: t),
+          );
+        }
 
-      case tournaments:
-        return MaterialPageRoute(builder: (_) => const TournamentsScreen());
+      case myCategory:
+        {
+          final args = settings.arguments as Map<String, dynamic>;
+          return CyberPageRoute(
+            builder: (_) => MyCategoryScreen(
+              tournamentId: args["tournamentId"] as String,
+              tournamentName: args["tournamentName"] as String,
+              categoryId: args["categoryId"] as String,
+              categoryLabel: args["categoryLabel"] as String,
+            ),
+          );
+        }
 
-      case tournamentDetail: {
-        final t = settings.arguments as Tournament;
-        return MaterialPageRoute(
-          builder: (_) => TournamentDetailScreen(tournament: t),
-        );
-      }
+      case tournamentMatches:
+        {
+          final args = settings.arguments as Map<String, dynamic>;
+          return CyberPageRoute(
+            builder: (_) => TournamentMatchesScreen(
+              tournamentId: args["tournamentId"] as String,
+              tournamentName: args["tournamentName"] as String,
+              initialMode: args["initialMode"] as String?,
+            ),
+          );
+        }
 
-      case adminTournaments:
-        return MaterialPageRoute(builder: (_) => const AdminTournamentsScreen());
+      case matchDetail:
+        {
+          final args = settings.arguments as Map<String, dynamic>;
+          return CyberPageRoute(
+            builder: (_) => MatchDetailScreen(
+              matchType: args["matchType"] as String,
+              matchId: args["matchId"] as String,
+            ),
+          );
+        }
 
-      case adminTournamentDetail: {
-        final t = settings.arguments as Tournament;
-        return MaterialPageRoute(
-          builder: (_) => TournamentAdminDetailScreen(tournament: t),
-        );
-      }
+      case tournamentPlayers:
+        {
+          final args = settings.arguments as Map<String, dynamic>;
+          return CyberPageRoute(
+            builder: (_) => TournamentPlayersScreen(
+              tournamentId: args["tournamentId"] as String,
+              tournamentName: args["tournamentName"] as String,
+            ),
+          );
+        }
 
-      case adminCreateTournament:
-        return MaterialPageRoute(builder: (_) => const AdminTournamentCreateScreen());
+      case tournamentTables:
+        {
+          final args = settings.arguments as Map<String, dynamic>;
+          return CyberPageRoute(
+            builder: (_) => TournamentTablesScreen(
+              tournamentId: args["tournamentId"] as String,
+              tournamentName: args["tournamentName"] as String,
+            ),
+          );
+        }
 
-      // ADMIN GENERAR GRUPOS
-      case adminGenerateGroups: {
-        final args = settings.arguments as Map<String, dynamic>;
-        return MaterialPageRoute(
-          builder: (_) => AdminGenerateGroupsScreen(
-            tournamentId: args["tournamentId"],
-            categoryId: args["categoryId"],
-            adminId: args["adminId"],
-          ),
-        );
-      }
-
-      // VER GRUPOS
-      case groupsView: {
-        final args = settings.arguments as Map<String, dynamic>;
-        return MaterialPageRoute(
-          builder: (_) => GroupsViewScreen(
-            tournamentId: args["tournamentId"],
-            categoryId: args["categoryId"],
-          ),
-        );
-      }
+      case playerProfile:
+        {
+          final args = settings.arguments as Map<String, dynamic>;
+          return CyberPageRoute(
+            builder: (_) => PlayerProfileScreen(
+              userId: args["userId"] as String,
+              playerName: args["playerName"] as String?,
+            ),
+          );
+        }
 
       default:
-        return MaterialPageRoute(
+        return CyberPageRoute(
           builder: (_) =>
               _PlaceholderScreen(title: "Ruta no encontrada: ${settings.name}"),
         );
@@ -132,10 +143,7 @@ class _PlaceholderScreen extends StatelessWidget {
       body: Center(
         child: Text(
           title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w900,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
         ),
       ),
     );

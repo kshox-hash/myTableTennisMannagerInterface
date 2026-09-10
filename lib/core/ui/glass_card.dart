@@ -1,88 +1,111 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 
+enum GlassCardVariant { normal, elevated }
+
+/// Tarjeta estándar del sistema "Marcador" — esquinas redondeadas con un
+/// degradé diagonal (negro verdoso a negro puro), el mismo lenguaje
+/// "moderno" que se definió para el home, aplicado a toda la app en vez
+/// de quedar solo ahí. Reemplaza el estilo anterior de esquinas cortadas
+/// en diagonal.
 class GlassCard extends StatelessWidget {
   final Widget child;
-  final double radius;
-  final EdgeInsets padding;
-  final double blur;
-  final double opacity;
-  final Color? tint; // opcional: para tint verde/azul
+  final EdgeInsetsGeometry padding;
+  final VoidCallback? onTap;
+  final GlassCardVariant variant;
+
+  /// Ya no se usa (venía del corte diagonal anterior) — se deja para no
+  /// romper a los call sites existentes que todavía lo pasan.
+  final double cut;
+
+  final Color? fillColor;
+  final Color? borderColor;
+
+  /// Foto de fondo opcional (asset), con un scrim oscuro/verde encima para
+  /// que el contenido siga siendo legible.
+  final ImageProvider? backgroundImage;
+  final Alignment backgroundAlignment;
 
   const GlassCard({
     super.key,
     required this.child,
-    this.radius = 22,
     this.padding = const EdgeInsets.all(16),
-    this.blur = 18,
-    this.opacity = 0.10,
-    this.tint,
+    this.onTap,
+    this.variant = GlassCardVariant.normal,
+    this.cut = 18,
+    this.fillColor,
+    this.borderColor,
+    this.backgroundImage,
+    this.backgroundAlignment = Alignment.center,
   });
+
+  static const _radius = 16.0;
 
   @override
   Widget build(BuildContext context) {
-    final base = tint ?? Colors.white;
+    final content = Container(
+      width: double.infinity,
+      padding: padding,
+      child: child,
+    );
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: Stack(
+    final Widget fill;
+    if (backgroundImage != null) {
+      fill = Stack(
+        fit: StackFit.passthrough,
         children: [
-          // Blur real
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-            child: Container(color: Colors.transparent),
-          ),
-
-          // Capa glass (no es solo opacity: es vidrio)
-          Container(
-            padding: padding,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(radius),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  base.withOpacity(opacity),
-                  base.withOpacity(opacity * 0.55),
-                ],
-              ),
-              border: Border.all(
-                color: AppColors.glassBorder.withOpacity(0.85),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadow.withOpacity(0.35),
-                  blurRadius: 18,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: child,
-          ),
-
-          // Shine sutil (detalle pro)
           Positioned.fill(
-            child: IgnorePointer(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(radius),
-                  gradient: LinearGradient(
-                    begin: const Alignment(-1, -1),
-                    end: const Alignment(1, 1),
-                    colors: [
-                      Colors.white.withOpacity(0.10),
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.10),
-                    ],
-                    stops: const [0.0, 0.45, 1.0],
-                  ),
+            child: Image(
+              image: backgroundImage!,
+              fit: BoxFit.cover,
+              alignment: backgroundAlignment,
+            ),
+          ),
+          // Scrim: oscurece la foto de abajo hacia arriba para que el texto
+          // siga siendo legible sin importar qué tan clara sea la imagen.
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.scorifyBg.withOpacity(0.30),
+                    AppColors.scorifyBg.withOpacity(0.92),
+                  ],
                 ),
               ),
             ),
           ),
+          content,
         ],
+      );
+    } else {
+      fill = content;
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(_radius),
+        border: Border.all(color: borderColor ?? AppColors.scorifyCardBorder),
+        color: fillColor,
+        gradient: (fillColor == null && backgroundImage == null)
+            ? AppColors.cardGradient
+            : null,
+        boxShadow: variant == GlassCardVariant.elevated
+            ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.45),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
+              ]
+            : null,
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: onTap == null ? fill : InkWell(onTap: onTap, child: fill),
       ),
     );
   }

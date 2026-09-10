@@ -1,7 +1,15 @@
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
+import "package:myttmi/core/constants/app_typography.dart";
+import "package:myttmi/core/ui/glass_card.dart";
+import "package:myttmi/core/ui/list_states.dart";
+import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/calendar/api/calendar_api.dart";
 import "package:myttmi/features/calendar/models/calendar_event.dart";
+import "package:myttmi/features/shell/tab_auto_refresh.dart";
+import "package:myttmi/features/tournament/api/tournament_api.dart";
+import "package:myttmi/features/tournament/presentation/tournament_detail_screen.dart";
+import "package:myttmi/routes/cyber_page_route.dart";
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -10,8 +18,19 @@ class CalendarScreen extends StatefulWidget {
   State<CalendarScreen> createState() => _CalendarScreenState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen> {
-  DateTime _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month, 1);
+class _CalendarScreenState extends State<CalendarScreen>
+    with TabAutoRefreshMixin<CalendarScreen> {
+  @override
+  int get tabIndex => 1;
+
+  @override
+  void onTabActivated() => _loadMonth(_focusedMonth);
+
+  DateTime _focusedMonth = DateTime(
+    DateTime.now().year,
+    DateTime.now().month,
+    1,
+  );
   DateTime _selectedDay = DateTime.now();
 
   final CalendarApi _api = CalendarApi();
@@ -19,8 +38,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
   bool _loading = false;
   String? _error;
 
-  // ✅ ahora se llena desde backend
   final Map<DateTime, List<_CalendarItem>> _itemsByDay = {};
+  final _tournamentApi = TournamentApi();
 
   @override
   void initState() {
@@ -60,209 +79,145 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final monthLabel = _monthLabel(_focusedMonth);
     final dayItems = _itemsByDay[_dayKey(_selectedDay)] ?? const [];
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColors.primary, AppColors.primary, AppColors.deep],
+    return ListView(
+      // Toda la pantalla es una sola lista scrolleable — si la grilla del mes
+      // tiene 6 filas, la agenda de abajo sigue siendo alcanzable.
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.all(16),
+      children: [
+        const TopHeader(title: "Calendario", showBack: false),
+
+        const SizedBox(height: 14),
+
+        GlassCard(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(child: Text(monthLabel, style: AppTypography.h2)),
+                  HeaderIconButton(
+                    icon: Icons.chevron_left_rounded,
+                    onTap: () {
+                      setState(() {
+                        _focusedMonth = DateTime(
+                          _focusedMonth.year,
+                          _focusedMonth.month - 1,
+                          1,
+                        );
+                        _selectedDay = _clampSelectedToMonth(
+                          _selectedDay,
+                          _focusedMonth,
+                        );
+                      });
+                      _loadMonth(_focusedMonth);
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  HeaderIconButton(
+                    icon: Icons.today_rounded,
+                    onTap: () {
+                      final now = DateTime.now();
+                      setState(() {
+                        _focusedMonth = DateTime(now.year, now.month, 1);
+                        _selectedDay = now;
+                      });
+                      _loadMonth(_focusedMonth);
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  HeaderIconButton(
+                    icon: Icons.chevron_right_rounded,
+                    onTap: () {
+                      setState(() {
+                        _focusedMonth = DateTime(
+                          _focusedMonth.year,
+                          _focusedMonth.month + 1,
+                          1,
+                        );
+                        _selectedDay = _clampSelectedToMonth(
+                          _selectedDay,
+                          _focusedMonth,
+                        );
+                      });
+                      _loadMonth(_focusedMonth);
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              Row(
+                children: const [
+                  _WeekLabel("L"),
+                  _WeekLabel("M"),
+                  _WeekLabel("M"),
+                  _WeekLabel("J"),
+                  _WeekLabel("V"),
+                  _WeekLabel("S"),
+                  _WeekLabel("D"),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              _CalendarMonthGrid(
+                month: _focusedMonth,
+                selectedDay: _selectedDay,
+                hasItems: (d) => (_itemsByDay[_dayKey(d)]?.isNotEmpty ?? false),
+                onSelectDay: (d) => setState(() => _selectedDay = d),
+              ),
+            ],
           ),
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                // TOP BAR
-                Row(
-                  children: [
-                    _GlassIconButton(
-                      icon: Icons.arrow_back,
-                      onTap: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Text(
-                        "Calendario",
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    _GlassIconButton(
-                      icon: Icons.refresh_rounded,
-                      onTap: () => _loadMonth(_focusedMonth),
-                    ),
-                  ],
-                ),
 
-                const SizedBox(height: 14),
+        const SizedBox(height: 14),
 
-                // HEADER MES + controles
-                _GlassCard(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              monthLabel,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ),
-                          _MiniButton(
-                            icon: Icons.chevron_left_rounded,
-                            onTap: () {
-                              setState(() {
-                                _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1, 1);
-                                _selectedDay = _clampSelectedToMonth(_selectedDay, _focusedMonth);
-                              });
-                              _loadMonth(_focusedMonth);
-                            },
-                          ),
-                          const SizedBox(width: 8),
-                          _MiniButton(
-                            icon: Icons.today_rounded,
-                            onTap: () {
-                              final now = DateTime.now();
-                              setState(() {
-                                _focusedMonth = DateTime(now.year, now.month, 1);
-                                _selectedDay = now;
-                              });
-                              _loadMonth(_focusedMonth);
-                            },
-                          ),
-                          const SizedBox(width: 8),
-                          _MiniButton(
-                            icon: Icons.chevron_right_rounded,
-                            onTap: () {
-                              setState(() {
-                                _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1, 1);
-                                _selectedDay = _clampSelectedToMonth(_selectedDay, _focusedMonth);
-                              });
-                              _loadMonth(_focusedMonth);
-                            },
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                "Agenda · ${_dayTitle(_selectedDay)}",
+                style: AppTypography.h2,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: Colors.white.withOpacity(0.10)),
+              ),
+              child: Text(
+                _loading ? "…" : "${dayItems.length} item(s)",
+                style: AppTypography.caption,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
 
-                      Row(
-                        children: const [
-                          _WeekLabel("L"),
-                          _WeekLabel("M"),
-                          _WeekLabel("M"),
-                          _WeekLabel("J"),
-                          _WeekLabel("V"),
-                          _WeekLabel("S"),
-                          _WeekLabel("D"),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-
-                      _CalendarMonthGrid(
-                        month: _focusedMonth,
-                        selectedDay: _selectedDay,
-                        hasItems: (d) => (_itemsByDay[_dayKey(d)]?.isNotEmpty ?? false),
-                        onSelectDay: (d) => setState(() => _selectedDay = d),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 14),
-
-                Expanded(
-                  child: ListView(
-                    physics: const BouncingScrollPhysics(),
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              "Agenda • ${_dayTitle(_selectedDay)}",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.10),
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(color: Colors.white.withOpacity(0.12)),
-                            ),
-                            child: Text(
-                              _loading ? "..." : "${dayItems.length} item(s)",
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
-                                fontWeight: FontWeight.w900,
-                                fontSize: 11,
-                                height: 1,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-
-                      if (_error != null)
-                        _GlassCard(
-                          child: Text(
-                            "Error:\n$_error",
-                            style: TextStyle(color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w800),
-                          ),
-                        )
-                      else if (_loading)
-                        const _GlassCard(
-                          child: Center(child: Padding(
-                            padding: EdgeInsets.all(18),
-                            child: CircularProgressIndicator(),
-                          )),
-                        )
-                      else if (dayItems.isEmpty)
-                        _GlassCard(
-                          child: Column(
-                            children: [
-                              Icon(Icons.event_available_rounded, color: Colors.white.withOpacity(0.85), size: 26),
-                              const SizedBox(height: 10),
-                              Text(
-                                "No tienes campeonatos este día.",
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.85),
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      else
-                        ...dayItems.map((e) => _AgendaCard(item: e)).toList(),
-
-                      const SizedBox(height: 8),
-                    ],
-                  ),
-                ),
-              ],
+        if (_error != null)
+          ErrorStateView(
+            message: "No pudimos cargar tu calendario.\n$_error",
+            onRetry: () => _loadMonth(_focusedMonth),
+          )
+        else if (_loading)
+          const LoadingState()
+        else if (dayItems.isEmpty)
+          const EmptyState(
+            icon: Icons.event_available_rounded,
+            message: "No tenés campeonatos este día.",
+          )
+        else
+          ...dayItems.map(
+            (e) => _AgendaCard(
+              item: e,
+              onTap: () => _openTournament(e.tournamentId),
             ),
           ),
-        ),
-      ),
+
+        const SizedBox(height: 8),
+      ],
     );
   }
 
@@ -270,16 +225,44 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   String _monthLabel(DateTime d) {
     const months = [
-      "Enero","Febrero","Marzo","Abril","Mayo","Junio",
-      "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
     ];
     return "${months[d.month - 1]} ${d.year}";
   }
 
   String _dayTitle(DateTime d) {
-    const wd = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+    const wd = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
     final w = wd[(d.weekday - 1).clamp(0, 6)];
     return "$w ${d.day.toString().padLeft(2, "0")}/${d.month.toString().padLeft(2, "0")}";
+  }
+
+  Future<void> _openTournament(String tournamentId) async {
+    try {
+      final tournament = await _tournamentApi.getTournamentById(tournamentId);
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        CyberPageRoute(
+          builder: (_) => TournamentDetailScreen(tournament: tournament),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("No pudimos abrir el campeonato.\n$e")),
+      );
+    }
   }
 
   DateTime _clampSelectedToMonth(DateTime selected, DateTime month) {
@@ -297,12 +280,14 @@ enum _CalendarItemType { tournament }
 
 class _CalendarItem {
   final _CalendarItemType type;
+  final String tournamentId;
   final String title;
   final String subtitle;
   final String meta;
 
   const _CalendarItem({
     required this.type,
+    required this.tournamentId,
     required this.title,
     required this.subtitle,
     required this.meta,
@@ -325,9 +310,10 @@ class _CalendarItem {
     final loc = (e.location ?? "").trim();
     return _CalendarItem(
       type: _CalendarItemType.tournament,
-      title: "🏆 ${e.tournamentName}",
-      subtitle: "Categoría: ${e.categoryName} • ${genderLabel(e.gender)}",
-      meta: loc.isEmpty ? "Inscrito" : "📍 $loc",
+      tournamentId: e.tournamentId,
+      title: e.tournamentName,
+      subtitle: "Categoría: ${e.categoryName} · ${genderLabel(e.gender)}",
+      meta: loc.isEmpty ? "Inscrito" : loc,
     );
   }
 }
@@ -355,7 +341,6 @@ class _CalendarMonthGrid extends StatelessWidget {
     final leadingEmpty = (firstOfMonth.weekday - 1) % 7;
     final totalCells = leadingEmpty + daysInMonth;
     final rows = (totalCells / 7).ceil();
-    final cellCount = rows * 7;
 
     return Column(
       children: List.generate(rows, (r) {
@@ -388,7 +373,8 @@ class _CalendarMonthGrid extends StatelessWidget {
     );
   }
 
-  bool _sameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
+  bool _sameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
 class _DayCell extends StatelessWidget {
@@ -408,9 +394,15 @@ class _DayCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = isSelected ? AppColors.accent.withOpacity(0.18) : Colors.white.withOpacity(0.06);
-    final border = isSelected ? AppColors.accent.withOpacity(0.40) : Colors.white.withOpacity(0.10);
-    final textColor = isSelected ? Colors.white : Colors.white.withOpacity(0.92);
+    final bg = isSelected
+        ? AppColors.scorifyMint.withOpacity(0.16)
+        : Colors.white.withOpacity(0.04);
+    final border = isSelected
+        ? AppColors.scorifyMint.withOpacity(0.45)
+        : Colors.white.withOpacity(0.08);
+    final textColor = isSelected
+        ? AppColors.scorifyText
+        : AppColors.scorifyText.withOpacity(0.85);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -431,10 +423,9 @@ class _DayCell extends StatelessWidget {
               children: [
                 Text(
                   "$day",
-                  style: TextStyle(
+                  style: AppTypography.mono14.copyWith(
                     color: textColor,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 if (isToday)
@@ -445,7 +436,7 @@ class _DayCell extends StatelessWidget {
                       width: 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: AppColors.accent,
+                        color: AppColors.scorifyMint,
                         borderRadius: BorderRadius.circular(99),
                       ),
                     ),
@@ -457,7 +448,7 @@ class _DayCell extends StatelessWidget {
                       width: 18,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: AppColors.accent,
+                        color: AppColors.scorifyMint,
                         borderRadius: BorderRadius.circular(99),
                       ),
                     ),
@@ -478,16 +469,7 @@ class _WeekLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Center(
-        child: Text(
-          t,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.70),
-            fontWeight: FontWeight.w900,
-            fontSize: 12,
-          ),
-        ),
-      ),
+      child: Center(child: Text(t, style: AppTypography.caption)),
     );
   }
 }
@@ -496,14 +478,16 @@ class _WeekLabel extends StatelessWidget {
 
 class _AgendaCard extends StatelessWidget {
   final _CalendarItem item;
-  const _AgendaCard({required this.item});
+  final VoidCallback onTap;
+  const _AgendaCard({required this.item, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: _GlassCard(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: GlassCard(
         padding: const EdgeInsets.all(14),
+        onTap: onTap,
         child: Row(
           children: [
             Container(
@@ -511,11 +495,15 @@ class _AgendaCard extends StatelessWidget {
               height: 46,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: AppColors.accent.withOpacity(0.16),
+                color: AppColors.scorifyMint.withOpacity(0.14),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.accent.withOpacity(0.28)),
+                border: Border.all(color: AppColors.scorifyCardBorder),
               ),
-              child: Icon(Icons.emoji_events_outlined, color: AppColors.accent, size: 22),
+              child: const Icon(
+                Icons.emoji_events_outlined,
+                color: AppColors.scorifyMint,
+                size: 22,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -526,105 +514,33 @@ class _AgendaCard extends StatelessWidget {
                     item.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 13,
-                    ),
+                    style: AppTypography.h2,
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   Text(
                     item.subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.78),
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12,
-                    ),
+                    style: AppTypography.bodyMuted,
                   ),
                   const SizedBox(height: 6),
                   Text(
                     item.meta,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.70),
-                      fontWeight: FontWeight.w800,
-                      fontSize: 11,
-                    ),
+                    style: AppTypography.caption,
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.chevron_right_rounded, color: Colors.white.withOpacity(0.60)),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.scorifyTextFaint,
+            ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _MiniButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _MiniButton({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white.withOpacity(0.10),
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: SizedBox(width: 40, height: 40, child: Icon(icon, color: Colors.white.withOpacity(0.95))),
-      ),
-    );
-  }
-}
-
-class _GlassIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _GlassIconButton({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white.withOpacity(0.10),
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: SizedBox(width: 44, height: 44, child: Icon(icon, color: Colors.white.withOpacity(0.95))),
-      ),
-    );
-  }
-}
-
-class _GlassCard extends StatelessWidget {
-  final Widget child;
-  final EdgeInsets padding;
-
-  const _GlassCard({required this.child, this.padding = const EdgeInsets.all(14)});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: padding,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.10)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.20), blurRadius: 18, offset: const Offset(0, 10)),
-        ],
-      ),
-      child: child,
     );
   }
 }
