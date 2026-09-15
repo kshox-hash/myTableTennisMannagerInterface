@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:myttmi/routes/cyber_page_route.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
+import "package:myttmi/core/constants/countries.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/auth_text_field.dart";
 import "package:myttmi/core/ui/glass_card.dart";
@@ -9,9 +10,11 @@ import "package:myttmi/core/ui/pill_button.dart";
 import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/auth/api/auth_api.dart";
+import "package:myttmi/features/profile/api/clubs_api.dart";
+import "package:myttmi/features/profile/models/club_model.dart";
 import "package:myttmi/features/shell/app_shell.dart";
 
-const _categories = ["Sub-13", "Sub-15", "Sub-18", "Juvenil", "Todo Competidor", "Máster"];
+const _handLabel = {"right-handed": "Diestro", "left-handed": "Zurdo"};
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -25,18 +28,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _pass = TextEditingController();
   final _firstName = TextEditingController();
   final _lastName = TextEditingController();
-  final _country = TextEditingController();
-  final _idDocument = TextEditingController();
-  final _club = TextEditingController();
 
   DateTime? _birthDate;
   String? _gender;
-  String? _category;
+  String? _dominantHand;
+  String? _country;
+  String? _selectedClubId;
 
   bool loading = false;
 
   final api = AuthApi();
   final storage = SessionStorage();
+  final clubsApi = ClubsApi();
+  List<PublicClub> _clubs = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Endpoint público (sin login) — el club tiene que poder elegirse acá,
+    // antes de que exista sesión.
+    clubsApi.list().then((clubs) {
+      if (mounted) setState(() => _clubs = clubs);
+    }).catchError((_) {});
+  }
 
   Future<void> _pickBirthDate() async {
     final now = DateTime.now();
@@ -86,15 +100,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
         firstName: _firstName.text.trim(),
         lastName: _lastName.text.trim(),
         gender: _gender,
-        clubName: _club.text.trim(),
+        dominantHand: _dominantHand,
         birthDate: _birthDate == null
             ? null
             : "${_birthDate!.year.toString().padLeft(4, '0')}-"
                 "${_birthDate!.month.toString().padLeft(2, '0')}-"
                 "${_birthDate!.day.toString().padLeft(2, '0')}",
-        country: _country.text.trim(),
-        idDocument: _idDocument.text.trim(),
-        category: _category,
+        country: _country,
       );
 
       await storage.saveSession(
@@ -103,6 +115,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
         userId: resp.user.idUser,
         email: resp.user.email,
       );
+
+      // El pedido de club recién puede mandarse con la sesión ya activa
+      // (guardada arriba) — si falla no bloquea el registro, se puede pedir
+      // después desde Perfil.
+      if (_selectedClubId != null) {
+        await clubsApi.requestJoin(_selectedClubId!).catchError((_) {});
+      }
 
       if (!mounted) return;
 
@@ -127,9 +146,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _pass.dispose();
     _firstName.dispose();
     _lastName.dispose();
-    _country.dispose();
-    _idDocument.dispose();
-    _club.dispose();
     super.dispose();
   }
 
@@ -194,33 +210,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(height: 14),
 
                           DropdownButtonFormField<String>(
-                            initialValue: _category,
-                            dropdownColor: AppColors.scorifyDeep,
-                            iconEnabledColor: AppColors.scorifyTextMuted,
-                            style: AppTypography.bodyText,
-                            decoration: InputDecoration(
-                              labelText: "Categoría",
-                              labelStyle: AppTypography.bodyMuted,
-                              prefixIcon: const Icon(Icons.emoji_events_outlined, color: AppColors.scorifyTextMuted, size: 20),
-                              filled: true,
-                              fillColor: AppColors.scorifyCardFill,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
-                              ),
-                            ),
-                            items: _categories
-                                .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-                                .toList(),
-                            onChanged: (v) => setState(() => _category = v),
-                          ),
-                          const SizedBox(height: 14),
-
-                          DropdownButtonFormField<String>(
                             initialValue: _gender,
                             dropdownColor: AppColors.scorifyDeep,
                             iconEnabledColor: AppColors.scorifyTextMuted,
@@ -243,21 +232,115 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             items: const [
                               DropdownMenuItem(value: "male", child: Text("Masculino")),
                               DropdownMenuItem(value: "female", child: Text("Femenino")),
-                              DropdownMenuItem(value: "other", child: Text("Otro")),
                             ],
                             onChanged: (v) => setState(() => _gender = v),
                           ),
                           const SizedBox(height: 14),
 
-                          AuthTextField(controller: _country, label: "País", icon: Icons.public_outlined),
-                          const SizedBox(height: 14),
-                          AuthTextField(
-                            controller: _idDocument,
-                            label: "RUT / Cédula de identidad",
-                            icon: Icons.perm_identity_outlined,
+                          DropdownButtonFormField<String>(
+                            initialValue: _dominantHand,
+                            dropdownColor: AppColors.scorifyDeep,
+                            iconEnabledColor: AppColors.scorifyTextMuted,
+                            style: AppTypography.bodyText,
+                            decoration: InputDecoration(
+                              labelText: "Mano con la que juegas",
+                              labelStyle: AppTypography.bodyMuted,
+                              prefixIcon: const Icon(Icons.sports_tennis_outlined, color: AppColors.scorifyTextMuted, size: 20),
+                              filled: true,
+                              fillColor: AppColors.scorifyCardFill,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
+                              ),
+                            ),
+                            items: _handLabel.entries
+                                .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
+                                .toList(),
+                            onChanged: (v) => setState(() => _dominantHand = v),
                           ),
                           const SizedBox(height: 14),
-                          AuthTextField(controller: _club, label: "Club (opcional)", icon: Icons.groups_2_outlined),
+
+                          DropdownButtonFormField<String>(
+                            initialValue: _country,
+                            dropdownColor: AppColors.scorifyDeep,
+                            iconEnabledColor: AppColors.scorifyTextMuted,
+                            style: AppTypography.bodyText,
+                            menuMaxHeight: 360,
+                            // isExpanded: nombres largos ("República
+                            // Democrática del Congo") desbordaban el botón
+                            // cerrado — sin esto el DropdownButton se dimensiona
+                            // a su contenido intrínseco en vez de al ancho
+                            // disponible.
+                            isExpanded: true,
+                            decoration: InputDecoration(
+                              labelText: "País",
+                              labelStyle: AppTypography.bodyMuted,
+                              prefixIcon: const Icon(Icons.public_outlined, color: AppColors.scorifyTextMuted, size: 20),
+                              filled: true,
+                              fillColor: AppColors.scorifyCardFill,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
+                              ),
+                            ),
+                            items: kCountries
+                                .map((c) => DropdownMenuItem(
+                                      value: c,
+                                      child: Text(c, overflow: TextOverflow.ellipsis),
+                                    ))
+                                .toList(),
+                            onChanged: (v) => setState(() => _country = v),
+                          ),
+                          const SizedBox(height: 14),
+
+                          DropdownButtonFormField<String>(
+                            initialValue: _selectedClubId,
+                            dropdownColor: AppColors.scorifyDeep,
+                            iconEnabledColor: AppColors.scorifyTextMuted,
+                            style: AppTypography.bodyText,
+                            // isExpanded: el nombre del club lo escribe cada
+                            // admin libremente, puede ser largo.
+                            isExpanded: true,
+                            decoration: InputDecoration(
+                              labelText: "Club (opcional)",
+                              labelStyle: AppTypography.bodyMuted,
+                              prefixIcon: const Icon(Icons.groups_2_outlined, color: AppColors.scorifyTextMuted, size: 20),
+                              filled: true,
+                              fillColor: AppColors.scorifyCardFill,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
+                              ),
+                            ),
+                            hint: Text(
+                              _clubs.isEmpty ? "No existen clubes registrados" : "Sin club por ahora",
+                              style: AppTypography.bodyMuted,
+                            ),
+                            items: _clubs
+                                .map((c) => DropdownMenuItem(
+                                      value: c.idClub,
+                                      child: Text(c.name, overflow: TextOverflow.ellipsis),
+                                    ))
+                                .toList(),
+                            onChanged: _clubs.isEmpty ? null : (v) => setState(() => _selectedClubId = v),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Le llega una solicitud al club — lo confirma su organizador.",
+                            style: AppTypography.bodyMuted,
+                          ),
 
                           const SizedBox(height: 22),
                           Divider(color: AppColors.scorifyCardBorder),

@@ -57,6 +57,14 @@ class Endpoints {
 
   static String userProfile(String userId) => "$base/users/$userId/profile";
 
+  // CLUBES — selector al registrarse / desde Perfil, pide unirse con una
+  // solicitud que confirma el admin dueño del club (mismo flujo que
+  // myttmi-web, ver features/profile/api/clubsApi.ts ahí).
+  static const clubs = "$base/clubs";
+  static const clubMyRequest = "$base/clubs/me/request";
+
+  static String clubJoin(String idClub) => "$base/clubs/$idClub/join";
+
   // RANKING
   static const ranking = "$base/ranking";
 

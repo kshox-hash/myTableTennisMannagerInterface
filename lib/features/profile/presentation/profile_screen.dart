@@ -13,18 +13,11 @@ import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/player/api/player_api.dart";
 import "package:myttmi/features/player/models/achievement_model.dart";
+import "package:myttmi/features/profile/api/clubs_api.dart";
 import "package:myttmi/features/profile/api/profile_api.dart";
+import "package:myttmi/features/profile/models/club_model.dart";
 import "package:myttmi/features/profile/models/profile_model.dart";
 import "package:myttmi/features/shell/splash_gate.dart";
-
-const _categories = [
-  "Sub-13",
-  "Sub-15",
-  "Sub-18",
-  "Juvenil",
-  "Todo Competidor",
-  "Máster",
-];
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -43,11 +36,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   final _firstNameCtrl = TextEditingController();
   final _lastNameCtrl = TextEditingController();
-  final _clubCtrl = TextEditingController();
   final _countryCtrl = TextEditingController();
-  final _idDocumentCtrl = TextEditingController();
   String? _gender;
-  String? _category;
   DateTime? _birthDate;
 
   @override
@@ -69,9 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void dispose() {
     _firstNameCtrl.dispose();
     _lastNameCtrl.dispose();
-    _clubCtrl.dispose();
     _countryCtrl.dispose();
-    _idDocumentCtrl.dispose();
     super.dispose();
   }
 
@@ -147,11 +135,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _startEditing(UserProfile p) {
     _firstNameCtrl.text = p.firstName ?? "";
     _lastNameCtrl.text = p.lastName ?? "";
-    _clubCtrl.text = p.club ?? "";
     _countryCtrl.text = p.country ?? "";
-    _idDocumentCtrl.text = p.idDocument ?? "";
     _gender = p.gender;
-    _category = p.category;
     _birthDate = p.birthDate;
     setState(() => _editing = true);
   }
@@ -163,10 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         firstName: _firstNameCtrl.text.trim(),
         lastName: _lastNameCtrl.text.trim(),
         gender: _gender,
-        clubName: _clubCtrl.text.trim(),
         country: _countryCtrl.text.trim(),
-        idDocument: _idDocumentCtrl.text.trim(),
-        category: _category,
         birthDate: _birthDate == null
             ? null
             : "${_birthDate!.year.toString().padLeft(4, '0')}-"
@@ -271,41 +253,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             const SizedBox(height: 12),
                             DropdownButtonFormField<String>(
-                              initialValue: _category,
-                              dropdownColor: AppColors.scorifyDeep,
-                              iconEnabledColor: AppColors.scorifyTextMuted,
-                              style: AppTypography.bodyText,
-                              decoration: InputDecoration(
-                                labelText: "Categoría",
-                                labelStyle: AppTypography.bodyMuted,
-                                filled: true,
-                                fillColor: AppColors.scorifyCardFill,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: const BorderSide(
-                                    color: AppColors.scorifyCardBorder,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: const BorderSide(
-                                    color: AppColors.scorifyMint,
-                                    width: 1.4,
-                                  ),
-                                ),
-                              ),
-                              items: _categories
-                                  .map(
-                                    (c) => DropdownMenuItem(
-                                      value: c,
-                                      child: Text(c),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (v) => setState(() => _category = v),
-                            ),
-                            const SizedBox(height: 12),
-                            DropdownButtonFormField<String>(
                               initialValue: _gender,
                               dropdownColor: AppColors.scorifyDeep,
                               iconEnabledColor: AppColors.scorifyTextMuted,
@@ -350,18 +297,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               controller: _countryCtrl,
                               label: "País",
                               icon: Icons.public_outlined,
-                            ),
-                            const SizedBox(height: 12),
-                            AuthTextField(
-                              controller: _idDocumentCtrl,
-                              label: "RUT / Cédula de identidad",
-                              icon: Icons.perm_identity_outlined,
-                            ),
-                            const SizedBox(height: 12),
-                            AuthTextField(
-                              controller: _clubCtrl,
-                              label: "Club (opcional)",
-                              icon: Icons.groups_2_outlined,
                             ),
                             const SizedBox(height: 20),
                             Row(
@@ -437,17 +372,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   achievements: aSnap.data ?? [],
                                 ),
                               ),
+                            const SizedBox(height: 12),
+                            _ClubSection(currentClub: p.club),
+                            const SizedBox(height: 12),
                             GlassCard(
                               child: Column(
                                 children: [
-                                  _ProfileRow(
-                                    icon: Icons.emoji_events_outlined,
-                                    label: "Categoría",
-                                    value: (p.category ?? "").trim().isEmpty
-                                        ? "Sin categoría"
-                                        : p.category!,
-                                  ),
-                                  const SizedBox(height: 12),
                                   _ProfileRow(
                                     icon: Icons.cake_outlined,
                                     label: "Edad",
@@ -463,27 +393,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                   const SizedBox(height: 12),
                                   _ProfileRow(
-                                    icon: Icons.groups_2_outlined,
-                                    label: "Club",
-                                    value: (p.club ?? "").trim().isEmpty
-                                        ? "Sin club"
-                                        : p.club!,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _ProfileRow(
                                     icon: Icons.public_outlined,
                                     label: "País",
                                     value: (p.country ?? "").trim().isEmpty
                                         ? "Sin especificar"
                                         : p.country!,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _ProfileRow(
-                                    icon: Icons.perm_identity_outlined,
-                                    label: "RUT/Cédula",
-                                    value: (p.idDocument ?? "").trim().isEmpty
-                                        ? "Sin especificar"
-                                        : p.idDocument!,
                                   ),
                                   const SizedBox(height: 12),
                                   _ProfileRow(
@@ -537,6 +451,201 @@ class _ProfileRow extends StatelessWidget {
           style: AppTypography.bodyText.copyWith(fontWeight: FontWeight.w700),
         ),
       ],
+    );
+  }
+}
+
+// Club: ya no es texto libre — el jugador elige uno de la lista y manda
+// una solicitud, el admin dueño del club la acepta o la rechaza (mismo
+// flujo que myttmi-web, ver features/profile/pages/ProfilePage.tsx ahí).
+class _ClubSection extends StatefulWidget {
+  final String? currentClub;
+  const _ClubSection({required this.currentClub});
+
+  @override
+  State<_ClubSection> createState() => _ClubSectionState();
+}
+
+class _ClubSectionState extends State<_ClubSection> {
+  final _api = ClubsApi();
+  List<PublicClub> _clubs = [];
+  MyClubRequest? _myRequest;
+  String? _selectedClubId;
+  bool _loading = true;
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    if (widget.currentClub != null) {
+      if (mounted) setState(() => _loading = false);
+      return;
+    }
+    setState(() => _loading = true);
+    try {
+      final results = await Future.wait([_api.list(), _api.getMyRequest()]);
+      final clubs = results[0] as List<PublicClub>;
+      final req = results[1] as MyClubRequest?;
+      if (!mounted) return;
+      setState(() {
+        _clubs = clubs;
+        _myRequest = (req != null && req.status == "pending") ? req : null;
+      });
+    } catch (_) {
+      // silencioso — la sección de club no es crítica para ver el resto del perfil.
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _requestJoin() async {
+    final idClub = _selectedClubId;
+    if (idClub == null) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await _api.requestJoin(idClub);
+      await _load();
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _cancelRequest() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await _api.cancelMyRequest();
+      await _load();
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Club", style: AppTypography.h1),
+          const SizedBox(height: 10),
+          if (_loading)
+            const Center(
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2.2, color: AppColors.scorifyMint),
+              ),
+            )
+          else if (widget.currentClub != null)
+            Row(
+              children: [
+                const Icon(Icons.groups_2_outlined, color: AppColors.scorifyMint, size: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      style: AppTypography.bodyMuted,
+                      children: [
+                        const TextSpan(text: "Perteneces a "),
+                        TextSpan(
+                          text: widget.currentClub,
+                          style: AppTypography.bodyText.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        const TextSpan(text: "."),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            )
+          else if (_myRequest != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Solicitud enviada a ${_myRequest!.clubName} — esperando respuesta del club.",
+                  style: AppTypography.bodyMuted,
+                ),
+                const SizedBox(height: 12),
+                _busy
+                    ? const Center(
+                        child: SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2.2, color: AppColors.scorifyMint),
+                        ),
+                      )
+                    : OutlinePillButton(label: "Cancelar solicitud", onTap: _cancelRequest),
+              ],
+            )
+          else if (_clubs.isEmpty)
+            Text("Todavía no hay clubes disponibles para unirte.", style: AppTypography.bodyMuted)
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedClubId,
+                  dropdownColor: AppColors.scorifyDeep,
+                  iconEnabledColor: AppColors.scorifyTextMuted,
+                  style: AppTypography.bodyText,
+                  // isExpanded: el nombre del club lo escribe cada admin
+                  // libremente, puede ser largo y desbordar el botón cerrado.
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    labelText: "Elige un club",
+                    labelStyle: AppTypography.bodyMuted,
+                    filled: true,
+                    fillColor: AppColors.scorifyCardFill,
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
+                    ),
+                  ),
+                  items: _clubs
+                      .map((c) => DropdownMenuItem(
+                            value: c.idClub,
+                            child: Text(c.name, overflow: TextOverflow.ellipsis),
+                          ))
+                      .toList(),
+                  onChanged: (v) => setState(() => _selectedClubId = v),
+                ),
+                const SizedBox(height: 12),
+                _busy
+                    ? const Center(
+                        child: SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2.2, color: AppColors.scorifyMint),
+                        ),
+                      )
+                    : SolidPillButton(
+                        label: "Solicitar unirme",
+                        onTap: _selectedClubId == null ? () {} : _requestJoin,
+                      ),
+              ],
+            ),
+          if (_error != null) ...[
+            const SizedBox(height: 8),
+            Text(_error!, style: AppTypography.bodyMuted.copyWith(color: Colors.redAccent)),
+          ],
+        ],
+      ),
     );
   }
 }

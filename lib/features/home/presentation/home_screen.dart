@@ -240,7 +240,6 @@ class _HomeScreenState extends State<HomeScreen>
                       : "Jugador",
                   details:
                       [
-                            _profile?.category,
                             _profile?.club,
                             if (_profile?.age != null) "${_profile!.age} años",
                           ]

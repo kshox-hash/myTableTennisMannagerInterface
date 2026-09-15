@@ -46,11 +46,9 @@ class AuthApi {
     String? firstName,
     String? lastName,
     String? gender,
-    String? clubName,
+    String? dominantHand,
     String? birthDate,
     String? country,
-    String? idDocument,
-    String? category,
   }) async {
     final uri = Uri.parse("$baseUrl/api/v1/auth/sign-up");
 
@@ -65,11 +63,9 @@ class AuthApi {
             if (firstName != null && firstName.isNotEmpty) "first_name": firstName,
             if (lastName != null && lastName.isNotEmpty) "last_name": lastName,
             if (gender != null) "gender": gender,
-            if (clubName != null && clubName.isNotEmpty) "club_name": clubName,
+            if (dominantHand != null) "dominant_hand": dominantHand,
             if (birthDate != null && birthDate.isNotEmpty) "birth_date": birthDate,
             if (country != null && country.isNotEmpty) "country": country,
-            if (idDocument != null && idDocument.isNotEmpty) "id_document": idDocument,
-            if (category != null && category.isNotEmpty) "category": category,
           }),
         )
         // 60s (no 12s): el backend es Render free tier y se duerme tras

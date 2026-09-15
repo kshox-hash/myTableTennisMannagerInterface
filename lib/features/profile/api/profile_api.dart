@@ -41,11 +41,8 @@ class ProfileApi {
     String? firstName,
     String? lastName,
     String? gender,
-    String? clubName,
     String? birthDate,
     String? country,
-    String? idDocument,
-    String? category,
   }) async {
     final uri = Uri.parse("$baseUrl${Endpoints.me}");
     final res = await http.patch(
@@ -55,11 +52,8 @@ class ProfileApi {
         if (firstName != null) "first_name": firstName,
         if (lastName != null) "last_name": lastName,
         if (gender != null) "gender": gender,
-        if (clubName != null) "club_name": clubName,
         if (birthDate != null) "birth_date": birthDate,
         if (country != null) "country": country,
-        if (idDocument != null) "id_document": idDocument,
-        if (category != null) "category": category,
       }),
     );
 

@@ -10,8 +10,6 @@ class UserProfile {
   final String? club;
   final DateTime? birthDate;
   final String? country;
-  final String? idDocument;
-  final String? category;
 
   UserProfile({
     required this.idUser,
@@ -24,8 +22,6 @@ class UserProfile {
     this.club,
     this.birthDate,
     this.country,
-    this.idDocument,
-    this.category,
   });
 
   String get displayName {
@@ -59,8 +55,6 @@ class UserProfile {
       club: json["club_name"] as String?,
       birthDate: parseDate(json["birth_date"]),
       country: json["country"] as String?,
-      idDocument: json["id_document"] as String?,
-      category: json["category"] as String?,
     );
   }
 }
