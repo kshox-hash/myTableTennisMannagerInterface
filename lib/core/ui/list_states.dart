@@ -4,27 +4,66 @@ import 'package:myttmi/core/constants/app_typography.dart';
 import 'glass_card.dart';
 import 'pill_button.dart';
 
-class LoadingState extends StatelessWidget {
+/// Carga tipo "skeleton": tarjetas grises con la forma del contenido que
+/// late suave mientras llegan los datos (en vez de un spinner o la pelota).
+class LoadingState extends StatefulWidget {
   final String? label;
+  final int rows;
 
-  const LoadingState({super.key, this.label});
+  const LoadingState({super.key, this.label, this.rows = 4});
+
+  @override
+  State<LoadingState> createState() => _LoadingStateState();
+}
+
+class _LoadingStateState extends State<LoadingState> with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40),
-      child: Column(
-        children: [
-          const SizedBox(
-            width: 26,
-            height: 26,
-            child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.scorifyMint),
-          ),
-          if (label != null) ...[
-            const SizedBox(height: 14),
-            Text(label!, style: AppTypography.bodyMuted),
+    Widget bar(double w, double h) => Container(
+          width: w,
+          height: h,
+          decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(6)),
+        );
+    return FadeTransition(
+      opacity: Tween(begin: 0.45, end: 1.0).animate(CurvedAnimation(parent: _c, curve: Curves.easeInOut)),
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(top: 4),
+        child: Column(
+          children: [
+            for (var i = 0; i < widget.rows; i++)
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(16)),
+                child: Row(
+                  children: [
+                    Container(width: 42, height: 42, decoration: const BoxDecoration(color: AppColors.scorifySurface2, shape: BoxShape.circle)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          bar(i.isEven ? 170 : 130, 13),
+                          const SizedBox(height: 8),
+                          bar(i.isEven ? 110 : 150, 10),
+                        ],
+                      ),
+                    ),
+                    bar(34, 22),
+                  ],
+                ),
+              ),
           ],
-        ],
+        ),
       ),
     );
   }

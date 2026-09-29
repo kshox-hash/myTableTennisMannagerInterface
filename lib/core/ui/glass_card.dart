@@ -92,15 +92,8 @@ class GlassCard extends StatelessWidget {
         gradient: (fillColor == null && backgroundImage == null)
             ? AppColors.cardGradient
             : null,
-        boxShadow: variant == GlassCardVariant.elevated
-            ? [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.45),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
-                ),
-              ]
-            : null,
+        // Sin sombra: plano, como las tarjetas del landing.
+        boxShadow: null,
       ),
       clipBehavior: Clip.antiAlias,
       child: Material(

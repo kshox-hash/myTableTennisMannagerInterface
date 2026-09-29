@@ -236,6 +236,7 @@ class TournamentParticipant extends CategoryParticipant {
   final String idCategory;
   final String categoryType;
   final String categoryRange;
+  final String? avatarUrl;
 
   TournamentParticipant({
     required super.idUser,
@@ -246,6 +247,7 @@ class TournamentParticipant extends CategoryParticipant {
     required this.idCategory,
     required this.categoryType,
     required this.categoryRange,
+    this.avatarUrl,
   });
 
   String get categoryLabel =>
@@ -263,6 +265,7 @@ class TournamentParticipant extends CategoryParticipant {
       idCategory: (json["id_category"] ?? "").toString(),
       categoryType: (json["category_type"] ?? "").toString(),
       categoryRange: (json["category_range"] ?? "").toString(),
+      avatarUrl: json["avatar_url"] as String?,
     );
   }
 }

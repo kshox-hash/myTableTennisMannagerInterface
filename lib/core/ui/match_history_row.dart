@@ -138,7 +138,6 @@ class _ScoreAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         color: accent.withOpacity(0.14),
         shape: BoxShape.circle,
-        border: Border.all(color: accent.withOpacity(0.5)),
       ),
       child: Text(
         label,

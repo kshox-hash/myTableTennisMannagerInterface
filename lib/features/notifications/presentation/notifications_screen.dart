@@ -1,7 +1,7 @@
+import "package:myttmi/routes/app_routes.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
-import "package:myttmi/core/ui/glass_card.dart";
 import "package:myttmi/core/ui/list_states.dart";
 import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/core/ui/top_header.dart";
@@ -32,11 +32,46 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Future<void> _markRead(AppNotification n) async {
-    if (n.isRead) return;
-    try {
-      await _api.markRead(n.idNotification);
-      _load();
-    } catch (_) {}
+    if (!n.isRead) {
+      try {
+        await _api.markRead(n.idNotification);
+        _load();
+      } catch (_) {}
+    }
+    if (!mounted) return;
+    _open(n);
+  }
+
+  // Al tocar: lleva a donde está la acción — el partido, la categoría o el
+  // perfil (cuotas del club). Antes solo marcaba la notificación leída.
+  void _open(AppNotification n) {
+    if (n.type == "club_payment" || n.type.startsWith("club_join")) {
+      Navigator.pushNamed(context, AppRoutes.profile);
+      return;
+    }
+    if (n.idMatch != null &&
+        n.matchType != null &&
+        n.type != "match_result_corrected") {
+      Navigator.pushNamed(
+        context,
+        AppRoutes.matchDetail,
+        arguments: {"matchType": n.matchType, "matchId": n.idMatch},
+      );
+      return;
+    }
+    if (n.idCategory != null && n.idTournament != null) {
+      Navigator.pushNamed(
+        context,
+        AppRoutes.myCategory,
+        arguments: {
+          "tournamentId": n.idTournament,
+          "tournamentName": n.tournamentName ?? "",
+          "categoryId": n.idCategory,
+          "categoryLabel":
+              n.categoryLabel ?? n.tournamentName ?? "Mi categoría",
+        },
+      );
+    }
   }
 
   Future<void> _markAllRead() async {
@@ -94,25 +129,35 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       body: PrismBackground(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(top: 16),
             child: Column(
               children: [
-                TopHeader(
-                  title: "Notificaciones",
-                  actions: [
-                    GestureDetector(
-                      onTap: _markAllRead,
-                      child: Text(
-                        "Marcar todo leído",
-                        style: AppTypography.bodyMuted.copyWith(
-                          color: AppColors.scorifyMint,
-                          fontWeight: FontWeight.w800,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TopHeader(
+                    title: "Notificaciones",
+                    // Se abre como panel lateral: se cierra con la X, no con "volver".
+                    showBack: false,
+                    actions: [
+                      GestureDetector(
+                        onTap: _markAllRead,
+                        child: Text(
+                          "Marcar todo leído",
+                          style: AppTypography.bodyMuted.copyWith(
+                            color: AppColors.scorifyMint,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 12),
+                      HeaderIconButton(
+                        icon: Icons.close_rounded,
+                        onTap: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
                 Expanded(
                   child: RefreshIndicator(
                     color: AppColors.scorifyMint,
@@ -146,105 +191,127 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                 padding: EdgeInsets.only(top: 40),
                                 child: EmptyState(
                                   icon: Icons.notifications_none_rounded,
-                                  message: "No tenés notificaciones.",
+                                  message: "No tienes notificaciones.",
                                 ),
                               ),
                             ],
                           );
                         }
 
+                        // Estilo Facebook: filas a todo el ancho separadas por una
+                        // línea fina, sin íconos (carga más liviana); las no leídas
+                        // con fondo destacado y un punto celeste.
                         final grouped = _groupByDay(items);
-                        return ListView.separated(
+                        return ListView.builder(
                           itemCount: grouped.length,
-                          separatorBuilder: (_, i) =>
-                              SizedBox(height: grouped[i] is String ? 4 : 10),
                           itemBuilder: (context, i) {
                             final entry = grouped[i];
                             if (entry is String) {
                               return Padding(
-                                padding: EdgeInsets.only(
-                                  top: i == 0 ? 0 : 10,
-                                  bottom: 2,
+                                padding: EdgeInsets.fromLTRB(
+                                  16,
+                                  i == 0 ? 4 : 18,
+                                  16,
+                                  8,
                                 ),
                                 child: Text(
                                   entry,
-                                  style: AppTypography.caption.copyWith(
-                                    color: AppColors.scorifyTextFaint,
+                                  style: const TextStyle(
+                                    fontFamily: AppTypography.body,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.4,
+                                    color: AppColors.scorifyText,
                                   ),
                                 ),
                               );
                             }
-
                             final n = entry as AppNotification;
-                            final color = notificationColor(n.type);
-                            return GlassCard(
-                              onTap: () => _markRead(n),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: 36,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      color: color.withOpacity(0.16),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: color.withOpacity(0.4),
+                            return Material(
+                              color: n.isRead
+                                  ? Colors.transparent
+                                  : AppColors.scorifyMint.withValues(
+                                      alpha: 0.08,
+                                    ),
+                              child: InkWell(
+                                onTap: () => _markRead(n),
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    12,
+                                    16,
+                                    12,
+                                  ),
+                                  decoration: const BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Color(0xFF1A2F39),
                                       ),
                                     ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      notificationIcon(n.type),
-                                      style: const TextStyle(fontSize: 17),
-                                    ),
                                   ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Expanded(
-                                              child: Text(
-                                                n.title,
-                                                style: n.isRead
-                                                    ? AppTypography.bodyText
-                                                    : AppTypography.h2,
+                                            Text(
+                                              n.title,
+                                              style: TextStyle(
+                                                fontFamily: AppTypography.body,
+                                                fontSize: 14.5,
+                                                fontWeight: n.isRead
+                                                    ? FontWeight.w600
+                                                    : FontWeight.w800,
+                                                color: AppColors.scorifyText,
                                               ),
                                             ),
-                                            if (!n.isRead)
-                                              Container(
-                                                width: 8,
-                                                height: 8,
-                                                margin: const EdgeInsets.only(
-                                                  left: 8,
-                                                  top: 4,
-                                                ),
-                                                decoration: const BoxDecoration(
-                                                  color: AppColors.scorifyMint,
-                                                  shape: BoxShape.circle,
-                                                ),
+                                            const SizedBox(height: 3),
+                                            Text(
+                                              n.message,
+                                              style: const TextStyle(
+                                                fontFamily: AppTypography.body,
+                                                fontSize: 13.5,
+                                                height: 1.35,
+                                                fontWeight: FontWeight.w500,
+                                                color:
+                                                    AppColors.scorifyTextMuted,
                                               ),
+                                            ),
+                                            const SizedBox(height: 5),
+                                            Text(
+                                              _timeAgo(n.createdAt),
+                                              style: TextStyle(
+                                                fontFamily: AppTypography.body,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: n.isRead
+                                                    ? AppColors.scorifyTextFaint
+                                                    : AppColors.scorifyMint,
+                                              ),
+                                            ),
                                           ],
                                         ),
-                                        const SizedBox(height: 3),
-                                        Text(
-                                          n.message,
-                                          style: AppTypography.bodyMuted,
+                                      ),
+                                      if (!n.isRead)
+                                        Container(
+                                          width: 10,
+                                          height: 10,
+                                          margin: const EdgeInsets.only(
+                                            left: 12,
+                                            top: 6,
+                                          ),
+                                          decoration: const BoxDecoration(
+                                            color: AppColors.scorifyMint,
+                                            shape: BoxShape.circle,
+                                          ),
                                         ),
-                                      ],
-                                    ),
+                                    ],
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    _timeAgo(n.createdAt),
-                                    style: AppTypography.caption,
-                                  ),
-                                ],
+                                ),
                               ),
                             );
                           },

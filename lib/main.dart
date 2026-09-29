@@ -30,6 +30,24 @@ class MyApp extends StatelessWidget {
           primary: AppColors.scorifyMint,
           onPrimary: AppColors.scorifyOnMint,
         ),
+        // Botones de acción verdes con la misma letra que la web
+        // (Montserrat 600, 14 px).
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.scorifyButterfly,
+            foregroundColor: AppColors.scorifyOnButterfly,
+            textStyle: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w600, fontSize: 14),
+            shape: const StadiumBorder(),
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.scorifyButterfly,
+            foregroundColor: AppColors.scorifyOnButterfly,
+            textStyle: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w600, fontSize: 14),
+            shape: const StadiumBorder(),
+          ),
+        ),
       ),
       onGenerateRoute: AppRoutes.onGenerateRoute,
       // "home" en vez de "initialRoute": un initialRoute con barras (ej.

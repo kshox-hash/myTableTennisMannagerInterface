@@ -11,9 +11,19 @@ const Map<String, String> _typeIcon = {
   "bracket_generated": "🏆",
   "bracket_bye": "⏭️",
   "next_match_ready": "🔜",
+  "match_up_soon": "⏳",
+  "queue_skipped": "⏩",
+  "groups_ending": "🏁",
   "match_on_table": "🏓",
   "match_result": "🏓",
   "tournament_cancelled": "🚫",
+  "group_outcome": "📊",
+  "final_position": "🏆",
+  "tournament_updated": "📅",
+  "match_result_corrected": "✏️",
+  "club_payment": "💳",
+  "club_join_approved": "🤝",
+  "club_join_rejected": "🚫",
 };
 
 String notificationIcon(String type) => _typeIcon[type] ?? "🔔";
@@ -29,9 +39,19 @@ const Map<String, Color> _typeColor = {
   "bracket_generated": AppColors.scorifyMint,
   "bracket_bye": AppColors.scorifyPending,
   "next_match_ready": AppColors.scorifyPending,
+  "match_up_soon": AppColors.scorifyPending,
+  "queue_skipped": AppColors.scorifyMint,
+  "groups_ending": AppColors.scorifyButterfly,
   "match_on_table": AppColors.scorifyMint,
   "match_result": AppColors.scorifyMint,
   "tournament_cancelled": AppColors.scorifyNegative,
+  "group_outcome": AppColors.scorifyButterfly,
+  "final_position": AppColors.scorifyButterfly,
+  "tournament_updated": AppColors.scorifyPending,
+  "match_result_corrected": AppColors.scorifyPending,
+  "club_payment": AppColors.scorifyMint,
+  "club_join_approved": AppColors.scorifyMint,
+  "club_join_rejected": AppColors.scorifyNegative,
 };
 
 Color notificationColor(String type) =>
@@ -44,6 +64,10 @@ class AppNotification {
   final String message;
   final String? idTournament;
   final String? idCategory;
+  final String? idMatch;
+  final String? matchType;
+  final String? tournamentName;
+  final String? categoryLabel;
   final bool isRead;
   final String createdAt;
 
@@ -54,6 +78,10 @@ class AppNotification {
     required this.message,
     this.idTournament,
     this.idCategory,
+    this.idMatch,
+    this.matchType,
+    this.tournamentName,
+    this.categoryLabel,
     required this.isRead,
     required this.createdAt,
   });
@@ -66,6 +94,10 @@ class AppNotification {
       message: (json["message"] ?? "").toString(),
       idTournament: json["id_tournament"] as String?,
       idCategory: json["id_category"] as String?,
+      idMatch: json["id_match"] as String?,
+      matchType: json["match_type"] as String?,
+      tournamentName: json["tournament_name"] as String?,
+      categoryLabel: json["category_label"] as String?,
       isRead: json["is_read"] == true,
       createdAt: (json["created_at"] ?? "").toString(),
     );

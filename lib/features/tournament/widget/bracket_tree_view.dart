@@ -106,9 +106,9 @@ class _BracketTreeViewState extends State<BracketTreeView> {
       final fromPos = fromBox.localToGlobal(Offset.zero, ancestor: wrapperBox);
       final toPos = toBox.localToGlobal(Offset.zero, ancestor: wrapperBox);
       final x1 = fromPos.dx + fromBox.size.width;
-      final y1 = fromPos.dy + fromBox.size.height / 2;
+      final y1 = fromPos.dy + fromBox.size.height / 2 + _cardCenterOffset;
       final x2 = toPos.dx;
-      final y2 = toPos.dy + toBox.size.height / 2;
+      final y2 = toPos.dy + toBox.size.height / 2 + _cardCenterOffset;
       final midX = x1 + (x2 - x1) / 2;
       lines.add(
         _ConnectorLine(
@@ -160,7 +160,7 @@ class _BracketTreeViewState extends State<BracketTreeView> {
           );
           final toPos = toBox.localToGlobal(Offset.zero, ancestor: wrapperBox);
           final x1 = fromPos.dx + fromBox.size.width;
-          final y1 = fromPos.dy + fromBox.size.height / 2;
+          final y1 = fromPos.dy + fromBox.size.height / 2 + _cardCenterOffset;
           final x2 = toPos.dx;
           final y2 = toPos.dy + toBox.size.height / 2;
           final midX = x1 + (x2 - x1) / 2;
@@ -204,7 +204,7 @@ class _BracketTreeViewState extends State<BracketTreeView> {
               ? finalMatch.player1Name
               : finalMatch.player2Name);
 
-    const boxHeight = 96.0;
+    const boxHeight = 104.0;
     const boxGap = 14.0;
     // La ronda más ancha no es necesariamente la primera de la lista: con
     // pre-llave, la ronda 0 puede tener más partidos que la ronda 1.
@@ -229,9 +229,9 @@ class _BracketTreeViewState extends State<BracketTreeView> {
                 children: [
                   for (final r in rounds)
                     Padding(
-                      padding: const EdgeInsets.only(right: 32),
+                      padding: const EdgeInsets.only(right: 40),
                       child: SizedBox(
-                        width: 190,
+                        width: 240,
                         height: treeHeight,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -239,7 +239,7 @@ class _BracketTreeViewState extends State<BracketTreeView> {
                             Text(
                               _roundTitle(r.round, totalRounds).toUpperCase(),
                               textAlign: TextAlign.center,
-                              style: AppTypography.caption,
+                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: AppColors.scorifyTextMuted),
                             ),
                             const SizedBox(height: 10),
                             Expanded(
@@ -293,10 +293,10 @@ class _LinesPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     for (final line in lines) {
       final paint = Paint()
-        ..color = line.decided
-            ? AppColors.scorifyMint
-            : Colors.white.withOpacity(0.18)
-        ..strokeWidth = line.decided ? 2 : 1.5
+        ..color = line.decided ? const Color(0xFF7FE0F5) : const Color(0xFF1A2F39)
+        ..strokeWidth = line.decided ? 2.25 : 1.5
+        ..strokeJoin = StrokeJoin.round
+        ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
       final path = Path()..moveTo(line.points.first.dx, line.points.first.dy);
       for (final p in line.points.skip(1)) {
@@ -309,6 +309,14 @@ class _LinesPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _LinesPainter oldDelegate) => true;
 }
+
+// Misma tarjeta que la llave de la web (MatchPlayerRows): encabezado
+// "● Partido N" en verde, dos filas (la segunda un tono más oscura), inicial
+// en círculo y la pastilla de sets verde para el ganador. Tocar a un jugador
+// ilumina su camino por la llave.
+// La tarjeta queda bajo el encabezado "Partido N" (~22 px): su centro está
+// ~11 px más abajo que el centro de la caja completa.
+const double _cardCenterOffset = 11;
 
 class _MatchBox extends StatelessWidget {
   final TournamentMatch match;
@@ -328,70 +336,82 @@ class _MatchBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final played = match.status == "played" || match.status == "walkover";
     final isBye = match.status == "bye";
-    // El rival de un bye no existe (avanzó directo) — mostrarlo como fila
-    // "BYE" en vez de un nombre vacío, igual que en el panel admin.
     final byePlayer1 = isBye && match.player1Id.isEmpty;
     final byePlayer2 = isBye && match.player2Id.isEmpty;
 
     return SizedBox(
       height: height,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.scorifyDeep,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.scorifyCardBorder),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
             children: [
-              byePlayer1
-                  ? const _ByeRow()
-                  : _PlayerRow(
-                      idUser: match.player1Id,
-                      name: match.player1Name,
-                      score: played ? match.setsPlayer1 : null,
-                      isWinner: match.winnerId == match.player1Id,
-                      highlighted:
-                          highlightedPlayerId != null &&
-                          highlightedPlayerId == match.player1Id,
-                      onTap: () => onTapPlayer(match.player1Id),
-                    ),
-              Divider(height: 1, color: Colors.white.withOpacity(0.08)),
-              byePlayer2
-                  ? const _ByeRow()
-                  : _PlayerRow(
-                      idUser: match.player2Id,
-                      name: match.player2Name,
-                      score: played ? match.setsPlayer2 : null,
-                      isWinner: match.winnerId == match.player2Id,
-                      highlighted:
-                          highlightedPlayerId != null &&
-                          highlightedPlayerId == match.player2Id,
-                      onTap: () => onTapPlayer(match.player2Id),
-                    ),
+              Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.scorifyButterfly, shape: BoxShape.circle)),
+              const SizedBox(width: 6),
+              Text("Partido ${match.matchNumber}",
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyButterfly)),
+              if (match.tableNumber != null && !played)
+                Text("  · Mesa ${match.tableNumber}",
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
             ],
           ),
-        ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: ColoredBox(
+              color: const Color(0xEB1C3440),
+              child: Column(
+                children: [
+                  byePlayer1
+                      ? const _ByeRow(tinted: false)
+                      : _PlayerRow(
+                          idUser: match.player1Id,
+                          name: match.player1Name,
+                          score: played ? match.setsPlayer1 : null,
+                          isWinner: played && match.winnerId == match.player1Id,
+                          highlighted: highlightedPlayerId != null && highlightedPlayerId == match.player1Id,
+                          tinted: false,
+                          onTap: () => onTapPlayer(match.player1Id),
+                        ),
+                  byePlayer2
+                      ? const _ByeRow(tinted: true)
+                      : _PlayerRow(
+                          idUser: match.player2Id,
+                          name: match.player2Name,
+                          score: played ? match.setsPlayer2 : null,
+                          isWinner: played && match.winnerId == match.player2Id,
+                          highlighted: highlightedPlayerId != null && highlightedPlayerId == match.player2Id,
+                          tinted: true,
+                          onTap: () => onTapPlayer(match.player2Id),
+                        ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
 class _ByeRow extends StatelessWidget {
-  const _ByeRow();
+  final bool tinted;
+  const _ByeRow({required this.tinted});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      height: 38,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       alignment: Alignment.centerLeft,
-      child: Text(
+      color: AppColors.scorifySurface2,
+      child: const Text(
         "BYE",
         style: TextStyle(
-          fontSize: 12.5,
-          fontWeight: FontWeight.w700,
+          fontFamily: AppTypography.body,
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
           fontStyle: FontStyle.italic,
           letterSpacing: 0.5,
           color: AppColors.scorifyTextMuted,
@@ -407,6 +427,7 @@ class _PlayerRow extends StatelessWidget {
   final int? score;
   final bool isWinner;
   final bool highlighted;
+  final bool tinted;
   final VoidCallback onTap;
 
   const _PlayerRow({
@@ -415,80 +436,85 @@ class _PlayerRow extends StatelessWidget {
     this.score,
     required this.isWinner,
     required this.highlighted,
+    required this.tinted,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final initial = name.trim().isEmpty
-        ? "?"
-        : name.trim().substring(0, 1).toUpperCase();
+    final initial = name.trim().isEmpty ? "?" : name.trim().substring(0, 1).toUpperCase();
 
     return InkWell(
       onTap: idUser.isEmpty ? null : onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        color: highlighted ? AppColors.scorifyMint : Colors.transparent,
+        height: 38,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: highlighted ? null : (tinted ? Colors.black.withValues(alpha: 0.15) : null),
+          gradient: highlighted ? const LinearGradient(colors: [Color(0xFF7FE0F5), Color(0xFF4DD2EE)]) : null,
+        ),
         child: Row(
           children: [
             Container(
-              width: 22,
-              height: 22,
+              width: 24,
+              height: 24,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: highlighted
-                    ? Colors.white
-                    : AppColors.scorifyMintDark.withOpacity(0.4),
+                color: highlighted ? Colors.white : AppColors.scorifySurface2,
               ),
               child: Text(
                 initial,
                 style: TextStyle(
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w900,
-                  color: highlighted
-                      ? AppColors.scorifyMint
-                      : AppColors.scorifyText,
+                  fontFamily: AppTypography.body,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: highlighted ? const Color(0xFF4DD2EE) : AppColors.scorifyTextMuted,
                 ),
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                name,
+                name.isEmpty ? "Por definir" : name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: highlighted || isWinner
-                      ? FontWeight.w800
-                      : FontWeight.w600,
+                  fontFamily: AppTypography.body,
+                  fontSize: 13.5,
+                  fontWeight: highlighted ? FontWeight.w700 : FontWeight.w600,
                   color: highlighted
                       ? AppColors.scorifyOnMint
-                      : AppColors.scorifyText,
+                      : name.isEmpty
+                          ? AppColors.scorifyTextMuted
+                          : AppColors.scorifyText,
                 ),
               ),
             ),
+            const SizedBox(width: 6),
             Container(
-              width: 22,
-              height: 22,
+              width: 26,
+              height: 26,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(6),
                 color: highlighted
                     ? Colors.white
-                    : (isWinner
-                          ? AppColors.scorifyMint.withOpacity(0.2)
-                          : Colors.white.withOpacity(0.06)),
+                    : isWinner
+                        ? AppColors.scorifyButterfly
+                        : AppColors.scorifySurface2,
               ),
               child: Text(
                 score?.toString() ?? "-",
                 style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
+                  fontFamily: AppTypography.body,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
                   color: highlighted
-                      ? AppColors.scorifyMint
-                      : AppColors.scorifyTextMuted,
+                      ? const Color(0xFF4DD2EE)
+                      : isWinner
+                          ? AppColors.scorifyOnButterfly
+                          : AppColors.scorifyTextMuted,
                 ),
               ),
             ),
@@ -509,11 +535,11 @@ class _ChampionCard extends StatelessWidget {
       width: 130,
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
       decoration: BoxDecoration(
-        color: AppColors.scorifyMint,
+        color: AppColors.scorifyButterfly,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: AppColors.scorifyMint.withOpacity(0.5),
+            color: AppColors.scorifyButterfly.withValues(alpha: 0.35),
             blurRadius: 16,
             spreadRadius: 1,
           ),
@@ -524,7 +550,7 @@ class _ChampionCard extends StatelessWidget {
         children: [
           const Icon(
             Icons.emoji_events_rounded,
-            color: AppColors.scorifyOnMint,
+            color: AppColors.scorifyOnButterfly,
             size: 26,
           ),
           const SizedBox(height: 6),
@@ -534,7 +560,7 @@ class _ChampionCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: AppColors.scorifyOnMint,
+              color: AppColors.scorifyOnButterfly,
               fontWeight: FontWeight.w900,
               fontSize: 13,
             ),

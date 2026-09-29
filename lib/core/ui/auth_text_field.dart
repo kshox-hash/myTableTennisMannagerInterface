@@ -33,7 +33,7 @@ class AuthTextField extends StatelessWidget {
         labelStyle: AppTypography.bodyMuted,
         prefixIcon: Icon(icon, color: AppColors.scorifyTextMuted, size: 20),
         filled: true,
-        fillColor: AppColors.scorifyCardFill,
+        fillColor: AppColors.scorifyInput,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,

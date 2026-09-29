@@ -1,10 +1,11 @@
 import "package:flutter/material.dart";
+import "package:myttmi/core/ui/app_toast.dart";
 import "package:myttmi/routes/cyber_page_route.dart";
 import "package:myttmi/core/constants/app_colors.dart";
+import "package:myttmi/core/ui/confirm_dialog.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/achievement_row.dart";
-import "package:myttmi/core/ui/auth_text_field.dart";
 import "package:myttmi/core/ui/glass_card.dart";
 import "package:myttmi/core/ui/identicon.dart";
 import "package:myttmi/core/ui/list_states.dart";
@@ -76,11 +77,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  String _formatDate(DateTime? dt) {
+  String _memberSince(DateTime? dt) {
     if (dt == null) return "—";
+    const months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
     final d = dt.toLocal();
-    String two(int n) => n.toString().padLeft(2, "0");
-    return "${two(d.day)}-${two(d.month)}-${d.year}  ${two(d.hour)}:${two(d.minute)}";
+    return "${months[d.month - 1]} ${d.year}";
   }
 
   String _formatBirthDate(DateTime? dt) {
@@ -142,6 +143,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _save() async {
+    // El país es obligatorio (igual que en el registro y en la web).
+    if (_countryCtrl.text.trim().isEmpty) {
+      showToast(context, "Escribe tu país.", error: true);
+      return;
+    }
     setState(() => _saving = true);
     try {
       await api.updateMe(
@@ -159,18 +165,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() => _editing = false);
       await _refresh();
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Perfil actualizado")));
+      showToast(context, "Perfil guardado");
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      showToast(context, e.toString(), error: true);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
   }
+
+  InputDecoration _inputDeco(IconData? icon) {
+    final border = OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none);
+    return InputDecoration(
+      isDense: true,
+      filled: true,
+      fillColor: AppColors.scorifyInput,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      prefixIcon: icon == null ? null : Icon(icon, color: AppColors.scorifyTextMuted, size: 20),
+      border: border,
+      enabledBorder: border,
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.4),
+      ),
+    );
+  }
+
+  Widget _textInput(TextEditingController c, IconData? icon) =>
+      TextField(controller: c, style: AppTypography.bodyText, decoration: _inputDeco(icon));
 
   @override
   Widget build(BuildContext context) {
@@ -211,124 +233,112 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                       if (_editing) {
                         return ListView(
+                          padding: const EdgeInsets.only(bottom: 24),
                           children: [
-                            AuthTextField(
-                              controller: _firstNameCtrl,
-                              label: "Nombre",
-                              icon: Icons.badge_outlined,
-                            ),
-                            const SizedBox(height: 12),
-                            AuthTextField(
-                              controller: _lastNameCtrl,
-                              label: "Apellido",
-                              icon: Icons.badge_outlined,
-                            ),
-                            const SizedBox(height: 12),
-                            InkWell(
-                              borderRadius: BorderRadius.circular(16),
-                              onTap: _pickBirthDate,
-                              child: InputDecorator(
-                                decoration: InputDecoration(
-                                  labelText: "Fecha de nacimiento",
-                                  labelStyle: AppTypography.bodyMuted,
-                                  prefixIcon: const Icon(
-                                    Icons.cake_outlined,
-                                    color: AppColors.scorifyTextMuted,
-                                    size: 20,
+                            GlassCard(
+                              padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Row(
+                                    children: [
+                                      ClipOval(child: Identicon(seed: p.idUser, size: 44)),
+                                      const SizedBox(width: 12),
+                                      const Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text("Editar perfil",
+                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                                            SizedBox(height: 2),
+                                            Text("Así te verán los organizadores y rivales.",
+                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  filled: true,
-                                  fillColor: AppColors.scorifyCardFill,
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.scorifyCardBorder,
+                                  const SizedBox(height: 20),
+                                  Row(
+                                    children: [
+                                      Expanded(child: _FormField(label: "Nombre", child: _textInput(_firstNameCtrl, Icons.badge_outlined))),
+                                      const SizedBox(width: 10),
+                                      Expanded(child: _FormField(label: "Apellido", child: _textInput(_lastNameCtrl, null))),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 14),
+                                  _FormField(
+                                    label: "Fecha de nacimiento",
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(12),
+                                      onTap: _pickBirthDate,
+                                      child: InputDecorator(
+                                        decoration: _inputDeco(Icons.cake_outlined).copyWith(
+                                          suffixIcon: const Icon(Icons.calendar_month_rounded, color: AppColors.scorifyMint, size: 20),
+                                        ),
+                                        child: Text(_formatBirthDate(_birthDate), style: AppTypography.bodyText),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                child: Text(
-                                  _formatBirthDate(_birthDate),
-                                  style: AppTypography.bodyText,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            DropdownButtonFormField<String>(
-                              initialValue: _gender,
-                              dropdownColor: AppColors.scorifyDeep,
-                              iconEnabledColor: AppColors.scorifyTextMuted,
-                              style: AppTypography.bodyText,
-                              decoration: InputDecoration(
-                                labelText: "Género",
-                                labelStyle: AppTypography.bodyMuted,
-                                filled: true,
-                                fillColor: AppColors.scorifyCardFill,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: const BorderSide(
-                                    color: AppColors.scorifyCardBorder,
+                                  const SizedBox(height: 14),
+                                  _FormField(
+                                    label: "Género",
+                                    child: DropdownButtonFormField<String>(
+                                      initialValue: _gender,
+                                      isExpanded: true,
+                                      dropdownColor: AppColors.scorifySurface2,
+                                      borderRadius: BorderRadius.circular(12),
+                                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.scorifyTextMuted),
+                                      style: AppTypography.bodyText,
+                                      decoration: _inputDeco(Icons.wc_outlined),
+                                      items: const [
+                                        DropdownMenuItem(value: "male", child: Text("Masculino")),
+                                        DropdownMenuItem(value: "female", child: Text("Femenino")),
+                                        DropdownMenuItem(value: "other", child: Text("Otro")),
+                                      ],
+                                      onChanged: (v) => setState(() => _gender = v),
+                                    ),
                                   ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: const BorderSide(
-                                    color: AppColors.scorifyMint,
-                                    width: 1.4,
-                                  ),
-                                ),
-                              ),
-                              items: const [
-                                DropdownMenuItem(
-                                  value: "male",
-                                  child: Text("Masculino"),
-                                ),
-                                DropdownMenuItem(
-                                  value: "female",
-                                  child: Text("Femenino"),
-                                ),
-                                DropdownMenuItem(
-                                  value: "other",
-                                  child: Text("Otro"),
-                                ),
-                              ],
-                              onChanged: (v) => setState(() => _gender = v),
-                            ),
-                            const SizedBox(height: 12),
-                            AuthTextField(
-                              controller: _countryCtrl,
-                              label: "País",
-                              icon: Icons.public_outlined,
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: OutlinePillButton(
-                                    label: "Cancelar",
-                                    onTap: _saving
-                                        ? () {}
-                                        : () =>
-                                              setState(() => _editing = false),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _saving
-                                      ? const Center(
-                                          child: SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2.2,
-                                              color: AppColors.scorifyMint,
+                                  const SizedBox(height: 14),
+                                  _FormField(label: "País", child: _textInput(_countryCtrl, Icons.public_outlined)),
+                                  const SizedBox(height: 22),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: SizedBox(
+                                          height: 46,
+                                          child: OutlinedButton(
+                                            onPressed: _saving ? null : () => setState(() => _editing = false),
+                                            style: OutlinedButton.styleFrom(
+                                              foregroundColor: AppColors.scorifyText,
+                                              side: const BorderSide(color: AppColors.scorifyTextMuted),
+                                              shape: const StadiumBorder(),
+                                              textStyle: AppTypography.button,
                                             ),
+                                            child: const Text("Cancelar"),
                                           ),
-                                        )
-                                      : SolidPillButton(
-                                          label: "Guardar",
-                                          onTap: _save,
                                         ),
-                                ),
-                              ],
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: SizedBox(
+                                          height: 46,
+                                          child: FilledButton(
+                                            onPressed: _saving ? null : _save,
+                                            child: _saving
+                                                ? const SizedBox(
+                                                    width: 18,
+                                                    height: 18,
+                                                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.scorifyOnButterfly),
+                                                  )
+                                                : const Text("Guardar cambios"),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         );
@@ -338,82 +348,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: AppColors.scorifyMint,
                         onRefresh: _refresh,
                         child: ListView(
+                          padding: const EdgeInsets.only(bottom: 24),
                           children: [
-                            GlassCard(
-                              child: Row(
-                                children: [
-                                  Identicon(seed: p.idUser, size: 52),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          p.displayName,
-                                          style: AppTypography.h1,
-                                        ),
-                                        const SizedBox(height: 3),
-                                        Text(
-                                          "${p.email} · Jugador",
-                                          style: AppTypography.bodyMuted,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            _ProfileHero(profile: p, onEdit: () => _startEditing(p)),
+                            const SizedBox(height: 14),
+                            GridView.count(
+                              crossAxisCount: 2,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              mainAxisSpacing: 10,
+                              crossAxisSpacing: 10,
+                              childAspectRatio: 2.3,
+                              children: [
+                                _InfoTile(icon: Icons.cake_outlined, label: "Edad", value: p.age == null ? "—" : "${p.age} años"),
+                                _InfoTile(icon: Icons.wc_outlined, label: "Género", value: _genderLabel(p.gender)),
+                                _InfoTile(
+                                  icon: Icons.public_outlined,
+                                  label: "País",
+                                  value: (p.country ?? "").trim().isEmpty ? "Sin especificar" : p.country!,
+                                ),
+                                _InfoTile(icon: Icons.calendar_today_outlined, label: "Miembro desde", value: _memberSince(p.createdAt)),
+                              ],
                             ),
-                            const SizedBox(height: 12),
-                            if (achievementsFuture != null)
+                            if (achievementsFuture != null) ...[
+                              const SizedBox(height: 14),
                               FutureBuilder<List<PlayerAchievement>>(
                                 future: achievementsFuture,
-                                builder: (context, aSnap) => AchievementsCard(
-                                  achievements: aSnap.data ?? [],
-                                ),
+                                builder: (context, aSnap) => AchievementsCard(achievements: aSnap.data ?? [], showEmpty: aSnap.connectionState == ConnectionState.done),
                               ),
-                            const SizedBox(height: 12),
+                            ],
+                            const SizedBox(height: 14),
                             _ClubSection(currentClub: p.club),
-                            const SizedBox(height: 12),
-                            GlassCard(
-                              child: Column(
-                                children: [
-                                  _ProfileRow(
-                                    icon: Icons.cake_outlined,
-                                    label: "Edad",
-                                    value: p.age == null
-                                        ? "—"
-                                        : "${p.age} años",
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _ProfileRow(
-                                    icon: Icons.wc_outlined,
-                                    label: "Género",
-                                    value: _genderLabel(p.gender),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _ProfileRow(
-                                    icon: Icons.public_outlined,
-                                    label: "País",
-                                    value: (p.country ?? "").trim().isEmpty
-                                        ? "Sin especificar"
-                                        : p.country!,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _ProfileRow(
-                                    icon: Icons.calendar_today_outlined,
-                                    label: "Creado en",
-                                    value: _formatDate(p.createdAt),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            SolidPillButton(
-                              icon: Icons.edit_outlined,
-                              label: "Editar perfil",
-                              onTap: () => _startEditing(p),
-                            ),
+                            if (p.club != null) ...[
+                              const SizedBox(height: 12),
+                              const _DuesCard(),
+                            ],
                           ],
                         ),
                       );
@@ -425,32 +394,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _ProfileRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  const _ProfileRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, color: AppColors.scorifyMint, size: 18),
-        const SizedBox(width: 10),
-        Expanded(child: Text(label, style: AppTypography.bodyMuted)),
-        Text(
-          value,
-          style: AppTypography.bodyText.copyWith(fontWeight: FontWeight.w700),
-        ),
-      ],
     );
   }
 }
@@ -506,6 +449,13 @@ class _ClubSectionState extends State<_ClubSection> {
   Future<void> _requestJoin() async {
     final idClub = _selectedClubId;
     if (idClub == null) return;
+    final ok = await confirmAction(
+      context,
+      title: "Unirte al club",
+      message: "¿Enviar la solicitud para unirte a este club? El club debe aceptarte.",
+      confirmLabel: "Enviar solicitud",
+    );
+    if (!ok || !mounted) return;
     setState(() {
       _busy = true;
       _error = null;
@@ -541,8 +491,20 @@ class _ClubSectionState extends State<_ClubSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Club", style: AppTypography.h1),
-          const SizedBox(height: 10),
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: const BoxDecoration(color: AppColors.scorifySurface2, shape: BoxShape.circle),
+                child: const Icon(Icons.shield_outlined, color: AppColors.scorifyMint, size: 19),
+              ),
+              const SizedBox(width: 12),
+              const Text("Mi club",
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+            ],
+          ),
+          const SizedBox(height: 14),
           if (_loading)
             const Center(
               child: SizedBox(
@@ -597,8 +559,11 @@ class _ClubSectionState extends State<_ClubSection> {
             Text("Todavía no hay clubes disponibles para unirte.", style: AppTypography.bodyMuted)
           else
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Text("Todavía no perteneces a un club. Elige uno y envía tu solicitud; el club debe aceptarte.",
+                    style: AppTypography.bodyMuted.copyWith(height: 1.4)),
+                const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   initialValue: _selectedClubId,
                   dropdownColor: AppColors.scorifyDeep,
@@ -611,11 +576,8 @@ class _ClubSectionState extends State<_ClubSection> {
                     labelText: "Elige un club",
                     labelStyle: AppTypography.bodyMuted,
                     filled: true,
-                    fillColor: AppColors.scorifyCardFill,
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
-                    ),
+                    fillColor: AppColors.scorifyInput,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   ),
                   items: _clubs
                       .map((c) => DropdownMenuItem(
@@ -648,4 +610,194 @@ class _ClubSectionState extends State<_ClubSection> {
       ),
     );
   }
+}
+
+/// Cuotas del club: "Estás al día" o "Debes 2 meses · $10.000".
+class _DuesCard extends StatefulWidget {
+  const _DuesCard();
+  @override
+  State<_DuesCard> createState() => _DuesCardState();
+}
+
+class _DuesCardState extends State<_DuesCard> {
+  MyClubDues? _dues;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    ClubsApi().getMyDues().then((d) {
+      if (mounted) setState(() { _dues = d; _loaded = true; });
+    }).catchError((_) {
+      if (mounted) setState(() => _loaded = true);
+    });
+  }
+
+  static String _money(int v) {
+    final s = v.toString();
+    final b = StringBuffer();
+    for (var i = 0; i < s.length; i++) {
+      if (i > 0 && (s.length - i) % 3 == 0) b.write(".");
+      b.write(s[i]);
+    }
+    return "\$${b.toString()}";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final d = _dues;
+    if (!_loaded || d == null) return const SizedBox.shrink();
+    final ok = d.upToDate;
+    final color = ok ? AppColors.scorifyButterfly : AppColors.scorifyNegative;
+    final unit = d.feeFrequency == "weekly" ? (d.owedPeriods == 1 ? "semana" : "semanas") : (d.owedPeriods == 1 ? "mes" : "meses");
+    return GlassCard(
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
+            child: Icon(ok ? Icons.verified_rounded : Icons.error_outline_rounded, color: color),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("CUOTAS DEL CLUB", style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 10.5, fontWeight: FontWeight.w800, letterSpacing: 1)),
+                const SizedBox(height: 2),
+                Text(
+                  ok ? "Estás al día" : "Debes ${d.owedPeriods} $unit",
+                  style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w800),
+                ),
+                if (!ok && d.owedAmount > 0)
+                  Text("Total pendiente: ${_money(d.owedAmount)}", style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 12, fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Cabecera del perfil: avatar grande, nombre, correo y chips, con el botón
+/// "Editar perfil" a mano (antes estaba al final de la pantalla).
+class _ProfileHero extends StatelessWidget {
+  final UserProfile profile;
+  final VoidCallback onEdit;
+  const _ProfileHero({required this.profile, required this.onEdit});
+
+  @override
+  Widget build(BuildContext context) {
+    final p = profile;
+    Widget chip(IconData icon, String text) => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(999)),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 14, color: AppColors.scorifyMint),
+              const SizedBox(width: 5),
+              Text(text, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+            ],
+          ),
+        );
+    return GlassCard(
+      padding: const EdgeInsets.fromLTRB(18, 22, 18, 18),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: const BoxDecoration(color: AppColors.scorifySurface2, shape: BoxShape.circle),
+            child: ClipOval(child: Identicon(seed: p.idUser, size: 84)),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            p.displayName,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.scorifyText),
+          ),
+          const SizedBox(height: 2),
+          Text(p.email, style: AppTypography.bodyMuted),
+          const SizedBox(height: 12),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              chip(Icons.sports_tennis_rounded, "Jugador"),
+              if ((p.club ?? "").isNotEmpty) chip(Icons.shield_outlined, p.club!),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: FilledButton.icon(
+              onPressed: onEdit,
+              icon: const Icon(Icons.edit_outlined, size: 18),
+              label: const Text("Editar perfil"),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  const _InfoTile({required this.icon, required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(16)),
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.scorifyMint, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
+                const SizedBox(height: 2),
+                Text(value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Campo del formulario con su etiqueta arriba (antes la etiqueta quedaba
+/// montada sobre el borde del campo y costaba leerla).
+class _FormField extends StatelessWidget {
+  final String label;
+  final Widget child;
+  const _FormField({required this.label, required this.child});
+
+  @override
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 6),
+            child: Text(label,
+                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted)),
+          ),
+          child,
+        ],
+      );
 }

@@ -11,6 +11,8 @@ class TournamentCategory {
   final int qualifiersPerGroup;
   final int enrolledCount;
   final bool isEnrolled;
+  /// El organizador marcó que pagué la inscripción.
+  final bool isPaid;
 
   TournamentCategory({
     required this.idCategory,
@@ -24,6 +26,7 @@ class TournamentCategory {
     this.qualifiersPerGroup = 2,
     this.enrolledCount = 0,
     this.isEnrolled = false,
+    this.isPaid = false,
   });
 
   /// Label combinado para mostrar en UI — el backend nunca manda un
@@ -46,6 +49,7 @@ class TournamentCategory {
       qualifiersPerGroup: intOrDefault(json["qualifiers_per_group"], 2),
       enrolledCount: intOrDefault(json["enrolled_count"]),
       isEnrolled: json["is_enrolled"] == true,
+      isPaid: json["is_paid"] == true,
     );
   }
 
@@ -62,6 +66,7 @@ class TournamentCategory {
       qualifiersPerGroup: qualifiersPerGroup,
       enrolledCount: enrolledCount,
       isEnrolled: isEnrolled ?? this.isEnrolled,
+      isPaid: isPaid,
     );
   }
 }
@@ -77,6 +82,8 @@ class Tournament {
   final String createdBy;
   final String status; // active | cancelled
   final List<TournamentCategory> categories;
+  final String? organizerName;
+  final String? organizerAvatarUrl;
 
   Tournament({
     required this.idTournament,
@@ -89,6 +96,8 @@ class Tournament {
     required this.createdBy,
     this.status = "active",
     required this.categories,
+    this.organizerName,
+    this.organizerAvatarUrl,
   });
 
   bool get isCancelled => status == "cancelled";
@@ -109,6 +118,8 @@ class Tournament {
       createdBy: (json["created_by"] ?? "").toString(),
       status: (json["status"] ?? "active").toString(),
       categories: cats,
+      organizerName: json["organizer_name"] as String?,
+      organizerAvatarUrl: json["organizer_avatar_url"] as String?,
     );
   }
 }

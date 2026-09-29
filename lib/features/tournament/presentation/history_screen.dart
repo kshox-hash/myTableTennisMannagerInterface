@@ -16,27 +16,66 @@ class HistoryScreen extends StatefulWidget {
   State<HistoryScreen> createState() => _HistoryScreenState();
 }
 
+// Historial con scroll infinito: de a 30 partidos, los siguientes al llegar
+// al final. Antes pedía los últimos 50 y no había forma de ver más atrás
+// (quien juega todos los fines de semana los junta en un par de meses).
 class _HistoryScreenState extends State<HistoryScreen> {
+  static const _pageSize = 30;
   final _api = PlayerApi();
-  Future<List<PlayerMatchHistoryItem>>? _future;
+  final _scroll = ScrollController();
+  final List<PlayerMatchHistoryItem> _items = [];
+  String? _myId;
+  bool _loading = false;
+  bool _hasMore = true;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _scroll.addListener(() {
+      if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 400) _loadMore();
+    });
+    _refresh();
   }
 
-  Future<void> _load() async {
-    final userId = await SessionStorage().getUserId();
-    if (userId == null || userId.isEmpty) {
-      setState(() {
-        _future = Future.value([]);
-      });
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  Future<void> _refresh() async {
+    _myId ??= await SessionStorage().getUserId();
+    setState(() {
+      _items.clear();
+      _hasMore = true;
+      _error = null;
+    });
+    await _loadMore();
+  }
+
+  Future<void> _loadMore() async {
+    final id = _myId;
+    if (_loading || !_hasMore || id == null || id.isEmpty) {
+      if (id == null || id.isEmpty) setState(() => _hasMore = false);
       return;
     }
     setState(() {
-      _future = _api.getPlayerMatchHistory(userId, limit: 50);
+      _loading = true;
+      _error = null;
     });
+    try {
+      final page = await _api.getPlayerMatchHistory(id, limit: _pageSize, offset: _items.length);
+      if (!mounted) return;
+      setState(() {
+        _items.addAll(page);
+        _hasMore = page.length == _pageSize;
+      });
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
@@ -51,93 +90,74 @@ class _HistoryScreenState extends State<HistoryScreen> {
               children: [
                 const TopHeader(title: "Historial"),
                 const SizedBox(height: 14),
-                Expanded(
-                  child: RefreshIndicator(
-                    color: AppColors.scorifyMint,
-                    onRefresh: _load,
-                    child: FutureBuilder<List<PlayerMatchHistoryItem>>(
-                      future: _future,
-                      builder: (context, snap) {
-                        if (snap.connectionState == ConnectionState.waiting) {
-                          return const LoadingState();
-                        }
-                        if (snap.hasError) {
-                          return ListView(
-                            children: [
-                              ErrorStateView(
-                                message:
-                                    "No pudimos cargar tu historial.\n${snap.error}",
-                                onRetry: _load,
-                              ),
-                            ],
-                          );
-                        }
-
-                        final items = snap.data ?? [];
-                        if (items.isEmpty) {
-                          return ListView(
-                            children: const [
-                              Padding(
-                                padding: EdgeInsets.only(top: 40),
-                                child: EmptyState(
-                                  icon: Icons.history_rounded,
-                                  message: "Todavía no jugaste ningún partido.",
-                                ),
-                              ),
-                            ],
-                          );
-                        }
-
-                        return FutureBuilder<String?>(
-                          future: SessionStorage().getUserId(),
-                          builder: (context, userSnap) {
-                            final myId = userSnap.data;
-                            return ListView.builder(
-                              itemCount: items.length,
-                              itemBuilder: (context, i) {
-                                final m = items[i];
-                                final isP1 = m.player1Id == myId;
-                                final opponent = isP1
-                                    ? m.player2Name
-                                    : m.player1Name;
-                                final opponentId = isP1
-                                    ? m.player2Id
-                                    : m.player1Id;
-                                final mySets = isP1
-                                    ? m.setsPlayer1
-                                    : m.setsPlayer2;
-                                final oppSets = isP1
-                                    ? m.setsPlayer2
-                                    : m.setsPlayer1;
-                                final won = myId != null && m.winnerId == myId;
-
-                                return MatchHistoryRow(
-                                  opponentName: "vs $opponent",
-                                  opponentId: opponentId,
-                                  meta: [
-                                    m.tournamentName,
-                                    m.categoryLabel,
-                                    if (m.groupName != null)
-                                      "Grupo ${m.groupName}",
-                                    if (m.round != null)
-                                      matchRoundLabel(m.round!),
-                                    matchStatusLabel[m.status] ?? m.status,
-                                  ].join(" · "),
-                                  won: won,
-                                  scoreText: "$mySets-$oppSets",
-                                );
-                              },
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
+                Expanded(child: _body()),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _body() {
+    if (_items.isEmpty && _loading) return const LoadingState();
+    if (_items.isEmpty && _error != null) {
+      return ListView(children: [ErrorStateView(message: "No pudimos cargar tu historial.\n$_error", onRetry: _refresh)]);
+    }
+    if (_items.isEmpty) {
+      return ListView(
+        children: const [
+          Padding(
+            padding: EdgeInsets.only(top: 40),
+            child: EmptyState(icon: Icons.history_rounded, message: "Todavía no has jugado ningún partido."),
+          ),
+        ],
+      );
+    }
+    final myId = _myId;
+    return RefreshIndicator(
+      color: AppColors.scorifyMint,
+      onRefresh: _refresh,
+      child: ListView.builder(
+        controller: _scroll,
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: _items.length + 1,
+        itemBuilder: (context, i) {
+          if (i == _items.length) {
+            if (_loading) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.scorifyMint))),
+              );
+            }
+            if (_error != null) return TextButton(onPressed: _loadMore, child: const Text("No se pudieron cargar más. Reintentar"));
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Center(
+                child: Text(
+                  _hasMore ? "" : "${_items.length} partidos jugados",
+                  style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 12.5),
+                ),
+              ),
+            );
+          }
+          final m = _items[i];
+          final isP1 = m.player1Id == myId;
+          final won = myId != null && m.winnerId == myId;
+          return MatchHistoryRow(
+            opponentName: "vs ${isP1 ? m.player2Name : m.player1Name}",
+            opponentId: isP1 ? m.player2Id : m.player1Id,
+            meta: [
+              m.tournamentName,
+              m.categoryLabel,
+              if (m.groupName != null) "Grupo ${m.groupName}",
+              if (m.round != null) matchRoundLabel(m.round!),
+              matchStatusLabel[m.status] ?? m.status,
+            ].join(" · "),
+            won: won,
+            scoreText: "${isP1 ? m.setsPlayer1 : m.setsPlayer2}-${isP1 ? m.setsPlayer2 : m.setsPlayer1}",
+          );
+        },
       ),
     );
   }

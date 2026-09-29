@@ -43,9 +43,11 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
         Expanded(
           child: IndexedStack(
             index: _sub,
+            // Estadísticas primero: el ranking global espera la tabla oficial
+            // de puntos por nivel, y mientras tanto suele estar vacío.
             children: const [
-              RankingScreen(showHeader: false),
               StatsScreen(showHeader: false),
+              RankingScreen(showHeader: false),
             ],
           ),
         ),
@@ -60,45 +62,39 @@ class _SubTabSwitch extends StatelessWidget {
 
   const _SubTabSwitch({required this.index, required this.onChanged});
 
-  static const _labels = ["Ranking", "Estadísticas"];
+  static const _labels = ["Estadísticas", "Ranking"];
 
   @override
   Widget build(BuildContext context) {
+    // Mismo selector tipo píldora que Partidos/Campeonatos.
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: AppColors.scorifyCardFill,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.scorifyCardBorder),
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         children: List.generate(_labels.length, (i) {
           final selected = i == index;
           return Expanded(
-            child: GestureDetector(
-              onTap: () => onChanged(i),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: selected
-                      ? AppColors.scorifyMint.withOpacity(0.16)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(11),
-                  border: selected
-                      ? Border.all(
-                          color: AppColors.scorifyMint.withOpacity(0.5),
-                        )
-                      : null,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  _labels[i],
-                  style: AppTypography.bodyText.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: selected
-                        ? AppColors.scorifyMint
-                        : AppColors.scorifyTextMuted,
+            child: Material(
+              color: selected ? AppColors.scorifyMint : Colors.transparent,
+              shape: const StadiumBorder(),
+              child: InkWell(
+                onTap: () => onChanged(i),
+                customBorder: const StadiumBorder(),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Center(
+                    child: Text(
+                      _labels[i],
+                      style: TextStyle(
+                        fontFamily: AppTypography.body,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: selected ? AppColors.scorifyOnMint : AppColors.scorifyText,
+                      ),
+                    ),
                   ),
                 ),
               ),

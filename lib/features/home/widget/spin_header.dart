@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
+import 'package:myttmi/core/constants/app_typography.dart';
 import 'package:myttmi/core/ui/brand_logo.dart';
 
 /// Topbar del home: logo + notificaciones + ajustes.
@@ -33,7 +34,7 @@ class SpinHeader extends StatelessWidget {
             count: notificationsCount,
             onTap: onNotifications,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           _IconButton(icon: Icons.settings_outlined, onTap: onSettings),
         ],
       ),
@@ -53,46 +54,42 @@ class _IconButton extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
+        // Fondo propio (antes era del mismo color que la barra y el botón
+        // no se distinguía) e ícono más grande.
         Material(
-          color: AppColors.scorifyCardFill,
-          borderRadius: BorderRadius.circular(10),
+          color: AppColors.scorifyInput,
+          shape: const CircleBorder(),
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
-              width: 36,
-              height: 36,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.scorifyCardBorder),
-              ),
-              child: Icon(
-                icon,
-                color: AppColors.scorifyText.withOpacity(0.85),
-                size: 18,
-              ),
+            customBorder: const CircleBorder(),
+            child: SizedBox(
+              width: 42,
+              height: 42,
+              child: Icon(icon, color: AppColors.scorifyText, size: 22),
             ),
           ),
         ),
         if (count > 0)
           Positioned(
-            right: -3,
-            top: -3,
+            right: -4,
+            top: -4,
             child: Container(
-              width: 15,
-              height: 15,
+              constraints: const BoxConstraints(minWidth: 20),
+              height: 20,
+              padding: const EdgeInsets.symmetric(horizontal: 5),
               alignment: Alignment.center,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.scorifyBadge,
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: AppColors.scorifyCardFill, width: 2),
               ),
               child: Text(
                 count > 9 ? "9+" : "$count",
                 style: const TextStyle(
-                  color: AppColors.scorifyText,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w900,
+                  fontFamily: AppTypography.body,
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
                   height: 1,
                 ),
               ),

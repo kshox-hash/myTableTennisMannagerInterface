@@ -9,6 +9,8 @@ class GroupMemberInfo {
   final String? lastName;
   final String? clubName;
   final String email;
+  /// Orden en que se armó el grupo (1, 2, 3…).
+  final int? groupPosition;
 
   GroupMemberInfo({
     required this.idUser,
@@ -16,6 +18,7 @@ class GroupMemberInfo {
     this.lastName,
     this.clubName,
     required this.email,
+    this.groupPosition,
   });
 
   String get displayName {
@@ -33,6 +36,7 @@ class GroupMemberInfo {
       lastName: json["last_name"] as String?,
       clubName: json["club_name"] as String?,
       email: (json["email"] ?? "").toString(),
+      groupPosition: json["group_position"] is num ? (json["group_position"] as num).toInt() : null,
     );
   }
 }

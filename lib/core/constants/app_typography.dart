@@ -70,11 +70,12 @@ class AppTypography {
     color: AppColors.scorifyTextFaint,
   );
 
+  // Igual que los botones de la web: Montserrat seminegrita, 14 px.
   static const TextStyle button = TextStyle(
     fontFamily: body,
-    fontWeight: FontWeight.w900,
-    fontSize: 11,
-    letterSpacing: 0.4,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    letterSpacing: 0,
     color: AppColors.scorifyText,
   );
 

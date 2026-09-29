@@ -27,7 +27,7 @@ class _PopIn extends StatelessWidget {
   }
 }
 
-/// Botón pill sólido (mint) — acción principal ("VER", "Suscribirme", "Confirmar").
+/// Botón pill sólido VERDE (como el primario de la web) — acción principal.
 class SolidPillButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
@@ -44,16 +44,16 @@ class SolidPillButton extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(999),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            decoration: BoxDecoration(color: AppColors.scorifyMint, borderRadius: BorderRadius.circular(999)),
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+            decoration: BoxDecoration(color: AppColors.scorifyButterfly, borderRadius: BorderRadius.circular(999)),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (icon != null) ...[
-                  Icon(icon, size: 14, color: AppColors.scorifyOnMint),
+                  Icon(icon, size: 14, color: AppColors.scorifyOnButterfly),
                   const SizedBox(width: 6),
                 ],
-                Text(label, style: AppTypography.button.copyWith(color: AppColors.scorifyOnMint)),
+                Text(label, style: AppTypography.button.copyWith(color: AppColors.scorifyOnButterfly)),
               ],
             ),
           ),

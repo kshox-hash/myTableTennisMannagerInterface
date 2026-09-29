@@ -109,18 +109,43 @@ class PlayerApi {
     String? status,
     int? limit,
   }) async {
-    final data =
-        await _get(
-              Endpoints.tournamentMatches(tournamentId),
-              query: {
-                if (status != null) "status": status,
-                if (limit != null) "limit": limit.toString(),
-              },
-            )
-            as List;
+    final raw = await _get(
+      Endpoints.tournamentMatches(tournamentId),
+      query: {
+        if (status != null) "status": status,
+        if (limit != null) "limit": limit.toString(),
+      },
+    );
+    // El backend pasó a responder paginado ({matches, total}); se acepta
+    // también la lista suelta del formato anterior.
+    final data = raw is Map<String, dynamic>
+        ? (raw["matches"] as List? ?? const [])
+        : raw as List;
     return data
         .map((e) => TournamentMatch.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  /// Una página de partidos del torneo (para la lista con scroll infinito):
+  /// los partidos de esa página y el total que hay con ese filtro.
+  Future<({List<TournamentMatch> items, int total})> getTournamentMatchesPage(
+    String tournamentId, {
+    String? status,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    final raw = await _get(
+      Endpoints.tournamentMatches(tournamentId),
+      query: {
+        if (status != null) "status": status,
+        "limit": limit.toString(),
+        "offset": offset.toString(),
+      },
+    );
+    final list = raw is Map<String, dynamic> ? (raw["matches"] as List? ?? const []) : raw as List;
+    final items = list.map((e) => TournamentMatch.fromJson(e as Map<String, dynamic>)).toList();
+    final total = raw is Map<String, dynamic> && raw["total"] is num ? (raw["total"] as num).toInt() : items.length;
+    return (items: items, total: total);
   }
 
   Future<MatchDetail> getMatchDetail(String matchType, String matchId) async {
@@ -133,11 +158,12 @@ class PlayerApi {
   Future<List<PlayerMatchHistoryItem>> getPlayerMatchHistory(
     String userId, {
     int limit = 15,
+    int offset = 0,
   }) async {
     final data =
         await _get(
               Endpoints.userMatches(userId),
-              query: {"limit": limit.toString()},
+              query: {"limit": limit.toString(), if (offset > 0) "offset": offset.toString()},
             )
             as List;
     return data

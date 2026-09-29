@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:myttmi/core/ui/app_toast.dart";
 import "package:myttmi/routes/cyber_page_route.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -36,9 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Esta app es solo para jugadores — las cuentas admin usan la web.
       if (resp.user.role != "player") {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Esta cuenta es de administrador. Usá la versión web para gestionar campeonatos.")),
-        );
+        showToast(context, "Esta cuenta es de administrador. Usa la versión web para gestionar campeonatos.", error: true);
         return;
       }
 
@@ -58,9 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      showToast(context, e.toString(), error: true);
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -131,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             : SizedBox(
                                 width: double.infinity,
                                 child: Center(
-                                  child: SolidPillButton(label: "ENTRAR", onTap: _login),
+                                  child: SolidPillButton(label: "Entrar", onTap: _login),
                                 ),
                               ),
                         const SizedBox(height: 16),

@@ -11,6 +11,14 @@ class QueueMatch {
   final int matchNumber;
   final String? player1Name;
   final String? player2Name;
+  final String? player1Id;
+  final String? player2Id;
+  /// El organizador lo mandó a la mesa sin ser el primero de la cola.
+  final bool calledOutOfOrder;
+
+  bool involves(String? userId) => userId != null && (player1Id == userId || player2Id == userId);
+
+  String? rivalOf(String userId) => player1Id == userId ? player2Name : player1Name;
 
   QueueMatch({
     required this.idMatch,
@@ -21,6 +29,9 @@ class QueueMatch {
     required this.matchNumber,
     this.player1Name,
     this.player2Name,
+    this.player1Id,
+    this.player2Id,
+    this.calledOutOfOrder = false,
   });
 
   String get categoryLabel => "$categoryType $categoryRange";
@@ -43,6 +54,9 @@ class QueueMatch {
       matchNumber: intOrDefault(json["match_number"]),
       player1Name: json["player1_name"] as String?,
       player2Name: json["player2_name"] as String?,
+      player1Id: json["player1_id"] as String?,
+      player2Id: json["player2_id"] as String?,
+      calledOutOfOrder: json["called_out_of_order"] == true,
     );
   }
 }

@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/ui/glass_card.dart";
@@ -28,10 +29,14 @@ class TournamentTablesScreen extends StatefulWidget {
 class _TournamentTablesScreenState extends State<TournamentTablesScreen> {
   final _api = TournamentApi();
   Future<TablesQueueBoard>? _future;
+  String? _myUserId;
 
   @override
   void initState() {
     super.initState();
+    SessionStorage().getUserId().then((id) {
+      if (mounted) setState(() => _myUserId = id);
+    });
     _load();
   }
 
@@ -82,6 +87,7 @@ class _TournamentTablesScreenState extends State<TournamentTablesScreen> {
                         return ListView(
                           physics: const BouncingScrollPhysics(),
                           children: [
+                            _MyTurnCard(board: board, myUserId: _myUserId),
                             Text("Mesas", style: AppTypography.h1),
                             const SizedBox(height: 10),
                             GridView.count(
@@ -171,7 +177,7 @@ class _TableCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  occupied ? "En juego" : "Libre",
+                  occupied ? (m.calledOutOfOrder ? "Adelantado" : "En juego") : "Libre",
                   style: AppTypography.caption.copyWith(
                     color: occupied
                         ? AppColors.scorifyMint
@@ -260,6 +266,79 @@ class _QueueRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// "Tu turno": dónde está el partido del jugador — en una mesa ahora, o en
+/// qué lugar de la cola y cuántos partidos faltan. Cuando queda 2° o 1°, el
+/// servidor además le manda una notificación (queue_notice_scheduler.ts).
+class _MyTurnCard extends StatelessWidget {
+  final TablesQueueBoard board;
+  final String? myUserId;
+  const _MyTurnCard({required this.board, required this.myUserId});
+
+  @override
+  Widget build(BuildContext context) {
+    final me = myUserId;
+    if (me == null) return const SizedBox.shrink();
+
+    final onTable = board.tables.where((t) => t.match?.involves(me) ?? false).firstOrNull;
+    final queueIndex = board.nextMatches.indexWhere((m) => m.involves(me));
+    if (onTable == null && queueIndex < 0) return const SizedBox.shrink();
+
+    final match = onTable?.match ?? board.nextMatches[queueIndex];
+    final rival = match.rivalOf(me) ?? "Por definir";
+    final ahead = queueIndex;
+
+    final (Color bg, Color fg, String big, String bigLabel, String title) = onTable != null
+        ? (AppColors.scorifyButterfly, AppColors.scorifyOnButterfly, "${onTable.tableNumber}", "Mesa",
+            match.calledOutOfOrder ? "¡Tu partido se adelantó! Ve a la mesa ${onTable.tableNumber}" : "¡Te toca! Ve a la mesa ${onTable.tableNumber}")
+        : ahead == 0
+            ? (AppColors.scorifyMint, AppColors.scorifyOnMint, "1°", "en la cola", "¡Eres el próximo!")
+            : (AppColors.scorifySurface2, AppColors.scorifyText, "${ahead + 1}°", "en la cola",
+                ahead == 1 ? "Falta 1 partido para el tuyo" : "Faltan $ahead partidos para el tuyo");
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 22),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(20)),
+        child: Row(
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16)),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(big, style: TextStyle(fontFamily: AppTypography.body, fontSize: 26, fontWeight: FontWeight.w800, color: fg, height: 1.1)),
+                  Text(bigLabel, style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: fg)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("TU TURNO",
+                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: AppColors.scorifyMint)),
+                  const SizedBox(height: 4),
+                  Text(title,
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.scorifyText, height: 1.25)),
+                  const SizedBox(height: 4),
+                  Text("vs $rival · ${match.matchLabel}",
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

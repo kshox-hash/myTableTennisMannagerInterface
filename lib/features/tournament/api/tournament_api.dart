@@ -121,7 +121,9 @@ class TournamentApi {
   Future<TablesQueueBoard> getTablesQueue(String tournamentId) async {
     final token = await SessionStorage().getToken();
 
-    final uri = Uri.parse("$baseUrl${Endpoints.tablesQueue(tournamentId)}");
+    // limit=20 (el máximo): la tarjeta "Tu turno" necesita encontrar el
+    // partido del jugador aunque esté más atrás en la cola.
+    final uri = Uri.parse("$baseUrl${Endpoints.tablesQueue(tournamentId)}?limit=20");
 
     final res = await http.get(
       uri,
@@ -148,6 +150,29 @@ class TournamentApi {
   // El id_user NO va en el body: el backend lo saca del JWT, y el schema es
   // estricto (rechaza cualquier campo que no espere).
   // -----------------------
+  /// Anula mi inscripción (solo mientras la categoría siga en inscripciones).
+  Future<void> unsubscribeFromCategory({
+    required String tournamentId,
+    required String categoryId,
+  }) async {
+    final token = await SessionStorage().getToken();
+    if (token == null || token.isEmpty) {
+      throw Exception("No hay sesión. Vuelve a iniciar sesión.");
+    }
+    final res = await http.post(
+      Uri.parse("$baseUrl${Endpoints.subscribe.replaceFirst("/subscribe", "/unsubscribe")}"),
+      headers: {"Content-Type": "application/json", "Authorization": "Bearer $token"},
+      body: jsonEncode({"id_tournament": tournamentId, "id_category": categoryId}),
+    );
+    if (res.statusCode != 200) {
+      String msg = "No se pudo anular la inscripción";
+      try {
+        msg = (jsonDecode(res.body) as Map<String, dynamic>)["message"]?.toString() ?? msg;
+      } catch (_) {}
+      throw Exception(msg);
+    }
+  }
+
   Future<void> subscribeToCategory({
     required String tournamentId,
     required String categoryId,

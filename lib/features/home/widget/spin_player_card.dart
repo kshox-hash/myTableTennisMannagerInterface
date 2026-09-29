@@ -40,8 +40,8 @@ class SpinPlayerCard extends StatelessWidget {
             children: [
               userId == null || userId!.isEmpty
                   ? Container(
-                      width: 46,
-                      height: 46,
+                      width: 64,
+                      height: 64,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: AppColors.scorifyMintDark.withOpacity(0.25),
@@ -51,10 +51,10 @@ class SpinPlayerCard extends StatelessWidget {
                       child: const Icon(
                         Icons.person,
                         color: AppColors.scorifyMint,
-                        size: 24,
+                        size: 32,
                       ),
                     )
-                  : Identicon(seed: userId!, size: 46),
+                  : Identicon(seed: userId!, size: 64),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -66,7 +66,7 @@ class SpinPlayerCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: AppColors.scorifyText,
-                        fontSize: 17,
+                        fontSize: 19,
                         fontWeight: FontWeight.w900,
                       ),
                     ),

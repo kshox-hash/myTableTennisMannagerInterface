@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:myttmi/core/ui/app_toast.dart";
 import "package:myttmi/routes/cyber_page_route.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -83,9 +84,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _register() async {
     if (_email.text.trim().isEmpty || _pass.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Email y contraseña son obligatorios")),
-      );
+      showToast(context, "Email y contraseña son obligatorios", error: true);
       return;
     }
 
@@ -132,9 +131,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      showToast(context, e.toString(), error: true);
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -191,7 +188,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 labelStyle: AppTypography.bodyMuted,
                                 prefixIcon: const Icon(Icons.cake_outlined, color: AppColors.scorifyTextMuted, size: 20),
                                 filled: true,
-                                fillColor: AppColors.scorifyCardFill,
+                                fillColor: AppColors.scorifyInput,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(16),
                                   borderSide: BorderSide.none,
@@ -219,7 +216,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               labelStyle: AppTypography.bodyMuted,
                               prefixIcon: const Icon(Icons.wc_outlined, color: AppColors.scorifyTextMuted, size: 20),
                               filled: true,
-                              fillColor: AppColors.scorifyCardFill,
+                              fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide.none,
@@ -247,7 +244,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               labelStyle: AppTypography.bodyMuted,
                               prefixIcon: const Icon(Icons.sports_tennis_outlined, color: AppColors.scorifyTextMuted, size: 20),
                               filled: true,
-                              fillColor: AppColors.scorifyCardFill,
+                              fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide.none,
@@ -281,7 +278,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               labelStyle: AppTypography.bodyMuted,
                               prefixIcon: const Icon(Icons.public_outlined, color: AppColors.scorifyTextMuted, size: 20),
                               filled: true,
-                              fillColor: AppColors.scorifyCardFill,
+                              fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide.none,
@@ -314,7 +311,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               labelStyle: AppTypography.bodyMuted,
                               prefixIcon: const Icon(Icons.groups_2_outlined, color: AppColors.scorifyTextMuted, size: 20),
                               filled: true,
-                              fillColor: AppColors.scorifyCardFill,
+                              fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide.none,
@@ -371,7 +368,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ),
                                 )
                               : Center(
-                                  child: SolidPillButton(label: "CREAR CUENTA", onTap: _register),
+                                  child: SolidPillButton(label: "Crear cuenta", onTap: _register),
                                 ),
                         ],
                       ),

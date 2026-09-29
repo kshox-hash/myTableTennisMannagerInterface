@@ -23,6 +23,8 @@ class PlayerNextMatch {
   final bool queueBlocked;
   final bool selfPending;
   final int? blockingTableNumber;
+  /// Hora planificada por el organizador (programación de mesas), si la hay.
+  final DateTime? scheduledStartAt;
 
   PlayerNextMatch({
     required this.idMatch,
@@ -42,6 +44,7 @@ class PlayerNextMatch {
     this.queueBlocked = false,
     this.selfPending = false,
     this.blockingTableNumber,
+    this.scheduledStartAt,
   });
 
   factory PlayerNextMatch.fromJson(Map<String, dynamic> json) {
@@ -63,6 +66,9 @@ class PlayerNextMatch {
       queueBlocked: json["queue_blocked"] == true,
       selfPending: json["self_pending"] == true,
       blockingTableNumber: intOrNull(json["blocking_table_number"]),
+      scheduledStartAt: json["scheduled_start_at"] == null
+          ? null
+          : DateTime.tryParse(json["scheduled_start_at"].toString())?.toLocal(),
     );
   }
 
@@ -78,11 +84,11 @@ class PlayerNextMatch {
     }
     if (queuePosition != null) {
       return queuePosition == 1
-          ? "Sos el siguiente en la cola"
+          ? "Eres el siguiente en la cola"
           : "Vas $queuePosition° en la cola de $queueTotal";
     }
     if (selfPending) {
-      return "Debes completar tu otro partido pendiente antes de que te toque este";
+      return "Se juega después de tu partido anterior";
     }
     return matchStatusLabel[status] ?? "Mesa sin asignar";
   }
