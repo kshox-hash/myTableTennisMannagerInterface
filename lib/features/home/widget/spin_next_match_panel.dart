@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
-import 'package:myttmi/core/ui/identicon.dart';
+import 'package:myttmi/core/ui/user_avatar.dart';
 
 /// Tarjeta "Próximo partido" estilo marcador de fútbol (competición arriba,
 /// un jugador a cada lado y el dato clave grande al centro).
@@ -17,8 +17,10 @@ class SpinNextMatchPanel extends StatelessWidget {
   final String stageLabel; // "Todo Competidor · Grupo GR-2"
   final String? myId;
   final String myName;
+  final String? myAvatarUrl;
   final String? opponentId;
   final String opponentName;
+  final String? opponentAvatarUrl;
   final int? tableNumber;
   final String statusLabel; // cola / estado cuando no hay mesa
   /// Hora planificada ("Hoy 18:30"); se muestra si todavía no hay mesa.
@@ -34,8 +36,10 @@ class SpinNextMatchPanel extends StatelessWidget {
     this.stageLabel = "",
     this.myId,
     this.myName = "Tú",
+    this.myAvatarUrl,
     this.opponentId,
     this.opponentName = "Rival por definir",
+    this.opponentAvatarUrl,
     this.tableNumber,
     this.statusLabel = "",
     this.scheduledAt,
@@ -134,7 +138,7 @@ class SpinNextMatchPanel extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: _Side(id: myId, name: _short(myName), caption: "Tú")),
+            Expanded(child: _Side(id: myId, url: myAvatarUrl, name: _short(myName), caption: "Tú")),
             SizedBox(
               width: 122,
               child: Column(
@@ -171,7 +175,7 @@ class SpinNextMatchPanel extends StatelessWidget {
                 ],
               ),
             ),
-            Expanded(child: _Side(id: opponentId, name: _short(opponentName), caption: "Rival")),
+            Expanded(child: _Side(id: opponentId, url: opponentAvatarUrl, name: _short(opponentName), caption: "Rival")),
           ],
         ),
         // Sin mesa: el detalle de la cola, completo (cabe en dos líneas).
@@ -203,16 +207,18 @@ class _Label extends StatelessWidget {
 
 class _Side extends StatelessWidget {
   final String? id;
+  final String? url;
   final String name;
   final String caption;
-  const _Side({required this.id, required this.name, required this.caption});
+  const _Side({required this.id, this.url, required this.name, required this.caption});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         id != null && id!.isNotEmpty
-            ? Identicon(seed: id!, size: 52)
+            // Foto real si la tiene; si no, su identicon.
+            ? UserAvatar(userId: id, url: url, size: 52)
             : Container(
                 width: 52,
                 height: 52,

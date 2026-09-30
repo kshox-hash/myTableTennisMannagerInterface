@@ -10,6 +10,7 @@ class PlayerNextMatch {
   final String categoryDisplay;
   final String? opponentId;
   final String? opponentName;
+  final String? opponentAvatarUrl;
   final int? tableNumber;
   final String status;
   final String? groupName;
@@ -35,6 +36,7 @@ class PlayerNextMatch {
     required this.categoryDisplay,
     this.opponentId,
     this.opponentName,
+    this.opponentAvatarUrl,
     this.tableNumber,
     required this.status,
     this.groupName,
@@ -57,6 +59,7 @@ class PlayerNextMatch {
       categoryDisplay: (json["category_display"] ?? "").toString(),
       opponentId: json["opponent_id"] as String?,
       opponentName: json["opponent_name"] as String?,
+      opponentAvatarUrl: json["opponent_avatar_url"] as String?,
       tableNumber: intOrNull(json["table_number"]),
       status: (json["status"] ?? "").toString(),
       groupName: json["group_name"] as String?,

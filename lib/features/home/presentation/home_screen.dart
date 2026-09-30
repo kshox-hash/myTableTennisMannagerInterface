@@ -199,8 +199,10 @@ class _HomeScreenState extends State<HomeScreen>
       myName: (_profile?.displayName.isNotEmpty ?? false)
           ? _profile!.displayName
           : "Tú",
+      myAvatarUrl: _profile?.avatarUrl,
       opponentId: m?.opponentId,
       opponentName: m?.opponentName ?? "Rival por definir",
+      opponentAvatarUrl: m?.opponentAvatarUrl,
       tableNumber: m?.tableNumber,
       scheduledAt: m?.scheduledStartAt,
       statusLabel: m != null && m.tableNumber == null ? m.queueLabel : "",

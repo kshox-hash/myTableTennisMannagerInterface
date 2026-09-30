@@ -378,29 +378,30 @@ class HomeNoMatchCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return HomePanel(
-      padding: const EdgeInsets.fromLTRB(14, 16, 14, 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: const BoxDecoration(color: AppColors.scorifySurface2, shape: BoxShape.circle),
-            child: const Icon(Icons.calendar_month_rounded, color: AppColors.scorifyMint, size: 22),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      // Centrado (ícono arriba, textos y botón al medio), igual que la
+      // tarjeta del partido, que ya es simétrica.
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
               children: [
-                Text("PRÓXIMO PARTIDO", style: _label(AppColors.scorifyMint)),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.calendar_month_rounded, color: AppColors.scorifyMint, size: 15),
+                    const SizedBox(width: 6),
+                    Text("PRÓXIMO PARTIDO", style: _label(AppColors.scorifyMint)),
+                  ],
+                ),
                 const SizedBox(height: 3),
                 Text(loading ? "Cargando…" : "Sin partidos programados",
+                    textAlign: TextAlign.center,
                     style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
                 const SizedBox(height: 2),
                 const Text("Inscríbete a un campeonato para entrar al fixture",
+                    textAlign: TextAlign.center,
                     style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 OutlinedButton(
                   onPressed: onBrowse,
                   style: OutlinedButton.styleFrom(
@@ -414,9 +415,7 @@ class HomeNoMatchCard extends StatelessWidget {
                   child: const Row(mainAxisSize: MainAxisSize.min, children: [Text("Ver torneos"), SizedBox(width: 2), Icon(Icons.chevron_right_rounded, size: 18)]),
                 ),
               ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
