@@ -9,8 +9,8 @@ import "package:myttmi/core/constants/app_config.dart";
 import "package:myttmi/core/helpers/endpoints.dart";
 import "package:myttmi/core/navigation/deep_links.dart";
 import "package:myttmi/core/storage/session_storage.dart";
-import "package:myttmi/core/ui/app_toast.dart";
 import "package:myttmi/features/shell/match_ready_watcher.dart";
+import "package:myttmi/features/notifications/notification_popups.dart";
 
 /// Notificaciones push (Firebase Cloud Messaging).
 ///
@@ -108,10 +108,9 @@ class PushService {
       MatchReadyWatcher.checkNow();
       return;
     }
-    final n = msg.notification;
-    final ctx = DeepLinks.overlayContext;
-    if (n == null || ctx == null || !ctx.mounted) return;
-    showNotice(ctx, title: n.title ?? "MyTTM", body: n.body, onTap: () => _onTap(msg));
+    // El resto sale como aviso tipo Facebook (abajo a la izquierda, igual
+    // que en la web): se revisa la campana ya, en vez de esperar su ciclo.
+    NotificationPopups.checkNow();
   }
 
   static void _onTap(RemoteMessage msg) {

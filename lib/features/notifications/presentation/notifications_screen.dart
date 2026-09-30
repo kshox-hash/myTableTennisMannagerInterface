@@ -1,4 +1,4 @@
-import "package:myttmi/routes/app_routes.dart";
+import "package:myttmi/features/notifications/notification_nav.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -42,37 +42,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     _open(n);
   }
 
-  // Al tocar: lleva a donde está la acción — el partido, la categoría o el
-  // perfil (cuotas del club). Antes solo marcaba la notificación leída.
-  void _open(AppNotification n) {
-    if (n.type == "club_payment" || n.type.startsWith("club_join")) {
-      Navigator.pushNamed(context, AppRoutes.profile);
-      return;
-    }
-    if (n.idMatch != null &&
-        n.matchType != null &&
-        n.type != "match_result_corrected") {
-      Navigator.pushNamed(
-        context,
-        AppRoutes.matchDetail,
-        arguments: {"matchType": n.matchType, "matchId": n.idMatch},
-      );
-      return;
-    }
-    if (n.idCategory != null && n.idTournament != null) {
-      Navigator.pushNamed(
-        context,
-        AppRoutes.myCategory,
-        arguments: {
-          "tournamentId": n.idTournament,
-          "tournamentName": n.tournamentName ?? "",
-          "categoryId": n.idCategory,
-          "categoryLabel":
-              n.categoryLabel ?? n.tournamentName ?? "Mi categoría",
-        },
-      );
-    }
-  }
+  void _open(AppNotification n) => openNotification(Navigator.of(context), n);
 
   Future<void> _markAllRead() async {
     try {

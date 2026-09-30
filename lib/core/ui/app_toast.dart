@@ -10,6 +10,14 @@ import "package:myttmi/core/constants/app_typography.dart";
 /// más porque hay que alcanzar a leerlo.
 OverlayEntry? _current;
 
+// El contexto puede ser el del propio Overlay (DeepLinks.overlayContext, para
+// avisar desde fuera de una pantalla): ahí Overlay.maybeOf no lo encuentra,
+// porque busca solo hacia arriba.
+OverlayState? _overlayOf(BuildContext context) {
+  if (context is StatefulElement && context.state is OverlayState) return context.state as OverlayState;
+  return Overlay.maybeOf(context, rootOverlay: true);
+}
+
 /// Dónde está la barra de navegación de abajo: AppShell se registra acá y el
 /// toast sube por encima de ella mientras sus pestañas estén al frente (antes
 /// quedaba encima de Inicio/Calendario/… tapándolos).
@@ -20,7 +28,7 @@ class ToastLayout {
 }
 
 void showToast(BuildContext context, String message, {bool error = false}) {
-  final overlay = Overlay.maybeOf(context, rootOverlay: true);
+  final overlay = _overlayOf(context);
   if (overlay == null) return;
   _current?.remove();
   _current = null;
@@ -160,7 +168,7 @@ void _removeNotice(int id) {
 }
 
 void showNotice(BuildContext context, {required String title, String? body, VoidCallback? onTap}) {
-  final overlay = Overlay.maybeOf(context, rootOverlay: true);
+  final overlay = _overlayOf(context);
   if (overlay == null) return;
   if (_noticeHost == null || !_noticeHost!.mounted) {
     _noticeHost = OverlayEntry(builder: (_) => const _NoticeStack());

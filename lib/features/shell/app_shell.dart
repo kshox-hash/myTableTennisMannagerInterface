@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/navigation/deep_links.dart';
 import 'package:myttmi/core/push/push_service.dart';
+import 'package:myttmi/features/notifications/notification_popups.dart';
 import 'package:myttmi/core/ui/app_toast.dart';
 import 'package:myttmi/core/ui/prism_background.dart';
 import 'package:myttmi/features/calendar/presentation/calendar_screen.dart';
@@ -66,6 +67,8 @@ class _AppShellState extends State<AppShell>
     WidgetsBinding.instance.addPostFrameCallback((_) => DeepLinks.shellReady());
     // Con sesión: permiso de notificaciones y registro del celular.
     PushService.register();
+    // Avisos tipo Facebook de las notificaciones nuevas (abajo a la izquierda).
+    NotificationPopups.start();
   }
 
   @override
@@ -79,6 +82,7 @@ class _AppShellState extends State<AppShell>
   void dispose() {
     if (ToastLayout.shellRoute == ModalRoute.of(context)) ToastLayout.shellRoute = null;
     DeepLinks.shellGone();
+    NotificationPopups.stop();
     _pulse.dispose();
     super.dispose();
   }
