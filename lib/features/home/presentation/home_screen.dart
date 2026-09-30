@@ -11,6 +11,7 @@ import 'package:myttmi/features/shell/splash_gate.dart';
 import 'package:myttmi/features/shell/tab_auto_refresh.dart';
 import 'package:myttmi/features/player/api/player_api.dart';
 import 'package:myttmi/features/player/models/player_dashboard_model.dart';
+import 'package:myttmi/features/player/models/player_category_view_model.dart';
 import 'package:myttmi/features/profile/api/profile_api.dart';
 import 'package:myttmi/features/profile/models/profile_model.dart';
 import 'package:myttmi/features/notifications/api/notifications_api.dart';
@@ -50,6 +51,10 @@ class _HomeScreenState extends State<HomeScreen>
   List<bool> _form = const [];
   int _unreadCount = 0;
   bool _loading = true;
+  // Modo día de torneo: mi fila en la tabla de mi grupo (del próximo
+  // partido de grupo) y cuántos son en el grupo.
+  PlayerStanding? _myStanding;
+  int _groupSize = 0;
 
   @override
   void initState() {
@@ -72,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen>
         _unreadCount = results[2] as int;
       });
       _loadForm(_profile?.idUser);
+      _loadGroup(_dashboard?.nextMatch);
     } catch (_) {
       // Silencioso: la pantalla igual se puede usar sin estos datos.
     } finally {
@@ -93,6 +99,25 @@ class _HomeScreenState extends State<HomeScreen>
           .reversed
           .toList();
       if (mounted) setState(() => _form = done);
+    } catch (_) {}
+  }
+
+  // Aparte del Future.wait principal (como la racha): si falla, el Inicio se
+  // muestra igual, solo sin la tarjeta del grupo.
+  Future<void> _loadGroup(PlayerNextMatch? m) async {
+    final me = _profile?.idUser;
+    if (m == null || m.matchType != "group" || me == null) {
+      if (mounted) setState(() => _myStanding = null);
+      return;
+    }
+    try {
+      final view = await _playerApi.getCategoryView(m.idTournament, m.idCategory);
+      final mine = view.standings.where((r) => r.idUser == me).toList();
+      if (!mounted) return;
+      setState(() {
+        _myStanding = mine.isEmpty ? null : mine.first;
+        _groupSize = view.standings.length;
+      });
     } catch (_) {}
   }
 
@@ -229,6 +254,25 @@ class _HomeScreenState extends State<HomeScreen>
     final stats = _dashboard?.stats;
     final played = stats?.matchesPlayed ?? 0;
 
+    final hero = HomeHero(
+      userId: _profile?.idUser,
+      name: (_profile?.displayName.isNotEmpty ?? false) ? _profile!.displayName : "Jugador",
+      country: _profile?.country,
+      club: _profile?.club,
+      age: _profile?.age,
+      gender: _profile?.gender,
+      memberSince: _profile?.createdAt,
+      avatarUrl: _profile?.avatarUrl,
+      onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
+    );
+    final matches = nm == null
+        ? const SizedBox.shrink()
+        : _MatchesCarousel(
+            pages: [
+              for (final m in [nm, ...?_dashboard?.otherNextMatches]) _panelFor(m),
+            ],
+          );
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -264,24 +308,41 @@ class _HomeScreenState extends State<HomeScreen>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      HomeHero(
-                        userId: _profile?.idUser,
-                        name: (_profile?.displayName.isNotEmpty ?? false)
-                            ? _profile!.displayName
-                            : "Jugador",
-                        country: _profile?.country,
-                        club: _profile?.club,
-                        age: _profile?.age,
-                        gender: _profile?.gender,
-                        memberSince: _profile?.createdAt,
-                        avatarUrl: _profile?.avatarUrl,
-                        onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
-                      ),
+                      // Modo día de torneo: con un partido por jugar, lo
+                      // primero es ese partido y cómo vas en tu grupo; el
+                      // resto del Inicio queda debajo.
+                      if (nm != null) ...[
+                        matches,
+                        if (_myStanding != null && nm.matchType == "group") ...[
+                          const SizedBox(height: 10),
+                          HomeGroupCard(
+                            groupName: nm.groupName ?? "",
+                            position: _myStanding!.played == 0 ? null : _myStanding!.position,
+                            total: _groupSize,
+                            won: _myStanding!.won,
+                            lost: _myStanding!.lost,
+                            setsFor: _myStanding!.setsFor,
+                            setsAgainst: _myStanding!.setsAgainst,
+                            onTap: () => Navigator.pushNamed(
+                              context,
+                              AppRoutes.myCategory,
+                              arguments: {
+                                "tournamentId": nm.idTournament,
+                                "tournamentName": nm.tournamentName,
+                                "categoryId": nm.idCategory,
+                                "categoryLabel": nm.categoryDisplay,
+                              },
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 10),
+                      ],
+                      hero,
                       const SizedBox(height: 10),
                       HomeStatsBar(
                         played: played,
-                        activeEnrollments: _dashboard?.activeEnrollments ?? 0,
-                        ranking: "–",
+                        won: stats?.matchesWon ?? 0,
+                        winRate: played == 0 ? "—" : "${(stats!.winRate * 100).round()}%",
                       ),
                       const SizedBox(height: 10),
                       HomeStreakCard(
@@ -296,57 +357,15 @@ class _HomeScreenState extends State<HomeScreen>
                         onHistory: () =>
                             Navigator.pushNamed(context, AppRoutes.history),
                       ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: HomeKpiCard(
-                              icon: Icons.emoji_events_rounded,
-                              decoration: Icons.emoji_events_outlined,
-                              accent: AppColors.scorifyButterfly,
-                              label: "Victorias",
-                              value: "${stats?.matchesWon ?? 0}",
-                              sub:
-                                  "${stats?.matchesWon ?? 0} G · ${stats?.matchesLost ?? 0} P",
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: HomeKpiCard(
-                              icon: Icons.insights_rounded,
-                              decoration: Icons.show_chart_rounded,
-                              accent: AppColors.scorifyMint,
-                              label: "Efectividad",
-                              value: played == 0
-                                  ? "—"
-                                  : "${(stats!.winRate * 100).round()}%",
-                              sub: played == 0
-                                  ? "Sin partidos aún"
-                                  : "de $played ${played == 1 ? "partido" : "partidos"}",
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-
-                      // Próximo partido: si hay, las tarjetas deslizables de siempre;
-                      // si no, la invitación a buscar campeonatos.
-                      if (nm == null)
+                      // Sin partido: la invitación a buscar campeonatos, abajo.
+                      if (nm == null) ...[
+                        const SizedBox(height: 10),
                         HomeNoMatchCard(
                           loading: _loading,
                           onBrowse: () =>
                               AppShellScope.of(context)?.switchTab(3),
-                        )
-                      else
-                        _MatchesCarousel(
-                          pages: [
-                            for (final m in [
-                              nm,
-                              ...?_dashboard?.otherNextMatches,
-                            ])
-                              _panelFor(m),
-                          ],
                         ),
+                      ],
                     ],
                   ),
                 ),

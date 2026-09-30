@@ -1,3 +1,4 @@
+import "package:myttmi/core/helpers/text_format.dart";
 import "package:myttmi/core/constants/match_status_labels.dart";
 import "package:myttmi/core/helpers/json_parse.dart";
 
@@ -55,7 +56,7 @@ class PlayerNextMatch {
       matchType: (json["match_type"] ?? "group").toString(),
       idCategory: (json["id_category"] ?? "").toString(),
       idTournament: (json["id_tournament"] ?? "").toString(),
-      tournamentName: (json["tournament_name"] ?? "").toString(),
+      tournamentName: prettyTitle((json["tournament_name"] ?? "").toString()),
       categoryDisplay: (json["category_display"] ?? "").toString(),
       opponentId: json["opponent_id"] as String?,
       opponentName: json["opponent_name"] as String?,
@@ -185,7 +186,7 @@ class PlayerEnrollment {
   factory PlayerEnrollment.fromJson(Map<String, dynamic> json) {
     return PlayerEnrollment(
       idTournament: (json["id_tournament"] ?? "").toString(),
-      tournamentName: (json["tournament_name"] ?? "").toString(),
+      tournamentName: prettyTitle((json["tournament_name"] ?? "").toString()),
       eventDate: json["event_date"] as String?,
       address: json["address"] as String?,
       region: json["region"] as String?,

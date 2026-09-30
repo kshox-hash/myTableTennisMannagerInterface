@@ -173,11 +173,14 @@ class HomeHero extends StatelessWidget {
 }
 
 /// Barra de 3 datos: Partidos · Inscripciones · Ranking.
+/// Una sola fila con lo esencial: partidos, victorias y efectividad (antes
+/// además había dos tarjetas grandes de Victorias/Efectividad que repetían
+/// lo mismo, y un "Ranking –" vacío). El detalle vive en Mi rendimiento.
 class HomeStatsBar extends StatelessWidget {
   final int played;
-  final int activeEnrollments;
-  final String ranking;
-  const HomeStatsBar({super.key, required this.played, required this.activeEnrollments, required this.ranking});
+  final int won;
+  final String winRate; // "83%" o "—"
+  const HomeStatsBar({super.key, required this.played, required this.won, required this.winRate});
 
   @override
   Widget build(BuildContext context) {
@@ -210,9 +213,9 @@ class HomeStatsBar extends StatelessWidget {
         children: [
           item(Icons.sports_tennis_rounded, AppColors.scorifyMint, "Partidos", "$played"),
           divider(),
-          item(Icons.assignment_outlined, AppColors.scorifyMint, "Inscripciones", "$activeEnrollments"),
+          item(Icons.emoji_events_rounded, AppColors.scorifyButterfly, "Victorias", "$won"),
           divider(),
-          item(Icons.leaderboard_rounded, AppColors.scorifyButterfly, "Ranking", ranking),
+          item(Icons.insights_rounded, AppColors.scorifyMint, "Efectividad", winRate),
         ],
       ),
     );
@@ -416,6 +419,81 @@ class HomeNoMatchCard extends StatelessWidget {
                 ),
               ],
         ),
+      ),
+    );
+  }
+}
+
+/// Modo día de torneo: tu posición en tu grupo, justo bajo el próximo
+/// partido. Toca para ver la tabla completa y tus partidos.
+class HomeGroupCard extends StatelessWidget {
+  final String groupName;
+  final int? position;
+  final int total;
+  final int won;
+  final int lost;
+  final int setsFor;
+  final int setsAgainst;
+  final VoidCallback onTap;
+  const HomeGroupCard({
+    super.key,
+    required this.groupName,
+    required this.position,
+    required this.total,
+    required this.won,
+    required this.lost,
+    required this.setsFor,
+    required this.setsAgainst,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final leading = position == 1;
+    return HomePanel(
+      onTap: onTap,
+      padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: leading ? AppColors.scorifyButterfly : AppColors.scorifySurface2,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              position == null ? "–" : "${position}°",
+              style: TextStyle(
+                fontFamily: AppTypography.body,
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                color: leading ? AppColors.scorifyOnButterfly : AppColors.scorifyText,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("TU GRUPO · ${groupName.toUpperCase()}", style: _label(AppColors.scorifyMint)),
+                const SizedBox(height: 3),
+                Text(
+                  position == null ? "Aún sin partidos jugados" : "${position}° de $total",
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.scorifyText),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  "${won}G · ${lost}P · Sets $setsFor-$setsAgainst",
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
+        ],
       ),
     );
   }

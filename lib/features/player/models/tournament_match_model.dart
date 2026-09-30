@@ -1,3 +1,4 @@
+import "package:myttmi/core/helpers/text_format.dart";
 import "package:myttmi/core/helpers/json_parse.dart";
 import "package:myttmi/features/player/models/player_category_view_model.dart";
 
@@ -160,7 +161,7 @@ class MatchDetail {
     return MatchDetail(
       idMatch: (json["id_match"] ?? "").toString(),
       matchType: (json["match_type"] ?? "group").toString(),
-      tournamentName: (json["tournament_name"] ?? "").toString(),
+      tournamentName: prettyTitle((json["tournament_name"] ?? "").toString()),
       categoryType: (json["category_type"] ?? "").toString(),
       categoryRange: (json["category_range"] ?? "").toString(),
       groupName: json["group_name"] as String?,
@@ -239,7 +240,7 @@ class PlayerMatchHistoryItem {
     return PlayerMatchHistoryItem(
       idMatch: (json["id_match"] ?? "").toString(),
       matchType: (json["match_type"] ?? "group").toString(),
-      tournamentName: (json["tournament_name"] ?? "").toString(),
+      tournamentName: prettyTitle((json["tournament_name"] ?? "").toString()),
       categoryType: (json["category_type"] ?? "").toString(),
       categoryRange: (json["category_range"] ?? "").toString(),
       groupName: json["group_name"] as String?,

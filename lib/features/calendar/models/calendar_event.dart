@@ -1,3 +1,4 @@
+import "package:myttmi/core/helpers/text_format.dart";
 class CalendarEvent {
   final DateTime date; // solo fecha
   final String tournamentId;
@@ -31,7 +32,7 @@ class CalendarEvent {
     return CalendarEvent(
       date: DateTime(date.year, date.month, date.day),
       tournamentId: json["tournament_id"].toString(),
-      tournamentName: json["tournament_name"].toString(),
+      tournamentName: prettyTitle(json["tournament_name"].toString()),
       // El backend manda "address" y tipo/rango por separado; se aceptan
       // también los nombres anteriores.
       location: (json["address"] ?? json["location"])?.toString(),

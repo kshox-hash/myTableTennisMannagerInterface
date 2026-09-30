@@ -1,3 +1,4 @@
+import "package:myttmi/core/helpers/text_format.dart";
 import "package:myttmi/core/helpers/json_parse.dart";
 
 /// Podio (1°, 2° o 3° lugar) de un jugador en una categoría ya finalizada.
@@ -50,7 +51,7 @@ class PlayerAchievement {
   factory PlayerAchievement.fromJson(Map<String, dynamic> json) {
     return PlayerAchievement(
       idTournament: (json["id_tournament"] ?? "").toString(),
-      tournamentName: (json["tournament_name"] ?? "").toString(),
+      tournamentName: prettyTitle((json["tournament_name"] ?? "").toString()),
       eventDate: json["event_date"] as String?,
       idCategory: (json["id_category"] ?? "").toString(),
       categoryType: (json["category_type"] ?? "").toString(),

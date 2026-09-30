@@ -1,3 +1,4 @@
+import "package:myttmi/core/helpers/text_format.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/helpers/json_parse.dart";
@@ -96,7 +97,7 @@ class AppNotification {
       idCategory: json["id_category"] as String?,
       idMatch: json["id_match"] as String?,
       matchType: json["match_type"] as String?,
-      tournamentName: json["tournament_name"] as String?,
+      tournamentName: (json["tournament_name"] == null ? null : prettyTitle(json["tournament_name"].toString())),
       categoryLabel: json["category_label"] as String?,
       isRead: json["is_read"] == true,
       createdAt: (json["created_at"] ?? "").toString(),

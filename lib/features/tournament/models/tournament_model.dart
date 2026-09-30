@@ -1,3 +1,4 @@
+import "package:myttmi/core/helpers/text_format.dart";
 import "package:myttmi/core/helpers/json_parse.dart";
 class TournamentCategory {
   final String idCategory;
@@ -116,7 +117,7 @@ class Tournament {
 
     return Tournament(
       idTournament: (json["id_tournament"] ?? "").toString(),
-      tournamentName: (json["tournament_name"] ?? "").toString(),
+      tournamentName: prettyTitle((json["tournament_name"] ?? "").toString()),
       description: json["description"] as String?,
       address: json["address"] as String?,
       region: json["region"] as String?,

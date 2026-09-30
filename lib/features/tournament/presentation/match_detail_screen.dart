@@ -1,4 +1,5 @@
 import "dart:async";
+import "package:myttmi/core/helpers/text_format.dart";
 
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -266,7 +267,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                   if (m.playedAt != null)
                                     _InfoRow(
                                       label: "Jugado",
-                                      value: m.playedAt!,
+                                      value: prettyDateTime(m.playedAt!),
                                       isLast: true,
                                     ),
                                 ],
