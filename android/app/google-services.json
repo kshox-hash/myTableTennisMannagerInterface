@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "778460700268",
+    "project_id": "myttm-4d269",
+    "storage_bucket": "myttm-4d269.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:778460700268:android:436e853d5603e55be18249",
+        "android_client_info": {
+          "package_name": "cl.myttm.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_TfDifMyT61hQqJxnTXzbgvFf_zbewa8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

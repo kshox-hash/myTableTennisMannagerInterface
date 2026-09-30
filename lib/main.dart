@@ -1,11 +1,13 @@
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/navigation/deep_links.dart";
+import "package:myttmi/core/push/push_service.dart";
 import "package:myttmi/features/shell/splash_gate.dart";
 import "package:myttmi/routes/app_routes.dart";
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await PushService.init();
   DeepLinks.init();
   runApp(const MyApp());
 }

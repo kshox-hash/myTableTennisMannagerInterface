@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/navigation/deep_links.dart';
+import 'package:myttmi/core/push/push_service.dart';
 import 'package:myttmi/core/ui/prism_background.dart';
 import 'package:myttmi/features/calendar/presentation/calendar_screen.dart';
 import 'package:myttmi/features/home/presentation/home_screen.dart';
@@ -62,6 +63,8 @@ class _AppShellState extends State<AppShell>
     // Link de campeonato que llegó antes de tener sesión (o con la app
     // cerrada): se abre ahora, encima de las pestañas.
     WidgetsBinding.instance.addPostFrameCallback((_) => DeepLinks.shellReady());
+    // Con sesión: permiso de notificaciones y registro del celular.
+    PushService.register();
   }
 
   @override

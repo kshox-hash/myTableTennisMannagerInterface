@@ -54,6 +54,16 @@ class DeepLinks {
     if (id != null) _open(id);
   }
 
+  /// Abre un campeonato por id (también desde un aviso push). Si todavía no
+  /// hay sesión queda pendiente, igual que un link.
+  static void openTournament(String id) {
+    if (_shellReady) {
+      _open(id);
+    } else {
+      _pendingTournamentId = id;
+    }
+  }
+
   static void shellGone() => _shellReady = false;
 
   static Future<void> _open(String id) async {

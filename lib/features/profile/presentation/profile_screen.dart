@@ -20,6 +20,7 @@ import "package:myttmi/features/profile/api/profile_api.dart";
 import "package:myttmi/features/profile/models/club_model.dart";
 import "package:myttmi/features/profile/models/profile_model.dart";
 import "package:myttmi/features/shell/splash_gate.dart";
+import "package:myttmi/core/push/push_service.dart";
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -116,6 +117,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _logout() async {
+    await PushService.unregister();
     await SessionStorage().clear();
     if (!mounted) return;
 
