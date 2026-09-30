@@ -308,10 +308,18 @@ class _HomeScreenState extends State<HomeScreen>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Modo día de torneo: con un partido por jugar, lo
-                      // primero es ese partido y cómo vas en tu grupo; el
-                      // resto del Inicio queda debajo.
+                      hero,
+                      const SizedBox(height: 10),
+                      HomeStatsBar(
+                        played: played,
+                        won: stats?.matchesWon ?? 0,
+                        winRate: played == 0 ? "—" : "${(stats!.winRate * 100).round()}%",
+                      ),
+                      // Con un partido por jugar: el partido y cómo vas en tu
+                      // grupo, al medio del Inicio (bajo tu perfil y tus
+                      // números; arriba del todo el perfil quedaba perdido).
                       if (nm != null) ...[
+                        const SizedBox(height: 10),
                         matches,
                         if (_myStanding != null && nm.matchType == "group") ...[
                           const SizedBox(height: 10),
@@ -335,15 +343,7 @@ class _HomeScreenState extends State<HomeScreen>
                             ),
                           ),
                         ],
-                        const SizedBox(height: 10),
                       ],
-                      hero,
-                      const SizedBox(height: 10),
-                      HomeStatsBar(
-                        played: played,
-                        won: stats?.matchesWon ?? 0,
-                        winRate: played == 0 ? "—" : "${(stats!.winRate * 100).round()}%",
-                      ),
                       const SizedBox(height: 10),
                       HomeStreakCard(
                         form: _form,
