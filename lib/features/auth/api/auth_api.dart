@@ -39,6 +39,25 @@ class AuthApi {
     return AuthResponse.fromJson(decoded);
   }
 
+  /// Entra (o crea la cuenta) con Google: se manda el ID token al servidor,
+  /// que lo valida contra Google. Devuelve la sesión y si falta completar la
+  /// ficha del jugador (cuenta nueva sin país/género).
+  Future<({AuthResponse auth, bool profileIncomplete})> loginWithGoogle(String idToken) async {
+    final res = await http
+        .post(
+          Uri.parse("$baseUrl/api/v1/auth/google"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"credential": idToken}),
+        )
+        .timeout(const Duration(seconds: 60));
+    final decoded = jsonDecode(res.body) as Map<String, dynamic>;
+    if (res.statusCode != 200 || decoded["ok"] != true) {
+      throw Exception(decoded["message"] ?? "No se pudo entrar con Google");
+    }
+    final data = decoded["data"] as Map<String, dynamic>;
+    return (auth: AuthResponse.fromJson(decoded), profileIncomplete: data["profile_incomplete"] == true);
+  }
+
   Future<AuthResponse> register({
     required String email,
     required String password,

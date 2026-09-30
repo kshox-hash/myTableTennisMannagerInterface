@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/ui/app_toast.dart";
 import "package:myttmi/routes/cyber_page_route.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -242,7 +243,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 children: [
                                   Row(
                                     children: [
-                                      ClipOval(child: Identicon(seed: p.idUser, size: 44)),
+                                      UserAvatar(userId: p.idUser, url: p.avatarUrl, size: 44),
                                       const SizedBox(width: 12),
                                       const Expanded(
                                         child: Column(
@@ -710,7 +711,7 @@ class _ProfileHero extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(4),
             decoration: const BoxDecoration(color: AppColors.scorifySurface2, shape: BoxShape.circle),
-            child: ClipOval(child: Identicon(seed: p.idUser, size: 84)),
+            child: UserAvatar(userId: p.idUser, url: p.avatarUrl, size: 84),
           ),
           const SizedBox(height: 12),
           Text(

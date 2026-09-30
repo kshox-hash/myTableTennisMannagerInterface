@@ -265,6 +265,7 @@ class _HomeScreenState extends State<HomeScreen>
                         age: _profile?.age,
                         gender: _profile?.gender,
                         memberSince: _profile?.createdAt,
+                        avatarUrl: _profile?.avatarUrl,
                         onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
                       ),
                       const SizedBox(height: 10),

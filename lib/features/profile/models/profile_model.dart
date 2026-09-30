@@ -10,6 +10,8 @@ class UserProfile {
   final String? club;
   final DateTime? birthDate;
   final String? country;
+  /// Foto subida por el jugador (null = usar el avatar generado).
+  final String? avatarUrl;
 
   UserProfile({
     required this.idUser,
@@ -22,6 +24,7 @@ class UserProfile {
     this.club,
     this.birthDate,
     this.country,
+    this.avatarUrl,
   });
 
   String get displayName {
@@ -55,6 +58,7 @@ class UserProfile {
       club: json["club_name"] as String?,
       birthDate: parseDate(json["birth_date"]),
       country: json["country"] as String?,
+      avatarUrl: json["avatar_url"] as String?,
     );
   }
 }
@@ -92,6 +96,7 @@ class PublicPlayerProfile {
   final String displayName;
   final String? club;
   final String? gender;
+  final String? avatarUrl;
   final PlayerStats stats;
 
   PublicPlayerProfile({
@@ -99,6 +104,7 @@ class PublicPlayerProfile {
     required this.displayName,
     this.club,
     this.gender,
+    this.avatarUrl,
     required this.stats,
   });
 
@@ -112,6 +118,7 @@ class PublicPlayerProfile {
       displayName: joined.isNotEmpty ? joined : "Jugador",
       club: json["club_name"] as String?,
       gender: json["gender"] as String?,
+      avatarUrl: json["avatar_url"] as String?,
       stats: PlayerStats.fromJson(json["stats"] as Map<String, dynamic>?),
     );
   }

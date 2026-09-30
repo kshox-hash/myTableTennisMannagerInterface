@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/constants/match_status_labels.dart";
@@ -84,7 +85,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                           Center(
                             child: Column(
                               children: [
-                                Identicon(seed: p.idUser, size: 76),
+                                UserAvatar(userId: p.idUser, url: p.avatarUrl, size: 76),
                                 const SizedBox(height: 12),
                                 Text(
                                   p.displayName,

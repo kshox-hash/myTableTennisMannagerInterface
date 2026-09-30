@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/ui/identicon.dart";
@@ -65,6 +66,7 @@ class HomeHero extends StatelessWidget {
   final int? age;
   final String? gender;
   final DateTime? memberSince;
+  final String? avatarUrl;
   final VoidCallback? onTap;
   const HomeHero({
     super.key,
@@ -75,6 +77,7 @@ class HomeHero extends StatelessWidget {
     this.age,
     this.gender,
     this.memberSince,
+    this.avatarUrl,
     this.onTap,
   });
 
@@ -111,11 +114,7 @@ class HomeHero extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(4),
                     decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.scorifySurface2),
-                    child: ClipOval(
-                      child: userId == null
-                          ? Container(width: 72, height: 72, color: AppColors.scorifySurface2)
-                          : Identicon(seed: userId!, size: 72),
-                    ),
+                    child: UserAvatar(userId: userId, url: avatarUrl, size: 72),
                   ),
                   if (hasCountry)
                     Positioned(

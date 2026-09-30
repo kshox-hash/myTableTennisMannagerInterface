@@ -12,4 +12,12 @@ class AppConfig {
     "API_BASE_URL",
     defaultValue: "https://mytabletennismannager.onrender.com",
   );
+
+  /// ID de cliente WEB de Google (el mismo del login con Google de la web):
+  /// la app pide el token para ese cliente, que es el que valida el servidor
+  /// (GOOGLE_CLIENT_ID).
+  static const String googleWebClientId = String.fromEnvironment(
+    "GOOGLE_WEB_CLIENT_ID",
+    defaultValue: "274578390065-br8pmjhg8a8r3c2albr9eg5la2pse9hv.apps.googleusercontent.com",
+  );
 }
