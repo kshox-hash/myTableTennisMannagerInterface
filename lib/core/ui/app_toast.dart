@@ -140,28 +140,70 @@ class _ToastState extends State<_Toast> with SingleTickerProviderStateMixin {
 // Baja desde arriba, oscuro y con la campana — distinto del toast verde de
 // "guardado", que es para confirmar acciones. Se va solo, se descarta
 // deslizando hacia arriba y, si lo tocan, ejecuta onTap. Uno a la vez.
-OverlayEntry? _currentNotice;
+// Se apilan (como los avisos de Facebook): el más nuevo arriba, máximo 3
+// a la vista; cada uno se va solo a los 6 s. Antes uno reemplazaba al otro
+// y si llegaban dos seguidas la primera ni se alcanzaba a leer.
+class _NoticeData {
+  final int id;
+  final String title;
+  final String? body;
+  final VoidCallback? onTap;
+  _NoticeData(this.id, this.title, this.body, this.onTap);
+}
+
+final ValueNotifier<List<_NoticeData>> _notices = ValueNotifier(const []);
+OverlayEntry? _noticeHost;
+int _noticeSeq = 0;
+
+void _removeNotice(int id) {
+  _notices.value = _notices.value.where((n) => n.id != id).toList();
+}
 
 void showNotice(BuildContext context, {required String title, String? body, VoidCallback? onTap}) {
   final overlay = Overlay.maybeOf(context, rootOverlay: true);
   if (overlay == null) return;
-  _currentNotice?.remove();
-  _currentNotice = null;
+  if (_noticeHost == null || !_noticeHost!.mounted) {
+    _noticeHost = OverlayEntry(builder: (_) => const _NoticeStack());
+    overlay.insert(_noticeHost!);
+  }
+  _notices.value = [_NoticeData(++_noticeSeq, title, body, onTap), ..._notices.value].take(3).toList();
+}
 
-  late final OverlayEntry entry;
-  entry = OverlayEntry(
-    builder: (_) => _Notice(
-      title: title,
-      body: body,
-      onTap: onTap,
-      onDone: () {
-        if (_currentNotice == entry) _currentNotice = null;
-        if (entry.mounted) entry.remove();
-      },
-    ),
-  );
-  _currentNotice = entry;
-  overlay.insert(entry);
+class _NoticeStack extends StatelessWidget {
+  const _NoticeStack();
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: MediaQuery.paddingOf(context).top + 10,
+      left: 12,
+      right: 12,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 440),
+          child: ValueListenableBuilder<List<_NoticeData>>(
+            valueListenable: _notices,
+            builder: (_, list, __) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final n in list)
+                  Padding(
+                    key: ValueKey(n.id),
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _Notice(
+                      title: n.title,
+                      body: n.body,
+                      onTap: n.onTap,
+                      onDone: () => _removeNotice(n.id),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _Notice extends StatefulWidget {
@@ -208,14 +250,7 @@ class _NoticeState extends State<_Notice> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final curve = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
     final body = (widget.body ?? "").trim();
-    return Positioned(
-      top: MediaQuery.paddingOf(context).top + 10,
-      left: 12,
-      right: 12,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 440),
-          child: SlideTransition(
+    return SlideTransition(
             position: Tween(begin: const Offset(0, -1.6), end: Offset.zero).animate(curve),
             child: Dismissible(
               key: UniqueKey(),
@@ -284,9 +319,6 @@ class _NoticeState extends State<_Notice> with SingleTickerProviderStateMixin {
                 ),
               ),
             ),
-          ),
-        ),
-      ),
     );
   }
 }
