@@ -1,5 +1,5 @@
 import "dart:convert";
-import "package:http/http.dart" as http;
+import "package:myttmi/core/api/api_http.dart";
 import "package:myttmi/core/constants/app_config.dart";
 import "package:myttmi/core/helpers/endpoints.dart";
 import "package:myttmi/core/storage/session_storage.dart";
@@ -13,7 +13,7 @@ class RankingApi {
   Future<List<RankingEntry>> getGlobal() async {
     final token = await SessionStorage().getToken();
     final uri = Uri.parse("$baseUrl${Endpoints.ranking}");
-    final res = await http.get(uri, headers: {
+    final res = await apiHttp.get(uri, headers: {
       "Content-Type": "application/json",
       if (token != null && token.isNotEmpty) "Authorization": "Bearer $token",
     });

@@ -1,5 +1,5 @@
 import "dart:convert";
-import "package:http/http.dart" as http;
+import "package:myttmi/core/api/api_http.dart";
 
 import "package:myttmi/core/constants/app_config.dart";
 import "package:myttmi/core/helpers/endpoints.dart";
@@ -23,7 +23,7 @@ class ProfileApi {
 
   Future<UserProfile> getMe() async {
     final uri = Uri.parse("$baseUrl${Endpoints.me}");
-    final res = await http.get(uri, headers: await _authHeaders());
+    final res = await apiHttp.get(uri, headers: await _authHeaders());
 
     if (res.statusCode != 200) {
       throw Exception("HTTP ${res.statusCode}: ${res.body}");
@@ -45,7 +45,7 @@ class ProfileApi {
     String? country,
   }) async {
     final uri = Uri.parse("$baseUrl${Endpoints.me}");
-    final res = await http.patch(
+    final res = await apiHttp.patch(
       uri,
       headers: await _authHeaders(),
       body: jsonEncode({
@@ -71,7 +71,7 @@ class ProfileApi {
 
   Future<PlayerStats> getStats() async {
     final uri = Uri.parse("$baseUrl${Endpoints.myStats}");
-    final res = await http.get(uri, headers: await _authHeaders());
+    final res = await apiHttp.get(uri, headers: await _authHeaders());
 
     if (res.statusCode != 200) {
       throw Exception("HTTP ${res.statusCode}: ${res.body}");
@@ -87,7 +87,7 @@ class ProfileApi {
 
   Future<PublicPlayerProfile> getPublicProfile(String userId) async {
     final uri = Uri.parse("$baseUrl${Endpoints.userProfile(userId)}");
-    final res = await http.get(uri, headers: await _authHeaders());
+    final res = await apiHttp.get(uri, headers: await _authHeaders());
 
     if (res.statusCode != 200) {
       throw Exception("HTTP ${res.statusCode}: ${res.body}");

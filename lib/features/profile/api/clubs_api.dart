@@ -1,5 +1,5 @@
 import "dart:convert";
-import "package:http/http.dart" as http;
+import "package:myttmi/core/api/api_http.dart";
 
 import "package:myttmi/core/constants/app_config.dart";
 import "package:myttmi/core/helpers/endpoints.dart";
@@ -26,7 +26,7 @@ class ClubsApi {
   /// Estado de cuotas del jugador con su club (null si no tiene club).
   Future<MyClubDues?> getMyDues() async {
     final uri = Uri.parse("$baseUrl${Endpoints.clubs}/me/dues");
-    final res = await http.get(uri, headers: await _headers()).timeout(const Duration(seconds: 60));
+    final res = await apiHttp.get(uri, headers: await _headers()).timeout(const Duration(seconds: 60));
     if (res.statusCode != 200) throw Exception("HTTP ${res.statusCode}: ${res.body}");
     final decoded = jsonDecode(res.body) as Map<String, dynamic>;
     final data = decoded["data"];
@@ -35,7 +35,7 @@ class ClubsApi {
 
   Future<List<PublicClub>> list() async {
     final uri = Uri.parse("$baseUrl${Endpoints.clubs}");
-    final res = await http.get(uri, headers: await _headers()).timeout(const Duration(seconds: 60));
+    final res = await apiHttp.get(uri, headers: await _headers()).timeout(const Duration(seconds: 60));
 
     if (res.statusCode != 200) {
       throw Exception("HTTP ${res.statusCode}: ${res.body}");
@@ -50,7 +50,7 @@ class ClubsApi {
 
   Future<MyClubRequest?> getMyRequest() async {
     final uri = Uri.parse("$baseUrl${Endpoints.clubMyRequest}");
-    final res = await http.get(uri, headers: await _headers()).timeout(const Duration(seconds: 60));
+    final res = await apiHttp.get(uri, headers: await _headers()).timeout(const Duration(seconds: 60));
 
     if (res.statusCode != 200) {
       throw Exception("HTTP ${res.statusCode}: ${res.body}");
@@ -66,7 +66,7 @@ class ClubsApi {
 
   Future<void> requestJoin(String idClub) async {
     final uri = Uri.parse("$baseUrl${Endpoints.clubJoin(idClub)}");
-    final res = await http.post(uri, headers: await _headers()).timeout(const Duration(seconds: 60));
+    final res = await apiHttp.post(uri, headers: await _headers()).timeout(const Duration(seconds: 60));
 
     if (res.statusCode != 201 && res.statusCode != 200) {
       final decoded = jsonDecode(res.body) as Map<String, dynamic>?;
@@ -76,7 +76,7 @@ class ClubsApi {
 
   Future<void> cancelMyRequest() async {
     final uri = Uri.parse("$baseUrl${Endpoints.clubMyRequest}");
-    final res = await http.delete(uri, headers: await _headers()).timeout(const Duration(seconds: 60));
+    final res = await apiHttp.delete(uri, headers: await _headers()).timeout(const Duration(seconds: 60));
 
     if (res.statusCode != 200) {
       final decoded = jsonDecode(res.body) as Map<String, dynamic>?;

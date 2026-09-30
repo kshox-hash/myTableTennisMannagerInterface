@@ -1,5 +1,5 @@
 import "dart:convert";
-import "package:http/http.dart" as http;
+import "package:myttmi/core/api/api_http.dart";
 
 import "package:myttmi/core/constants/app_config.dart";
 import "package:myttmi/core/helpers/endpoints.dart";
@@ -55,7 +55,7 @@ class TournamentApi {
       "$baseUrl${Endpoints.listTournaments}",
     ).replace(queryParameters: params);
 
-    final res = await http.get(
+    final res = await apiHttp.get(
       uri,
       headers: {
         "Content-Type": "application/json",
@@ -91,7 +91,7 @@ class TournamentApi {
 
     final uri = Uri.parse("$baseUrl${Endpoints.tournamentById(tournamentId)}");
 
-    final res = await http.get(
+    final res = await apiHttp.get(
       uri,
       headers: {
         "Content-Type": "application/json",
@@ -125,7 +125,7 @@ class TournamentApi {
     // partido del jugador aunque esté más atrás en la cola.
     final uri = Uri.parse("$baseUrl${Endpoints.tablesQueue(tournamentId)}?limit=20");
 
-    final res = await http.get(
+    final res = await apiHttp.get(
       uri,
       headers: {
         "Content-Type": "application/json",
@@ -159,7 +159,7 @@ class TournamentApi {
     if (token == null || token.isEmpty) {
       throw Exception("No hay sesión. Vuelve a iniciar sesión.");
     }
-    final res = await http.post(
+    final res = await apiHttp.post(
       Uri.parse("$baseUrl${Endpoints.subscribe.replaceFirst("/subscribe", "/unsubscribe")}"),
       headers: {"Content-Type": "application/json", "Authorization": "Bearer $token"},
       body: jsonEncode({"id_tournament": tournamentId, "id_category": categoryId}),
@@ -185,7 +185,7 @@ class TournamentApi {
 
     final uri = Uri.parse("$baseUrl${Endpoints.subscribe}");
 
-    final res = await http.post(
+    final res = await apiHttp.post(
       uri,
       headers: {
         "Content-Type": "application/json",

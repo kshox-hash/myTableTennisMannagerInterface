@@ -1,5 +1,5 @@
 import "dart:convert";
-import "package:http/http.dart" as http;
+import "package:myttmi/core/api/api_http.dart";
 import "package:myttmi/core/constants/app_config.dart";
 import "package:myttmi/core/helpers/endpoints.dart";
 import "package:myttmi/core/storage/session_storage.dart";
@@ -27,7 +27,7 @@ class PlayerApi {
     if (query != null && query.isNotEmpty) {
       uri = uri.replace(queryParameters: query);
     }
-    final res = await http.get(uri, headers: await _authHeaders());
+    final res = await apiHttp.get(uri, headers: await _authHeaders());
     if (res.statusCode != 200) {
       throw Exception(_extractMessage(res.body) ?? "HTTP ${res.statusCode}");
     }

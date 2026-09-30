@@ -1,5 +1,5 @@
 import "dart:convert";
-import "package:http/http.dart" as http;
+import "package:myttmi/core/api/api_http.dart";
 
 import "package:myttmi/core/constants/app_config.dart";
 import "package:myttmi/core/storage/session_storage.dart";
@@ -18,7 +18,7 @@ class CalendarApi {
 
     final uri = Uri.parse("$baseUrl/api/v1/calendar/my?from=${fmt(from)}&to=${fmt(to)}");
 
-    final res = await http.get(
+    final res = await apiHttp.get(
       uri,
       headers: {
         "Content-Type": "application/json",

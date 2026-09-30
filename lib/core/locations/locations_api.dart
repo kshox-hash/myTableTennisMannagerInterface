@@ -1,5 +1,5 @@
 import "dart:convert";
-import "package:http/http.dart" as http;
+import "package:myttmi/core/api/api_http.dart";
 import "package:myttmi/core/constants/app_config.dart";
 
 class RegionCL {
@@ -40,7 +40,7 @@ class LocationsApi {
 
   Future<List<RegionCL>> fetchRegions() async {
     final uri = Uri.parse("$baseUrl/api/locations/regions");
-    final res = await http.get(uri);
+    final res = await apiHttp.get(uri);
     final decoded = jsonDecode(res.body) as Map<String, dynamic>;
     if (res.statusCode != 200 || decoded["ok"] != true) {
       throw Exception(decoded["error"] ?? "Error regiones");
@@ -52,7 +52,7 @@ class LocationsApi {
   Future<List<ProvinciaCL>> fetchProvinces(String regionCode) async {
     final uri = Uri.parse("$baseUrl/api/locations/provinces")
         .replace(queryParameters: {"regionCode": regionCode});
-    final res = await http.get(uri);
+    final res = await apiHttp.get(uri);
     final decoded = jsonDecode(res.body) as Map<String, dynamic>;
     if (res.statusCode != 200 || decoded["ok"] != true) {
       throw Exception(decoded["error"] ?? "Error provincias");
@@ -64,7 +64,7 @@ class LocationsApi {
   Future<List<ComunaCL>> fetchCommunes(String provinceCode) async {
     final uri = Uri.parse("$baseUrl/api/locations/communes")
         .replace(queryParameters: {"provinceCode": provinceCode});
-    final res = await http.get(uri);
+    final res = await apiHttp.get(uri);
     final decoded = jsonDecode(res.body) as Map<String, dynamic>;
     if (res.statusCode != 200 || decoded["ok"] != true) {
       throw Exception(decoded["error"] ?? "Error comunas");
