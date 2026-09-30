@@ -134,8 +134,12 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
   Widget build(BuildContext context) {
     final dayItems = _itemsByDay[_dayKey(_selectedDay)] ?? const <CalendarEvent>[];
 
-    return ListView(
-      physics: const BouncingScrollPhysics(),
+    // Deslizar hacia abajo recarga el mes y los próximos campeonatos.
+    return RefreshIndicator(
+      color: AppColors.scorifyMint,
+      onRefresh: () => Future.wait([_loadMonth(_focusedMonth), _loadUpcoming()]),
+      child: ListView(
+      physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: [
         const TopHeader(title: "Calendario", showBack: false),
@@ -221,6 +225,7 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
             const SizedBox(height: 10),
           ],
       ],
+      ),
     );
   }
 

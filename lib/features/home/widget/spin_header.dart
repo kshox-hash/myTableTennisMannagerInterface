@@ -20,9 +20,8 @@ class SpinHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      // Mismo negro que la barra de la web.
       decoration: BoxDecoration(
-        color: AppColors.scorifyNavbar,
+        color: AppColors.scorifyDeep,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.scorifyCardBorder),
       ),

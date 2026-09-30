@@ -88,6 +88,36 @@ class PushService {
     _token = null;
   }
 
+  /// "Probar notificaciones": vuelve a registrar el celular y le pide al
+  /// servidor un aviso de prueba. Devuelve (mensaje, ok) para mostrar el
+  /// motivo exacto si algo falla.
+  static Future<(String, bool)> selfTest() async {
+    if (!_ready) return ("Firebase no se inició en este celular.", false);
+    try {
+      final settings = await FirebaseMessaging.instance.requestPermission();
+      if (settings.authorizationStatus == AuthorizationStatus.denied) {
+        return ("Las notificaciones están bloqueadas. Actívalas en Ajustes → Apps → MyTTM → Notificaciones.", false);
+      }
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token == null) return ("No se pudo obtener el código de este celular.", false);
+      await _sendToken(token);
+      final session = await SessionStorage().getToken();
+      final res = await apiHttp.post(
+        Uri.parse("${AppConfig.baseUrl}${Endpoints.pushTest}"),
+        headers: {"Content-Type": "application/json", if (session != null) "Authorization": "Bearer $session"},
+      );
+      if (res.statusCode != 200) return ("El servidor respondió ${res.statusCode}.", false);
+      final d = (jsonDecode(res.body) as Map)["data"] as Map;
+      if (d["enabled"] != true) return ("El servidor no tiene configurada la clave de Firebase (FIREBASE_SERVICE_ACCOUNT).", false);
+      if (d["firebase"] != true) return ("La clave de Firebase del servidor no es válida.", false);
+      if ((d["tokens"] ?? 0) == 0) return ("El servidor no tiene registrado este celular.", false);
+      if ((d["sent"] ?? 0) == 0) return ("Firebase rechazó el envío: ${(d["errors"] as List?)?.join(", ")}", false);
+      return ("Aviso de prueba enviado. Debería llegarte en unos segundos.", true);
+    } catch (e) {
+      return ("No se pudo probar: $e", false);
+    }
+  }
+
   static Future<void> _sendToken(String token) async {
     _token = token;
     final session = await SessionStorage().getToken();
