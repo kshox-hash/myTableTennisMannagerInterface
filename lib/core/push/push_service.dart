@@ -103,7 +103,7 @@ class PushService {
       await _sendToken(token);
       final session = await SessionStorage().getToken();
       final res = await apiHttp.post(
-        Uri.parse("${AppConfig.baseUrl}${Endpoints.pushTest}"),
+        Uri.parse("${AppConfig.baseUrl}${Endpoints.pushTest}?delay=5"),
         headers: {"Content-Type": "application/json", if (session != null) "Authorization": "Bearer $session"},
       );
       if (res.statusCode != 200) return ("El servidor respondió ${res.statusCode}.", false);
@@ -112,7 +112,7 @@ class PushService {
       if (d["firebase"] != true) return ("La clave de Firebase del servidor no es válida.", false);
       if ((d["tokens"] ?? 0) == 0) return ("El servidor no tiene registrado este celular.", false);
       if ((d["sent"] ?? 0) == 0) return ("Firebase rechazó el envío: ${(d["errors"] as List?)?.join(", ")}", false);
-      return ("Aviso de prueba enviado. Debería llegarte en unos segundos.", true);
+      return ("Listo. Sal de la app o bloquea el celular: el aviso llega en 5 segundos.", true);
     } catch (e) {
       return ("No se pudo probar: $e", false);
     }
@@ -131,7 +131,7 @@ class PushService {
 
   static void _onForeground(RemoteMessage msg) {
     final n = msg.notification;
-    final ctx = DeepLinks.navigatorKey.currentContext;
+    final ctx = DeepLinks.overlayContext;
     if (n == null || ctx == null || !ctx.mounted) return;
     showToast(ctx, [n.title, n.body].whereType<String>().where((s) => s.isNotEmpty).join(" · "));
   }

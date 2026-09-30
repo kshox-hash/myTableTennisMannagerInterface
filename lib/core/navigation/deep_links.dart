@@ -18,6 +18,11 @@ class DeepLinks {
 
   static final navigatorKey = GlobalKey<NavigatorState>();
 
+  /// Contexto para mostrar un toast desde fuera de una pantalla (push, link).
+  /// No sirve navigatorKey.currentContext: es el del Navigator, que está
+  /// ARRIBA de su Overlay, y showToast no encontraba dónde dibujarse.
+  static BuildContext? get overlayContext => navigatorKey.currentState?.overlay?.context;
+
   static String? _pendingTournamentId;
   static bool _shellReady = false;
   static StreamSubscription<Uri>? _sub;
@@ -73,7 +78,7 @@ class DeepLinks {
         CyberPageRoute(builder: (_) => TournamentDetailScreen(tournament: tournament)),
       );
     } catch (_) {
-      final ctx = navigatorKey.currentContext;
+      final ctx = overlayContext;
       if (ctx != null && ctx.mounted) {
         showToast(ctx, "No se pudo abrir el campeonato del link.", error: true);
       }
