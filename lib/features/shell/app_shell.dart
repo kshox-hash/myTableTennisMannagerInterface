@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/navigation/deep_links.dart';
 import 'package:myttmi/core/push/push_service.dart';
+import 'package:myttmi/core/ui/app_toast.dart';
 import 'package:myttmi/core/ui/prism_background.dart';
 import 'package:myttmi/features/calendar/presentation/calendar_screen.dart';
 import 'package:myttmi/features/home/presentation/home_screen.dart';
@@ -68,7 +69,15 @@ class _AppShellState extends State<AppShell>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // El toast sube por encima de la barra de abajo mientras esta ruta esté al frente.
+    ToastLayout.shellRoute = ModalRoute.of(context);
+  }
+
+  @override
   void dispose() {
+    if (ToastLayout.shellRoute == ModalRoute.of(context)) ToastLayout.shellRoute = null;
     DeepLinks.shellGone();
     _pulse.dispose();
     super.dispose();

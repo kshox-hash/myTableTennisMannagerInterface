@@ -20,7 +20,6 @@ import '../../../routes/app_routes.dart';
 import '../widget/spin_header.dart';
 import '../widget/spin_next_match_panel.dart';
 import "package:myttmi/core/push/push_service.dart";
-import "package:myttmi/core/ui/app_toast.dart";
 
 /// Pestaña "Inicio" del shell — ya no arma su propio Scaffold/fondo/nav, eso
 /// lo maneja AppShell. Cambiar a otra pestaña se pide vía AppShellScope en
@@ -160,14 +159,6 @@ class _HomeScreenState extends State<HomeScreen>
             children: [
               const SizedBox(height: 10),
               ListTile(
-                leading: const Icon(Icons.notifications_active_outlined, color: AppColors.scorifyText),
-                title: const Text(
-                  "Probar notificaciones",
-                  style: TextStyle(color: AppColors.scorifyText),
-                ),
-                onTap: () => Navigator.pop(context, "push_test"),
-              ),
-              ListTile(
                 leading: const Icon(Icons.logout, color: AppColors.scorifyText),
                 title: const Text(
                   "Cerrar sesión",
@@ -187,9 +178,6 @@ class _HomeScreenState extends State<HomeScreen>
     // Perfil e historial ya están en el Inicio (tarjeta y botones).
     if (action == "logout") {
       await _confirmLogout();
-    } else if (action == "push_test") {
-      final msg = await PushService.selfTest();
-      if (mounted) showToast(context, msg.$1, error: !msg.$2);
     }
   }
 

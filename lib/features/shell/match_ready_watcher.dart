@@ -19,6 +19,10 @@ class MatchReadyWatcher extends StatefulWidget {
   final Widget child;
   const MatchReadyWatcher({super.key, required this.child});
 
+  /// Revisar ya (llegó el push de mesa asignada con la app abierta): así se
+  /// muestra este banner con el número de mesa, en vez de un segundo aviso.
+  static void checkNow() => _MatchReadyWatcherState._instance?._check();
+
   @override
   State<MatchReadyWatcher> createState() => _MatchReadyWatcherState();
 }
@@ -30,10 +34,12 @@ class _MatchReadyWatcherState extends State<MatchReadyWatcher> with WidgetsBindi
   final _api = PlayerApi();
   Timer? _timer;
   bool _showing = false;
+  static _MatchReadyWatcherState? _instance;
 
   @override
   void initState() {
     super.initState();
+    _instance = this;
     WidgetsBinding.instance.addObserver(this);
     // Primera revisión apenas se abre la app, después cada 30 s.
     WidgetsBinding.instance.addPostFrameCallback((_) => _check());
@@ -42,6 +48,7 @@ class _MatchReadyWatcherState extends State<MatchReadyWatcher> with WidgetsBindi
 
   @override
   void dispose() {
+    if (_instance == this) _instance = null;
     WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     super.dispose();

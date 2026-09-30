@@ -73,7 +73,6 @@ class Endpoints {
   static const notificationsUnreadCount = "$base/notifications/unread-count";
   static const notificationsReadAll = "$base/notifications/read-all";
   static const deviceToken = "$base/notifications/device-token";
-  static const pushTest = "$base/notifications/push-test";
 
   static String notificationRead(String idNotification) =>
       "$base/notifications/$idNotification/read";

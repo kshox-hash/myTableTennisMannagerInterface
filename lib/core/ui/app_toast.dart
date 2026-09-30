@@ -10,6 +10,15 @@ import "package:myttmi/core/constants/app_typography.dart";
 /// más porque hay que alcanzar a leerlo.
 OverlayEntry? _current;
 
+/// Dónde está la barra de navegación de abajo: AppShell se registra acá y el
+/// toast sube por encima de ella mientras sus pestañas estén al frente (antes
+/// quedaba encima de Inicio/Calendario/… tapándolos).
+class ToastLayout {
+  ToastLayout._();
+  static ModalRoute<dynamic>? shellRoute;
+  static const double navBarHeight = 62;
+}
+
 void showToast(BuildContext context, String message, {bool error = false}) {
   final overlay = Overlay.maybeOf(context, rootOverlay: true);
   if (overlay == null) return;
@@ -75,13 +84,20 @@ class _ToastState extends State<_Toast> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final fg = widget.error ? Colors.white : AppColors.scorifyOnButterfly;
     final curve = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
+    // Con teclado abierto, justo encima del teclado (antes quedaba escondido
+    // detrás, p. ej. un error al iniciar sesión). Si no, encima de la barra
+    // de navegación cuando está visible, o a 16 px del borde. El margen del
+    // sistema se suma una sola vez (antes también lo agregaba un SafeArea).
+    final mq = MediaQuery.of(context);
+    final onShell = ToastLayout.shellRoute?.isCurrent ?? false;
+    final bottom = mq.viewInsets.bottom > 0
+        ? mq.viewInsets.bottom + 12
+        : mq.padding.bottom + (onShell ? ToastLayout.navBarHeight + 12 : 16);
     return Positioned(
       left: 16,
       right: 16,
-      bottom: 16 + MediaQuery.paddingOf(context).bottom,
-      child: SafeArea(
-        top: false,
-        child: Center(
+      bottom: bottom,
+      child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 384),
             child: SlideTransition(
@@ -109,6 +125,160 @@ class _ToastState extends State<_Toast> with SingleTickerProviderStateMixin {
                           ),
                         ],
                       ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ),
+    );
+  }
+}
+
+// ── Aviso de notificación (push que llega con la app abierta) ────────────
+// Baja desde arriba, oscuro y con la campana — distinto del toast verde de
+// "guardado", que es para confirmar acciones. Se va solo, se descarta
+// deslizando hacia arriba y, si lo tocan, ejecuta onTap. Uno a la vez.
+OverlayEntry? _currentNotice;
+
+void showNotice(BuildContext context, {required String title, String? body, VoidCallback? onTap}) {
+  final overlay = Overlay.maybeOf(context, rootOverlay: true);
+  if (overlay == null) return;
+  _currentNotice?.remove();
+  _currentNotice = null;
+
+  late final OverlayEntry entry;
+  entry = OverlayEntry(
+    builder: (_) => _Notice(
+      title: title,
+      body: body,
+      onTap: onTap,
+      onDone: () {
+        if (_currentNotice == entry) _currentNotice = null;
+        if (entry.mounted) entry.remove();
+      },
+    ),
+  );
+  _currentNotice = entry;
+  overlay.insert(entry);
+}
+
+class _Notice extends StatefulWidget {
+  final String title;
+  final String? body;
+  final VoidCallback? onTap;
+  final VoidCallback onDone;
+  const _Notice({required this.title, this.body, this.onTap, required this.onDone});
+
+  @override
+  State<_Notice> createState() => _NoticeState();
+}
+
+class _NoticeState extends State<_Notice> with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 300),
+    reverseDuration: const Duration(milliseconds: 200),
+  );
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _c.forward();
+    _timer = Timer(const Duration(seconds: 6), _dismiss);
+  }
+
+  Future<void> _dismiss() async {
+    _timer?.cancel();
+    if (!mounted) return;
+    await _c.reverse();
+    widget.onDone();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final curve = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
+    final body = (widget.body ?? "").trim();
+    return Positioned(
+      top: MediaQuery.paddingOf(context).top + 10,
+      left: 12,
+      right: 12,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 440),
+          child: SlideTransition(
+            position: Tween(begin: const Offset(0, -1.6), end: Offset.zero).animate(curve),
+            child: Dismissible(
+              key: UniqueKey(),
+              direction: DismissDirection.up,
+              onDismissed: (_) => widget.onDone(),
+              child: Material(
+                color: AppColors.scorifyDeep,
+                elevation: 12,
+                shadowColor: Colors.black,
+                borderRadius: BorderRadius.circular(16),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () {
+                    _dismiss();
+                    widget.onTap?.call();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: AppColors.scorifyMint.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(11),
+                          ),
+                          child: const Icon(Icons.notifications_rounded, color: AppColors.scorifyMint, size: 20),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontFamily: AppTypography.body,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.scorifyText,
+                                ),
+                              ),
+                              if (body.isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  body,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontFamily: AppTypography.body,
+                                    fontSize: 13,
+                                    color: AppColors.scorifyTextMuted,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
