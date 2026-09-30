@@ -1,4 +1,5 @@
 import "dart:async";
+import "package:myttmi/core/favorites/favorite_button.dart";
 import "package:myttmi/core/helpers/text_format.dart";
 
 import "package:flutter/material.dart";
@@ -76,6 +77,9 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                 TopHeader(
                   title: "Detalle del partido",
                   actions: [
+                    // Guardar para seguirlo en vivo (♥ del Inicio).
+                    FavoriteButton(matchType: widget.matchType, matchId: widget.matchId, filledBackground: true),
+                    const SizedBox(width: 8),
                     HeaderIconButton(icon: Icons.refresh_rounded, onTap: _load),
                   ],
                 ),

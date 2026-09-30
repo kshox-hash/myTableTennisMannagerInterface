@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:myttmi/core/favorites/favorite_button.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/constants/match_status_labels.dart";
@@ -231,6 +232,8 @@ class _MatchCard extends StatelessWidget {
           Row(
             children: [
               Expanded(child: Text(meta, maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted)),
+              // Guardar para seguirlo en vivo (solo si todavía no termina).
+              if (!played) FavoriteButton(matchType: m.matchType, matchId: m.idMatch, size: 20),
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

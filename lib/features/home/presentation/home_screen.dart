@@ -21,6 +21,7 @@ import '../../../routes/app_routes.dart';
 import '../widget/spin_header.dart';
 import '../widget/spin_next_match_panel.dart';
 import "package:myttmi/core/push/push_service.dart";
+import "package:myttmi/features/favorites/favorites_screen.dart";
 
 /// Pestaña "Inicio" del shell — ya no arma su propio Scaffold/fondo/nav, eso
 /// lo maneja AppShell. Cambiar a otra pestaña se pide vía AppShellScope en
@@ -281,6 +282,10 @@ class _HomeScreenState extends State<HomeScreen>
         children: [
           SpinHeader(
             notificationsCount: _unreadCount,
+            onFavorites: () => Navigator.push(
+              context,
+              CyberPageRoute(builder: (_) => const FavoritesScreen()),
+            ),
             // Panel lateral en vez de página completa; al cerrarlo se
             // refresca el contador de no leídas.
             onNotifications: () => Navigator.push(

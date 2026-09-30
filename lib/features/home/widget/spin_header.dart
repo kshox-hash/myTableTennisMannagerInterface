@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
 import 'package:myttmi/core/ui/brand_logo.dart';
+import 'package:myttmi/core/favorites/favorite_matches.dart';
 
 /// Topbar del home: logo + notificaciones + ajustes.
 class SpinHeader extends StatelessWidget {
   final int notificationsCount;
   final VoidCallback onNotifications;
   final VoidCallback onSettings;
+  /// Corazón: "Partidos guardados" (seguir partidos en vivo).
+  final VoidCallback? onFavorites;
 
   const SpinHeader({
     super.key,
+    this.onFavorites,
     required this.onNotifications,
     required this.onSettings,
     this.notificationsCount = 0,
@@ -29,6 +33,17 @@ class SpinHeader extends StatelessWidget {
         children: [
           const BrandLogo(markSize: 26, wordmarkSize: 17),
           const Spacer(),
+          if (onFavorites != null) ...[
+            ValueListenableBuilder<List<FavoriteMatch>>(
+              valueListenable: FavoriteMatches.items,
+              builder: (_, favs, __) => _IconButton(
+                icon: favs.isEmpty ? Icons.favorite_border_rounded : Icons.favorite_rounded,
+                count: favs.length,
+                onTap: onFavorites!,
+              ),
+            ),
+            const SizedBox(width: 10),
+          ],
           _IconButton(
             icon: Icons.notifications_none_rounded,
             count: notificationsCount,
