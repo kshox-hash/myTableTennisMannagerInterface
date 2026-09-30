@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Color con que Android pinta la silueta de la "M" en las notificaciones
+     (el ícono pequeño siempre es de un solo color). Celeste de la marca. -->
+<resources>
+    <color name="notification_color">#00B4D8</color>
+</resources>

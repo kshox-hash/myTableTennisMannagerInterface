@@ -44,6 +44,15 @@
                  como ruta propia y cae en "Ruta no encontrada". -->
             <meta-data android:name="flutter_deeplinking_enabled" android:value="false"/>
         </activity>
+        <!-- Ícono de los push: silueta blanca de la "M" (drawable-*/ic_notification.png),
+             pintada con el celeste de la marca. Sin esto Android usaba el
+             ícono de la app y se veía un cuadrado gris. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_color" />
         <!-- Canal por defecto de los push (lo crea MainActivity.kt). -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
