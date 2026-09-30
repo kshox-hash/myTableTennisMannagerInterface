@@ -13,6 +13,10 @@ class TournamentCategory {
   final bool isEnrolled;
   /// El organizador marcó que pagué la inscripción.
   final bool isPaid;
+  /// Por qué el jugador no puede inscribirse (lo calcula el servidor con su
+  /// género y año de nacimiento): GENDER_REQUIRED | GENDER_MISMATCH |
+  /// BIRTH_DATE_REQUIRED | AGE_NOT_ELIGIBLE. null = puede.
+  final String? ineligibleReason;
 
   TournamentCategory({
     required this.idCategory,
@@ -27,6 +31,7 @@ class TournamentCategory {
     this.enrolledCount = 0,
     this.isEnrolled = false,
     this.isPaid = false,
+    this.ineligibleReason,
   });
 
   /// Label combinado para mostrar en UI — el backend nunca manda un
@@ -50,6 +55,7 @@ class TournamentCategory {
       enrolledCount: intOrDefault(json["enrolled_count"]),
       isEnrolled: json["is_enrolled"] == true,
       isPaid: json["is_paid"] == true,
+      ineligibleReason: json["ineligible_reason"] as String?,
     );
   }
 
@@ -67,6 +73,7 @@ class TournamentCategory {
       enrolledCount: enrolledCount,
       isEnrolled: isEnrolled ?? this.isEnrolled,
       isPaid: isPaid,
+      ineligibleReason: ineligibleReason,
     );
   }
 }

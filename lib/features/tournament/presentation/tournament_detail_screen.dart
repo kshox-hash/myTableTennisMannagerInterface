@@ -585,6 +585,48 @@ class _CategoryCardState extends State<_CategoryCard> {
         ],
       );
     }
+    // No cumple el género o la edad de la categoría: se dice antes de
+    // intentar (antes el botón estaba activo y recién al tocarlo salía el
+    // error). Si solo le falta completar el perfil, se lo lleva a completarlo.
+    final reason = c.ineligibleReason;
+    if (inEnrollment && reason != null) {
+      final needsProfile = reason == "GENDER_REQUIRED" || reason == "BIRTH_DATE_REQUIRED";
+      final text = switch (reason) {
+        "GENDER_MISMATCH" => c.gender == "female" ? "Categoría solo para damas" : "Categoría solo para varones",
+        "AGE_NOT_ELIGIBLE" => "No cumples el rango de edad de esta categoría",
+        "GENDER_REQUIRED" => "Completa tu género en tu perfil para inscribirte",
+        _ => "Completa tu fecha de nacimiento en tu perfil para inscribirte",
+      };
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(needsProfile ? Icons.info_outline_rounded : Icons.block_rounded, size: 16, color: AppColors.scorifyTextMuted),
+              const SizedBox(width: 6),
+              Expanded(child: Text(text, style: _meta.copyWith(color: AppColors.scorifyTextMuted, fontWeight: FontWeight.w600))),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 46,
+            child: needsProfile
+                ? OutlinedButton(
+                    onPressed: () => Navigator.pushNamed(context, AppRoutes.profile),
+                    child: const Text("Completar mi perfil"),
+                  )
+                : FilledButton(
+                    onPressed: null,
+                    style: FilledButton.styleFrom(
+                      disabledBackgroundColor: AppColors.scorifySurface2,
+                      disabledForegroundColor: AppColors.scorifyTextMuted,
+                    ),
+                    child: const Text("No disponible para ti"),
+                  ),
+          ),
+        ],
+      );
+    }
     if (inEnrollment) {
       return SizedBox(
         width: double.infinity,
