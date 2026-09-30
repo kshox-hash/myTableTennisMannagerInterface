@@ -1,4 +1,6 @@
 import "package:flutter/material.dart";
+import "package:share_plus/share_plus.dart";
+import "package:myttmi/core/constants/app_config.dart";
 import "package:myttmi/core/ui/app_toast.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -178,7 +180,22 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Column(
               children: [
-                const TopHeader(title: "Campeonato"),
+                TopHeader(
+                  title: "Campeonato",
+                  actions: [
+                    // Los campeonatos son privados: se suman jugadores
+                    // compartiendo este link (abre la app si la tienen).
+                    HeaderIconButton(
+                      icon: Icons.ios_share_rounded,
+                      onTap: () => SharePlus.instance.share(
+                        ShareParams(
+                          text: "${t.tournamentName}\n${AppConfig.webBaseUrl}/torneos/${t.idTournament}",
+                          subject: t.tournamentName,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 14),
                 Expanded(
                   child: RefreshIndicator(

@@ -11,29 +11,10 @@ import "package:myttmi/features/tournament/presentation/tournament_detail_screen
 import "package:myttmi/features/tournament/models/tournament_model.dart";
 import "package:myttmi/features/shell/tab_auto_refresh.dart";
 
-// Misma estructura que /tournaments de la web: buscador + región + "Buscar",
-// chips Todos/Activos/No activos y tarjetas con estado, lugar y datos.
-
-// Regiones (no ciudades): el torneo guarda la región ("Metropolitana de
-// Santiago"), así que filtrar por ciudad nunca encontraba nada.
-const List<String> _chileRegions = [
-  "Arica y Parinacota",
-  "Tarapacá",
-  "Antofagasta",
-  "Atacama",
-  "Coquimbo",
-  "Valparaíso",
-  "Metropolitana de Santiago",
-  "O'Higgins",
-  "Maule",
-  "Ñuble",
-  "Biobío",
-  "La Araucanía",
-  "Los Ríos",
-  "Los Lagos",
-  "Aysén",
-  "Magallanes",
-];
+// "Mis campeonatos": en período de prueba los campeonatos son privados y no
+// se buscan — el servidor devuelve solo los públicos y aquellos en que el
+// jugador ya está inscrito. A uno nuevo se entra por el link que comparte el
+// organizador (abre directo el detalle, ver deep_links.dart).
 
 enum _Status { upcoming, ongoing, finished, unknown }
 
@@ -79,10 +60,6 @@ class _TournamentsScreenState extends State<TournamentsScreen>
 
   late final TournamentApi api;
   final ScrollController _scrollController = ScrollController();
-  final TextEditingController _searchCtrl = TextEditingController();
-
-  String? _region; // null = todas
-  String _query = "";
   _ActiveFilter _activeFilter = _ActiveFilter.all;
 
   List<Tournament> _items = [];
@@ -104,7 +81,6 @@ class _TournamentsScreenState extends State<TournamentsScreen>
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
-    _searchCtrl.dispose();
     super.dispose();
   }
 
@@ -123,8 +99,6 @@ class _TournamentsScreenState extends State<TournamentsScreen>
     });
     try {
       final result = await api.fetchTournaments(
-        q: _query,
-        city: _region,
         page: 1,
       );
       if (!mounted) return;
@@ -146,8 +120,6 @@ class _TournamentsScreenState extends State<TournamentsScreen>
     setState(() => _loadingMore = true);
     try {
       final result = await api.fetchTournaments(
-        q: _query,
-        city: _region,
         page: _page + 1,
       );
       if (!mounted) return;
@@ -162,19 +134,6 @@ class _TournamentsScreenState extends State<TournamentsScreen>
     } finally {
       if (mounted) setState(() => _loadingMore = false);
     }
-  }
-
-  void _search() {
-    FocusScope.of(context).unfocus();
-    _query = _searchCtrl.text.trim();
-    _reload();
-  }
-
-  void _onSelectRegion(String? region) {
-    setState(
-      () => _region = (region == null || region.isEmpty) ? null : region,
-    );
-    _reload();
   }
 
   List<Tournament> get _visible => _items.where((t) {
@@ -195,7 +154,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const TopHeader(title: "Campeonatos", showBack: false),
+          const TopHeader(title: "Mis campeonatos", showBack: false),
           const SizedBox(height: 14),
           Expanded(
             child: RefreshIndicator(
@@ -206,11 +165,9 @@ class _TournamentsScreenState extends State<TournamentsScreen>
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
                   Text(
-                    "Descubre tu próximo campeonato de tenis de mesa.",
+                    "Los campeonatos en que participas. Para inscribirte en uno nuevo, abre el link que comparte el organizador.",
                     style: AppTypography.bodyMuted,
                   ),
-                  const SizedBox(height: 14),
-                  _filtersCard(),
                   const SizedBox(height: 14),
                   _filterChips(),
                   const SizedBox(height: 14),
@@ -225,11 +182,13 @@ class _TournamentsScreenState extends State<TournamentsScreen>
                       onRetry: _reload,
                     )
                   else if (visible.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 24),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 24),
                       child: EmptyState(
                         icon: Icons.emoji_events_outlined,
-                        message: "No hay campeonatos con ese filtro.",
+                        message: _items.isEmpty
+                            ? "Aún no participas en ningún campeonato.\nPide al organizador el link del campeonato para inscribirte."
+                            : "No hay campeonatos con ese filtro.",
                       ),
                     )
                   else
@@ -264,70 +223,6 @@ class _TournamentsScreenState extends State<TournamentsScreen>
     );
   }
 
-  Widget _filtersCard() {
-    return GlassCard(
-      child: Column(
-        children: [
-          TextField(
-            controller: _searchCtrl,
-            textInputAction: TextInputAction.search,
-            onSubmitted: (_) => _search(),
-            style: AppTypography.bodyText,
-            decoration: _inputDeco(
-              hint: "Buscar por nombre, región o categoría…",
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  initialValue: _region ?? "",
-                  isExpanded: true,
-                  dropdownColor: AppColors.scorifySurface2,
-                  borderRadius: BorderRadius.circular(12),
-                  icon: const Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    color: AppColors.scorifyTextMuted,
-                  ),
-                  style: AppTypography.bodyText,
-                  decoration: _inputDeco(),
-                  items: [
-                    const DropdownMenuItem(
-                      value: "",
-                      child: Text("Todas las regiones"),
-                    ),
-                    ..._chileRegions.map(
-                      (r) => DropdownMenuItem(
-                        value: r,
-                        child: Text(r, overflow: TextOverflow.ellipsis),
-                      ),
-                    ),
-                  ],
-                  onChanged: _onSelectRegion,
-                ),
-              ),
-              const SizedBox(width: 10),
-              SizedBox(
-                height: 46,
-                child: FilledButton(
-                  onPressed: _search,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text("Buscar"),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _filterChips() {
     const labels = {
       _ActiveFilter.all: "Todos",
@@ -353,26 +248,6 @@ class _TournamentsScreenState extends State<TournamentsScreen>
     );
   }
 
-  InputDecoration _inputDeco({String? hint}) {
-    final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide.none,
-    );
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: AppTypography.bodyMuted,
-      isDense: true,
-      filled: true,
-      fillColor: AppColors.scorifyInput,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-      border: border,
-      enabledBorder: border,
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.4),
-      ),
-    );
-  }
 }
 
 class _FilterChip extends StatelessWidget {

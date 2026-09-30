@@ -13,6 +13,11 @@ class AppConfig {
     defaultValue: "https://mytabletennismannager.onrender.com",
   );
 
+  /// Web pública: base de los links de campeonato que se comparten
+  /// (https://www.myttm.cl/torneos/<id>). Con la app instalada, Android abre
+  /// esos links acá (App Links, ver AndroidManifest + deep_links.dart).
+  static const String webBaseUrl = "https://www.myttm.cl";
+
   /// ID de cliente WEB de Google (el mismo del login con Google de la web):
   /// la app pide el token para ese cliente, que es el que valida el servidor
   /// (GOOGLE_CLIENT_ID).

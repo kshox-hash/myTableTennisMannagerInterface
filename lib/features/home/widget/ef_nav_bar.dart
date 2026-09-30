@@ -32,7 +32,8 @@ class EFBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = backgroundColor ?? AppColors.scorifyDeep;
+    // Negro de la barra de la web (--color-app-primary #020304).
+    final bg = backgroundColor ?? AppColors.scorifyNavbar;
 
     return DecoratedBox(
       decoration: BoxDecoration(

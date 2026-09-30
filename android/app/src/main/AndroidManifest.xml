@@ -26,6 +26,21 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- App Links: los links de campeonato compartidos
+                 (https://www.myttm.cl/torneos/<id>) abren la app si está
+                 instalada. Android lo verifica contra
+                 https://www.myttm.cl/.well-known/assetlinks.json (huella de la
+                 llave de firma release). -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="www.myttm.cl" android:pathPrefix="/torneos/"/>
+            </intent-filter>
+            <!-- El link lo maneja app_links (deep_links.dart), no el Navigator
+                 de Flutter — sin esto Flutter intenta abrir "/torneos/<id>"
+                 como ruta propia y cae en "Ruta no encontrada". -->
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="false"/>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

@@ -1,9 +1,12 @@
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
+import "package:myttmi/core/navigation/deep_links.dart";
 import "package:myttmi/features/shell/splash_gate.dart";
 import "package:myttmi/routes/app_routes.dart";
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  DeepLinks.init();
   runApp(const MyApp());
 }
 
@@ -49,6 +52,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
+      navigatorKey: DeepLinks.navigatorKey,
       onGenerateRoute: AppRoutes.onGenerateRoute,
       // "home" en vez de "initialRoute": un initialRoute con barras (ej.
       // "/splash") hace que Flutter arme el stack inicial dividiendo el
