@@ -384,9 +384,12 @@ class HomeNoMatchCard extends StatelessWidget {
       // Centrado (ícono arriba, textos y botón al medio), igual que la
       // tarjeta del partido, que ya es simétrica.
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      // Si el Inicio le da más alto (es la última tarjeta), el contenido
+      // queda centrado en ese espacio.
       child: SizedBox(
         width: double.infinity,
         child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Row(
                   mainAxisSize: MainAxisSize.min,

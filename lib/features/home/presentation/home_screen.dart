@@ -206,6 +206,8 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
+  Widget _fillHeight(bool enabled, Widget child) => enabled ? IntrinsicHeight(child: child) : child;
+
   Widget _panelFor(PlayerNextMatch? m) {
     final stage = m == null
         ? ""
@@ -304,12 +306,17 @@ class _HomeScreenState extends State<HomeScreen>
                 padding: const EdgeInsets.only(bottom: 12),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: box.maxHeight - 12),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // Separación pareja de 12 px entre bloques (antes se
+                  // repartían para llenar la pantalla y quedaban huecos
+                  // grandes); sin partido, el alto que sobra lo toma la
+                  // tarjeta de abajo. Con partido no hace falta (el
+                  // contenido ya llena) y el carrusel —que usa
+                  // LayoutBuilder— no admite IntrinsicHeight.
+                  child: _fillHeight(nm == null, Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       hero,
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
                       HomeStatsBar(
                         played: played,
                         won: stats?.matchesWon ?? 0,
@@ -319,10 +326,10 @@ class _HomeScreenState extends State<HomeScreen>
                       // grupo, al medio del Inicio (bajo tu perfil y tus
                       // números; arriba del todo el perfil quedaba perdido).
                       if (nm != null) ...[
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 12),
                         matches,
                         if (_myStanding != null && nm.matchType == "group") ...[
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 12),
                           HomeGroupCard(
                             groupName: nm.groupName ?? "",
                             position: _myStanding!.played == 0 ? null : _myStanding!.position,
@@ -344,13 +351,13 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         ],
                       ],
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
                       HomeStreakCard(
                         form: _form,
                         onTap: () =>
                             Navigator.pushNamed(context, AppRoutes.history),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
                       HomeActionButtons(
                         onProfile: () =>
                             Navigator.pushNamed(context, AppRoutes.profile),
@@ -359,15 +366,17 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                       // Sin partido: la invitación a buscar campeonatos, abajo.
                       if (nm == null) ...[
-                        const SizedBox(height: 10),
-                        HomeNoMatchCard(
-                          loading: _loading,
-                          onBrowse: () =>
-                              AppShellScope.of(context)?.switchTab(3),
+                        const SizedBox(height: 12),
+                        Expanded(
+                          child: HomeNoMatchCard(
+                            loading: _loading,
+                            onBrowse: () =>
+                                AppShellScope.of(context)?.switchTab(3),
+                          ),
                         ),
                       ],
                     ],
-                  ),
+                  )),
                 ),
               ),
               ),
@@ -431,7 +440,7 @@ class _MatchesCarouselState extends State<_MatchesCarousel> {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             // Con muchos partidos los puntitos no caben: se muestra "3 / 12".
             if (pages.length > 6)
               Text(
