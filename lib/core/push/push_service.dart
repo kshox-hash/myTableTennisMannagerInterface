@@ -101,7 +101,7 @@ class PushService {
   }
 
   static void _onForeground(RemoteMessage msg) {
-    // Mesa asignada: lo muestra el banner "¡Te toca! Ve a la mesa N" de
+    // Mesa asignada: lo muestra el aviso "¡Te toca! Ve a la mesa N" de
     // MatchReadyWatcher (con número de mesa y acceso al partido). Antes salía
     // además un toast verde con el mismo texto: dos avisos por lo mismo.
     if (msg.data["type"] == "match_on_table") {

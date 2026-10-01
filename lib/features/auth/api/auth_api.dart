@@ -28,7 +28,12 @@ class AuthApi {
         .timeout(const Duration(seconds: 60));
 
     if (res.statusCode != 200) {
-      throw Exception("Login error: ${res.body}");
+      // El mensaje del servidor ("Credenciales inválidas"), no el JSON crudo.
+      String? msg;
+      try {
+        msg = (jsonDecode(res.body) as Map<String, dynamic>)["message"] as String?;
+      } catch (_) {}
+      throw Exception(msg ?? "No se pudo iniciar sesión. Intenta de nuevo.");
     }
 
     final decoded = jsonDecode(res.body) as Map<String, dynamic>;

@@ -3,210 +3,154 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
+import "package:myttmi/core/navigation/deep_links.dart";
 
-/// Aviso flotante igual al toast de la web: verde con ✓ para éxito, rojo con
-/// ✕ para error, abajo al centro. Entra subiendo desde abajo y sale bajando
-/// (el SnackBar de Flutter solo aparecía con un fundido). El de error dura
-/// más porque hay que alcanzar a leerlo.
-OverlayEntry? _current;
+/// Un solo tipo de aviso en toda la app (igual que el de la web): un cuadro
+/// que entra desde la izquierda, abajo, sobre la barra de navegación, y se
+/// apila si hay varios (el más nuevo abajo). Lo usan:
+///  - las confirmaciones de acciones (showToast): ✓ verde / ✕ rojo, breves;
+///  - las notificaciones nuevas (NotificationPopups), con su ícono;
+///  - "¡Te toca! Ve a la mesa N" (MatchReadyWatcher), destacado en verde.
+/// Antes eran tres estilos distintos (toast verde abajo al centro, cuadros
+/// oscuros abajo a la izquierda y un banner arriba) y parecían de apps
+/// distintas.
 
-// El contexto puede ser el del propio Overlay (DeepLinks.overlayContext, para
-// avisar desde fuera de una pantalla): ahí Overlay.maybeOf no lo encuentra,
-// porque busca solo hacia arriba.
-OverlayState? _overlayOf(BuildContext context) {
-  if (context is StatefulElement && context.state is OverlayState) return context.state as OverlayState;
-  return Overlay.maybeOf(context, rootOverlay: true);
-}
-
-/// Dónde está la barra de navegación de abajo: AppShell se registra acá y el
-/// toast sube por encima de ella mientras sus pestañas estén al frente (antes
-/// quedaba encima de Inicio/Calendario/… tapándolos).
+/// Dónde está la barra de navegación de abajo: AppShell se registra acá y los
+/// avisos suben por encima de ella mientras sus pestañas estén al frente.
 class ToastLayout {
   ToastLayout._();
   static ModalRoute<dynamic>? shellRoute;
   static const double navBarHeight = 62;
 }
 
-void showToast(BuildContext context, String message, {bool error = false}) {
-  final overlay = _overlayOf(context);
-  if (overlay == null) return;
-  _current?.remove();
-  _current = null;
+enum PopupTone { good, bad, info, time }
 
-  late final OverlayEntry entry;
-  entry = OverlayEntry(
-    builder: (_) => _Toast(
-      message: message.replaceFirst("Exception: ", ""),
-      error: error,
-      onDone: () {
-        if (_current == entry) _current = null;
-        if (entry.mounted) entry.remove();
-      },
-    ),
-  );
-  _current = entry;
-  overlay.insert(entry);
-}
-
-class _Toast extends StatefulWidget {
-  final String message;
-  final bool error;
-  final VoidCallback onDone;
-
-  const _Toast({required this.message, required this.error, required this.onDone});
-
-  @override
-  State<_Toast> createState() => _ToastState();
-}
-
-class _ToastState extends State<_Toast> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 260),
-    reverseDuration: const Duration(milliseconds: 200),
-  );
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _c.forward();
-    _timer = Timer(Duration(milliseconds: widget.error ? 3500 : 2000), _dismiss);
-  }
-
-  Future<void> _dismiss() async {
-    _timer?.cancel();
-    if (!mounted) return;
-    await _c.reverse();
-    widget.onDone();
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final fg = widget.error ? Colors.white : AppColors.scorifyOnButterfly;
-    final curve = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
-    // Con teclado abierto, justo encima del teclado (antes quedaba escondido
-    // detrás, p. ej. un error al iniciar sesión). Si no, encima de la barra
-    // de navegación cuando está visible, o a 16 px del borde. El margen del
-    // sistema se suma una sola vez (antes también lo agregaba un SafeArea).
-    final mq = MediaQuery.of(context);
-    final onShell = ToastLayout.shellRoute?.isCurrent ?? false;
-    final bottom = mq.viewInsets.bottom > 0
-        ? mq.viewInsets.bottom + 12
-        : mq.padding.bottom + (onShell ? ToastLayout.navBarHeight + 12 : 16);
-    return Positioned(
-      left: 16,
-      right: 16,
-      bottom: bottom,
-      child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 384),
-            child: SlideTransition(
-              position: Tween(begin: const Offset(0, 1.2), end: Offset.zero).animate(curve),
-              child: FadeTransition(
-                opacity: curve,
-                child: Material(
-                  color: widget.error ? AppColors.scorifyNegative : AppColors.scorifyButterfly,
-                  elevation: 10,
-                  borderRadius: BorderRadius.circular(12),
-                  child: InkWell(
-                    onTap: _dismiss,
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      child: Row(
-                        children: [
-                          Icon(widget.error ? Icons.cancel_outlined : Icons.check_circle_outline_rounded, color: fg, size: 20),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              widget.message,
-                              style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w700, color: fg),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-      ),
-    );
-  }
-}
-
-// ── Aviso de notificación (push que llega con la app abierta) ────────────
-// Baja desde arriba, oscuro y con la campana — distinto del toast verde de
-// "guardado", que es para confirmar acciones. Se va solo, se descarta
-// deslizando hacia arriba y, si lo tocan, ejecuta onTap. Uno a la vez.
-// Se apilan (como los avisos de Facebook): el más nuevo arriba, máximo 3
-// a la vista; cada uno se va solo a los 6 s. Antes uno reemplazaba al otro
-// y si llegaban dos seguidas la primera ni se alcanzaba a leer.
-class _NoticeData {
+class PopupItem {
   final int id;
   final String title;
   final String? body;
+  final IconData? icon;
+  final String? emoji;
+  final Widget? leading;
+  final PopupTone tone;
+  final bool highlight;
   final VoidCallback? onTap;
-  _NoticeData(this.id, this.title, this.body, this.onTap);
+  PopupItem._(this.id, this.title, this.body, this.icon, this.emoji, this.leading, this.tone, this.highlight, this.onTap);
 }
 
-final ValueNotifier<List<_NoticeData>> _notices = ValueNotifier(const []);
-OverlayEntry? _noticeHost;
-int _noticeSeq = 0;
+class PopupStack {
+  PopupStack._();
 
-void _removeNotice(int id) {
-  _notices.value = _notices.value.where((n) => n.id != id).toList();
-}
+  static const _maxVisible = 4;
+  static const _exit = Duration(milliseconds: 320);
+  static final ValueNotifier<List<PopupItem>> _items = ValueNotifier(const []);
+  static final ValueNotifier<Set<int>> _leaving = ValueNotifier(const {});
+  static OverlayEntry? _host;
+  static int _seq = 0;
 
-void showNotice(BuildContext context, {required String title, String? body, VoidCallback? onTap}) {
-  final overlay = _overlayOf(context);
-  if (overlay == null) return;
-  if (_noticeHost == null || !_noticeHost!.mounted) {
-    _noticeHost = OverlayEntry(builder: (_) => const _NoticeStack());
-    overlay.insert(_noticeHost!);
+  // El contexto puede ser el del propio Overlay (DeepLinks.overlayContext):
+  // ahí Overlay.maybeOf no lo encuentra, porque busca solo hacia arriba. Si
+  // no hay contexto, el Overlay del Navigator.
+  static OverlayState? _overlay(BuildContext? context) {
+    if (context != null) {
+      if (context is StatefulElement && context.state is OverlayState) return context.state as OverlayState;
+      final o = Overlay.maybeOf(context, rootOverlay: true);
+      if (o != null) return o;
+    }
+    return DeepLinks.navigatorKey.currentState?.overlay;
   }
-  _notices.value = [_NoticeData(++_noticeSeq, title, body, onTap), ..._notices.value].take(3).toList();
+
+  static void show({
+    BuildContext? context,
+    required String title,
+    String? body,
+    IconData? icon,
+    String? emoji,
+    Widget? leading,
+    PopupTone tone = PopupTone.info,
+    bool highlight = false,
+    VoidCallback? onTap,
+    Duration lifetime = const Duration(seconds: 8),
+  }) {
+    final overlay = _overlay(context);
+    if (overlay == null) return;
+    if (_host == null || !_host!.mounted) {
+      _host = OverlayEntry(builder: (_) => _PopupStackView()); // sin const: markNeedsBuild debe reconstruirlo
+      overlay.insert(_host!);
+    } else {
+      // Recalcular la altura: el contenedor pudo crearse en otra pantalla
+      // (p. ej. el login, sin barra de navegación).
+      _host!.markNeedsBuild();
+    }
+    final item = PopupItem._(++_seq, title, body, icon, emoji, leading, tone, highlight, onTap);
+    final all = [..._items.value, item];
+    _items.value = all.length > _maxVisible ? all.sublist(all.length - _maxVisible) : all;
+    Timer(lifetime, () => dismiss(item.id));
+  }
+
+  static void dismiss(int id) {
+    if (_leaving.value.contains(id) || !_items.value.any((n) => n.id == id)) return;
+    _leaving.value = {..._leaving.value, id};
+    Timer(_exit, () {
+      _items.value = _items.value.where((n) => n.id != id).toList();
+      _leaving.value = {..._leaving.value}..remove(id);
+    });
+  }
+
+  static void clear() {
+    _items.value = const [];
+    _leaving.value = const {};
+  }
 }
 
-class _NoticeStack extends StatelessWidget {
-  const _NoticeStack();
+/// Confirmación de una acción ("Perfil guardado", "Quedaste inscrito…") o
+/// error: el mismo cuadro que las notificaciones, con ✓ verde / ✕ rojo y más
+/// breve (el error dura más porque hay que alcanzar a leerlo).
+void showToast(BuildContext context, String message, {bool error = false}) {
+  PopupStack.show(
+    context: context,
+    title: message.replaceFirst("Exception: ", ""),
+    icon: error ? Icons.close_rounded : Icons.check_rounded,
+    tone: error ? PopupTone.bad : PopupTone.good,
+    lifetime: Duration(milliseconds: error ? 4500 : 2800),
+  );
+}
+
+class _PopupStackView extends StatelessWidget {
+  // ignore: prefer_const_constructors_in_immutables
+  _PopupStackView();
 
   @override
   Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    final onShell = ToastLayout.shellRoute?.isCurrent ?? false;
+    // Con teclado abierto, justo encima del teclado (si no, un error al
+    // iniciar sesión quedaba escondido); si no, sobre la barra de
+    // navegación cuando está visible, o a 16 px del borde.
+    final bottom = mq.viewInsets.bottom > 0
+        ? mq.viewInsets.bottom + 12
+        : mq.padding.bottom + (onShell ? ToastLayout.navBarHeight + 10 : 16);
+    final width = (mq.size.width - 32).clamp(0.0, 360.0);
     return Positioned(
-      top: MediaQuery.paddingOf(context).top + 10,
-      left: 12,
-      right: 12,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 440),
-          child: ValueListenableBuilder<List<_NoticeData>>(
-            valueListenable: _notices,
-            builder: (_, list, __) => Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final n in list)
-                  Padding(
-                    key: ValueKey(n.id),
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: _Notice(
-                      title: n.title,
-                      body: n.body,
-                      onTap: n.onTap,
-                      onDone: () => _removeNotice(n.id),
-                    ),
-                  ),
-              ],
-            ),
+      left: 16,
+      bottom: bottom,
+      width: width,
+      child: ValueListenableBuilder<Set<int>>(
+        valueListenable: PopupStack._leaving,
+        builder: (_, leaving, __) => ValueListenableBuilder<List<PopupItem>>(
+          valueListenable: PopupStack._items,
+          builder: (_, list, __) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // El más nuevo queda abajo (más cerca del dedo).
+              for (final n in list)
+                Padding(
+                  key: ValueKey(n.id),
+                  padding: const EdgeInsets.only(top: 8),
+                  child: _Popup(item: n, leaving: leaving.contains(n.id)),
+                ),
+            ],
           ),
         ),
       ),
@@ -214,119 +158,142 @@ class _NoticeStack extends StatelessWidget {
   }
 }
 
-class _Notice extends StatefulWidget {
-  final String title;
-  final String? body;
-  final VoidCallback? onTap;
-  final VoidCallback onDone;
-  const _Notice({required this.title, this.body, this.onTap, required this.onDone});
+class _Popup extends StatefulWidget {
+  final PopupItem item;
+  final bool leaving;
+  const _Popup({required this.item, required this.leaving});
 
   @override
-  State<_Notice> createState() => _NoticeState();
+  State<_Popup> createState() => _PopupState();
 }
 
-class _NoticeState extends State<_Notice> with SingleTickerProviderStateMixin {
+class _PopupState extends State<_Popup> with SingleTickerProviderStateMixin {
+  // Entra desde la izquierda con un pequeño rebote y crece; sale
+  // deslizándose a la izquierda y el hueco se cierra suave (los de arriba
+  // bajan en vez de saltar).
   late final AnimationController _c = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 300),
-    reverseDuration: const Duration(milliseconds: 200),
-  );
-  Timer? _timer;
+    duration: const Duration(milliseconds: 520),
+    reverseDuration: const Duration(milliseconds: 320),
+  )..forward();
 
   @override
-  void initState() {
-    super.initState();
-    _c.forward();
-    _timer = Timer(const Duration(seconds: 6), _dismiss);
-  }
-
-  Future<void> _dismiss() async {
-    _timer?.cancel();
-    if (!mounted) return;
-    await _c.reverse();
-    widget.onDone();
+  void didUpdateWidget(covariant _Popup old) {
+    super.didUpdateWidget(old);
+    if (widget.leaving && !old.leaving) _c.reverse();
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
     _c.dispose();
     super.dispose();
   }
 
+  static Color _color(PopupTone t) => switch (t) {
+        PopupTone.good => AppColors.scorifyButterfly,
+        PopupTone.bad => AppColors.scorifyNegative,
+        PopupTone.time => AppColors.scorifyPending,
+        PopupTone.info => AppColors.scorifyMint,
+      };
+
   @override
   Widget build(BuildContext context) {
-    final curve = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
-    final body = (widget.body ?? "").trim();
-    return SlideTransition(
-            position: Tween(begin: const Offset(0, -1.6), end: Offset.zero).animate(curve),
-            child: Dismissible(
-              key: UniqueKey(),
-              direction: DismissDirection.up,
-              onDismissed: (_) => widget.onDone(),
-              child: Material(
-                color: AppColors.scorifyDeep,
-                elevation: 12,
-                shadowColor: Colors.black,
-                borderRadius: BorderRadius.circular(16),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: () {
-                    _dismiss();
-                    widget.onTap?.call();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                            color: AppColors.scorifyMint.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(11),
-                          ),
-                          child: const Icon(Icons.notifications_rounded, color: AppColors.scorifyMint, size: 20),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontFamily: AppTypography.body,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.scorifyText,
-                                ),
+    final n = widget.item;
+    final slide = CurvedAnimation(parent: _c, curve: Curves.easeOutBack, reverseCurve: Curves.easeInCubic);
+    final fade = CurvedAnimation(parent: _c, curve: const Interval(0, 0.6, curve: Curves.easeOut), reverseCurve: Curves.easeIn);
+    final size = CurvedAnimation(parent: _c, curve: const Interval(0, 0.5, curve: Curves.easeOut), reverseCurve: const Interval(0.3, 1, curve: Curves.easeIn));
+    final fg = _color(n.tone);
+    final body = (n.body ?? "").trim();
+    final Widget leading = n.leading ??
+        Container(
+          width: 36,
+          height: 36,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: n.emoji != null ? AppColors.scorifyDeep : fg.withValues(alpha: 0.16),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: n.emoji != null
+              ? Text(n.emoji!, style: const TextStyle(fontSize: 17))
+              : Icon(n.icon ?? Icons.notifications_rounded, color: fg, size: 20),
+        );
+    return SizeTransition(
+      sizeFactor: size,
+      axisAlignment: 1,
+      child: SlideTransition(
+        position: Tween(begin: const Offset(-1.15, 0), end: Offset.zero).animate(slide),
+        child: ScaleTransition(
+          scale: Tween(begin: 0.92, end: 1.0).animate(fade),
+          alignment: Alignment.centerLeft,
+          child: FadeTransition(
+            opacity: fade,
+            // Más claro que las tarjetas y con borde fino, para que se note
+            // que flota encima; los destacados llevan el borde de su color.
+            child: Material(
+              color: AppColors.scorifySurface2,
+              elevation: 12,
+              shadowColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: n.highlight ? BorderSide(color: fg, width: 1.5) : const BorderSide(color: Color(0x26FFFFFF)),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () {
+                  PopupStack.dismiss(n.id);
+                  n.onTap?.call();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 10, 4, 10),
+                  child: Row(
+                    crossAxisAlignment: body.isEmpty ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+                    children: [
+                      leading,
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              n.title,
+                              maxLines: body.isEmpty ? 3 : 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: AppTypography.body,
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w700,
+                                color: n.highlight ? fg : AppColors.scorifyText,
                               ),
-                              if (body.isNotEmpty) ...[
-                                const SizedBox(height: 2),
-                                Text(
-                                  body,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontFamily: AppTypography.body,
-                                    fontSize: 13,
-                                    color: AppColors.scorifyTextMuted,
-                                  ),
-                                ),
-                              ],
+                            ),
+                            if (body.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                body,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, height: 1.3, color: AppColors.scorifyTextMuted),
+                              ),
                             ],
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      InkResponse(
+                        onTap: () => PopupStack.dismiss(n.id),
+                        radius: 16,
+                        child: const Padding(
+                          padding: EdgeInsets.all(4),
+                          child: Icon(Icons.close_rounded, size: 16, color: AppColors.scorifyTextMuted),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
+          ),
+        ),
+      ),
     );
   }
 }
