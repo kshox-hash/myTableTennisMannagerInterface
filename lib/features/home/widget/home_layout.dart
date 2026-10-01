@@ -501,3 +501,51 @@ class HomeGroupCard extends StatelessWidget {
     );
   }
 }
+
+/// "Te toca arbitrar": el organizador te asignó como árbitro (o escaneaste
+/// su QR). Abre la pantalla para anotar el marcador.
+class HomeRefereeCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  const HomeRefereeCard({super.key, required this.title, required this.subtitle, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return HomePanel(
+      onTap: onTap,
+      padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(color: AppColors.scorifyButterfly, borderRadius: BorderRadius.circular(12)),
+            child: const Icon(Icons.sports_rounded, color: AppColors.scorifyOnButterfly),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("TE TOCA ARBITRAR", style: _label(AppColors.scorifyButterfly)),
+                const SizedBox(height: 3),
+                Text(title, maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                const SizedBox(height: 2),
+                Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, color: AppColors.scorifyTextMuted)),
+              ],
+            ),
+          ),
+          FilledButton(
+            onPressed: onTap,
+            style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 14), minimumSize: const Size(0, 38)),
+            child: const Text("Arbitrar"),
+          ),
+        ],
+      ),
+    );
+  }
+}

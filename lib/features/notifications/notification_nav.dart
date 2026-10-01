@@ -1,10 +1,17 @@
 import "package:flutter/material.dart";
 import "package:myttmi/features/notifications/models/notification_model.dart";
 import "package:myttmi/routes/app_routes.dart";
+import "package:myttmi/routes/cyber_page_route.dart";
+import "package:myttmi/features/referee/referee_screen.dart";
 
 /// Al tocar una notificación (en la lista o en el aviso emergente): lleva a
 /// donde está la acción — el partido, la categoría o el perfil (club).
 void openNotification(NavigatorState nav, AppNotification n) {
+  // "Te toca arbitrar": directo a la pantalla para anotar.
+  if (n.type == "referee_assigned" && n.idMatch != null && n.matchType != null) {
+    nav.push(CyberPageRoute(builder: (_) => RefereeScreen(matchType: n.matchType!, matchId: n.idMatch!)));
+    return;
+  }
   if (n.type == "club_payment" || n.type.startsWith("club_join")) {
     nav.pushNamed(AppRoutes.profile);
     return;

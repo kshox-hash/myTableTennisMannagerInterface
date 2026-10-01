@@ -35,6 +35,7 @@ const importantTypes = {
   "club_join_request",
   "club_join_approved",
   "club_join_rejected",
+  "referee_assigned",
 };
 
 class NotificationPopups {

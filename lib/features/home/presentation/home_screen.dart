@@ -22,6 +22,9 @@ import '../widget/spin_header.dart';
 import '../widget/spin_next_match_panel.dart';
 import "package:myttmi/core/push/push_service.dart";
 import "package:myttmi/features/favorites/favorites_screen.dart";
+import "package:myttmi/features/referee/referee_api.dart";
+import "package:myttmi/features/referee/referee_screen.dart";
+import "package:myttmi/features/referee/referee_scan_screen.dart";
 import "package:myttmi/features/notifications/notification_popups.dart";
 
 /// Pestaña "Inicio" del shell — ya no arma su propio Scaffold/fondo/nav, eso
@@ -56,6 +59,8 @@ class _HomeScreenState extends State<HomeScreen>
   // Modo día de torneo: mi fila en la tabla de mi grupo (del próximo
   // partido de grupo) y cuántos son en el grupo.
   PlayerStanding? _myStanding;
+  // Partidos que me toca arbitrar (asignados por el organizador o por QR).
+  List<RefereeMatch> _refMatches = const [];
   int _groupSize = 0;
 
   @override
@@ -81,6 +86,9 @@ class _HomeScreenState extends State<HomeScreen>
       });
       _loadForm(_profile?.idUser);
       _loadGroup(_dashboard?.nextMatch);
+      RefereeApi().myMatches().then((r) {
+        if (mounted) setState(() => _refMatches = r);
+      }).catchError((_) {});
     } catch (_) {
       // Silencioso: la pantalla igual se puede usar sin estos datos.
     } finally {
@@ -187,6 +195,14 @@ class _HomeScreenState extends State<HomeScreen>
             children: [
               const SizedBox(height: 10),
               ListTile(
+                leading: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.scorifyText),
+                title: const Text(
+                  "Arbitrar con QR",
+                  style: TextStyle(color: AppColors.scorifyText),
+                ),
+                onTap: () => Navigator.pop(context, "referee_scan"),
+              ),
+              ListTile(
                 leading: const Icon(Icons.logout, color: AppColors.scorifyText),
                 title: const Text(
                   "Cerrar sesión",
@@ -206,6 +222,9 @@ class _HomeScreenState extends State<HomeScreen>
     // Perfil e historial ya están en el Inicio (tarjeta y botones).
     if (action == "logout") {
       await _confirmLogout();
+    } else if (action == "referee_scan") {
+      await Navigator.push(context, CyberPageRoute(builder: (_) => const RefereeScanScreen()));
+      if (mounted) _load(silent: true);
     }
   }
 
@@ -327,6 +346,25 @@ class _HomeScreenState extends State<HomeScreen>
                     children: [
                       hero,
                       const SizedBox(height: 12),
+                      if (_refMatches.isNotEmpty) ...[
+                        HomeRefereeCard(
+                          title: "${_refMatches.first.player1Name} vs ${_refMatches.first.player2Name}",
+                          subtitle: [
+                            if (_refMatches.first.tableNumber != null) "Mesa ${_refMatches.first.tableNumber}",
+                            _refMatches.first.categoryDisplay,
+                            if (_refMatches.length > 1) "+${_refMatches.length - 1} más",
+                          ].join(" · "),
+                          onTap: () async {
+                            final r = _refMatches.first;
+                            await Navigator.push(
+                              context,
+                              CyberPageRoute(builder: (_) => RefereeScreen(matchType: r.matchType, matchId: r.idMatch)),
+                            );
+                            if (mounted) _load(silent: true);
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                       HomeStatsBar(
                         played: played,
                         won: stats?.matchesWon ?? 0,

@@ -74,6 +74,10 @@ class Endpoints {
   static const notificationsReadAll = "$base/notifications/read-all";
   static const deviceToken = "$base/notifications/device-token";
 
+  // Árbitro desde la app
+  static const refereeMyMatches = "$base/bracket/referee/my-matches";
+  static const refereeClaim = "$base/bracket/referee/claim";
+
   static String notificationRead(String idNotification) =>
       "$base/notifications/$idNotification/read";
 }
