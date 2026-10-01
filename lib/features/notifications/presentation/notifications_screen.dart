@@ -1,5 +1,4 @@
 import "package:myttmi/features/notifications/notification_nav.dart";
-import "package:myttmi/core/live/live_refresh.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -16,11 +15,7 @@ class NotificationsScreen extends StatefulWidget {
   State<NotificationsScreen> createState() => _NotificationsScreenState();
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen> with LiveRefreshMixin<NotificationsScreen> {
-  // Se actualiza solo (cada 30 s, al llegar una notificación o al volver a la app).
-  @override
-  void onLiveRefresh() => _load();
-
+class _NotificationsScreenState extends State<NotificationsScreen> {
   final _api = NotificationsApi();
   Future<NotificationsSnapshot>? _future;
 

@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:myttmi/core/live/live_refresh.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/constants/match_status_labels.dart";
@@ -45,11 +44,7 @@ class MyCategoryScreen extends StatefulWidget {
   State<MyCategoryScreen> createState() => _MyCategoryScreenState();
 }
 
-class _MyCategoryScreenState extends State<MyCategoryScreen> with LiveRefreshMixin<MyCategoryScreen> {
-  // Se actualiza solo (cada 30 s, al llegar una notificación o al volver a la app).
-  @override
-  void onLiveRefresh() => _load();
-
+class _MyCategoryScreenState extends State<MyCategoryScreen> {
   final _api = PlayerApi();
   late Future<_CategoryData> _future;
 

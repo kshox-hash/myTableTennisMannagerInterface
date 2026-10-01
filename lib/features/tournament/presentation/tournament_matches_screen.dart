@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:myttmi/core/live/live_refresh.dart";
 import "package:myttmi/core/favorites/favorite_button.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -61,14 +60,7 @@ class TournamentMatchesScreen extends StatefulWidget {
   State<TournamentMatchesScreen> createState() => _TournamentMatchesScreenState();
 }
 
-class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> with LiveRefreshMixin<TournamentMatchesScreen> {
-  // Grupos y llaves se actualizan solos; la lista paginada no (recargarla
-  // vaciaría lo ya cargado mientras se baja por la lista).
-  @override
-  void onLiveRefresh() {
-    if (_mode != _ViewMode.list) _load();
-  }
-
+class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
   final _api = PlayerApi();
   Future<List<TournamentMatch>> _future = Future.value(const []);
   String _statusFilter = "all";

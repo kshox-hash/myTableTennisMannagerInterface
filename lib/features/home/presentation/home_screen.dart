@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import "package:myttmi/core/live/live_refresh.dart";
 import "package:myttmi/features/home/widget/home_layout.dart";
 import "package:myttmi/core/ui/side_panel_route.dart";
 import "package:myttmi/features/notifications/presentation/notifications_screen.dart";
@@ -36,14 +35,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen>
-    with TabAutoRefreshMixin<HomeScreen>, LiveRefreshMixin<HomeScreen> {
-  // Próximo partido, tu grupo y números: se actualizan solos.
-  @override
-  int? get liveTabIndex => 0;
-
-  @override
-  void onLiveRefresh() => _load(silent: true);
-
+    with TabAutoRefreshMixin<HomeScreen> {
   @override
   int get tabIndex => 0;
 

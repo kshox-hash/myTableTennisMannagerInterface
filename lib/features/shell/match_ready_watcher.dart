@@ -1,5 +1,4 @@
 import 'dart:async';
-import "package:myttmi/core/live/live_refresh.dart";
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -59,11 +58,7 @@ class _MatchReadyWatcherState extends State<MatchReadyWatcher> with WidgetsBindi
   // al tiro en vez de esperar al próximo ciclo.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _check();
-      // Al volver a la app, lo que se esté viendo se pone al día.
-      LiveRefresh.bump();
-    }
+    if (state == AppLifecycleState.resumed) _check();
   }
 
   Future<void> _check() async {

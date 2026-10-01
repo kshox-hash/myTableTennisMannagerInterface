@@ -1,5 +1,4 @@
 import "dart:async";
-import "package:myttmi/core/live/live_refresh.dart";
 
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -83,9 +82,6 @@ class NotificationPopups {
     try {
       final count = await _api.getUnreadCount();
       unread.value = count;
-      // Llegó algo nuevo (un resultado, arrancaron los grupos, se asignó
-      // mesa…): las pantallas abiertas se actualizan al tiro.
-      if (_lastCount != null && count > _lastCount!) LiveRefresh.bump();
       final prev = _lastCount;
       _lastCount = count;
       // El primer conteo solo fija la base; después, si subió, se piden las

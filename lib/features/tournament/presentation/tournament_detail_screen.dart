@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:myttmi/core/live/live_refresh.dart";
 import "package:share_plus/share_plus.dart";
 import "package:myttmi/core/constants/app_config.dart";
 import "package:myttmi/core/ui/app_toast.dart";
@@ -55,11 +54,7 @@ class TournamentDetailScreen extends StatefulWidget {
   State<TournamentDetailScreen> createState() => _TournamentDetailScreenState();
 }
 
-class _TournamentDetailScreenState extends State<TournamentDetailScreen> with LiveRefreshMixin<TournamentDetailScreen> {
-  // Se actualiza solo (cada 30 s, al llegar una notificación o al volver a la app).
-  @override
-  void onLiveRefresh() => _refresh();
-
+class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
   final TournamentApi api = TournamentApi();
   final PlayerApi _playerApi = PlayerApi();
   late Tournament _tournament;
