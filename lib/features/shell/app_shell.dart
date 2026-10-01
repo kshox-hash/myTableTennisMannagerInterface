@@ -11,7 +11,6 @@ import 'package:myttmi/features/home/widget/ef_nav_bar.dart';
 import 'package:myttmi/features/performance/presentation/performance_screen.dart';
 import 'package:myttmi/features/tournament/presentation/tournaments_screen.dart';
 import 'package:myttmi/routes/cyber_page_route.dart';
-import 'package:myttmi/features/shell/match_ready_watcher.dart';
 
 /// Shell de navegación persistente: Inicio/Calendario/Mi rendimiento/
 /// Campeonatos viven como pestañas de un mismo IndexedStack en vez de pushes
@@ -116,10 +115,7 @@ class _AppShellState extends State<AppShell>
                   AppShellScope(
                     switchTab: _switchTab,
                     currentIndex: _index,
-                    // Aviso "¡Partido listo!" cuando te asignan mesa.
-                    child: MatchReadyWatcher(
-                      child: IndexedStack(index: _index, children: _tabs),
-                    ),
+                    child: IndexedStack(index: _index, children: _tabs),
                   ),
                   CyberTransition.glowOverlay(glow),
                 ],

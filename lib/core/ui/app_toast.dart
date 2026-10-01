@@ -5,15 +5,10 @@ import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/navigation/deep_links.dart";
 
-/// Un solo tipo de aviso en toda la app (igual que el de la web): un cuadro
-/// que entra desde la izquierda, abajo, sobre la barra de navegación, y se
-/// apila si hay varios (el más nuevo abajo). Lo usan:
-///  - las confirmaciones de acciones (showToast): ✓ verde / ✕ rojo, breves;
-///  - las notificaciones nuevas (NotificationPopups), con su ícono;
-///  - "¡Te toca! Ve a la mesa N" (MatchReadyWatcher), destacado en verde.
-/// Antes eran tres estilos distintos (toast verde abajo al centro, cuadros
-/// oscuros abajo a la izquierda y un banner arriba) y parecían de apps
-/// distintas.
+/// Aviso de confirmación (✓ verde) o error (✕ rojo) de una acción: un
+/// cuadro que entra desde la izquierda, abajo, sobre la barra de navegación,
+/// y se apila si hay varios (el más nuevo abajo). Las notificaciones no usan
+/// esto: su aviso es la push del teléfono.
 
 /// Dónde está la barra de navegación de abajo: AppShell se registra acá y los
 /// avisos suben por encima de ella mientras sus pestañas estén al frente.
