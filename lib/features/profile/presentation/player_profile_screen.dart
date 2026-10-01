@@ -68,7 +68,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                   child: FutureBuilder<PublicPlayerProfile>(
                     future: _profileFuture,
                     builder: (context, snap) {
-                      if (snap.connectionState == ConnectionState.waiting) {
+                      if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
                         return const LoadingState();
                       }
                       if (snap.hasError) {

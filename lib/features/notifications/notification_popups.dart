@@ -1,4 +1,5 @@
 import "dart:async";
+import "package:myttmi/core/live/live_refresh.dart";
 
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -45,6 +46,11 @@ class NotificationPopups {
   static const _maxVisible = 4;
 
   static final _api = NotificationsApi();
+
+  /// Sin leer, para el número de la campana del Inicio: se actualiza en cada
+  /// revisión (antes solo al recargar el Inicio, así que llegaban avisos y el
+  /// número no subía). Baja solo al marcar leídas, no al cerrarse el cuadro.
+  static final ValueNotifier<int> unread = ValueNotifier(0);
   static final ValueNotifier<List<AppNotification>> _items = ValueNotifier(const []);
   static final Set<String> _shown = {};
   // Solo lo que llega después de abrir la app: al entrar no se muestran de
@@ -76,6 +82,10 @@ class NotificationPopups {
     _checking = true;
     try {
       final count = await _api.getUnreadCount();
+      unread.value = count;
+      // Llegó algo nuevo (un resultado, arrancaron los grupos, se asignó
+      // mesa…): las pantallas abiertas se actualizan al tiro.
+      if (_lastCount != null && count > _lastCount!) LiveRefresh.bump();
       final prev = _lastCount;
       _lastCount = count;
       // El primer conteo solo fija la base; después, si subió, se piden las
@@ -137,6 +147,7 @@ class NotificationPopups {
     try {
       await _api.markRead(n.idNotification);
       if (_lastCount != null && _lastCount! > 0) _lastCount = _lastCount! - 1;
+      if (unread.value > 0) unread.value = unread.value - 1;
     } catch (_) {}
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:myttmi/core/live/live_refresh.dart";
 import "package:myttmi/features/home/widget/home_layout.dart";
 import "package:myttmi/core/ui/side_panel_route.dart";
 import "package:myttmi/features/notifications/presentation/notifications_screen.dart";
@@ -22,6 +23,7 @@ import '../widget/spin_header.dart';
 import '../widget/spin_next_match_panel.dart';
 import "package:myttmi/core/push/push_service.dart";
 import "package:myttmi/features/favorites/favorites_screen.dart";
+import "package:myttmi/features/notifications/notification_popups.dart";
 
 /// Pestaña "Inicio" del shell — ya no arma su propio Scaffold/fondo/nav, eso
 /// lo maneja AppShell. Cambiar a otra pestaña se pide vía AppShellScope en
@@ -34,7 +36,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen>
-    with TabAutoRefreshMixin<HomeScreen> {
+    with TabAutoRefreshMixin<HomeScreen>, LiveRefreshMixin<HomeScreen> {
+  // Próximo partido, tu grupo y números: se actualizan solos.
+  @override
+  int? get liveTabIndex => 0;
+
+  @override
+  void onLiveRefresh() => _load(silent: true);
+
   @override
   int get tabIndex => 0;
 
@@ -63,8 +72,8 @@ class _HomeScreenState extends State<HomeScreen>
     _load();
   }
 
-  Future<void> _load() async {
-    setState(() => _loading = true);
+  Future<void> _load({bool silent = false}) async {
+    if (!silent) setState(() => _loading = true);
     try {
       final results = await Future.wait([
         _profileApi.getMe(),
@@ -76,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen>
         _profile = results[0] as UserProfile;
         _dashboard = results[1] as PlayerDashboard;
         _unreadCount = results[2] as int;
+        NotificationPopups.unread.value = _unreadCount;
       });
       _loadForm(_profile?.idUser);
       _loadGroup(_dashboard?.nextMatch);
@@ -280,8 +290,10 @@ class _HomeScreenState extends State<HomeScreen>
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          SpinHeader(
-            notificationsCount: _unreadCount,
+          ValueListenableBuilder<int>(
+            valueListenable: NotificationPopups.unread,
+            builder: (context, unread, _) => SpinHeader(
+            notificationsCount: unread,
             onFavorites: () => Navigator.push(
               context,
               CyberPageRoute(builder: (_) => const FavoritesScreen()),
@@ -293,6 +305,7 @@ class _HomeScreenState extends State<HomeScreen>
               SidePanelRoute(child: const NotificationsScreen()),
             ).then((_) => _load()),
             onSettings: _openSettings,
+          ),
           ),
 
           const SizedBox(height: 16),

@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:myttmi/core/live/live_refresh.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -26,7 +27,11 @@ class TournamentTablesScreen extends StatefulWidget {
   State<TournamentTablesScreen> createState() => _TournamentTablesScreenState();
 }
 
-class _TournamentTablesScreenState extends State<TournamentTablesScreen> {
+class _TournamentTablesScreenState extends State<TournamentTablesScreen> with LiveRefreshMixin<TournamentTablesScreen> {
+  // Se actualiza solo (cada 30 s, al llegar una notificación o al volver a la app).
+  @override
+  void onLiveRefresh() => _load();
+
   final _api = TournamentApi();
   Future<TablesQueueBoard>? _future;
   String? _myUserId;
@@ -68,7 +73,7 @@ class _TournamentTablesScreenState extends State<TournamentTablesScreen> {
                     child: FutureBuilder<TablesQueueBoard>(
                       future: _future,
                       builder: (context, snap) {
-                        if (snap.connectionState == ConnectionState.waiting) {
+                        if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
                           return const LoadingState();
                         }
                         if (snap.hasError) {
