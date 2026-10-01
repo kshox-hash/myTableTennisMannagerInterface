@@ -17,6 +17,26 @@ import "package:myttmi/features/notifications/notification_nav.dart";
 ///
 /// Se enteran de lo nuevo revisando la campana cada 20 s mientras la app está
 /// abierta (y al instante si llega un push con la app abierta).
+/// Tipos que se avisan (push y cuadro emergente). Mismo listado que el
+/// servidor (PUSH_TYPES en notifications_repository.ts) y la web.
+const importantTypes = {
+  "groups_started",
+  "match_up_soon",
+  "match_on_table",
+  "groups_ending",
+  "group_outcome",
+  "final_position",
+  "tournament_cancelled",
+  "tournament_updated",
+  "enrollment_removed",
+  "match_result_corrected",
+  "group_changed",
+  "bracket_changed",
+  "club_join_request",
+  "club_join_approved",
+  "club_join_rejected",
+};
+
 class NotificationPopups {
   NotificationPopups._();
 
@@ -76,6 +96,8 @@ class NotificationPopups {
       if (n.isRead || _shown.contains(n.idNotification)) return false;
       // Mesa asignada: ya lo avisa el banner "¡Te toca! Ve a la mesa N".
       if (n.type == "match_on_table") return false;
+      // Solo lo importante (el resto queda en la campana, sin aviso).
+      if (!importantTypes.contains(n.type)) return false;
       final at = DateTime.tryParse(n.createdAt);
       return at == null || !at.isBefore(_since);
     }).toList().reversed.toList(); // la lista viene de la más nueva a la más vieja
@@ -96,8 +118,16 @@ class NotificationPopups {
     _items.value = all.length > _maxVisible ? all.sublist(all.length - _maxVisible) : all;
   }
 
+  static final ValueNotifier<Set<String>> _leaving = ValueNotifier(const {});
+  static const _exit = Duration(milliseconds: 320);
+
   static void _dismiss(String id) {
-    _items.value = _items.value.where((n) => n.idNotification != id).toList();
+    if (_leaving.value.contains(id) || !_items.value.any((n) => n.idNotification == id)) return;
+    _leaving.value = {..._leaving.value, id};
+    Timer(_exit, () {
+      _items.value = _items.value.where((n) => n.idNotification != id).toList();
+      _leaving.value = {..._leaving.value}..remove(id);
+    });
   }
 
   static Future<void> _open(AppNotification n) async {
@@ -124,7 +154,9 @@ class _PopupStack extends StatelessWidget {
       left: 16,
       bottom: bottom,
       width: width,
-      child: ValueListenableBuilder<List<AppNotification>>(
+      child: ValueListenableBuilder<Set<String>>(
+        valueListenable: NotificationPopups._leaving,
+        builder: (_, leaving, __) => ValueListenableBuilder<List<AppNotification>>(
         valueListenable: NotificationPopups._items,
         builder: (_, list, __) => Column(
           mainAxisSize: MainAxisSize.min,
@@ -138,6 +170,7 @@ class _PopupStack extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 8),
                 child: _Popup(
                   n: n,
+                  leaving: leaving.contains(n.idNotification),
                   onTap: () => NotificationPopups._open(n),
                   onClose: () => NotificationPopups._dismiss(n.idNotification),
                 ),
@@ -145,22 +178,38 @@ class _PopupStack extends StatelessWidget {
           ],
         ),
       ),
+      ),
     );
   }
 }
 
 class _Popup extends StatefulWidget {
   final AppNotification n;
+  final bool leaving;
   final VoidCallback onTap;
   final VoidCallback onClose;
-  const _Popup({required this.n, required this.onTap, required this.onClose});
+  const _Popup({required this.n, required this.leaving, required this.onTap, required this.onClose});
 
   @override
   State<_Popup> createState() => _PopupState();
 }
 
 class _PopupState extends State<_Popup> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 260))..forward();
+  // Entrada: entra desde la izquierda con un pequeño rebote, crece y
+  // aparece. Salida (se va solo, ×, o al tocarlo): se desliza a la
+  // izquierda desvaneciéndose y el hueco se cierra suave (los de arriba
+  // bajan en vez de saltar).
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 520),
+    reverseDuration: const Duration(milliseconds: 320),
+  )..forward();
+
+  @override
+  void didUpdateWidget(covariant _Popup old) {
+    super.didUpdateWidget(old);
+    if (widget.leaving && !old.leaving) _c.reverse();
+  }
 
   @override
   void dispose() {
@@ -171,11 +220,19 @@ class _PopupState extends State<_Popup> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final n = widget.n;
-    final curve = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
-    return SlideTransition(
-      position: Tween(begin: const Offset(-1.1, 0), end: Offset.zero).animate(curve),
+    final slide = CurvedAnimation(parent: _c, curve: Curves.easeOutBack, reverseCurve: Curves.easeInCubic);
+    final fade = CurvedAnimation(parent: _c, curve: const Interval(0, 0.6, curve: Curves.easeOut), reverseCurve: Curves.easeIn);
+    final size = CurvedAnimation(parent: _c, curve: const Interval(0, 0.5, curve: Curves.easeOut), reverseCurve: const Interval(0.3, 1, curve: Curves.easeIn));
+    return SizeTransition(
+      sizeFactor: size,
+      axisAlignment: 1,
+      child: SlideTransition(
+      position: Tween(begin: const Offset(-1.15, 0), end: Offset.zero).animate(slide),
+      child: ScaleTransition(
+      scale: Tween(begin: 0.92, end: 1.0).animate(fade),
+      alignment: Alignment.centerLeft,
       child: FadeTransition(
-        opacity: curve,
+        opacity: fade,
         // Más claro que las tarjetas y con borde fino, para que se note que
         // flota encima (igual que el cuadro de la web).
         child: Material(
@@ -236,6 +293,8 @@ class _PopupState extends State<_Popup> with SingleTickerProviderStateMixin {
           ),
         ),
       ),
+    ),
+    ),
     );
   }
 }
