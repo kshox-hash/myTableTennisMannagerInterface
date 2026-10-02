@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/tap_sound.dart";
 import "package:myttmi/core/ui/stagger_in.dart";
 import 'package:myttmi/core/ui/app_button.dart';
 import 'package:flutter/material.dart';
@@ -199,6 +200,18 @@ class _HomeScreenState extends State<HomeScreen>
                   style: TextStyle(color: AppColors.scorifyText),
                 ),
                 onTap: () => Navigator.pop(context, "referee_scan"),
+              ),
+              // Sonido al tocar botones (se guarda en el teléfono).
+              ValueListenableBuilder<bool>(
+                valueListenable: TapSound.enabled,
+                builder: (_, on, __) => SwitchListTile(
+                  secondary: Icon(on ? Icons.volume_up_rounded : Icons.volume_off_rounded, color: AppColors.scorifyText),
+                  title: const Text("Sonidos", style: TextStyle(color: AppColors.scorifyText)),
+                  value: on,
+                  activeThumbColor: AppColors.scorifyOnMint,
+                  activeTrackColor: AppColors.scorifyMint,
+                  onChanged: TapSound.setEnabled,
+                ),
               ),
               ListTile(
                 leading: const Icon(Icons.logout, color: AppColors.scorifyText),

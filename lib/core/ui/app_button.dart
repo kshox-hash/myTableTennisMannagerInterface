@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/tap_sound.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -173,7 +174,12 @@ class _AppButtonState extends State<AppButton> {
         onTapDown: (_) => _setPressed(true),
         onTapUp: (_) => _setPressed(false),
         onTapCancel: () => _setPressed(false),
-        onTap: _enabled ? widget.onPressed : null,
+        onTap: _enabled
+            ? () {
+                TapSound.play();
+                widget.onPressed!();
+              }
+            : null,
         child: AnimatedScale(
           scale: _pressed ? 0.97 : 1,
           duration: const Duration(milliseconds: 110),

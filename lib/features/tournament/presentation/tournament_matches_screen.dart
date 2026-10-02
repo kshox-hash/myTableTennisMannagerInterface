@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/tap_sound.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/favorites/favorite_button.dart";
@@ -509,7 +510,10 @@ class _Segmented extends StatelessWidget {
                 color: Colors.transparent,
                 shape: const StadiumBorder(),
                 child: InkWell(
-                  onTap: it.onTap,
+                  onTap: () {
+                    if (!it.selected) TapSound.play();
+                    it.onTap();
+                  },
                   customBorder: const StadiumBorder(),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),

@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/tap_sound.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/ui/app_button.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
@@ -88,7 +89,10 @@ class _SubTabSwitch extends StatelessWidget {
               color: Colors.transparent,
               shape: const StadiumBorder(),
               child: InkWell(
-                onTap: () => onChanged(i),
+                onTap: () {
+                  if (i != index) TapSound.play();
+                  onChanged(i);
+                },
                 customBorder: const StadiumBorder(),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
