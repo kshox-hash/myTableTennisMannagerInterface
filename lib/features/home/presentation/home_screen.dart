@@ -426,7 +426,9 @@ class _HomeScreenState extends State<HomeScreen>
                   // tarjeta de abajo. Con partido no hace falta (el
                   // contenido ya llena) y el carrusel —que usa
                   // LayoutBuilder— no admite IntrinsicHeight.
-                  child: _fillHeight(nm == null, Column(
+                  // La tarjeta de partido (o la de sin partido) toma el alto
+                  // que sobra, así llega hasta abajo en cualquier caso.
+                  child: _fillHeight(true, Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: staggerChildren([
                       hero,
@@ -460,7 +462,7 @@ class _HomeScreenState extends State<HomeScreen>
                       // números; arriba del todo el perfil quedaba perdido).
                       if (nm != null) ...[
                         const SizedBox(height: 12),
-                        matches,
+                        Expanded(child: matches),
                         if (_myStanding != null && nm.matchType == "group") ...[
                           const SizedBox(height: 12),
                           HomeGroupCard(
@@ -543,12 +545,14 @@ class _MatchesCarouselState extends State<_MatchesCarousel> {
   Widget build(BuildContext context) {
     final pages = widget.pages;
     if (pages.length == 1) return pages.first;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final w = constraints.maxWidth;
+    // Ancho de la pantalla menos el margen del Inicio (16 a cada lado).
+    final w = MediaQuery.sizeOf(context).width - 32;
+    return Builder(
+      builder: (context) {
         return Column(
           children: [
-            NotificationListener<ScrollNotification>(
+            Expanded(
+              child: NotificationListener<ScrollNotification>(
               onNotification: (_) {
                 final p = (_controller.offset / w).round().clamp(
                   0,
@@ -561,15 +565,14 @@ class _MatchesCarouselState extends State<_MatchesCarousel> {
                 controller: _controller,
                 scrollDirection: Axis.horizontal,
                 physics: const PageScrollPhysics(),
-                child: IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (final page in pages) SizedBox(width: w, child: page),
-                    ],
-                  ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final page in pages) SizedBox(width: w, child: page),
+                  ],
                 ),
               ),
+            ),
             ),
             const SizedBox(height: 12),
             // Con muchos partidos los puntitos no caben: se muestra "3 / 12".

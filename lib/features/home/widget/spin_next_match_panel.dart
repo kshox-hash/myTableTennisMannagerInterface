@@ -117,7 +117,9 @@ class SpinNextMatchPanel extends StatelessWidget {
 
   Widget _match() {
     final ready = tableNumber != null;
+    // Centrado en el alto que le dé el Inicio (la tarjeta llega hasta abajo).
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const _Label(),
         const SizedBox(height: 8),
