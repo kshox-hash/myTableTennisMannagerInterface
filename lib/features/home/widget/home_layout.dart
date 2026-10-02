@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/card_border.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
@@ -48,7 +49,7 @@ class HomePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(16);
-    return Material(
+    return CardBorder(child: Material(
       color: gradient == null ? AppColors.scorifyCardFill : Colors.transparent,
       borderRadius: radius,
       child: Ink(
@@ -59,7 +60,7 @@ class HomePanel extends StatelessWidget {
           child: Padding(padding: padding, child: child),
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -271,6 +272,9 @@ class HomeStreakCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                const SizedBox(height: 4),
+                const Text("Ver historial ›",
+                    style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyMint)),
               ],
             ),
           ),
@@ -292,23 +296,6 @@ class HomeStreakCard extends StatelessWidget {
   }
 }
 
-/// Botones "Mi perfil" (degradado) e "Historial" (borde en degradado).
-class HomeActionButtons extends StatelessWidget {
-  final VoidCallback onProfile;
-  final VoidCallback onHistory;
-  const HomeActionButtons({super.key, required this.onProfile, required this.onHistory});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(child: AppButton(label: "Mi perfil", icon: Icons.person_rounded, onPressed: onProfile)),
-        const SizedBox(width: 12),
-        Expanded(child: AppButton.outline(label: "Historial", icon: Icons.receipt_long_rounded, onPressed: onHistory)),
-      ],
-    );
-  }
-}
 
 /// KPI grande (Victorias / Efectividad) con su ícono de color.
 class HomeKpiCard extends StatelessWidget {
@@ -347,11 +334,29 @@ class HomeKpiCard extends StatelessWidget {
   }
 }
 
-/// "Próximo partido" cuando no hay ninguno: invita a buscar campeonatos.
+/// "Próximo partido" cuando no hay ninguno. Si estás inscrito en un
+/// campeonato que aún no empieza, lo muestra (fecha y cuánto falta); si no,
+/// invita a buscar campeonatos (con cuántos tienen la inscripción abierta).
 class HomeNoMatchCard extends StatelessWidget {
   final VoidCallback onBrowse;
   final bool loading;
-  const HomeNoMatchCard({super.key, required this.onBrowse, this.loading = false});
+  /// Próximo campeonato en que estás inscrito.
+  final String? upcomingName;
+  final String? upcomingWhen; // "sáb 12 oct · faltan 9 días"
+  final String? upcomingCategory;
+  final VoidCallback? onUpcoming;
+  /// Campeonatos con la inscripción abierta (si no estás inscrito en nada).
+  final int openCount;
+  const HomeNoMatchCard({
+    super.key,
+    required this.onBrowse,
+    this.loading = false,
+    this.upcomingName,
+    this.upcomingWhen,
+    this.upcomingCategory,
+    this.onUpcoming,
+    this.openCount = 0,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -370,27 +375,56 @@ class HomeNoMatchCard extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.calendar_month_rounded, color: AppColors.scorifyMint, size: 15),
+                    Icon(upcomingName != null ? Icons.emoji_events_rounded : Icons.calendar_month_rounded, color: AppColors.scorifyMint, size: 15),
                     const SizedBox(width: 6),
-                    Text("PRÓXIMO PARTIDO", style: _label(AppColors.scorifyMint)),
+                    Text(upcomingName != null ? "PRÓXIMO CAMPEONATO" : "PRÓXIMO PARTIDO", style: _label(AppColors.scorifyMint)),
                   ],
                 ),
                 const SizedBox(height: 3),
-                Text(loading ? "Cargando…" : "Sin partidos programados",
+                Text(
+                    loading
+                        ? "Cargando…"
+                        : (upcomingName ?? "Sin partidos programados"),
                     textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                 const SizedBox(height: 2),
-                const Text("Inscríbete a un campeonato para entrar al fixture",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
-                const SizedBox(height: 12),
-                AppButton.outline(
-                  label: "Ver torneos",
-                  onPressed: onBrowse,
-                  trailingIcon: Icons.chevron_right_rounded,
-                  height: 36,
-                  expand: false,
-                ),
+                if (upcomingName != null) ...[
+                  if (upcomingWhen != null)
+                    Text(upcomingWhen!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.scorifyMint)),
+                  if (upcomingCategory != null) ...[
+                    const SizedBox(height: 2),
+                    Text(upcomingCategory!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
+                  ],
+                  const SizedBox(height: 12),
+                  AppButton.outline(
+                    label: "Ver campeonato",
+                    onPressed: onUpcoming,
+                    trailingIcon: Icons.chevron_right_rounded,
+                    height: 36,
+                    expand: false,
+                  ),
+                ] else ...[
+                  Text(
+                      openCount > 0
+                          ? "${openCount == 1 ? "Hay 1 campeonato" : "Hay $openCount campeonatos"} con la inscripción abierta"
+                          : "Inscríbete a un campeonato para entrar al fixture",
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
+                  const SizedBox(height: 12),
+                  AppButton.outline(
+                    label: "Ver torneos",
+                    onPressed: onBrowse,
+                    trailingIcon: Icons.chevron_right_rounded,
+                    height: 36,
+                    expand: false,
+                  ),
+                ],
               ],
         ),
       ),

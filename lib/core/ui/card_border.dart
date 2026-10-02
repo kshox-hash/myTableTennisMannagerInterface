@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 
-/// Filete sutil en degradado para las tarjetas principales: celeste tenue
-/// arriba a la izquierda, casi invisible al medio y un toque verde abajo a
-/// la derecha. Se pinta encima del borde de la tarjeta (no cambia su tamaño).
+/// Filete sutil para las tarjetas principales: un solo tono turquesa
+/// apagado, un poco más claro arriba y que se desvanece hacia abajo (sin
+/// mezclar colores, para que no se vea recargado). Se pinta encima del borde de la tarjeta (no cambia su tamaño).
 /// Solo para tarjetas grandes; los elementos de adentro (chips, filas,
 /// casillas) van sin borde para no recargar.
 class CardBorder extends StatelessWidget {
@@ -26,18 +26,16 @@ class _CardBorderPainter extends CustomPainter {
     final rect = Offset.zero & size;
     final paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.6
+      ..strokeWidth = 1.4
       ..shader = LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
         colors: [
-          AppColors.scorifyMint.withValues(alpha: 0.45),
-          Colors.white.withValues(alpha: 0.08),
-          AppColors.scorifyButterfly.withValues(alpha: 0.30),
+          AppColors.scorifyMint.withValues(alpha: 0.32),
+          AppColors.scorifyMint.withValues(alpha: 0.10),
         ],
-        stops: const [0, 0.5, 1],
       ).createShader(rect);
-    canvas.drawRRect(RRect.fromRectAndRadius(rect.deflate(0.8), Radius.circular(radius - 0.8)), paint);
+    canvas.drawRRect(RRect.fromRectAndRadius(rect.deflate(0.7), Radius.circular(radius - 0.7)), paint);
   }
 
   @override

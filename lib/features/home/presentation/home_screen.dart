@@ -1,4 +1,7 @@
 import "package:myttmi/features/shell/shell_preload.dart";
+import "package:myttmi/features/calendar/api/calendar_api.dart";
+import "package:myttmi/features/calendar/models/calendar_event.dart";
+import "package:myttmi/features/tournament/api/tournament_api.dart";
 import "package:myttmi/core/ui/stagger_in.dart";
 import 'package:myttmi/core/ui/app_button.dart';
 import 'package:flutter/material.dart';
@@ -64,6 +67,10 @@ class _HomeScreenState extends State<HomeScreen>
   PlayerStanding? _myStanding;
   // Partidos que me toca arbitrar (asignados por el organizador o por QR).
   List<RefereeMatch> _refMatches = const [];
+  // Sin partido asignado: el próximo campeonato en que estás inscrito, o
+  // cuántos campeonatos tienen la inscripción abierta.
+  CalendarEvent? _upcoming;
+  int _openCount = 0;
   int _groupSize = 0;
 
   @override
@@ -98,6 +105,7 @@ class _HomeScreenState extends State<HomeScreen>
         _loadForm(_profile?.idUser),
         _loadGroup(_dashboard?.nextMatch),
         _loadReferee(),
+        if (_dashboard?.nextMatch == null) _loadUpcoming(),
       ]);
     } catch (_) {
       // Silencioso: la pantalla igual se puede usar sin estos datos.
@@ -108,6 +116,59 @@ class _HomeScreenState extends State<HomeScreen>
         ShellPreload.done();
       }
     }
+  }
+
+  /// Sin partido: tu próximo campeonato (inscrito y aún sin empezar); si no
+  /// hay, cuántos campeonatos tienen la inscripción abierta.
+  Future<void> _loadUpcoming() async {
+    final today = DateTime.now();
+    final day = DateTime(today.year, today.month, today.day);
+    CalendarEvent? next;
+    try {
+      final events = await CalendarApi().myEvents(from: day, to: day.add(const Duration(days: 180)));
+      final pending = events.where((e) => !e.finished && !e.inProgress && !e.date.isBefore(day)).toList()
+        ..sort((a, b) => a.date.compareTo(b.date));
+      if (pending.isNotEmpty) next = pending.first;
+    } catch (_) {}
+    var open = 0;
+    if (next == null) {
+      try {
+        final page = await TournamentApi().fetchTournaments(limit: 50);
+        open = page.items.where((t) {
+          if (t.isCancelled) return false;
+          final d = DateTime.tryParse(t.eventDate ?? "");
+          if (d != null && d.isBefore(day)) return false;
+          return t.categories.any((c) => c.phase == "enrollment");
+        }).length;
+      } catch (_) {}
+    }
+    if (!mounted) return;
+    setState(() {
+      _upcoming = next;
+      _openCount = open;
+    });
+  }
+
+  static const _weekdays = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"];
+  static const _months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+
+  /// "sáb 12 oct · faltan 9 días" / "· es mañana" / "· es hoy".
+  String _whenLabel(DateTime d) {
+    final now = DateTime.now();
+    final days = DateTime(d.year, d.month, d.day).difference(DateTime(now.year, now.month, now.day)).inDays;
+    final left = days <= 0 ? "es hoy" : days == 1 ? "es mañana" : "faltan $days días";
+    return "${_weekdays[d.weekday - 1]} ${d.day} ${_months[d.month - 1]} · $left";
+  }
+
+  Future<void> _openUpcoming() async {
+    final e = _upcoming;
+    if (e == null) return;
+    try {
+      final t = await TournamentApi().getTournamentById(e.tournamentId);
+      if (!mounted) return;
+      await Navigator.pushNamed(context, AppRoutes.tournamentDetail, arguments: t);
+      if (mounted) _load(silent: true);
+    } catch (_) {}
   }
 
   Future<void> _loadReferee() async {
@@ -275,7 +336,14 @@ class _HomeScreenState extends State<HomeScreen>
       emptySubtitle: _loading
           ? "Cargando…"
           : "Inscríbete a un campeonato para entrar al fixture",
-      onTap: m?.opponentId != null
+      onTap: m != null
+          ? () => Navigator.pushNamed(
+              context,
+              AppRoutes.tournamentTables,
+              arguments: {"tournamentId": m.idTournament, "tournamentName": m.tournamentName},
+            )
+          : () => AppShellScope.of(context)?.switchTab(3),
+      onOpponentProfile: m?.opponentId != null
           ? () => Navigator.pushNamed(
               context,
               AppRoutes.playerProfile,
@@ -284,7 +352,7 @@ class _HomeScreenState extends State<HomeScreen>
                 "playerName": m.opponentName ?? "Jugador",
               },
             )
-          : () => AppShellScope.of(context)?.switchTab(3),
+          : null,
     );
   }
 
@@ -422,13 +490,6 @@ class _HomeScreenState extends State<HomeScreen>
                         onTap: () =>
                             Navigator.pushNamed(context, AppRoutes.history),
                       ),
-                      const SizedBox(height: 12),
-                      HomeActionButtons(
-                        onProfile: () =>
-                            Navigator.pushNamed(context, AppRoutes.profile),
-                        onHistory: () =>
-                            Navigator.pushNamed(context, AppRoutes.history),
-                      ),
                       // Sin partido: la invitación a buscar campeonatos, abajo.
                       if (nm == null) ...[
                         const SizedBox(height: 12),
@@ -437,6 +498,11 @@ class _HomeScreenState extends State<HomeScreen>
                             loading: _loading,
                             onBrowse: () =>
                                 AppShellScope.of(context)?.switchTab(3),
+                            upcomingName: _upcoming?.tournamentName,
+                            upcomingWhen: _upcoming == null ? null : _whenLabel(_upcoming!.date),
+                            upcomingCategory: _upcoming?.categoryName,
+                            onUpcoming: _openUpcoming,
+                            openCount: _openCount,
                           ),
                         ),
                       ],

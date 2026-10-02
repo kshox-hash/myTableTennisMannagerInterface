@@ -60,13 +60,12 @@ class AppColors {
     colors: [Color(0xFF0F1E25), Color(0xFF0F1E25)],
   );
 
-  /// Tarjeta destacada (próximo partido): el celeste y el verde de los
-  /// botones, tenues sobre el fondo de tarjeta — celeste arriba a la
-  /// izquierda, neutro al medio, verde abajo a la derecha.
+  /// Tarjeta destacada (próximo partido): turquesa tenue arriba a la
+  /// izquierda que se funde con el fondo de tarjeta (un solo tono).
   static const LinearGradient featuredGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF0C3A46), Color(0xFF0F1E25), Color(0xFF233826)],
-    stops: [0, 0.55, 1],
+    colors: [Color(0xFF0D3741), Color(0xFF0F1E25)],
+    stops: [0, 0.75],
   );
 }

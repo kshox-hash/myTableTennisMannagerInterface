@@ -1,3 +1,5 @@
+import 'package:myttmi/core/ui/app_button.dart';
+import 'package:myttmi/core/ui/card_border.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/ui/user_avatar.dart';
@@ -28,6 +30,8 @@ class SpinNextMatchPanel extends StatelessWidget {
   final String emptyTitle;
   final String emptySubtitle;
   final VoidCallback onTap;
+  /// Abre el perfil del rival (con su historial). Null si aún no hay rival.
+  final VoidCallback? onOpponentProfile;
 
   const SpinNextMatchPanel({
     super.key,
@@ -46,6 +50,7 @@ class SpinNextMatchPanel extends StatelessWidget {
     this.emptyTitle = "Sin partidos programados",
     this.emptySubtitle = "",
     required this.onTap,
+    this.onOpponentProfile,
   });
 
   static String _hhmm(DateTime d) => "${d.hour.toString().padLeft(2, "0")}:${d.minute.toString().padLeft(2, "0")}";
@@ -68,7 +73,7 @@ class SpinNextMatchPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return CardBorder(child: Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
@@ -83,7 +88,7 @@ class SpinNextMatchPanel extends StatelessWidget {
           child: hasMatch ? _match() : _empty(),
         ),
       ),
-    );
+    ));
   }
 
   Widget _empty() {
@@ -187,6 +192,16 @@ class SpinNextMatchPanel extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
             style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11.5, fontWeight: FontWeight.w600),
+          ),
+        ],
+        if (onOpponentProfile != null) ...[
+          const SizedBox(height: 12),
+          AppButton.outline(
+            label: "Ver perfil del rival",
+            icon: Icons.person_search_rounded,
+            onPressed: onOpponentProfile,
+            height: 36,
+            expand: false,
           ),
         ],
       ],
