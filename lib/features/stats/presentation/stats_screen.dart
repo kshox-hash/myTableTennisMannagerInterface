@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
 import 'package:myttmi/core/storage/session_storage.dart';
-import 'package:myttmi/core/ui/glass_card.dart';
 import 'package:myttmi/core/ui/list_states.dart';
 import 'package:myttmi/core/ui/top_header.dart';
 import 'package:myttmi/features/player/api/player_api.dart';
@@ -135,7 +134,10 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                           padding: const EdgeInsets.only(bottom: 24),
                           children: staggerChildren([
                             // ── Efectividad + racha ──
-                            GlassCard(
+                            SectionCard(
+                              title: "Tu forma",
+                              icon: Icons.local_fire_department_rounded,
+                              titleColor: AppColors.scorifyMint,
                               padding: const EdgeInsets.all(18),
                               child: Column(
                                 children: [
@@ -147,8 +149,6 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            const Text("TU FORMA", style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2, color: AppColors.scorifyMint)),
-                                            const SizedBox(height: 6),
                                             Text(
                                               streak == null
                                                   ? "Sin partidos aún"
@@ -208,6 +208,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                             const SizedBox(height: 22),
                             SectionCard(
                               title: "Sets",
+                              icon: Icons.scoreboard_outlined,
                               padding: const EdgeInsets.all(18),
                               child: Column(
                                 children: [
@@ -250,6 +251,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                             const SizedBox(height: 22),
                             SectionCard(
                               title: "Últimos partidos",
+                              icon: Icons.history_rounded,
                               trailing: _recent.isEmpty
                                   ? null
                                   : TextButton(

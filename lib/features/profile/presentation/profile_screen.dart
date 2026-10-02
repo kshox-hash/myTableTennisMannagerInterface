@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/section_card.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
@@ -474,24 +475,12 @@ class _ClubSectionState extends State<_ClubSection> {
 
   @override
   Widget build(BuildContext context) {
-    return GlassCard(
+    return SectionCard(
+      title: "Mi club",
+      icon: Icons.shield_outlined,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: const BoxDecoration(color: AppColors.scorifySurface2, shape: BoxShape.circle),
-                child: const Icon(Icons.shield_outlined, color: AppColors.scorifyMint, size: 19),
-              ),
-              const SizedBox(width: 12),
-              const Text("Mi club",
-                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 17, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
-            ],
-          ),
-          const SizedBox(height: 14),
           if (_loading)
             const Center(
               child: SizedBox(
@@ -637,7 +626,9 @@ class _DuesCardState extends State<_DuesCard> {
     final ok = d.upToDate;
     final color = ok ? AppColors.scorifyButterfly : AppColors.scorifyNegative;
     final unit = d.feeFrequency == "weekly" ? (d.owedPeriods == 1 ? "semana" : "semanas") : (d.owedPeriods == 1 ? "mes" : "meses");
-    return GlassCard(
+    return SectionCard(
+      title: "Cuotas del club",
+      icon: Icons.payments_outlined,
       child: Row(
         children: [
           Container(
@@ -651,8 +642,6 @@ class _DuesCardState extends State<_DuesCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("CUOTAS DEL CLUB", style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 1)),
-                const SizedBox(height: 2),
                 Text(
                   ok ? "Estás al día" : "Debes ${d.owedPeriods} $unit",
                   style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w600),

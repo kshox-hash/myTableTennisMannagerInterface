@@ -1,4 +1,4 @@
-import "package:myttmi/core/ui/card_border.dart";
+import "package:myttmi/core/ui/section_card.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -303,9 +303,11 @@ class _MyTurnCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 22),
-      child: CardBorder(radius: 20, child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(20)),
+      child: SectionCard(
+        title: "Tu turno",
+        icon: Icons.sports_tennis_rounded,
+        titleColor: AppColors.scorifyMint,
+        gradient: AppColors.featuredGradient,
         child: Row(
           children: [
             Container(
@@ -325,9 +327,6 @@ class _MyTurnCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("TU TURNO",
-                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2, color: AppColors.scorifyMint)),
-                  const SizedBox(height: 4),
                   Text(title,
                       style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText, height: 1.25)),
                   const SizedBox(height: 4),
@@ -340,7 +339,7 @@ class _MyTurnCard extends StatelessWidget {
             ),
           ],
         ),
-      )),
+      ),
     );
   }
 }

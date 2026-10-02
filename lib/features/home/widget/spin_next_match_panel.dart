@@ -1,5 +1,5 @@
+import 'package:myttmi/core/ui/section_card.dart';
 import 'package:myttmi/core/ui/app_button.dart';
-import 'package:myttmi/core/ui/card_border.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/ui/user_avatar.dart';
@@ -73,29 +73,21 @@ class SpinNextMatchPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CardBorder(child: Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-          decoration: BoxDecoration(
-            gradient: AppColors.featuredGradient,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.scorifyCardBorder),
-          ),
-          child: hasMatch ? _match() : _empty(),
-        ),
-      ),
-    ));
+    return SectionCard(
+      title: "Próximo partido",
+      icon: Icons.sports_tennis_rounded,
+      titleColor: AppColors.scorifyMint,
+      gradient: AppColors.featuredGradient,
+      fill: true,
+      onTap: onTap,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      child: hasMatch ? _match() : _empty(),
+    );
   }
 
   Widget _empty() {
     return Column(
       children: [
-        const _Label(),
-        const SizedBox(height: 14),
         const Icon(Icons.sports_tennis_rounded, color: AppColors.scorifyMint, size: 30),
         const SizedBox(height: 10),
         Text(
@@ -121,8 +113,6 @@ class SpinNextMatchPanel extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const _Label(),
-        const SizedBox(height: 8),
         // Competición (como "Premier League / Week 10").
         Text(
           tournamentName,
@@ -207,17 +197,6 @@ class SpinNextMatchPanel extends StatelessWidget {
           ),
         ],
       ],
-    );
-  }
-}
-
-class _Label extends StatelessWidget {
-  const _Label();
-  @override
-  Widget build(BuildContext context) {
-    return const Text(
-      "PRÓXIMO PARTIDO",
-      style: TextStyle(color: AppColors.scorifyMint, fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 1.2),
     );
   }
 }

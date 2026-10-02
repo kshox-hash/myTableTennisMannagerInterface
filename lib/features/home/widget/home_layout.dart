@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/section_card.dart";
 import "package:myttmi/core/ui/card_border.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
@@ -215,7 +216,9 @@ class HomeStatsBar extends StatelessWidget {
           ),
         );
     Widget divider() => Container(width: 1, height: 36, margin: const EdgeInsets.symmetric(horizontal: 8), color: AppColors.scorifySurface2);
-    return HomePanel(
+    return SectionCard(
+      title: "Estadísticas",
+      icon: Icons.bar_chart_rounded,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       child: Row(
         children: [
@@ -255,26 +258,27 @@ class HomeStreakCard extends StatelessWidget {
           : (n == 1 ? "Perdiste el último" : "$n derrotas seguidas");
     }
     final accent = winning ? AppColors.scorifyButterfly : AppColors.scorifyNegative;
-    return HomePanel(
+    return SectionCard(
+      title: "Racha",
+      icon: winning ? Icons.local_fire_department_rounded : Icons.trending_down_rounded,
+      titleColor: accent,
+      trailing: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        child: Text("Ver historial ›",
+            style: TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w500, color: AppColors.scorifyMint)),
+      ),
       onTap: onTap,
-      padding: const EdgeInsets.fromLTRB(16, 14, 10, 14),
+      padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
       child: Row(
         children: [
-          Icon(winning ? Icons.local_fire_department_rounded : Icons.trending_down_rounded, color: accent, size: 30),
-          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("RACHA", style: _label(accent)),
-                const SizedBox(height: 3),
                 Text(text,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
-                const SizedBox(height: 4),
-                const Text("Ver historial ›",
-                    style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyMint)),
               ],
             ),
           ),
@@ -289,7 +293,6 @@ class HomeStreakCard extends StatelessWidget {
               ),
               child: Icon(won ? Icons.check_rounded : Icons.close_rounded, color: won ? AppColors.scorifyOnButterfly : Colors.white, size: 14),
             ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
         ],
       ),
     );
@@ -360,7 +363,11 @@ class HomeNoMatchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HomePanel(
+    return SectionCard(
+      title: upcomingName != null ? "Próximo campeonato" : "Próximo partido",
+      icon: upcomingName != null ? Icons.emoji_events_rounded : Icons.calendar_month_rounded,
+      titleColor: AppColors.scorifyMint,
+      fill: true,
       gradient: AppColors.featuredGradient,
       // Centrado (ícono arriba, textos y botón al medio), igual que la
       // tarjeta del partido, que ya es simétrica.
@@ -372,15 +379,6 @@ class HomeNoMatchCard extends StatelessWidget {
         child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(upcomingName != null ? Icons.emoji_events_rounded : Icons.calendar_month_rounded, color: AppColors.scorifyMint, size: 15),
-                    const SizedBox(width: 6),
-                    Text(upcomingName != null ? "PRÓXIMO CAMPEONATO" : "PRÓXIMO PARTIDO", style: _label(AppColors.scorifyMint)),
-                  ],
-                ),
-                const SizedBox(height: 3),
                 Text(
                     loading
                         ? "Cargando…"
@@ -458,7 +456,10 @@ class HomeGroupCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final leading = position == 1;
-    return HomePanel(
+    return SectionCard(
+      title: "Tu grupo · $groupName",
+      icon: Icons.groups_rounded,
+      titleColor: AppColors.scorifyMint,
       onTap: onTap,
       padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
       child: Row(
@@ -486,8 +487,6 @@ class HomeGroupCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("TU GRUPO · ${groupName.toUpperCase()}", style: _label(AppColors.scorifyMint)),
-                const SizedBox(height: 3),
                 Text(
                   position == null ? "Aún sin partidos jugados" : "${position}° de $total",
                   style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
@@ -517,7 +516,10 @@ class HomeRefereeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HomePanel(
+    return SectionCard(
+      title: "Te toca arbitrar",
+      icon: Icons.sports_rounded,
+      titleColor: AppColors.scorifyButterfly,
       onTap: onTap,
       padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
       child: Row(
@@ -534,8 +536,6 @@ class HomeRefereeCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("TE TOCA ARBITRAR", style: _label(AppColors.scorifyButterfly)),
-                const SizedBox(height: 3),
                 Text(title, maxLines: 1, overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                 const SizedBox(height: 2),

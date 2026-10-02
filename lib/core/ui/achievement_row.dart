@@ -132,6 +132,7 @@ class _AchievementsCardState extends State<AchievementsCard> {
       padding: const EdgeInsets.only(bottom: 12),
       child: SectionCard(
         title: "Palmarés",
+        icon: Icons.emoji_events_rounded,
         trailing: list.isEmpty
             ? null
             : Padding(
