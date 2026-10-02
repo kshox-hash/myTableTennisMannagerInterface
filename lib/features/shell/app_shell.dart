@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/background_music.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/navigation/deep_links.dart';
@@ -68,6 +69,8 @@ class _AppShellState extends State<AppShell>
     PushService.register();
     // Avisos tipo Facebook de las notificaciones nuevas (abajo a la izquierda).
     NotificationPopups.start();
+    // Música de fondo mientras hay sesión.
+    BackgroundMusic.start();
   }
 
   @override
@@ -82,6 +85,7 @@ class _AppShellState extends State<AppShell>
     if (ToastLayout.shellRoute == ModalRoute.of(context)) ToastLayout.shellRoute = null;
     DeepLinks.shellGone();
     NotificationPopups.stop();
+    BackgroundMusic.stop();
     _pulse.dispose();
     super.dispose();
   }

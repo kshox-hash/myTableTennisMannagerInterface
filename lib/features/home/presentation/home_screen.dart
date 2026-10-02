@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/background_music.dart";
 import "package:myttmi/core/ui/tap_sound.dart";
 import "package:myttmi/core/ui/stagger_in.dart";
 import 'package:myttmi/core/ui/app_button.dart';
@@ -211,6 +212,17 @@ class _HomeScreenState extends State<HomeScreen>
                   activeThumbColor: AppColors.scorifyOnMint,
                   activeTrackColor: AppColors.scorifyMint,
                   onChanged: TapSound.setEnabled,
+                ),
+              ),
+              ValueListenableBuilder<bool>(
+                valueListenable: BackgroundMusic.enabled,
+                builder: (_, on, __) => SwitchListTile(
+                  secondary: Icon(on ? Icons.music_note_rounded : Icons.music_off_rounded, color: AppColors.scorifyText),
+                  title: const Text("Música", style: TextStyle(color: AppColors.scorifyText)),
+                  value: on,
+                  activeThumbColor: AppColors.scorifyOnMint,
+                  activeTrackColor: AppColors.scorifyMint,
+                  onChanged: BackgroundMusic.setEnabled,
                 ),
               ),
               ListTile(
