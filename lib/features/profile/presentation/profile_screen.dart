@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/ui/app_toast.dart";
@@ -308,34 +309,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Row(
                                     children: [
                                       Expanded(
-                                        child: SizedBox(
-                                          height: 46,
-                                          child: OutlinedButton(
-                                            onPressed: _saving ? null : () => setState(() => _editing = false),
-                                            style: OutlinedButton.styleFrom(
-                                              foregroundColor: AppColors.scorifyText,
-                                              side: const BorderSide(color: AppColors.scorifyTextMuted),
-                                              shape: const StadiumBorder(),
-                                              textStyle: AppTypography.button,
-                                            ),
-                                            child: const Text("Cancelar"),
-                                          ),
+                                        child: AppButton.outline(
+                                          label: "Cancelar",
+                                          onPressed: _saving ? null : () => setState(() => _editing = false),
                                         ),
                                       ),
                                       const SizedBox(width: 10),
                                       Expanded(
-                                        child: SizedBox(
-                                          height: 46,
-                                          child: FilledButton(
-                                            onPressed: _saving ? null : _save,
-                                            child: _saving
-                                                ? const SizedBox(
-                                                    width: 18,
-                                                    height: 18,
-                                                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.scorifyOnButterfly),
-                                                  )
-                                                : const Text("Guardar cambios"),
-                                          ),
+                                        child: AppButton(
+                                          label: "Guardar",
+                                          onPressed: _saving ? null : _save,
+                                          loading: _saving,
                                         ),
                                       ),
                                     ],
@@ -734,15 +718,7 @@ class _ProfileHero extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            height: 44,
-            child: FilledButton.icon(
-              onPressed: onEdit,
-              icon: const Icon(Icons.edit_outlined, size: 18),
-              label: const Text("Editar perfil"),
-            ),
-          ),
+          AppButton.outline(label: "Editar perfil", icon: Icons.edit_outlined, onPressed: onEdit),
         ],
       ),
     );

@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -285,7 +286,7 @@ class HomeStreakCard extends StatelessWidget {
   }
 }
 
-/// Botones "Mi perfil" (verde) e "Historial" (contorno), con ícono y flecha.
+/// Botones "Mi perfil" (degradado) e "Historial" (borde en degradado).
 class HomeActionButtons extends StatelessWidget {
   final VoidCallback onProfile;
   final VoidCallback onHistory;
@@ -293,43 +294,11 @@ class HomeActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget btn({required IconData icon, required String label, required bool primary, required VoidCallback onTap}) => Expanded(
-          child: Material(
-            color: primary ? AppColors.scorifyButterfly : Colors.transparent,
-            shape: primary ? const StadiumBorder() : const StadiumBorder(side: BorderSide(color: AppColors.scorifyTextMuted)),
-            child: InkWell(
-              onTap: onTap,
-              customBorder: const StadiumBorder(),
-              child: SizedBox(
-                height: 48,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      Icon(icon, size: 19, color: primary ? AppColors.scorifyOnButterfly : AppColors.scorifyText),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(label,
-                            style: TextStyle(
-                              fontFamily: AppTypography.body,
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w600,
-                              color: primary ? AppColors.scorifyOnButterfly : AppColors.scorifyText,
-                            )),
-                      ),
-                      Icon(Icons.chevron_right_rounded, color: primary ? AppColors.scorifyOnButterfly : AppColors.scorifyTextMuted),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
     return Row(
       children: [
-        btn(icon: Icons.person_rounded, label: "Mi perfil", primary: true, onTap: onProfile),
+        Expanded(child: AppButton(label: "Mi perfil", icon: Icons.person_rounded, onPressed: onProfile)),
         const SizedBox(width: 12),
-        btn(icon: Icons.receipt_long_rounded, label: "Historial", primary: false, onTap: onHistory),
+        Expanded(child: AppButton.outline(label: "Historial", icon: Icons.receipt_long_rounded, onPressed: onHistory)),
       ],
     );
   }
@@ -408,17 +377,12 @@ class HomeNoMatchCard extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
                 const SizedBox(height: 12),
-                OutlinedButton(
+                AppButton.outline(
+                  label: "Ver torneos",
                   onPressed: onBrowse,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.scorifyText,
-                    side: const BorderSide(color: AppColors.scorifyTextMuted),
-                    shape: const StadiumBorder(),
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    minimumSize: const Size(0, 34),
-                    textStyle: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w600),
-                  ),
-                  child: const Row(mainAxisSize: MainAxisSize.min, children: [Text("Ver torneos"), SizedBox(width: 2), Icon(Icons.chevron_right_rounded, size: 18)]),
+                  trailingIcon: Icons.chevron_right_rounded,
+                  height: 36,
+                  expand: false,
                 ),
               ],
         ),
@@ -539,11 +503,7 @@ class HomeRefereeCard extends StatelessWidget {
               ],
             ),
           ),
-          FilledButton(
-            onPressed: onTap,
-            style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 14), minimumSize: const Size(0, 38)),
-            child: const Text("Arbitrar"),
-          ),
+          AppButton(label: "Arbitrar", onPressed: onTap, height: 36, expand: false),
         ],
       ),
     );

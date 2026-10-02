@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/app_toast.dart";
 import "package:myttmi/routes/cyber_page_route.dart";
@@ -7,7 +8,6 @@ import "package:myttmi/core/constants/countries.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/auth_text_field.dart";
 import "package:myttmi/core/ui/glass_card.dart";
-import "package:myttmi/core/ui/pill_button.dart";
 import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/auth/api/auth_api.dart";
@@ -367,9 +367,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.scorifyMint),
                                   ),
                                 )
-                              : Center(
-                                  child: SolidPillButton(label: "Crear cuenta", onTap: _register),
-                                ),
+                              : AppButton(label: "Crear cuenta", onPressed: _register),
                         ],
                       ),
                     ),

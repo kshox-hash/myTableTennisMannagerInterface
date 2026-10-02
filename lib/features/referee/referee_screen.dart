@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -299,14 +300,11 @@ class _RefereeScreenState extends State<RefereeScreen> {
             ),
           )
         else
-          SizedBox(
-            height: 50,
-            child: FilledButton(
-              onPressed: decided && problem == null && !_saving ? _confirm : null,
-              child: _saving
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.scorifyOnButterfly))
-                  : const Text("Confirmar resultado"),
-            ),
+          AppButton(
+            label: "Confirmar resultado",
+            onPressed: decided && problem == null ? _confirm : null,
+            loading: _saving,
+            height: 48,
           ),
       ],
     );

@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/app_button.dart';
 import 'package:flutter/material.dart';
 import "package:myttmi/features/home/widget/home_layout.dart";
 import "package:myttmi/core/ui/side_panel_route.dart";
@@ -153,16 +154,12 @@ class _HomeScreenState extends State<HomeScreen>
               style: TextStyle(color: AppColors.scorifyText.withOpacity(0.85)),
             ),
           ),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.scorifyButterfly,
-              foregroundColor: AppColors.scorifyOnButterfly,
-              elevation: 0,
-              shape: const StadiumBorder(),
-            ),
+          AppButton(
+            label: "Cerrar sesión",
+            icon: Icons.logout,
             onPressed: () => Navigator.pop(context, true),
-            icon: const Icon(Icons.logout),
-            label: const Text("Cerrar sesión"),
+            height: 40,
+            expand: false,
           ),
         ],
       ),

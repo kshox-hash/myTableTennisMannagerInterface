@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/routes/cyber_page_route.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -308,19 +309,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
                 ),
               ),
               const SizedBox(width: 10),
-              SizedBox(
-                height: 46,
-                child: FilledButton(
-                  onPressed: _search,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text("Buscar"),
-                ),
-              ),
+              AppButton(label: "Buscar", onPressed: _search, height: 46, expand: false),
             ],
           ),
         ],

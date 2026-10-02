@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:google_sign_in/google_sign_in.dart";
 import "package:myttmi/core/constants/app_config.dart";
@@ -10,7 +11,6 @@ import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/auth_text_field.dart";
 import "package:myttmi/core/ui/brand_logo.dart";
 import "package:myttmi/core/ui/glass_card.dart";
-import "package:myttmi/core/ui/pill_button.dart";
 import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/features/auth/api/auth_api.dart";
 import "package:myttmi/features/auth/presentation/register_screen.dart";
@@ -156,12 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 height: 22,
                                 child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.scorifyMint),
                               )
-                            : SizedBox(
-                                width: double.infinity,
-                                child: Center(
-                                  child: SolidPillButton(label: "Entrar", onTap: _login),
-                                ),
-                              ),
+                            : AppButton(label: "Entrar", onPressed: _login),
                         const SizedBox(height: 18),
                         Row(
                           children: [
@@ -176,7 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 14),
                         SizedBox(
                           width: double.infinity,
-                          height: 46,
+                          height: 44,
                           child: OutlinedButton(
                             onPressed: loading ? null : _loginGoogle,
                             style: OutlinedButton.styleFrom(

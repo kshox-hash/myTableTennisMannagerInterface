@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:share_plus/share_plus.dart";
 import "package:myttmi/core/constants/app_config.dart";
@@ -608,59 +609,26 @@ class _CategoryCardState extends State<_CategoryCard> {
             ],
           ),
           const SizedBox(height: 8),
-          SizedBox(
-            height: 46,
-            child: needsProfile
-                ? OutlinedButton(
-                    onPressed: () => Navigator.pushNamed(context, AppRoutes.profile),
-                    child: const Text("Completar mi perfil"),
-                  )
-                : FilledButton(
-                    onPressed: null,
-                    style: FilledButton.styleFrom(
-                      disabledBackgroundColor: AppColors.scorifySurface2,
-                      disabledForegroundColor: AppColors.scorifyTextMuted,
-                    ),
-                    child: const Text("No disponible para ti"),
-                  ),
-          ),
+          needsProfile
+              ? AppButton.outline(
+                  label: "Completar mi perfil",
+                  onPressed: () => Navigator.pushNamed(context, AppRoutes.profile),
+                )
+              : const AppButton(label: "No disponible para ti", onPressed: null),
         ],
       );
     }
     if (inEnrollment) {
-      return SizedBox(
-        width: double.infinity,
-        height: 46,
-        child: FilledButton(
-          onPressed: full || widget.subscribing ? null : widget.onSubscribe,
-          style: FilledButton.styleFrom(
-            disabledBackgroundColor: AppColors.scorifySurface2,
-            disabledForegroundColor: AppColors.scorifyTextMuted,
-          ),
-          child: widget.subscribing
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.scorifyOnButterfly),
-                )
-              : Text(full ? "Cupos completos" : "Inscribirme"),
-        ),
+      return AppButton(
+        label: full ? "Cupos completos" : "Inscribirme",
+        onPressed: full ? null : widget.onSubscribe,
+        loading: widget.subscribing,
       );
     }
-    return SizedBox(
-      width: double.infinity,
-      height: 46,
-      child: OutlinedButton.icon(
-        onPressed: widget.onOpen,
-        icon: const Icon(Icons.groups_rounded, size: 18),
-        label: const Text("Ver grupos y resultados"),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.scorifyText,
-          side: const BorderSide(color: AppColors.scorifyTextMuted),
-          shape: const StadiumBorder(),
-          textStyle: AppTypography.button,
-        ),
-      ),
+    return AppButton.outline(
+      label: "Ver grupos y resultados",
+      icon: Icons.groups_rounded,
+      onPressed: widget.onOpen,
     );
   }
 }

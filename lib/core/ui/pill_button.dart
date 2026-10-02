@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/app_button.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
@@ -37,29 +38,7 @@ class SolidPillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _PopIn(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(999),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-            decoration: BoxDecoration(color: AppColors.scorifyButterfly, borderRadius: BorderRadius.circular(999)),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, size: 14, color: AppColors.scorifyOnButterfly),
-                  const SizedBox(width: 6),
-                ],
-                Text(label, style: AppTypography.button.copyWith(color: AppColors.scorifyOnButterfly)),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+    return _PopIn(child: AppButton(label: label, onPressed: onTap, icon: icon, expand: false));
   }
 }
 
@@ -73,32 +52,7 @@ class OutlinePillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _PopIn(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(999),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: AppColors.scorifyCardBorder),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, size: 14, color: AppColors.scorifyText),
-                  const SizedBox(width: 6),
-                ],
-                Text(label, style: AppTypography.button.copyWith(color: AppColors.scorifyText)),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+    return _PopIn(child: AppButton.outline(label: label, onPressed: onTap, icon: icon, expand: false));
   }
 }
 

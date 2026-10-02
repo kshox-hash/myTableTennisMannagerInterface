@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -36,12 +37,12 @@ Future<bool> confirmAction(
             style: TextStyle(fontFamily: AppTypography.body, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted),
           ),
         ),
-        FilledButton(
+        AppButton(
+          label: confirmLabel,
           onPressed: () => Navigator.pop(ctx, true),
-          style: danger
-              ? FilledButton.styleFrom(backgroundColor: AppColors.scorifyNegative, foregroundColor: Colors.white)
-              : null,
-          child: Text(confirmLabel),
+          variant: danger ? AppButtonVariant.danger : AppButtonVariant.primary,
+          height: 40,
+          expand: false,
         ),
       ],
     ),
