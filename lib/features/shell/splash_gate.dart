@@ -2,7 +2,6 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:myttmi/routes/cyber_page_route.dart";
-import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/app_button.dart";
@@ -11,7 +10,8 @@ import "package:myttmi/features/auth/presentation/login_screen.dart";
 import "package:myttmi/features/shell/app_shell.dart";
 import "package:myttmi/features/profile/api/profile_api.dart";
 
-/// Pantalla de carga al abrir la app (estilo FIFA): la foto del jugador de
+/// Al abrir la app: primero el logo al medio sobre negro (~1 s, aquí irá
+/// su animación) y después, con un fundido, la pantalla de carga (estilo FIFA): la foto del jugador de
 /// fondo y, en el espacio libre de arriba, el logo, el lema y una barra de
 /// carga que avanza con los pasos reales (revisar la sesión, traer tus
 /// datos). Se muestra al menos un instante para que no sea un parpadeo.
@@ -24,6 +24,12 @@ class SplashGate extends StatefulWidget {
 
 class _SplashGateState extends State<SplashGate> {
   static const _minShown = Duration(milliseconds: 1600);
+  static const _introLength = Duration(milliseconds: 1000);
+
+  // Primera fase: logo al medio sobre negro. La carga real ya corre por
+  // detrás; la pantalla de carga aparece al terminar esta fase.
+  bool _intro = true;
+  final _introDone = Completer<void>();
   static const _bg = AssetImage("assets/images/loading_bg.jpg");
 
   double _target = 0.08; // hasta dónde va la barra según el paso actual
@@ -53,14 +59,22 @@ class _SplashGateState extends State<SplashGate> {
   @override
   void initState() {
     super.initState();
+    Future.delayed(_introLength, () async {
+      // Que la foto ya esté lista al pasar a la pantalla de carga.
+      await _bgReady.future.timeout(const Duration(seconds: 2), onTimeout: () {});
+      if (!mounted) return;
+      setState(() => _intro = false);
+      _shownAt = DateTime.now();
+      _introDone.complete();
+    });
     _route();
   }
 
   Future<void> _go(Widget screen, DateTime started) async {
     _step(1, "¡A JUGAR!");
-    // Si la foto tardó en cargar, el tiempo mínimo cuenta desde que apareció.
-    await _bgReady.future.timeout(const Duration(seconds: 3), onTimeout: () {});
-    if (_shownAt.isAfter(started)) started = _shownAt;
+    // El tiempo mínimo cuenta desde que aparece la pantalla de carga.
+    await _introDone.future;
+    started = _shownAt;
     final left = _minShown - DateTime.now().difference(started);
     await Future.delayed(left.isNegative ? const Duration(milliseconds: 350) : left);
     if (!mounted) return;
@@ -70,7 +84,6 @@ class _SplashGateState extends State<SplashGate> {
   DateTime _shownAt = DateTime.now();
 
   Future<void> _route() async {
-    _bgReady.future.then((_) => _shownAt = DateTime.now());
     final started = DateTime.now();
     final storage = SessionStorage();
     _step(0.3, "AJUSTANDO LA RED…");
@@ -107,8 +120,25 @@ class _SplashGateState extends State<SplashGate> {
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
     return Scaffold(
-      backgroundColor: AppColors.scorifyBg,
-      body: Stack(
+      backgroundColor: Colors.black,
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 500),
+        child: _intro ? _logoIntro() : _loading(mq),
+      ),
+    );
+  }
+
+  /// Fase 1: logo al medio sobre negro (aquí irá la animación del logo).
+  Widget _logoIntro() => const ColoredBox(
+        key: ValueKey("intro"),
+        color: Colors.black,
+        child: Center(child: BrandLogo(markSize: 96, showWordmark: false)),
+      );
+
+  /// Fase 2: la foto con el logo arriba y la barra de carga abajo.
+  Widget _loading(MediaQueryData mq) {
+    return Stack(
+        key: const ValueKey("loading"),
         fit: StackFit.expand,
         children: [
           // Foto: el jugador abajo; arriba queda el espacio libre del texto.
@@ -177,7 +207,6 @@ class _SplashGateState extends State<SplashGate> {
                 ),
           ),
         ],
-      ),
     );
   }
 
