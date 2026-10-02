@@ -3,7 +3,7 @@ import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 
 /// Botones de la app, estilo "premium": bajos y alargados, texto en
-/// mayúsculas con letras espaciadas.
+/// mayúsculas. Planos: sin resplandor ni brillo.
 ///  - primary: relleno en degradado verde → celeste, para LA acción principal
 ///    de la pantalla (Entrar, Inscribirme, Guardar, Confirmar…).
 ///  - outline: borde en degradado sobre fondo oscuro, para las secundarias
@@ -13,8 +13,8 @@ enum AppButtonVariant { primary, outline, danger }
 
 const appButtonGradient = LinearGradient(
   colors: [AppColors.scorifyButterfly, AppColors.scorifyMint],
-  begin: Alignment.centerLeft,
-  end: Alignment.centerRight,
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
 );
 
 class AppButton extends StatefulWidget {
@@ -74,7 +74,7 @@ class _AppButtonState extends State<AppButton> {
         ? AppColors.scorifyTextMuted
         : switch (v) {
             AppButtonVariant.primary => AppColors.scorifyOnMint,
-            AppButtonVariant.outline => AppColors.scorifyText,
+            AppButtonVariant.outline => const Color(0xFFB9C1C9), // gris claro, no blanco
             AppButtonVariant.danger => Colors.white,
           };
 
@@ -95,9 +95,9 @@ class _AppButtonState extends State<AppButton> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: AppTypography.body,
-                    fontSize: small ? 11.5 : 13,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: small ? 0.8 : 1.1,
+                    fontSize: small ? 12 : 13.5,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.2,
                     color: fg,
                   ),
                 ),
@@ -123,28 +123,12 @@ class _AppButtonState extends State<AppButton> {
             borderRadius: radius,
             color: disabled ? AppColors.scorifySurface2 : (v == AppButtonVariant.danger ? AppColors.scorifyNegative : null),
             gradient: !disabled && v == AppButtonVariant.primary ? appButtonGradient : null,
-            boxShadow: disabled
-                ? null
-                : [
-                    BoxShadow(
-                      color: (v == AppButtonVariant.danger ? AppColors.scorifyNegative : AppColors.scorifyMint).withValues(alpha: 0.28),
-                      blurRadius: 18,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
           ),
-          // Brillo suave arriba: da el volumen "de cristal" del botón.
+          // Filete fino y claro en el borde (sin resplandor ni brillo).
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: radius,
-              gradient: disabled
-                  ? null
-                  : LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Colors.white.withValues(alpha: 0.22), Colors.white.withValues(alpha: 0.0)],
-                      stops: const [0, 0.55],
-                    ),
+              border: disabled ? null : Border.all(color: Colors.white.withValues(alpha: 0.35), width: 1),
             ),
             child: inner,
           ),
@@ -158,23 +142,22 @@ class _AppButtonState extends State<AppButton> {
             gradient: disabled
                 ? null
                 : LinearGradient(
+                    // Celeste arriba → verde abajo, apagado.
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                     colors: [
-                      AppColors.scorifyButterfly.withValues(alpha: 0.85),
-                      AppColors.scorifyMint.withValues(alpha: 0.85),
+                      AppColors.scorifyMint.withValues(alpha: 0.55),
+                      AppColors.scorifyButterfly.withValues(alpha: 0.6),
                     ],
                   ),
             color: disabled ? AppColors.scorifySurface2 : null,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(1.3),
+            padding: const EdgeInsets.all(1.5),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(widget.height / 2 - 1.3),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [const Color(0xFF14262E), AppColors.scorifyBg.withValues(alpha: 0.96)],
-                ),
+                borderRadius: BorderRadius.circular(widget.height / 2 - 1.5),
+                color: const Color(0xFF0E1D25),
               ),
               child: inner,
             ),
