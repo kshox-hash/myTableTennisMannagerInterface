@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myttmi/core/ui/app_button.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
 import 'package:myttmi/core/ui/top_header.dart';
@@ -77,8 +78,14 @@ class _SubTabSwitch extends StatelessWidget {
         children: List.generate(_labels.length, (i) {
           final selected = i == index;
           return Expanded(
-            child: Material(
-              color: selected ? AppColors.scorifyMint : Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: selected ? appButtonGradient : null,
+                borderRadius: BorderRadius.circular(999),
+                border: selected ? Border.all(color: Colors.white.withValues(alpha: 0.35)) : null,
+              ),
+              child: Material(
+              color: Colors.transparent,
               shape: const StadiumBorder(),
               child: InkWell(
                 onTap: () => onChanged(i),
@@ -98,6 +105,7 @@ class _SubTabSwitch extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
             ),
           );
         }),

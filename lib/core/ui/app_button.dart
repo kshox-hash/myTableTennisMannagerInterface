@@ -146,8 +146,8 @@ class _AppButtonState extends State<AppButton> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      AppColors.scorifyMint.withValues(alpha: 0.55),
-                      AppColors.scorifyButterfly.withValues(alpha: 0.6),
+                      AppColors.scorifyMint.withValues(alpha: 0.9),
+                      AppColors.scorifyButterfly.withValues(alpha: 0.9),
                     ],
                   ),
             color: disabled ? AppColors.scorifySurface2 : null,
@@ -157,7 +157,8 @@ class _AppButtonState extends State<AppButton> {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(widget.height / 2 - 1.5),
-                color: const Color(0xFF0E1D25),
+                // Más claro que las tarjetas: se lee como botón encima de ellas.
+                color: const Color(0xFF1A313C),
               ),
               child: inner,
             ),
