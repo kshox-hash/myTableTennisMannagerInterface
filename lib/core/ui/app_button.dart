@@ -191,3 +191,11 @@ class _AppButtonState extends State<AppButton> {
     );
   }
 }
+
+/// Fondo de la opción elegida en los selectores tipo píldora (pestañas,
+/// filtros): el mismo degradado y filete claro del botón principal.
+BoxDecoration selectedPillDecoration(bool selected) => BoxDecoration(
+      gradient: selected ? appButtonGradient : null,
+      borderRadius: BorderRadius.circular(999),
+      border: selected ? Border.all(color: Colors.white.withValues(alpha: 0.35)) : null,
+    );

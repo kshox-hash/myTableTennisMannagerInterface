@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/app_button.dart";
 import "package:myttmi/core/ui/card_border.dart";
 import "dart:async";
 
@@ -187,10 +188,7 @@ class _ViewSelector extends StatelessWidget {
               onTap: () => onChanged(v),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: v == value ? AppColors.scorifyMint : Colors.transparent,
-                  borderRadius: BorderRadius.circular(999),
-                ),
+                decoration: selectedPillDecoration(v == value),
                 child: Text(
                   "$v",
                   style: TextStyle(

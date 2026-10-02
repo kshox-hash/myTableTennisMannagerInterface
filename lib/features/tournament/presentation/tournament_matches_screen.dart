@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/favorites/favorite_button.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -504,8 +505,8 @@ class _Segmented extends StatelessWidget {
         children: [
           for (final it in items)
             Expanded(
-              child: Material(
-                color: it.selected ? AppColors.scorifyMint : Colors.transparent,
+              child: DecoratedBox(decoration: selectedPillDecoration(it.selected), child: Material(
+                color: Colors.transparent,
                 shape: const StadiumBorder(),
                 child: InkWell(
                   onTap: it.onTap,
@@ -536,7 +537,7 @@ class _Segmented extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
+              )),
             ),
         ],
       ),

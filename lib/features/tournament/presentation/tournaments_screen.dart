@@ -377,8 +377,8 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: selected ? AppColors.scorifyMint : AppColors.scorifySurface2,
+    return DecoratedBox(decoration: selectedPillDecoration(selected), child: Material(
+      color: selected ? Colors.transparent : AppColors.scorifySurface2,
       shape: const StadiumBorder(),
       child: InkWell(
         onTap: onTap,
@@ -401,7 +401,7 @@ class _FilterChip extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 
