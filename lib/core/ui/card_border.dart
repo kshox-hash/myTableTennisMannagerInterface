@@ -26,18 +26,18 @@ class _CardBorderPainter extends CustomPainter {
     final rect = Offset.zero & size;
     final paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
+      ..strokeWidth = 1.6
       ..shader = LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          AppColors.scorifyMint.withValues(alpha: 0.30),
-          Colors.white.withValues(alpha: 0.05),
-          AppColors.scorifyButterfly.withValues(alpha: 0.18),
+          AppColors.scorifyMint.withValues(alpha: 0.45),
+          Colors.white.withValues(alpha: 0.08),
+          AppColors.scorifyButterfly.withValues(alpha: 0.30),
         ],
         stops: const [0, 0.5, 1],
       ).createShader(rect);
-    canvas.drawRRect(RRect.fromRectAndRadius(rect.deflate(0.5), Radius.circular(radius - 0.5)), paint);
+    canvas.drawRRect(RRect.fromRectAndRadius(rect.deflate(0.8), Radius.circular(radius - 0.8)), paint);
   }
 
   @override
