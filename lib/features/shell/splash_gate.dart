@@ -113,17 +113,6 @@ class _SplashGateState extends State<SplashGate> {
         children: [
           // Foto: el jugador abajo; arriba queda el espacio libre del texto.
           const Image(image: _bg, fit: BoxFit.cover, alignment: Alignment(-0.6, 1)),
-          // Sombra oscura arriba para que el texto blanco se lea sobre el turquesa.
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xB3060E12), Color(0x00060E12)],
-                stops: [0, 0.48],
-              ),
-            ),
-          ),
           Positioned(
             left: 28,
             right: 28,
