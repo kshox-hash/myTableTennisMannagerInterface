@@ -263,8 +263,8 @@ class _LiveCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final d = detail;
-    return CardBorder(child: Material(
-      color: AppColors.scorifyCardFill,
+    return CardBorder(child: DecoratedBox(decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(16)), child: Material(
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -286,7 +286,7 @@ class _LiveCard extends StatelessWidget {
               : _content(d),
         ),
       ),
-    ));
+    )));
   }
 
   Widget _content(MatchDetail d) {

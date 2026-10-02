@@ -251,7 +251,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
         // Grilla: una fila por jugador, una columna por set (igual al panel).
         CardBorder(child: Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(16)),
+          decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(16)),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Column(

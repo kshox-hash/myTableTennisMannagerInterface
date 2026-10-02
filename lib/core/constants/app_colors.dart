@@ -56,16 +56,21 @@ class AppColors {
   // Ahora es un color SÓLIDO (los dos extremos iguales), como las tarjetas
   // del landing: se mantiene como "gradiente" solo para no tocar a quien
   // lo usa.
+  /// Todas las tarjetas: turquesa tenue arriba a la izquierda que se funde
+  /// con el fondo de tarjeta.
   static const LinearGradient cardGradient = LinearGradient(
-    colors: [Color(0xFF0F1E25), Color(0xFF0F1E25)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF0E2A32), Color(0xFF0F1E25)],
+    stops: [0, 0.7],
   );
 
-  /// Tarjeta destacada (próximo partido): turquesa tenue arriba a la
-  /// izquierda que se funde con el fondo de tarjeta (un solo tono).
+  /// Tarjeta destacada (próximo partido): el mismo turquesa pero más
+  /// intenso y que llega más lejos, para que resalte sobre las demás.
   static const LinearGradient featuredGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF0D3741), Color(0xFF0F1E25)],
-    stops: [0, 0.75],
+    colors: [Color(0xFF0F4652), Color(0xFF0F1E25)],
+    stops: [0, 0.9],
   );
 }

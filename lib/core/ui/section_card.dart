@@ -28,8 +28,8 @@ class SectionCard extends StatelessWidget {
       radius: _radius,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(_radius),
-        child: ColoredBox(
-          color: AppColors.scorifyCardFill,
+        child: DecoratedBox(
+          decoration: const BoxDecoration(gradient: AppColors.cardGradient),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

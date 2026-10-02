@@ -754,8 +754,8 @@ class _QuickLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CardBorder(child: Material(
-      color: AppColors.scorifyCardFill,
+    return CardBorder(child: DecoratedBox(decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(16)), child: Material(
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -779,7 +779,7 @@ class _QuickLink extends StatelessWidget {
           ),
         ),
       ),
-    ));
+    )));
   }
 }
 

@@ -305,7 +305,7 @@ class _MyTurnCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 22),
       child: CardBorder(radius: 20, child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(20)),
+        decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(20)),
         child: Row(
           children: [
             Container(

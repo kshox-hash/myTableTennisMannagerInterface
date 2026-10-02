@@ -50,10 +50,10 @@ class HomePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(16);
     return CardBorder(child: Material(
-      color: gradient == null ? AppColors.scorifyCardFill : Colors.transparent,
+      color: Colors.transparent,
       borderRadius: radius,
       child: Ink(
-        decoration: BoxDecoration(gradient: gradient, borderRadius: radius),
+        decoration: BoxDecoration(gradient: gradient ?? AppColors.cardGradient, borderRadius: radius),
         child: InkWell(
           borderRadius: radius,
           onTap: onTap,
