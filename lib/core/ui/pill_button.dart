@@ -108,7 +108,7 @@ class InfoChip extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontFamily: AppTypography.body,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w600,
           fontSize: 11,
           color: fg,
         ),

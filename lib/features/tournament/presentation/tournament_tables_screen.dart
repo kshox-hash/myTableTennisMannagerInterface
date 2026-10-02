@@ -165,7 +165,7 @@ class _TableCard extends StatelessWidget {
               Text(
                 "🏓 Mesa ${slot.tableNumber}",
                 style: AppTypography.bodyText.copyWith(
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               const Spacer(),
@@ -183,7 +183,7 @@ class _TableCard extends StatelessWidget {
                     color: occupied
                         ? AppColors.scorifyMint
                         : AppColors.scorifyTextMuted,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -235,7 +235,7 @@ class _QueueRow extends StatelessWidget {
             child: Text(
               "$position",
               style: AppTypography.caption.copyWith(
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -315,7 +315,7 @@ class _MyTurnCard extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(big, style: TextStyle(fontFamily: AppTypography.body, fontSize: 26, fontWeight: FontWeight.w800, color: fg, height: 1.1)),
+                  Text(big, style: TextStyle(fontFamily: AppTypography.body, fontSize: 26, fontWeight: FontWeight.w600, color: fg, height: 1.1)),
                   Text(bigLabel, style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: fg)),
                 ],
               ),
@@ -326,15 +326,15 @@ class _MyTurnCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text("TU TURNO",
-                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: AppColors.scorifyMint)),
+                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2, color: AppColors.scorifyMint)),
                   const SizedBox(height: 4),
                   Text(title,
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.scorifyText, height: 1.25)),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText, height: 1.25)),
                   const SizedBox(height: 4),
                   Text("vs $rival · ${match.matchLabel}",
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
                 ],
               ),
             ),

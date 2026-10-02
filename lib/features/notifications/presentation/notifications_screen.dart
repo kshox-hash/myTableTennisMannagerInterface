@@ -115,7 +115,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           "Marcar todo leído",
                           style: AppTypography.bodyMuted.copyWith(
                             color: AppColors.scorifyMint,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -189,7 +189,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   style: const TextStyle(
                                     fontFamily: AppTypography.body,
                                     fontSize: 15,
-                                    fontWeight: FontWeight.w800,
+                                    fontWeight: FontWeight.w600,
                                     color: AppColors.scorifyText,
                                   ),
                                 ),
@@ -235,7 +235,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                                 fontSize: 14.5,
                                                 fontWeight: n.isRead
                                                     ? FontWeight.w600
-                                                    : FontWeight.w800,
+                                                    : FontWeight.w600,
                                                 color: AppColors.scorifyText,
                                               ),
                                             ),
@@ -246,7 +246,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                                 fontFamily: AppTypography.body,
                                                 fontSize: 13.5,
                                                 height: 1.35,
-                                                fontWeight: FontWeight.w500,
+                                                fontWeight: FontWeight.w400,
                                                 color:
                                                     AppColors.scorifyTextMuted,
                                               ),

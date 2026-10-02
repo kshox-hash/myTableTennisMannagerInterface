@@ -37,19 +37,19 @@ class GroupCard extends StatelessWidget {
             child: Row(
               children: [
                 Text(_label(group.groupName),
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                 if (isMyGroup) ...[
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(color: AppColors.scorifyMint, borderRadius: BorderRadius.circular(999)),
                     child: const Text("Tu grupo",
-                        style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.scorifyOnMint)),
+                        style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyOnMint)),
                   ),
                 ],
                 const Spacer(),
                 Text("${members.length} ${members.length == 1 ? "jugador" : "jugadores"}",
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
               ],
             ),
           ),
@@ -72,7 +72,7 @@ class GroupCard extends StatelessWidget {
                       SizedBox(
                         width: 22,
                         child: Text("${i + 1}",
-                            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.scorifyTextMuted)),
+                            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted)),
                       ),
                       ClipOval(child: Identicon(seed: members[i].idUser, size: 30)),
                       const SizedBox(width: 10),
@@ -90,7 +90,7 @@ class GroupCard extends StatelessWidget {
                               Text(members[i].clubName!,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
+                                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
                           ],
                         ),
                       ),

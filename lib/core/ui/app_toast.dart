@@ -257,7 +257,7 @@ class _PopupState extends State<_Popup> with SingleTickerProviderStateMixin {
                               style: TextStyle(
                                 fontFamily: AppTypography.body,
                                 fontSize: 13.5,
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w600,
                                 color: n.highlight ? fg : AppColors.scorifyText,
                               ),
                             ),

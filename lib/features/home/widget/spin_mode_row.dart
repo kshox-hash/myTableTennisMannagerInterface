@@ -60,7 +60,7 @@ class SpinModeRow extends StatelessWidget {
                           style: const TextStyle(
                             color: AppColors.scorifyText,
                             fontSize: 14,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w700,
                             fontStyle: FontStyle.italic,
                           ),
                         ),

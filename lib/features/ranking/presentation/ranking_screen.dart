@@ -14,7 +14,7 @@ import 'package:myttmi/routes/app_routes.dart';
 const TextStyle _muted = TextStyle(
   fontFamily: AppTypography.body,
   fontSize: 12.5,
-  fontWeight: FontWeight.w500,
+  fontWeight: FontWeight.w400,
   color: AppColors.scorifyTextMuted,
 );
 
@@ -202,7 +202,7 @@ class _MyRankCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   "#${me.rankingPosition} de $total",
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.scorifyText),
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                 ),
               ],
             ),
@@ -212,7 +212,7 @@ class _MyRankCard extends StatelessWidget {
             decoration: BoxDecoration(color: AppColors.scorifyButterfly, borderRadius: BorderRadius.circular(999)),
             child: Text(
               "${me.rankingPoints} pts",
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.scorifyOnButterfly),
+              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyOnButterfly),
             ),
           ),
         ],
@@ -275,7 +275,7 @@ class _PodiumStep extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.scorifyText),
+            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
           ),
           Text("${e.rankingPoints} pts", style: _muted.copyWith(fontSize: 12)),
           const SizedBox(height: 8),
@@ -290,7 +290,7 @@ class _PodiumStep extends StatelessWidget {
             ),
             child: Text(
               "$place",
-              style: TextStyle(fontFamily: AppTypography.body, fontSize: 26, fontWeight: FontWeight.w800, color: color),
+              style: TextStyle(fontFamily: AppTypography.body, fontSize: 26, fontWeight: FontWeight.w600, color: color),
             ),
           ),
         ],
@@ -321,7 +321,7 @@ class _RankRow extends StatelessWidget {
                 width: 34,
                 child: Text(
                   "${player.rankingPosition}",
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.scorifyTextMuted),
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted),
                 ),
               ),
               ClipOval(child: Identicon(seed: player.idUser, size: 32)),
@@ -342,7 +342,7 @@ class _RankRow extends StatelessWidget {
               ),
               Text(
                 "${player.rankingPoints} pts",
-                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.scorifyText),
+                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
               ),
             ],
           ),

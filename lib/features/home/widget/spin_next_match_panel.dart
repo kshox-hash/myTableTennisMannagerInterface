@@ -96,7 +96,7 @@ class SpinNextMatchPanel extends StatelessWidget {
         Text(
           emptyTitle,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.scorifyText, fontSize: 15, fontWeight: FontWeight.w800),
+          style: const TextStyle(color: AppColors.scorifyText, fontSize: 15, fontWeight: FontWeight.w600),
         ),
         if (emptySubtitle.isNotEmpty) ...[
           const SizedBox(height: 4),
@@ -122,7 +122,7 @@ class SpinNextMatchPanel extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w800),
+          style: const TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w600),
         ),
         if (stageLabel.isNotEmpty) ...[
           const SizedBox(height: 2),
@@ -147,25 +147,25 @@ class SpinNextMatchPanel extends StatelessWidget {
                   if (ready) ...[
                     const Text(
                       "MESA",
-                      style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.5),
+                      style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.5),
                     ),
                     Text(
                       "$tableNumber",
-                      style: const TextStyle(color: AppColors.scorifyText, fontSize: 38, height: 1.05, fontWeight: FontWeight.w900),
+                      style: const TextStyle(color: AppColors.scorifyText, fontSize: 38, height: 1.05, fontWeight: FontWeight.w700),
                     ),
                   ] else if (scheduledAt != null) ...[
                     Text(
                       _dayLabel(scheduledAt!),
-                      style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.2),
+                      style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2),
                     ),
                     Text(
                       _hhmm(scheduledAt!),
-                      style: const TextStyle(color: AppColors.scorifyText, fontSize: 32, height: 1.1, fontWeight: FontWeight.w900),
+                      style: const TextStyle(color: AppColors.scorifyText, fontSize: 32, height: 1.1, fontWeight: FontWeight.w700),
                     ),
                   ] else
                     const Text(
                       "VS",
-                      style: TextStyle(color: AppColors.scorifyText, fontSize: 34, height: 1.2, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+                      style: TextStyle(color: AppColors.scorifyText, fontSize: 34, height: 1.2, fontWeight: FontWeight.w700, fontStyle: FontStyle.italic),
                     ),
                   const SizedBox(height: 8),
                   _Chip(
@@ -200,7 +200,7 @@ class _Label extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Text(
       "PRÓXIMO PARTIDO",
-      style: TextStyle(color: AppColors.scorifyMint, fontSize: 10.5, fontWeight: FontWeight.w800, letterSpacing: 1.2),
+      style: TextStyle(color: AppColors.scorifyMint, fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 1.2),
     );
   }
 }
@@ -231,7 +231,7 @@ class _Side extends StatelessWidget {
           maxLines: 2,
           textAlign: TextAlign.center,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(color: AppColors.scorifyText, fontSize: 13, fontWeight: FontWeight.w800, height: 1.2),
+          style: const TextStyle(color: AppColors.scorifyText, fontSize: 13, fontWeight: FontWeight.w600, height: 1.2),
         ),
         const SizedBox(height: 2),
         Text(caption, style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600)),
@@ -252,7 +252,7 @@ class _Chip extends StatelessWidget {
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(text, maxLines: 1, softWrap: false, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w800)),
+      child: Text(text, maxLines: 1, softWrap: false, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w600)),
     );
   }
 }

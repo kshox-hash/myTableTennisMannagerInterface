@@ -39,7 +39,7 @@ class BrandLogo extends StatelessWidget {
             'MYTTM',
             style: TextStyle(
               fontFamily: 'Montserrat',
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               fontSize: wordmarkSize ?? markSize * 0.62,
               letterSpacing: 0.5,
               color: wordmarkColor,

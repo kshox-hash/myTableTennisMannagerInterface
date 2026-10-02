@@ -34,7 +34,7 @@ class CountryFlag extends StatelessWidget {
 }
 
 TextStyle _label([Color c = AppColors.scorifyTextMuted]) =>
-    TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 1, color: c);
+    TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 1, color: c);
 
 /// Tarjeta sólida, la base de todo el Inicio.
 class HomePanel extends StatelessWidget {
@@ -140,7 +140,7 @@ class HomeHero extends StatelessWidget {
                       name,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 21, height: 1.15, fontWeight: FontWeight.w800, color: AppColors.scorifyText),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 21, height: 1.15, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                     ),
                     const SizedBox(height: 5),
                     Text(
@@ -149,7 +149,7 @@ class HomeHero extends StatelessWidget {
                         if (since != null) "En MyTTM desde ${_months[since.month - 1]} ${since.year}",
                       ].join(" · "),
                       maxLines: 2,
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted),
                     ),
                   ],
                 ),
@@ -200,7 +200,7 @@ class HomeStatsBar extends StatelessWidget {
                       child: Text(label.toUpperCase(), style: _label().copyWith(letterSpacing: 0.6)),
                     ),
                     const SizedBox(height: 2),
-                    Text(value, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                    Text(value, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                   ],
                 ),
               ),
@@ -264,7 +264,7 @@ class HomeStreakCard extends StatelessWidget {
                 Text(text,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
               ],
             ),
           ),
@@ -329,9 +329,9 @@ class HomeKpiCard extends StatelessWidget {
               children: [
                 Text(label.toUpperCase(), style: _label()),
                 const SizedBox(height: 4),
-                Text(value, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 28, height: 1, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                Text(value, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 28, height: 1, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                 const SizedBox(height: 6),
-                Text(sub, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
+                Text(sub, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
               ],
             ),
           ),
@@ -371,11 +371,11 @@ class HomeNoMatchCard extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(loading ? "Cargando…" : "Sin partidos programados",
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                 const SizedBox(height: 2),
                 const Text("Inscríbete a un campeonato para entrar al fixture",
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
+                    style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
                 const SizedBox(height: 12),
                 AppButton.outline(
                   label: "Ver torneos",
@@ -435,7 +435,7 @@ class HomeGroupCard extends StatelessWidget {
               style: TextStyle(
                 fontFamily: AppTypography.body,
                 fontSize: 20,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
                 color: leading ? AppColors.scorifyOnButterfly : AppColors.scorifyText,
               ),
             ),
@@ -449,12 +449,12 @@ class HomeGroupCard extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   position == null ? "Aún sin partidos jugados" : "${position}° de $total",
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.scorifyText),
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   "${won}G · ${lost}P · Sets $setsFor-$setsAgainst",
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted),
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted),
                 ),
               ],
             ),
@@ -496,7 +496,7 @@ class HomeRefereeCard extends StatelessWidget {
                 Text("TE TOCA ARBITRAR", style: _label(AppColors.scorifyButterfly)),
                 const SizedBox(height: 3),
                 Text(title, maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                 const SizedBox(height: 2),
                 Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, color: AppColors.scorifyTextMuted)),

@@ -34,7 +34,7 @@ class SpinStatsRow extends StatelessWidget {
                     style: const TextStyle(
                       color: AppColors.scorifyText,
                       fontSize: 19,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -43,7 +43,7 @@ class SpinStatsRow extends StatelessWidget {
                     style: TextStyle(
                       color: AppColors.scorifyTextMuted,
                       fontSize: 10.5,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],

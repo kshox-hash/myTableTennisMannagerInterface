@@ -180,7 +180,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                           style: TextStyle(
                                             fontFamily: AppTypography.body,
                                             fontSize: 11.5,
-                                            fontWeight: FontWeight.w800,
+                                            fontWeight: FontWeight.w600,
                                             letterSpacing: 1,
                                             color: Colors.white,
                                           ),
@@ -345,7 +345,7 @@ class _PlayerRow extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: AppTypography.body,
                   fontSize: 14.5,
-                  fontWeight: isWinner ? FontWeight.w800 : FontWeight.w600,
+                  fontWeight: isWinner ? FontWeight.w600 : FontWeight.w600,
                   color: AppColors.scorifyText,
                 ),
               ),
@@ -372,7 +372,7 @@ class _PlayerRow extends StatelessWidget {
               style: TextStyle(
                 fontFamily: AppTypography.body,
                 fontSize: 15,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w600,
                 color: !_closed(sp.mine, sp.theirs)
                     ? AppColors.scorifyText
                     : sp.mine > sp.theirs
@@ -397,7 +397,7 @@ class _PlayerRow extends StatelessWidget {
             style: TextStyle(
               fontFamily: AppTypography.body,
               fontSize: 20,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               color: isWinner
                   ? AppColors.scorifyOnButterfly
                   : AppColors.scorifyText,
@@ -429,7 +429,7 @@ class _InfoRow extends StatelessWidget {
           Text(label, style: AppTypography.bodyMuted),
           Text(
             value,
-            style: AppTypography.bodyText.copyWith(fontWeight: FontWeight.w700),
+            style: AppTypography.bodyText.copyWith(fontWeight: FontWeight.w600),
           ),
         ],
       ),

@@ -23,7 +23,7 @@ enum _ViewMode { list, groups, bracket }
 const TextStyle _muted = TextStyle(
   fontFamily: AppTypography.body,
   fontSize: 12.5,
-  fontWeight: FontWeight.w500,
+  fontWeight: FontWeight.w400,
   color: AppColors.scorifyTextMuted,
 );
 
@@ -265,7 +265,7 @@ class _MatchCard extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: AppTypography.body,
                       fontSize: played ? 22 : 16,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
                       color: played ? AppColors.scorifyText : AppColors.scorifyTextMuted,
                     ),
                   ),
@@ -319,7 +319,7 @@ class _Player extends StatelessWidget {
                 fontFamily: AppTypography.body,
                 fontSize: 13.5,
                 height: 1.25,
-                fontWeight: winner ? FontWeight.w800 : FontWeight.w600,
+                fontWeight: winner ? FontWeight.w600 : FontWeight.w600,
                 color: AppColors.scorifyText,
               ),
             ),
@@ -485,7 +485,7 @@ class _CategoryTitle extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 10),
         child: Text(
           text,
-          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.scorifyText),
+          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
         ),
       );
 }
@@ -731,7 +731,7 @@ class _PagedMatchListState extends State<_PagedMatchList> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(parts.last,
-                        style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                        style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                   ),
                   Text(parts.first, style: _muted),
                 ],

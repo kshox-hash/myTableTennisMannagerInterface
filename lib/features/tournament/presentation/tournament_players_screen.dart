@@ -146,10 +146,10 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text("Los grupos ya se armaron",
-                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                                             SizedBox(height: 2),
                                             Text("Toca para ver los grupos y la llave",
-                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
+                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
                                           ],
                                         ),
                                       ),
@@ -212,7 +212,7 @@ class _CategoryPlayersState extends State<_CategoryPlayers> {
                 children: [
                   Expanded(
                     child: Text(widget.label,
-                        style: const TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                        style: const TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -258,7 +258,7 @@ class _CategoryPlayersState extends State<_CategoryPlayers> {
                             Text((players[i].clubName ?? "").trim().isEmpty ? "Sin club" : players[i].clubName!,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
+                                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
                           ],
                         ),
                       ),

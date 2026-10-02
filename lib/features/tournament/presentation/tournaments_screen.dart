@@ -441,7 +441,7 @@ class _TournamentCard extends StatelessWidget {
                   style: const TextStyle(
                     fontFamily: AppTypography.body,
                     fontSize: 17,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     height: 1.3,
                     color: AppColors.scorifyText,
                   ),
@@ -582,7 +582,7 @@ class _Meta extends StatelessWidget {
           style: const TextStyle(
             fontFamily: AppTypography.body,
             fontSize: 12.5,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w400,
             letterSpacing: 0,
             color: AppColors.scorifyTextMuted,
           ),

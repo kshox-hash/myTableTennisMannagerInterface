@@ -194,7 +194,7 @@ class _ViewSelector extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: AppTypography.body,
                     fontSize: 13,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: v == value ? AppColors.scorifyOnMint : AppColors.scorifyTextMuted,
                   ),
                 ),
@@ -221,7 +221,7 @@ class _Empty extends StatelessWidget {
             const SizedBox(height: 12),
             const Text(
               "Aún no guardas partidos",
-              style: TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.scorifyText),
+              style: TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
             ),
             const SizedBox(height: 6),
             Text(
@@ -311,7 +311,7 @@ class _LiveCard extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: AppTypography.body,
                   fontSize: nameSize,
-                  fontWeight: winner ? FontWeight.w800 : FontWeight.w600,
+                  fontWeight: winner ? FontWeight.w600 : FontWeight.w600,
                   color: done && !winner ? AppColors.scorifyTextMuted : AppColors.scorifyText,
                 ),
               ),
@@ -323,7 +323,7 @@ class _LiveCard extends StatelessWidget {
                 fontFamily: AppTypography.body,
                 fontSize: setsSize,
                 height: 1.1,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
                 color: winner ? AppColors.scorifyButterfly : AppColors.scorifyText,
               ),
             ),
@@ -345,7 +345,7 @@ class _LiveCard extends StatelessWidget {
                   pill,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.6, color: pillFg),
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 0.6, color: pillFg),
                 ),
               ),
               ),

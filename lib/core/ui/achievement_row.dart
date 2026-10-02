@@ -1,4 +1,4 @@
-import "package:myttmi/core/ui/card_border.dart";
+import "package:myttmi/core/ui/section_card.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -52,7 +52,7 @@ class Medal extends StatelessWidget {
         style: TextStyle(
           fontFamily: AppTypography.body,
           fontSize: size * 0.36,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w700,
           color: const Color(0xFF2A1E05),
         ),
       ),
@@ -83,14 +83,14 @@ class AchievementRow extends StatelessWidget {
                   "${_placeLabel(a.position)} · ${a.categoryLabel}",
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.scorifyText),
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   [a.tournamentName, if (date != null) date].join(" · "),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted),
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted),
                 ),
               ],
             ),
@@ -130,32 +130,25 @@ class _AchievementsCardState extends State<AchievementsCard> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: CardBorder(radius: 20, child: Container(
-        decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(20)),
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+      child: SectionCard(
+        title: "Palmarés",
+        trailing: list.isEmpty
+            ? null
+            : Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                child: Text("${list.length} ${list.length == 1 ? "podio" : "podios"}",
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
+              ),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                const Icon(Icons.emoji_events_rounded, color: Color(0xFFE0A526), size: 22),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text("Palmarés",
-                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
-                ),
-                if (list.isNotEmpty)
-                  Text("${list.length} ${list.length == 1 ? "podio" : "podios"}",
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted)),
-              ],
-            ),
-            const SizedBox(height: 14),
             if (list.isEmpty)
               const Padding(
                 padding: EdgeInsets.only(bottom: 8),
                 child: Text(
                   "Todavía no tienes podios. Cuando quedes entre los 3 primeros de una categoría, tu medalla aparece aquí.",
-                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, height: 1.4, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted),
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, height: 1.4, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted),
                 ),
               )
             else ...[
@@ -171,7 +164,7 @@ class _AchievementsCardState extends State<AchievementsCard> {
               ),
               const SizedBox(height: 10),
               for (var i = 0; i < shown.length; i++) ...[
-                if (i > 0) const Divider(height: 1, color: Color(0xFF1A2F39)),
+                if (i > 0) const Divider(height: 1, thickness: 1, color: Color(0x14FFFFFF)),
                 AchievementRow(achievement: shown[i]),
               ],
               if (list.length > _preview)
@@ -185,7 +178,7 @@ class _AchievementsCardState extends State<AchievementsCard> {
             ],
           ],
         ),
-      )),
+      ),
     );
   }
 }
@@ -206,8 +199,8 @@ class _Count extends StatelessWidget {
           Opacity(opacity: count == 0 ? 0.35 : 1, child: Medal(position: position, size: 34)),
           const SizedBox(height: 6),
           Text("$count",
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
-          Text(label, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
+              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+          Text(label, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
         ],
       ),
     );

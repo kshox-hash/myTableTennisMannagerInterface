@@ -143,7 +143,7 @@ class _PlaceholderScreen extends StatelessWidget {
       body: Center(
         child: Text(
           title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
         ),
       ),
     );

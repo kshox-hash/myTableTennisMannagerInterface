@@ -119,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     "MYTTM",
                     style: TextStyle(
                       fontFamily: 'Montserrat',
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
                       fontSize: 26,
                       letterSpacing: 1,
                       color: AppColors.scorifyText,
@@ -183,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text("G", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF4285F4))),
+                                Text("G", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF4285F4))),
                                 SizedBox(width: 10),
                                 Text("Continuar con Google", style: TextStyle(fontFamily: "Montserrat", fontSize: 14, fontWeight: FontWeight.w600)),
                               ],

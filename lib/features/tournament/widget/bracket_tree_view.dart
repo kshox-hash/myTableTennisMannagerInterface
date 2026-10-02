@@ -239,7 +239,7 @@ class _BracketTreeViewState extends State<BracketTreeView> {
                             Text(
                               _roundTitle(r.round, totalRounds).toUpperCase(),
                               textAlign: TextAlign.center,
-                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: AppColors.scorifyTextMuted),
+                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2, color: AppColors.scorifyTextMuted),
                             ),
                             const SizedBox(height: 10),
                             Expanded(
@@ -353,7 +353,7 @@ class _MatchBox extends StatelessWidget {
                   style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyButterfly)),
               if (match.tableNumber != null && !played)
                 Text("  · Mesa ${match.tableNumber}",
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
             ],
           ),
           const SizedBox(height: 6),
@@ -468,7 +468,7 @@ class _PlayerRow extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: AppTypography.body,
                   fontSize: 11,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   color: highlighted ? const Color(0xFF4DD2EE) : AppColors.scorifyTextMuted,
                 ),
               ),
@@ -482,7 +482,7 @@ class _PlayerRow extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: AppTypography.body,
                   fontSize: 13.5,
-                  fontWeight: highlighted ? FontWeight.w700 : FontWeight.w600,
+                  fontWeight: highlighted ? FontWeight.w600 : FontWeight.w600,
                   color: highlighted
                       ? AppColors.scorifyOnMint
                       : name.isEmpty
@@ -509,7 +509,7 @@ class _PlayerRow extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: AppTypography.body,
                   fontSize: 14,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   color: highlighted
                       ? const Color(0xFF4DD2EE)
                       : isWinner
@@ -561,7 +561,7 @@ class _ChampionCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               color: AppColors.scorifyOnButterfly,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               fontSize: 13,
             ),
           ),

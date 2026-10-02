@@ -104,7 +104,7 @@ class _IconButton extends StatelessWidget {
                   fontFamily: AppTypography.body,
                   color: Colors.white,
                   fontSize: 11,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   height: 1,
                 ),
               ),

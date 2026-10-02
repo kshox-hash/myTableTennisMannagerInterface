@@ -20,7 +20,7 @@ const _weekdays = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábad
 const TextStyle _muted = TextStyle(
   fontFamily: AppTypography.body,
   fontSize: 12.5,
-  fontWeight: FontWeight.w500,
+  fontWeight: FontWeight.w400,
   color: AppColors.scorifyTextMuted,
 );
 
@@ -170,7 +170,7 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
                   Expanded(
                     child: Text(
                       "${_months[_focusedMonth.month - 1]} ${_focusedMonth.year}",
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.scorifyText),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 17, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                     ),
                   ),
                   _RoundIcon(icon: Icons.chevron_left_rounded, onTap: () => _goMonth(-1)),
@@ -265,7 +265,7 @@ class _Section extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(top: 22, bottom: 10),
         child: Text(title,
-            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
       );
 }
 
@@ -327,9 +327,9 @@ class _EventCard extends StatelessWidget {
               child: Column(
                 children: [
                   Text(_monthsShort[e.date.month - 1],
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.scorifyMint, letterSpacing: 1)),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyMint, letterSpacing: 1)),
                   Text("${e.date.day}",
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.scorifyText, height: 1.15)),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 24, fontWeight: FontWeight.w600, color: AppColors.scorifyText, height: 1.15)),
                 ],
               ),
             ),
@@ -342,7 +342,7 @@ class _EventCard extends StatelessWidget {
                 Text(e.tournamentName,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.scorifyText, height: 1.25)),
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.scorifyText, height: 1.25)),
                 const SizedBox(height: 4),
                 Text("${e.categoryName} · ${_genderLabel(e.gender)}", maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted),
                 if (loc.isNotEmpty) ...[
@@ -462,7 +462,7 @@ class _DayCell extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: AppTypography.body,
                   fontSize: 14,
-                  fontWeight: isSelected || isToday || hasItems ? FontWeight.w700 : FontWeight.w500,
+                  fontWeight: isSelected || isToday || hasItems ? FontWeight.w600 : FontWeight.w400,
                   color: isSelected ? AppColors.scorifyOnMint : AppColors.scorifyText,
                 ),
               ),

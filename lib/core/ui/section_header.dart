@@ -28,7 +28,7 @@ class SectionHeader extends StatelessWidget {
             style: TextStyle(
               color: AppColors.scorifyTextMuted,
               fontSize: 11.5,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               letterSpacing: 1.5,
             ),
           ),
@@ -39,7 +39,7 @@ class SectionHeader extends StatelessWidget {
             child: Text(
               actionLabel!,
               style: const TextStyle(
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w600,
                 fontSize: 12.5,
                 color: AppColors.scorifyMint,
               ),

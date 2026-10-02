@@ -287,7 +287,7 @@ class _HeroCard extends StatelessWidget {
             style: const TextStyle(
               fontFamily: AppTypography.body,
               fontSize: 22,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               height: 1.2,
               color: AppColors.scorifyText,
             ),
@@ -376,7 +376,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                   style: const TextStyle(
                     fontFamily: AppTypography.body,
                     fontSize: 17,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.scorifyText,
                   ),
                 ),
@@ -637,7 +637,7 @@ class _CategoryCardState extends State<_CategoryCard> {
 const TextStyle _meta = TextStyle(
   fontFamily: AppTypography.body,
   fontSize: 12.5,
-  fontWeight: FontWeight.w500,
+  fontWeight: FontWeight.w400,
   color: AppColors.scorifyTextMuted,
 );
 
@@ -661,7 +661,7 @@ class _InfoRow extends StatelessWidget {
               style: const TextStyle(
                 fontFamily: AppTypography.body,
                 fontSize: 14,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w400,
                 color: AppColors.scorifyText,
               ),
             ),
@@ -687,7 +687,7 @@ class _Kpi extends StatelessWidget {
             style: const TextStyle(
               fontFamily: AppTypography.body,
               fontSize: 20,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               color: AppColors.scorifyText,
             ),
           ),
@@ -818,7 +818,7 @@ class _SectionLabel extends StatelessWidget {
       style: const TextStyle(
         fontFamily: AppTypography.body,
         fontSize: 18,
-        fontWeight: FontWeight.w800,
+        fontWeight: FontWeight.w600,
         color: AppColors.scorifyText,
       ),
     );

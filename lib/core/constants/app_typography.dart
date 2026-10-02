@@ -36,35 +36,35 @@ class AppTypography {
 
   static const TextStyle h1 = TextStyle(
     fontFamily: body,
-    fontWeight: FontWeight.w800,
+    fontWeight: FontWeight.w700,
     fontSize: 20,
     color: AppColors.scorifyText,
   );
 
   static const TextStyle h2 = TextStyle(
     fontFamily: body,
-    fontWeight: FontWeight.w800,
+    fontWeight: FontWeight.w600,
     fontSize: 15,
     color: AppColors.scorifyText,
   );
 
   static const TextStyle bodyText = TextStyle(
     fontFamily: body,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w400,
     fontSize: 14,
     color: AppColors.scorifyText,
   );
 
   static const TextStyle bodyMuted = TextStyle(
     fontFamily: body,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w400,
     fontSize: 12.5,
     color: AppColors.scorifyTextMuted,
   );
 
   static const TextStyle caption = TextStyle(
     fontFamily: body,
-    fontWeight: FontWeight.w800,
+    fontWeight: FontWeight.w500,
     fontSize: 11,
     letterSpacing: 1.1,
     color: AppColors.scorifyTextFaint,

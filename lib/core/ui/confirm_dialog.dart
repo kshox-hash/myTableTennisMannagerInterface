@@ -23,7 +23,7 @@ Future<bool> confirmAction(
         style: const TextStyle(
           fontFamily: AppTypography.body,
           fontSize: 18,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           color: AppColors.scorifyText,
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:myttmi/core/ui/stagger_in.dart';
+import 'package:myttmi/core/ui/section_card.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
@@ -17,7 +18,7 @@ import 'package:myttmi/routes/app_routes.dart';
 const TextStyle _muted = TextStyle(
   fontFamily: AppTypography.body,
   fontSize: 12.5,
-  fontWeight: FontWeight.w500,
+  fontWeight: FontWeight.w400,
   color: AppColors.scorifyTextMuted,
 );
 
@@ -146,7 +147,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            const Text("TU FORMA", style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: AppColors.scorifyMint)),
+                                            const Text("TU FORMA", style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2, color: AppColors.scorifyMint)),
                                             const SizedBox(height: 6),
                                             Text(
                                               streak == null
@@ -154,7 +155,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                                   : streak.$2
                                                       ? (streak.$1 == 1 ? "Ganaste el último" : "${streak.$1} victorias seguidas")
                                                       : (streak.$1 == 1 ? "Perdiste el último" : "${streak.$1} derrotas seguidas"),
-                                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.scorifyText),
+                                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 17, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                                             ),
                                             const SizedBox(height: 10),
                                             if (form.isEmpty)
@@ -170,7 +171,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                               ),
                                             if (form.isNotEmpty) ...[
                                               const SizedBox(height: 4),
-                                              const Text("Últimos 5 · el más reciente a la derecha", style: TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w500, color: AppColors.scorifyTextFaint)),
+                                              const Text("Últimos 5 · el más reciente a la derecha", style: TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w400, color: AppColors.scorifyTextFaint)),
                                             ],
                                           ],
                                         ),
@@ -204,8 +205,9 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                             ),
 
                             // ── Sets ──
-                            const _Section("Sets"),
-                            GlassCard(
+                            const SizedBox(height: 22),
+                            SectionCard(
+                              title: "Sets",
                               padding: const EdgeInsets.all(18),
                               child: Column(
                                 children: [
@@ -218,7 +220,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                         decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(999)),
                                         child: Text(
                                           "Diferencia ${setsWon - setsLost >= 0 ? "+" : ""}${setsWon - setsLost}",
-                                          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.scorifyText),
+                                          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                                         ),
                                       ),
                                       Expanded(child: _BigNumber(value: "$setsLost", label: "Perdidos", color: AppColors.scorifyNegative, alignEnd: true)),
@@ -245,33 +247,28 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                             ),
 
                             // ── Últimos partidos ──
-                            _Section(
-                              "Últimos partidos",
+                            const SizedBox(height: 22),
+                            SectionCard(
+                              title: "Últimos partidos",
                               trailing: _recent.isEmpty
                                   ? null
                                   : TextButton(
                                       onPressed: () => Navigator.pushNamed(context, AppRoutes.history),
-                                      child: const Text("Ver historial", style: TextStyle(fontFamily: AppTypography.body, fontWeight: FontWeight.w600, color: AppColors.scorifyMint)),
+                                      child: const Text("Ver historial", style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.scorifyMint)),
                                     ),
-                            ),
-                            if (_recent.isEmpty)
-                              const GlassCard(
-                                padding: EdgeInsets.all(16),
-                                child: Row(
+                              padding: _recent.isEmpty ? const EdgeInsets.all(16) : const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+                              child: _recent.isEmpty
+                                  ? const Row(
                                   children: [
                                     Icon(Icons.info_outline_rounded, color: AppColors.scorifyMint, size: 20),
                                     SizedBox(width: 10),
                                     Expanded(child: Text("Todavía no has jugado ningún partido. Tus números aparecen aquí apenas juegues el primero.", style: _muted)),
                                   ],
-                                ),
-                              )
-                            else
-                              GlassCard(
-                                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
-                                child: Column(
-                                  children: [for (final m in _recent.take(5)) _RecentRow(match: m, myId: _myId ?? "")],
-                                ),
-                              ),
+                                )
+                                  : Column(
+                                      children: dividedRows([for (final m in _recent.take(5)) _RecentRow(match: m, myId: _myId ?? "")]),
+                                    ),
+                            ),
                           ]),
                         ),
                       ),
@@ -280,26 +277,6 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
       ),
     );
   }
-}
-
-class _Section extends StatelessWidget {
-  final String title;
-  final Widget? trailing;
-  const _Section(this.title, {this.trailing});
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: 22, bottom: 10),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(title,
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
-            ),
-            if (trailing != null) trailing!,
-          ],
-        ),
-      );
 }
 
 class _Ring extends StatelessWidget {
@@ -328,7 +305,7 @@ class _Ring extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(empty ? "—" : "${(rate * 100).round()}%",
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 23, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 23, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
               Text("Efectividad", style: _muted.copyWith(fontSize: 10.5)),
             ],
           ),
@@ -381,7 +358,7 @@ class _Kpi extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(value, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                Text(value, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                 Text(label, style: _muted.copyWith(fontSize: 11.5)),
               ],
             ),
@@ -403,7 +380,7 @@ class _BigNumber extends StatelessWidget {
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          Text(value, style: TextStyle(fontFamily: AppTypography.body, fontSize: 28, fontWeight: FontWeight.w800, color: color)),
+          Text(value, style: TextStyle(fontFamily: AppTypography.body, fontSize: 28, fontWeight: FontWeight.w600, color: color)),
           Text(label, style: _muted),
         ],
       );
@@ -442,7 +419,7 @@ class _RecentRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(won ? "G" : "P",
-                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w800, color: won ? AppColors.scorifyOnButterfly : AppColors.scorifyNegative)),
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: won ? AppColors.scorifyOnButterfly : AppColors.scorifyNegative)),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -452,14 +429,14 @@ class _RecentRow extends StatelessWidget {
                   Text("vs $rival",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                   Text("${m.tournamentName} · $cat", maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted.copyWith(fontSize: 11.5)),
                 ],
               ),
             ),
             const SizedBox(width: 8),
             Text("$mine - $theirs",
-                style: TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w800, color: won ? AppColors.scorifyButterfly : AppColors.scorifyText)),
+                style: TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: won ? AppColors.scorifyButterfly : AppColors.scorifyText)),
             const SizedBox(width: 4),
             const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.scorifyTextFaint),
           ],

@@ -67,7 +67,7 @@ class SpinPlayerCard extends StatelessWidget {
                       style: const TextStyle(
                         color: AppColors.scorifyText,
                         fontSize: 19,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     for (final d in details) ...[

@@ -354,7 +354,7 @@ class _GeneralStandingsList extends StatelessWidget {
                   child: Text(
                     "${s.position}",
                     style: AppTypography.mono14.copyWith(
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       color: s.position == 1
                           ? AppColors.scorifyOnMint
                           : AppColors.scorifyText,
@@ -495,7 +495,7 @@ class _JourneyCard extends StatelessWidget {
                             style: TextStyle(
                               color: color,
                               fontSize: 10.5,
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.w700,
                               letterSpacing: 1,
                             ),
                           ),
@@ -507,7 +507,7 @@ class _JourneyCard extends StatelessWidget {
                             style: const TextStyle(
                               color: AppColors.scorifyText,
                               fontSize: 14,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -522,7 +522,7 @@ class _JourneyCard extends StatelessWidget {
                       style: TextStyle(
                         color: done ? color : AppColors.scorifyTextMuted,
                         fontSize: done ? 16 : 12,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
@@ -541,7 +541,7 @@ class _JourneyCard extends StatelessWidget {
 const TextStyle _muted = TextStyle(
   fontFamily: AppTypography.body,
   fontSize: 12.5,
-  fontWeight: FontWeight.w500,
+  fontWeight: FontWeight.w400,
   color: AppColors.scorifyTextMuted,
 );
 
@@ -604,7 +604,7 @@ class _Section extends StatelessWidget {
             style: const TextStyle(
               fontFamily: AppTypography.body,
               fontSize: 18,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               color: AppColors.scorifyText,
             ),
           ),
@@ -675,7 +675,7 @@ class _CategoryHero extends StatelessWidget {
             style: const TextStyle(
               fontFamily: AppTypography.body,
               fontSize: 22,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               color: AppColors.scorifyText,
             ),
           ),
@@ -731,7 +731,7 @@ class _Kpi extends StatelessWidget {
           style: TextStyle(
             fontFamily: AppTypography.body,
             fontSize: 20,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w600,
             color: color,
           ),
         ),
@@ -771,7 +771,7 @@ class _GroupTable extends StatelessWidget {
         style: TextStyle(
           fontFamily: AppTypography.body,
           fontSize: 13,
-          fontWeight: strong ? FontWeight.w800 : FontWeight.w500,
+          fontWeight: strong ? FontWeight.w600 : FontWeight.w400,
           color: strong ? AppColors.scorifyText : AppColors.scorifyTextMuted,
         ),
       ),
@@ -831,7 +831,7 @@ class _GroupTable extends StatelessWidget {
                           style: TextStyle(
                             fontFamily: AppTypography.body,
                             fontSize: 13,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w600,
                             color: s.qualifiedToBracket
                                 ? AppColors.scorifyButterfly
                                 : AppColors.scorifyText,
@@ -950,7 +950,7 @@ class _MatchCard extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: AppTypography.body,
                       fontSize: played ? 24 : 18,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
                       color: played
                           ? AppColors.scorifyText
                           : AppColors.scorifyTextMuted,
@@ -1016,7 +1016,7 @@ class _Side extends StatelessWidget {
           style: const TextStyle(
             fontFamily: AppTypography.body,
             fontSize: 14,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
             color: AppColors.scorifyText,
             height: 1.25,
           ),

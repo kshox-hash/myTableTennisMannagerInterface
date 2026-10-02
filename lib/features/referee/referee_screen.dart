@@ -239,7 +239,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
                 style: TextStyle(
                   fontFamily: AppTypography.body,
                   fontSize: 22,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                   color: decided ? AppColors.scorifyOnButterfly : AppColors.scorifyText,
                 ),
               ),
@@ -265,7 +265,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
                         width: 56,
                         child: Text("Set ${i + 1}",
                             textAlign: TextAlign.center,
-                            style: AppTypography.bodyMuted.copyWith(fontSize: 11.5, fontWeight: FontWeight.w700)),
+                            style: AppTypography.bodyMuted.copyWith(fontSize: 11.5, fontWeight: FontWeight.w600)),
                       ),
                   ],
                 ),
@@ -297,7 +297,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
             child: Text(
               "Partido terminado: ${s1 >= s2 ? m.player1Name : m.player2Name} ganó ${s1 >= s2 ? s1 : s2}-${s1 >= s2 ? s2 : s1}.",
               textAlign: TextAlign.center,
-              style: const TextStyle(fontFamily: AppTypography.body, fontWeight: FontWeight.w700, color: AppColors.scorifyText),
+              style: const TextStyle(fontFamily: AppTypography.body, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
             ),
           )
         else
@@ -319,7 +319,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
         style: TextStyle(
           fontFamily: AppTypography.body,
           fontSize: 15,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w600,
           color: winning ? AppColors.scorifyButterfly : AppColors.scorifyText,
         ),
       );
@@ -333,7 +333,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
           child: Text(name,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
+              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
         ),
         for (var i = 0; i < ctrls.length; i++) SizedBox(width: 56, child: Center(child: _cell(i, player, ctrls[i]))),
       ],
@@ -357,7 +357,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
         style: TextStyle(
           fontFamily: AppTypography.body,
           fontSize: 18,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w600,
           color: won ? AppColors.scorifyButterfly : AppColors.scorifyText,
         ),
         decoration: InputDecoration(

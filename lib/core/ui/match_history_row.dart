@@ -143,7 +143,7 @@ class _ScoreAvatar extends StatelessWidget {
         label,
         style: TextStyle(
           color: accent,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w700,
           fontFamily: AppTypography.body,
           fontSize: 13,
         ),

@@ -253,10 +253,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text("Editar perfil",
-                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                                             SizedBox(height: 2),
                                             Text("Así te verán los organizadores y rivales.",
-                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
+                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
                                           ],
                                         ),
                                       ),
@@ -488,7 +488,7 @@ class _ClubSectionState extends State<_ClubSection> {
               ),
               const SizedBox(width: 12),
               const Text("Mi club",
-                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 17, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
             ],
           ),
           const SizedBox(height: 14),
@@ -513,7 +513,7 @@ class _ClubSectionState extends State<_ClubSection> {
                         const TextSpan(text: "Perteneces a "),
                         TextSpan(
                           text: widget.currentClub,
-                          style: AppTypography.bodyText.copyWith(fontWeight: FontWeight.w700),
+                          style: AppTypography.bodyText.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const TextSpan(text: "."),
                       ],
@@ -651,11 +651,11 @@ class _DuesCardState extends State<_DuesCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("CUOTAS DEL CLUB", style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 10.5, fontWeight: FontWeight.w800, letterSpacing: 1)),
+                const Text("CUOTAS DEL CLUB", style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 1)),
                 const SizedBox(height: 2),
                 Text(
                   ok ? "Estás al día" : "Debes ${d.owedPeriods} $unit",
-                  style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w800),
+                  style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 if (!ok && d.owedAmount > 0)
                   Text("Total pendiente: ${_money(d.owedAmount)}", style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 12, fontWeight: FontWeight.w600)),
@@ -703,7 +703,7 @@ class _ProfileHero extends StatelessWidget {
           Text(
             p.displayName,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.scorifyText),
+            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 22, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
           ),
           const SizedBox(height: 2),
           Text(p.email, style: AppTypography.bodyMuted),
@@ -745,12 +745,12 @@ class _InfoTile extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted)),
+                Text(label, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
                 const SizedBox(height: 2),
                 Text(value,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
               ],
             ),
           ),

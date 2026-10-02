@@ -493,7 +493,7 @@ class _MatchesCarouselState extends State<_MatchesCarousel> {
                 "${_page + 1} / ${pages.length}",
                 style: const TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   color: AppColors.scorifyTextMuted,
                 ),
               )
