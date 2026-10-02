@@ -288,7 +288,9 @@ class HomeStreakCard extends StatelessWidget {
               height: 21,
               margin: const EdgeInsets.symmetric(horizontal: 2),
               decoration: BoxDecoration(
-                color: won ? AppColors.scorifyButterfly : AppColors.scorifyNegative,
+                // Ganado: el mismo degradado del botón principal.
+                gradient: won ? appButtonGradient : null,
+                color: won ? null : AppColors.scorifyNegative,
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Icon(won ? Icons.check_rounded : Icons.close_rounded, color: won ? AppColors.scorifyOnButterfly : Colors.white, size: 14),
@@ -415,7 +417,7 @@ class HomeNoMatchCard extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
                   const SizedBox(height: 12),
-                  AppButton.outline(
+                  AppButton(
                     label: "Ver torneos",
                     onPressed: onBrowse,
                     trailingIcon: Icons.chevron_right_rounded,
