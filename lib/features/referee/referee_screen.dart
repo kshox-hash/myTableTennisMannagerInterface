@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/card_border.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -248,7 +249,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
         ),
         const SizedBox(height: 16),
         // Grilla: una fila por jugador, una columna por set (igual al panel).
-        Container(
+        CardBorder(child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(16)),
           child: SingleChildScrollView(
@@ -275,7 +276,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
               ],
             ),
           ),
-        ),
+        )),
         const SizedBox(height: 10),
         if (problem != null)
           Text(problem, style: const TextStyle(color: AppColors.scorifyNegative, fontSize: 13, fontWeight: FontWeight.w600))

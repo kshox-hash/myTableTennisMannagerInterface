@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/card_border.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
@@ -22,7 +23,7 @@ class SpinHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return CardBorder(child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.scorifyDeep,
@@ -53,7 +54,7 @@ class SpinHeader extends StatelessWidget {
           _IconButton(icon: Icons.settings_outlined, onTap: onSettings),
         ],
       ),
-    );
+    ));
   }
 }
 

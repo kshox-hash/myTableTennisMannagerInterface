@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/card_border.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 
@@ -84,7 +85,7 @@ class GlassCard extends StatelessWidget {
       fill = content;
     }
 
-    return Container(
+    return CardBorder(radius: _radius, child: Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(_radius),
         border: Border.all(color: borderColor ?? AppColors.scorifyCardBorder),
@@ -100,6 +101,6 @@ class GlassCard extends StatelessWidget {
         color: Colors.transparent,
         child: onTap == null ? fill : InkWell(onTap: onTap, child: fill),
       ),
-    );
+    ));
   }
 }

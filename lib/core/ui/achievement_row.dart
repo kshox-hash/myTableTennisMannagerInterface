@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/card_border.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -129,7 +130,7 @@ class _AchievementsCardState extends State<AchievementsCard> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
+      child: CardBorder(radius: 20, child: Container(
         decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(20)),
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
         child: Column(
@@ -184,7 +185,7 @@ class _AchievementsCardState extends State<AchievementsCard> {
             ],
           ],
         ),
-      ),
+      )),
     );
   }
 }

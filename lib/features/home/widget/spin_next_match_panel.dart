@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/card_border.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/ui/user_avatar.dart';
@@ -68,7 +69,7 @@ class SpinNextMatchPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return CardBorder(child: Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
@@ -83,7 +84,7 @@ class SpinNextMatchPanel extends StatelessWidget {
           child: hasMatch ? _match() : _empty(),
         ),
       ),
-    );
+    ));
   }
 
   Widget _empty() {

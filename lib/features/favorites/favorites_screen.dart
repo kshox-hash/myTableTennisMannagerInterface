@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/card_border.dart";
 import "dart:async";
 
 import "package:flutter/material.dart";
@@ -260,7 +261,7 @@ class _LiveCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final d = detail;
-    return Material(
+    return CardBorder(child: Material(
       color: AppColors.scorifyCardFill,
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
@@ -283,7 +284,7 @@ class _LiveCard extends StatelessWidget {
               : _content(d),
         ),
       ),
-    );
+    ));
   }
 
   Widget _content(MatchDetail d) {

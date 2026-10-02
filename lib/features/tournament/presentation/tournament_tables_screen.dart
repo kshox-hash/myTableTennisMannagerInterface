@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/card_border.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -302,7 +303,7 @@ class _MyTurnCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 22),
-      child: Container(
+      child: CardBorder(radius: 20, child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(20)),
         child: Row(
@@ -339,7 +340,7 @@ class _MyTurnCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 }
