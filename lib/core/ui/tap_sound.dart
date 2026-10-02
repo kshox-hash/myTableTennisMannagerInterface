@@ -9,7 +9,7 @@ class TapSound {
   TapSound._();
 
   static const _prefsKey = "myttm:tap_sound";
-  static const _volume = 0.55;
+  static const _volume = 0.8;
 
   /// Encendido/apagado (se guarda en el teléfono).
   static final ValueNotifier<bool> enabled = ValueNotifier(true);
