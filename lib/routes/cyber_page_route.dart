@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:myttmi/core/constants/app_colors.dart';
 
 /// Timings compartidos por CyberPageRoute (push/pop entre pantallas) y por
 /// el pulso de cambio de pestaña del shell (ver app_shell.dart), para que
@@ -75,56 +74,43 @@ class CyberTransition {
     ]).animate(curved);
   }
 
-  static Widget glowOverlay(Animation<double> glowAnim) {
-    return IgnorePointer(
-      child: AnimatedBuilder(
-        animation: glowAnim,
-        builder: (context, _) => Opacity(
-          opacity: glowAnim.value,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: Alignment.center,
-                radius: 1.1,
-                colors: [AppColors.scorifyMint.withOpacity(0.55), Colors.transparent],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  /// Antes era un destello celeste en el corte; se quitó (recargaba la
+  /// transición). Queda para no tocar a quien lo usa.
+  static Widget glowOverlay(Animation<double> glowAnim) => const SizedBox.shrink();
 }
 
-/// Transición "cyberpunk" de navegación: la pantalla de origen se apaga y
-/// se encoge del todo ANTES de que la nueva empiece a aparecer (no se
-/// cruzan/superponen) agrandándose desde el centro con un flash de brillo
-/// mint en el corte. Se usa en TODAS las rutas con nombre (ver
-/// app_routes.dart) en vez de tener que envolver cada card con un Hero.
+/// Transición de navegación: la pantalla nueva entra subiendo un poco,
+/// desvaneciéndose y asentándose (escala 0.98 → 1) con una curva suave; la
+/// de atrás se oscurece y se aleja apenas. Al volver, lo mismo al revés.
+/// Se usa en TODAS las rutas con nombre (ver app_routes.dart).
 class CyberPageRoute<T> extends PageRouteBuilder<T> {
   CyberPageRoute({required WidgetBuilder builder, super.settings})
       : super(
-          transitionDuration: const Duration(milliseconds: 560),
-          reverseTransitionDuration: const Duration(milliseconds: 480),
+          transitionDuration: const Duration(milliseconds: 460),
+          reverseTransitionDuration: const Duration(milliseconds: 340),
           pageBuilder: (context, animation, secondaryAnimation) => builder(context),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            final outgoingFade = CyberTransition.fadeOut(secondaryAnimation);
-            final outgoingScale = CyberTransition.scaleOut(secondaryAnimation);
-            final incomingFade = CyberTransition.fadeIn(animation);
-            final incomingScale = CyberTransition.scaleIn(animation);
-            final glow = CyberTransition.glow(animation);
-
-            return FadeTransition(
-              opacity: outgoingFade,
-              child: ScaleTransition(
-                scale: outgoingScale,
-                child: FadeTransition(
-                  opacity: incomingFade,
+            final enter = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
+            final fade = CurvedAnimation(
+              parent: animation,
+              curve: const Interval(0, 0.7, curve: Curves.easeOut),
+              reverseCurve: const Interval(0.3, 1, curve: Curves.easeIn),
+            );
+            final behind = CurvedAnimation(parent: secondaryAnimation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
+            return AnimatedBuilder(
+              animation: behind,
+              // La de atrás: se aleja (0.96) y se oscurece mientras entra la nueva.
+              builder: (context, inner) => Transform.scale(
+                scale: 1 - 0.04 * behind.value,
+                child: Opacity(opacity: 1 - 0.6 * behind.value, child: inner),
+              ),
+              child: FadeTransition(
+                opacity: fade,
+                child: SlideTransition(
+                  position: Tween(begin: const Offset(0, 0.05), end: Offset.zero).animate(enter),
                   child: ScaleTransition(
-                    scale: incomingScale,
-                    child: Stack(
-                      children: [child, CyberTransition.glowOverlay(glow)],
-                    ),
+                    scale: Tween(begin: 0.98, end: 1.0).animate(enter),
+                    child: child,
                   ),
                 ),
               ),

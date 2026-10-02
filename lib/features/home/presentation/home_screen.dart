@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/stagger_in.dart";
 import 'package:myttmi/core/ui/app_button.dart';
 import 'package:flutter/material.dart';
 import "package:myttmi/features/home/widget/home_layout.dart";
@@ -340,7 +341,7 @@ class _HomeScreenState extends State<HomeScreen>
                   // LayoutBuilder— no admite IntrinsicHeight.
                   child: _fillHeight(nm == null, Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
+                    children: staggerChildren([
                       hero,
                       const SizedBox(height: 12),
                       if (_refMatches.isNotEmpty) ...[
@@ -420,7 +421,7 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         ),
                       ],
-                    ],
+                    ]),
                   )),
                 ),
               ),

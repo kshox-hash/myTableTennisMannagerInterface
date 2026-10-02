@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/stagger_in.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/routes/cyber_page_route.dart";
@@ -205,7 +206,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
               child: ListView(
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: [
+                children: staggerChildren([
                   Text(
                     "Descubre tu próximo campeonato de tenis de mesa.",
                     style: AppTypography.bodyMuted,
@@ -256,7 +257,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
                         ),
                       ),
                     ),
-                ],
+                ]),
               ),
             ),
           ),

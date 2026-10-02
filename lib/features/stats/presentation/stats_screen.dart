@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/stagger_in.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
@@ -131,7 +132,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                         child: ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.only(bottom: 24),
-                          children: [
+                          children: staggerChildren([
                             // ── Efectividad + racha ──
                             GlassCard(
                               padding: const EdgeInsets.all(18),
@@ -271,7 +272,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                   children: [for (final m in _recent.take(5)) _RecentRow(match: m, myId: _myId ?? "")],
                                 ),
                               ),
-                          ],
+                          ]),
                         ),
                       ),
           ),

@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/stagger_in.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/app_toast.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -141,7 +142,7 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
       child: ListView(
       physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-      children: [
+      children: staggerChildren([
         const TopHeader(title: "Calendario", showBack: false),
         const SizedBox(height: 6),
         const Text("Tus campeonatos inscritos, día a día.", style: _muted),
@@ -224,7 +225,7 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
             _EventCard(event: e, onTap: () => _openTournament(e.tournamentId)),
             const SizedBox(height: 10),
           ],
-      ],
+      ]),
       ),
     );
   }

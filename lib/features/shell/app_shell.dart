@@ -89,7 +89,6 @@ class _AppShellState extends State<AppShell>
   @override
   Widget build(BuildContext context) {
     final opacity = CyberTransition.contentOpacity(_pulse);
-    final scale = CyberTransition.contentScale(_pulse);
     final glow = CyberTransition.glow(_pulse);
 
     return Scaffold(
@@ -108,8 +107,20 @@ class _AppShellState extends State<AppShell>
         child: SafeArea(
           child: FadeTransition(
             opacity: opacity,
-            child: ScaleTransition(
-              scale: scale,
+            // La pestaña que se va sube un poco al apagarse; la que entra
+            // llega desde abajo y se asienta (mismo lenguaje que las rutas).
+            child: AnimatedBuilder(
+              animation: _pulse,
+              builder: (context, inner) {
+                const cut = CyberTransition.crossoverAt;
+                final t = _pulse.value;
+                final dy = t == 0 || t == 1
+                    ? 0.0
+                    : t < cut
+                        ? -8 * Curves.easeIn.transform(t / cut)
+                        : 18 * (1 - Curves.easeOutCubic.transform((t - cut) / (1 - cut)));
+                return Transform.translate(offset: Offset(0, dy), child: inner);
+              },
               child: Stack(
                 children: [
                   AppShellScope(
