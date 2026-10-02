@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/tap_sound.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/navigation/deep_links.dart";
@@ -10,6 +11,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PushService.init();
   await FavoriteMatches.load();
+  TapSound.init();
   DeepLinks.init();
   runApp(const MyApp());
 }
@@ -57,6 +59,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       navigatorKey: DeepLinks.navigatorKey,
+      navigatorObservers: [TapSound.backObserver],
       onGenerateRoute: AppRoutes.onGenerateRoute,
       // "home" en vez de "initialRoute": un initialRoute con barras (ej.
       // "/splash") hace que Flutter arme el stack inicial dividiendo el
