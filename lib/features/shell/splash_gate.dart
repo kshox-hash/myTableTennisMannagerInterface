@@ -132,8 +132,15 @@ class _SplashGateState extends State<SplashGate> {
                     color: Colors.white.withValues(alpha: 0.85),
                   ),
                 ),
-                const SizedBox(height: 34),
-                TweenAnimationBuilder<double>(
+              ],
+            ),
+          ),
+          // Barra de carga abajo.
+          Positioned(
+            left: 28,
+            right: 28,
+            bottom: mq.padding.bottom + 36,
+            child: TweenAnimationBuilder<double>(
                   tween: Tween(end: _target),
                   duration: const Duration(milliseconds: 900),
                   curve: Curves.easeOutCubic,
@@ -168,8 +175,6 @@ class _SplashGateState extends State<SplashGate> {
                     ],
                   ),
                 ),
-              ],
-            ),
           ),
         ],
       ),
@@ -182,5 +187,7 @@ class _SplashGateState extends State<SplashGate> {
     fontWeight: FontWeight.w500,
     letterSpacing: 0.6,
     color: Colors.white.withValues(alpha: 0.9),
+    // Sombra solo en el texto: se lee sobre la pierna o el fondo claro.
+    shadows: const [Shadow(color: Color(0x99000000), blurRadius: 6)],
   );
 }
