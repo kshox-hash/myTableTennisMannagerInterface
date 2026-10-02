@@ -35,7 +35,7 @@ class AppRoutes {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case login:
-        return CyberPageRoute(builder: (_) => const LoginScreen());
+        return CyberPageRoute(waitForData: false, builder: (_) => const LoginScreen());
 
       case profile:
         return CyberPageRoute(builder: (_) => const ProfileScreen());

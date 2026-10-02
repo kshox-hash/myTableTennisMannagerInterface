@@ -1,5 +1,4 @@
-import "package:myttmi/core/ui/background_music.dart";
-import "package:myttmi/core/ui/tap_sound.dart";
+import "package:myttmi/features/shell/shell_preload.dart";
 import "package:myttmi/core/ui/stagger_in.dart";
 import 'package:myttmi/core/ui/app_button.dart';
 import 'package:flutter/material.dart';
@@ -73,6 +72,10 @@ class _HomeScreenState extends State<HomeScreen>
     _load();
   }
 
+  // La primera carga avisa a la pantalla de carga (ShellPreload): esta se
+  // quita recién cuando el Inicio tiene TODO, para que aparezca completo.
+  bool _firstLoad = true;
+
   Future<void> _load({bool silent = false}) async {
     if (!silent) setState(() => _loading = true);
     try {
@@ -88,16 +91,30 @@ class _HomeScreenState extends State<HomeScreen>
         _unreadCount = results[2] as int;
         NotificationPopups.unread.value = _unreadCount;
       });
-      _loadForm(_profile?.idUser);
-      _loadGroup(_dashboard?.nextMatch);
-      RefereeApi().myMatches().then((r) {
-        if (mounted) setState(() => _refMatches = r);
-      }).catchError((_) {});
+      if (_firstLoad) ShellPreload.report(0.6);
+      // Racha, grupo y partidos por arbitrar: en paralelo, y se esperan para
+      // que el Inicio se muestre completo de una vez.
+      await Future.wait([
+        _loadForm(_profile?.idUser),
+        _loadGroup(_dashboard?.nextMatch),
+        _loadReferee(),
+      ]);
     } catch (_) {
       // Silencioso: la pantalla igual se puede usar sin estos datos.
     } finally {
       if (mounted) setState(() => _loading = false);
+      if (_firstLoad) {
+        _firstLoad = false;
+        ShellPreload.done();
+      }
     }
+  }
+
+  Future<void> _loadReferee() async {
+    try {
+      final r = await RefereeApi().myMatches();
+      if (mounted) setState(() => _refMatches = r);
+    } catch (_) {}
   }
 
   // Aparte del Future.wait principal: necesita el id del perfil, y si falla
@@ -201,29 +218,6 @@ class _HomeScreenState extends State<HomeScreen>
                   style: TextStyle(color: AppColors.scorifyText),
                 ),
                 onTap: () => Navigator.pop(context, "referee_scan"),
-              ),
-              // Sonido al tocar botones (se guarda en el teléfono).
-              ValueListenableBuilder<bool>(
-                valueListenable: TapSound.enabled,
-                builder: (_, on, __) => SwitchListTile(
-                  secondary: Icon(on ? Icons.volume_up_rounded : Icons.volume_off_rounded, color: AppColors.scorifyText),
-                  title: const Text("Sonidos", style: TextStyle(color: AppColors.scorifyText)),
-                  value: on,
-                  activeThumbColor: AppColors.scorifyOnMint,
-                  activeTrackColor: AppColors.scorifyMint,
-                  onChanged: TapSound.setEnabled,
-                ),
-              ),
-              ValueListenableBuilder<bool>(
-                valueListenable: BackgroundMusic.enabled,
-                builder: (_, on, __) => SwitchListTile(
-                  secondary: Icon(on ? Icons.music_note_rounded : Icons.music_off_rounded, color: AppColors.scorifyText),
-                  title: const Text("Música", style: TextStyle(color: AppColors.scorifyText)),
-                  value: on,
-                  activeThumbColor: AppColors.scorifyOnMint,
-                  activeTrackColor: AppColors.scorifyMint,
-                  onChanged: BackgroundMusic.setEnabled,
-                ),
               ),
               ListTile(
                 leading: const Icon(Icons.logout, color: AppColors.scorifyText),

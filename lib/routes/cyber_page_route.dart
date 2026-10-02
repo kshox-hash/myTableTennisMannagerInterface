@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myttmi/core/api/api_http.dart';
 
 /// Timings compartidos por CyberPageRoute (push/pop entre pantallas) y por
 /// el pulso de cambio de pestaña del shell (ver app_shell.dart), para que
@@ -84,10 +85,13 @@ class CyberTransition {
 /// de atrás se oscurece y se aleja apenas. Al volver, lo mismo al revés.
 /// Se usa en TODAS las rutas con nombre (ver app_routes.dart).
 class CyberPageRoute<T> extends PageRouteBuilder<T> {
-  CyberPageRoute({required WidgetBuilder builder, super.settings})
+  /// Esperar a que la pantalla traiga sus datos antes de mostrarla.
+  final bool waitForData;
+
+  CyberPageRoute({required WidgetBuilder builder, super.settings, this.waitForData = true})
       : super(
-          transitionDuration: const Duration(milliseconds: 460),
-          reverseTransitionDuration: const Duration(milliseconds: 340),
+          transitionDuration: const Duration(milliseconds: 300),
+          reverseTransitionDuration: const Duration(milliseconds: 240),
           pageBuilder: (context, animation, secondaryAnimation) => builder(context),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             final enter = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
@@ -107,7 +111,7 @@ class CyberPageRoute<T> extends PageRouteBuilder<T> {
               child: FadeTransition(
                 opacity: fade,
                 child: SlideTransition(
-                  position: Tween(begin: const Offset(0, 0.05), end: Offset.zero).animate(enter),
+                  position: Tween(begin: const Offset(0, 0.035), end: Offset.zero).animate(enter),
                   child: ScaleTransition(
                     scale: Tween(begin: 0.98, end: 1.0).animate(enter),
                     child: child,
@@ -117,4 +121,19 @@ class CyberPageRoute<T> extends PageRouteBuilder<T> {
             );
           },
         );
+
+  /// La pantalla nueva se arma invisible (la anterior sigue a la vista) y la
+  /// transición parte recién cuando terminó de traer sus datos (tope 1,2 s):
+  /// así aparece completa, sin bloques que se cargan después.
+  @override
+  TickerFuture didPush() {
+    final started = super.didPush();
+    if (!waitForData) return started;
+    controller!.stop();
+    controller!.value = 0;
+    ApiActivity.settle().then((_) {
+      if (isActive && controller != null && controller!.value == 0) controller!.forward();
+    });
+    return started;
+  }
 }

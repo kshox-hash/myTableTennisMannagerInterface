@@ -1,4 +1,3 @@
-import "package:myttmi/core/ui/tap_sound.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:myttmi/core/ui/card_border.dart";
 import "dart:async";
@@ -186,10 +185,7 @@ class _ViewSelector extends StatelessWidget {
         children: [
           for (final v in const [2, 4, 6])
             GestureDetector(
-              onTap: () {
-                if (v != value) TapSound.play();
-                onChanged(v);
-              },
+              onTap: () => onChanged(v),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: selectedPillDecoration(v == value),

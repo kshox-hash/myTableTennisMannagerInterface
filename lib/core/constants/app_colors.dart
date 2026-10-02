@@ -59,4 +59,14 @@ class AppColors {
   static const LinearGradient cardGradient = LinearGradient(
     colors: [Color(0xFF0F1E25), Color(0xFF0F1E25)],
   );
+
+  /// Tarjeta destacada (próximo partido): el celeste y el verde de los
+  /// botones, tenues sobre el fondo de tarjeta — celeste arriba a la
+  /// izquierda, neutro al medio, verde abajo a la derecha.
+  static const LinearGradient featuredGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF0C3A46), Color(0xFF0F1E25), Color(0xFF233826)],
+    stops: [0, 0.55, 1],
+  );
 }

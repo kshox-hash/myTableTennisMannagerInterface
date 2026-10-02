@@ -1,3 +1,4 @@
+import "package:myttmi/features/shell/splash_gate.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:google_sign_in/google_sign_in.dart";
@@ -14,7 +15,6 @@ import "package:myttmi/core/ui/glass_card.dart";
 import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/features/auth/api/auth_api.dart";
 import "package:myttmi/features/auth/presentation/register_screen.dart";
-import "package:myttmi/features/shell/app_shell.dart";
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -51,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       Navigator.pushAndRemoveUntil(
         context,
-        CyberPageRoute(builder: (_) => const AppShell()),
+        CyberPageRoute(waitForData: false, builder: (_) => const SplashGate(afterLogin: true)),
         (_) => false,
       );
     } catch (e) {
@@ -80,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
         email: r.auth.user.email,
       );
       if (!mounted) return;
-      Navigator.pushAndRemoveUntil(context, CyberPageRoute(builder: (_) => const AppShell()), (_) => false);
+      Navigator.pushAndRemoveUntil(context, CyberPageRoute(waitForData: false, builder: (_) => const SplashGate(afterLogin: true)), (_) => false);
       // Cuenta nueva por Google: falta la ficha (país, género, nacimiento).
       if (r.profileIncomplete) {
         Navigator.pushNamed(context, AppRoutes.profile);

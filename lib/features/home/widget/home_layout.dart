@@ -41,17 +41,23 @@ class HomePanel extends StatelessWidget {
   final Widget child;
   final EdgeInsets padding;
   final VoidCallback? onTap;
-  const HomePanel({super.key, required this.child, this.padding = const EdgeInsets.all(16), this.onTap});
+  /// Fondo en degradado (tarjeta destacada); sin él, color sólido.
+  final Gradient? gradient;
+  const HomePanel({super.key, required this.child, this.padding = const EdgeInsets.all(16), this.onTap, this.gradient});
 
   @override
   Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(16);
     return Material(
-      color: AppColors.scorifyCardFill,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(padding: padding, child: child),
+      color: gradient == null ? AppColors.scorifyCardFill : Colors.transparent,
+      borderRadius: radius,
+      child: Ink(
+        decoration: BoxDecoration(gradient: gradient, borderRadius: radius),
+        child: InkWell(
+          borderRadius: radius,
+          onTap: onTap,
+          child: Padding(padding: padding, child: child),
+        ),
       ),
     );
   }
@@ -350,6 +356,7 @@ class HomeNoMatchCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return HomePanel(
+      gradient: AppColors.featuredGradient,
       // Centrado (ícono arriba, textos y botón al medio), igual que la
       // tarjeta del partido, que ya es simétrica.
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),

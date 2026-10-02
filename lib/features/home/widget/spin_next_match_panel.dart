@@ -76,7 +76,7 @@ class SpinNextMatchPanel extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
           decoration: BoxDecoration(
-            gradient: AppColors.cardGradient,
+            gradient: AppColors.featuredGradient,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.scorifyCardBorder),
           ),

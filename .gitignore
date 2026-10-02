@@ -44,5 +44,3 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Música de fondo de prueba (canción ajena): solo local, no al repo.
-assets/sounds/bg_music.mp3

@@ -1,3 +1,4 @@
+import "package:myttmi/features/shell/splash_gate.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/app_toast.dart";
@@ -13,7 +14,6 @@ import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/auth/api/auth_api.dart";
 import "package:myttmi/features/profile/api/clubs_api.dart";
 import "package:myttmi/features/profile/models/club_model.dart";
-import "package:myttmi/features/shell/app_shell.dart";
 
 const _handLabel = {"right-handed": "Diestro", "left-handed": "Zurdo"};
 
@@ -126,7 +126,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       Navigator.pushAndRemoveUntil(
         context,
-        CyberPageRoute(builder: (_) => const AppShell()),
+        CyberPageRoute(waitForData: false, builder: (_) => const SplashGate(afterLogin: true)),
         (_) => false,
       );
     } catch (e) {

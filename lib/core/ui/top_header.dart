@@ -1,4 +1,3 @@
-import 'package:myttmi/core/ui/tap_sound.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
@@ -67,10 +66,7 @@ class HeaderIconButton extends StatelessWidget {
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
-        onTap: () {
-          TapSound.play();
-          onTap();
-        },
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
           width: 38,

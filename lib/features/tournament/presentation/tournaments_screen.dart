@@ -1,4 +1,3 @@
-import "package:myttmi/core/ui/tap_sound.dart";
 import "package:myttmi/core/ui/stagger_in.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
@@ -383,10 +382,7 @@ class _FilterChip extends StatelessWidget {
       color: selected ? Colors.transparent : AppColors.scorifySurface2,
       shape: const StadiumBorder(),
       child: InkWell(
-        onTap: () {
-          if (!selected) TapSound.play();
-          onTap();
-        },
+        onTap: onTap,
         customBorder: const StadiumBorder(),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 9),
