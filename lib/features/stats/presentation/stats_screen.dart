@@ -1,4 +1,6 @@
 import 'package:myttmi/core/ui/stagger_in.dart';
+import 'package:myttmi/core/ui/stat_gauge.dart';
+import 'package:myttmi/core/ui/glass_card.dart';
 import 'package:myttmi/core/ui/section_card.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
@@ -10,7 +12,6 @@ import 'package:myttmi/features/player/api/player_api.dart';
 import 'package:myttmi/features/player/models/tournament_match_model.dart';
 import 'package:myttmi/features/profile/api/profile_api.dart';
 import 'package:myttmi/features/profile/models/profile_model.dart';
-import 'package:myttmi/features/ranking/api/ranking_api.dart';
 import 'package:myttmi/features/shell/tab_auto_refresh.dart';
 import 'package:myttmi/routes/app_routes.dart';
 
@@ -40,11 +41,9 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
   void onTabActivated() => _load();
 
   final _profileApi = ProfileApi();
-  final _rankingApi = RankingApi();
   final _playerApi = PlayerApi();
 
   PlayerStats? _stats;
-  int? _myRankingPosition;
   String? _myId;
   // Partidos terminados, del más reciente al más antiguo.
   List<PlayerMatchHistoryItem> _recent = [];
@@ -66,17 +65,13 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
       final myId = await SessionStorage().getUserId();
       final results = await Future.wait([
         _profileApi.getStats(),
-        _rankingApi.getGlobal(),
         if (myId != null) _playerApi.getPlayerMatchHistory(myId, limit: 15),
       ]);
       if (!mounted) return;
-      final ranking = results[1] as List;
-      final mine = ranking.cast<dynamic>().where((r) => r.idUser == myId).toList();
-      final history = results.length > 2 ? results[2] as List<PlayerMatchHistoryItem> : <PlayerMatchHistoryItem>[];
+      final history = results.length > 1 ? results[1] as List<PlayerMatchHistoryItem> : <PlayerMatchHistoryItem>[];
       setState(() {
         _stats = results[0] as PlayerStats;
         _myId = myId;
-        _myRankingPosition = mine.isNotEmpty ? mine.first.rankingPosition as int : null;
         _recent = history.where((m) => m.status == "played" || m.status == "walkover").toList();
       });
     } catch (e) {
@@ -134,72 +129,80 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                           padding: const EdgeInsets.only(bottom: 24),
                           children: staggerChildren([
                             // ── Efectividad + racha ──
-                            SectionCard(
-                              title: "Tu forma",
-                              icon: Icons.local_fire_department_rounded,
-                              titleColor: AppColors.scorifyMint,
-                              padding: const EdgeInsets.all(18),
-                              child: Column(
+                            GlassCard(
+                              padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+                              child: Row(
                                 children: [
-                                  Row(
-                                    children: [
-                                      _Ring(rate: rate, empty: played == 0),
-                                      const SizedBox(width: 18),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                  StatGauge(
+                                    fraction: played == 0 ? 0 : rate,
+                                    value: played == 0 ? "—" : "${(rate * 100).round()}%",
+                                    caption: "Victorias",
+                                    size: 100,
+                                    stroke: 6,
+                                    open: false,
+                                    valueSize: 24,
+                                  ),
+                                  Container(width: 1, height: 84, margin: const EdgeInsets.symmetric(horizontal: 16), color: Colors.white.withValues(alpha: 0.10)),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Row(
                                           children: [
-                                            Text(
-                                              streak == null
-                                                  ? "Sin partidos aún"
-                                                  : streak.$2
-                                                      ? (streak.$1 == 1 ? "Ganaste el último" : "${streak.$1} victorias seguidas")
-                                                      : (streak.$1 == 1 ? "Perdiste el último" : "${streak.$1} derrotas seguidas"),
-                                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 17, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
-                                            ),
-                                            const SizedBox(height: 10),
-                                            if (form.isEmpty)
-                                              const Text("Juega tu primer partido para ver tu racha.", style: _muted)
-                                            else
-                                              Row(
-                                                children: [
-                                                  for (final m in form) ...[
-                                                    _FormDot(won: _won(m)),
-                                                    const SizedBox(width: 6),
-                                                  ],
-                                                ],
-                                              ),
-                                            if (form.isNotEmpty) ...[
-                                              const SizedBox(height: 4),
-                                              const Text("Últimos 5 · el más reciente a la derecha", style: TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w400, color: AppColors.scorifyTextFaint)),
-                                            ],
+                                            Icon(Icons.local_fire_department_rounded, size: 18, color: _fire),
+                                            SizedBox(width: 6),
+                                            Text("RACHA ACTUAL", style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 1.2, color: AppColors.scorifyTextMuted)),
                                           ],
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(height: 4),
+                                        if (streak == null)
+                                          const Text("Sin partidos aún", style: TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText))
+                                        else
+                                          Row(
+                                            children: [
+                                              Text("${streak.$1}",
+                                                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 42, height: 1.0, fontWeight: FontWeight.w700, color: streak.$2 ? _fire : AppColors.scorifyNegative)),
+                                              const SizedBox(width: 10),
+                                              Expanded(
+                                                child: Text(
+                                                  streak.$2
+                                                      ? (streak.$1 == 1 ? "victoria" : "victorias\nseguidas")
+                                                      : (streak.$1 == 1 ? "derrota" : "derrotas\nseguidas"),
+                                                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, height: 1.15, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        if (form.isNotEmpty) ...[
+                                          const SizedBox(height: 10),
+                                          Row(
+                                            children: [
+                                              for (final m in form) ...[
+                                                _FormDot(won: _won(m)),
+                                                const SizedBox(width: 5),
+                                              ],
+                                            ],
+                                          ),
+                                        ],
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 18),
 
-                            // ── Indicadores ──
-                            GridView.count(
-                              crossAxisCount: 2,
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              mainAxisSpacing: 10,
-                              crossAxisSpacing: 10,
-                              childAspectRatio: 2.1,
+                            // ── Indicadores: mini medidores (turquesa; derrotas en rojo) ──
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                _Kpi(icon: Icons.sports_tennis_rounded, label: "Partidos", value: "$played", color: AppColors.scorifyMint),
-                                _Kpi(icon: Icons.emoji_events_rounded, label: "Victorias", value: "$won", color: AppColors.scorifyButterfly),
-                                _Kpi(icon: Icons.close_rounded, label: "Derrotas", value: "$lost", color: AppColors.scorifyNegative),
-                                _Kpi(
-                                  icon: Icons.leaderboard_rounded,
-                                  label: "Ranking",
-                                  value: _myRankingPosition != null ? "#$_myRankingPosition" : "—",
-                                  color: AppColors.scorifyPending,
+                                StatGauge(fraction: played == 0 ? 0 : 1, value: "$played", label: "Partidos"),
+                                StatGauge(fraction: played == 0 ? 0 : won / played, value: "$won", label: "Victorias"),
+                                StatGauge(fraction: played == 0 ? 0 : lost / played, value: "$lost", label: "Derrotas", color: AppColors.scorifyNegative),
+                                StatGauge(
+                                  fraction: setsWon + setsLost == 0 ? 0 : setsWon / (setsWon + setsLost),
+                                  value: setsWon + setsLost == 0 ? "—" : "${(setsWon * 100 / (setsWon + setsLost)).round()}%",
+                                  label: "Sets",
                                 ),
                               ],
                             ),
@@ -215,14 +218,20 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                   Row(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                      Expanded(child: _BigNumber(value: "$setsWon", label: "Ganados", color: AppColors.scorifyButterfly)),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                        decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(999)),
-                                        child: Text(
-                                          "Diferencia ${setsWon - setsLost >= 0 ? "+" : ""}${setsWon - setsLost}",
-                                          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
-                                        ),
+                                      Expanded(child: _BigNumber(value: "$setsWon", label: "Ganados", color: AppColors.scorifyText)),
+                                      Column(
+                                        children: [
+                                          const Text("DIFERENCIA", style: TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w500, letterSpacing: 1, color: AppColors.scorifyTextMuted)),
+                                          Text(
+                                            "${setsWon - setsLost >= 0 ? "+" : ""}${setsWon - setsLost}",
+                                            style: TextStyle(
+                                              fontFamily: AppTypography.body,
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.w700,
+                                              color: setsWon >= setsLost ? AppColors.scorifyButterfly : AppColors.scorifyNegative,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                       Expanded(child: _BigNumber(value: "$setsLost", label: "Perdidos", color: AppColors.scorifyNegative, alignEnd: true)),
                                     ],
@@ -231,7 +240,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(99),
                                     child: SizedBox(
-                                      height: 8,
+                                      height: 5,
                                       child: setsWon + setsLost == 0
                                           ? Container(color: AppColors.scorifySurface2)
                                           : Row(
@@ -281,42 +290,6 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
   }
 }
 
-class _Ring extends StatelessWidget {
-  final double rate;
-  final bool empty;
-  const _Ring({required this.rate, required this.empty});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 100,
-      height: 100,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox.expand(
-            child: CircularProgressIndicator(
-              value: empty ? 0 : rate.clamp(0.0, 1.0),
-              strokeWidth: 9,
-              strokeCap: StrokeCap.round,
-              backgroundColor: AppColors.scorifySurface2,
-              color: AppColors.scorifyButterfly,
-            ),
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(empty ? "—" : "${(rate * 100).round()}%",
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 23, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
-              Text("Efectividad", style: _muted.copyWith(fontSize: 10.5)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _FormDot extends StatelessWidget {
   final bool won;
   const _FormDot({required this.won});
@@ -334,42 +307,6 @@ class _FormDot extends StatelessWidget {
       );
 }
 
-class _Kpi extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-  const _Kpi({required this.icon, required this.label, required this.value, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(16)),
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.15), shape: BoxShape.circle),
-            child: Icon(icon, color: color, size: 19),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(value, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
-                Text(label, style: _muted.copyWith(fontSize: 11.5)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _BigNumber extends StatelessWidget {
   final String value;
@@ -413,15 +350,9 @@ class _RecentRow extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 30,
-              height: 30,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: won ? AppColors.scorifyButterfly : AppColors.scorifyNegative.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(won ? "G" : "P",
-                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: won ? AppColors.scorifyOnButterfly : AppColors.scorifyNegative)),
+              width: 9,
+              height: 9,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: won ? AppColors.scorifyButterfly : AppColors.scorifyNegative),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -432,13 +363,13 @@ class _RecentRow extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
-                  Text("${m.tournamentName} · $cat", maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted.copyWith(fontSize: 11.5)),
+                  Text([if (_date(m.playedAt).isNotEmpty) _date(m.playedAt), m.tournamentName, cat].join(" · "), maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted.copyWith(fontSize: 11.5)),
                 ],
               ),
             ),
             const SizedBox(width: 8),
             Text("$mine - $theirs",
-                style: TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: won ? AppColors.scorifyButterfly : AppColors.scorifyText)),
+                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
             const SizedBox(width: 4),
             const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.scorifyTextFaint),
           ],
@@ -447,3 +378,13 @@ class _RecentRow extends StatelessWidget {
     );
   }
 }
+
+/// Racha: naranja de fuego (separa la racha de las victorias, que son verdes).
+const _fire = Color(0xFFFFA62B);
+
+String _date(String? iso) {
+  const months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  final d = DateTime.tryParse(iso ?? "")?.toLocal();
+  return d == null ? "" : "${d.day} ${months[d.month - 1]}";
+}
+

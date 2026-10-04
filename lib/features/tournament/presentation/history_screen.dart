@@ -1,9 +1,11 @@
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
-import "package:myttmi/core/constants/match_status_labels.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/list_states.dart";
-import "package:myttmi/core/ui/match_history_row.dart";
+import "package:myttmi/core/ui/match_list.dart";
+import "package:myttmi/core/constants/app_typography.dart";
+import "package:myttmi/features/profile/api/profile_api.dart";
+import "package:myttmi/features/profile/models/profile_model.dart";
 import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/player/api/player_api.dart";
@@ -28,6 +30,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   bool _loading = false;
   bool _hasMore = true;
   String? _error;
+  // Totales para el resumen de arriba (no dependen de cuántos se cargaron).
+  PlayerStats? _stats;
 
   @override
   void initState() {
@@ -36,6 +40,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
       if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 400) _loadMore();
     });
     _refresh();
+    ProfileApi().getStats().then((s) {
+      if (mounted) setState(() => _stats = s);
+    }).catchError((_) {});
   }
 
   @override
@@ -114,50 +121,47 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ],
       );
     }
-    final myId = _myId;
+    final st = _stats;
+    Widget stat(String v, String l, Color c) => Expanded(
+          child: Column(
+            children: [
+              Text(v, style: TextStyle(fontFamily: AppTypography.body, fontSize: 24, fontWeight: FontWeight.w600, color: c)),
+              Text(l.toUpperCase(),
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w500, letterSpacing: 1, color: AppColors.scorifyTextMuted)),
+            ],
+          ),
+        );
+    Widget sep() => Container(width: 1, height: 36, color: Colors.white.withValues(alpha: 0.10));
     return RefreshIndicator(
       color: AppColors.scorifyMint,
       onRefresh: _refresh,
-      child: ListView.builder(
+      child: ListView(
         controller: _scroll,
         physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: _items.length + 1,
-        itemBuilder: (context, i) {
-          if (i == _items.length) {
-            if (_loading) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.scorifyMint))),
-              );
-            }
-            if (_error != null) return TextButton(onPressed: _loadMore, child: const Text("No se pudieron cargar más. Reintentar"));
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Center(
-                child: Text(
-                  _hasMore ? "" : "${_items.length} partidos jugados",
-                  style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 12.5),
-                ),
-              ),
-            );
-          }
-          final m = _items[i];
-          final isP1 = m.player1Id == myId;
-          final won = myId != null && m.winnerId == myId;
-          return MatchHistoryRow(
-            opponentName: "vs ${isP1 ? m.player2Name : m.player1Name}",
-            opponentId: isP1 ? m.player2Id : m.player1Id,
-            meta: [
-              m.tournamentName,
-              m.categoryLabel,
-              if (m.groupName != null) "Grupo ${m.groupName}",
-              if (m.round != null) matchRoundLabel(m.round!),
-              matchStatusLabel[m.status] ?? m.status,
-            ].join(" · "),
-            won: won,
-            scoreText: "${isP1 ? m.setsPlayer1 : m.setsPlayer2}-${isP1 ? m.setsPlayer2 : m.setsPlayer1}",
-          );
-        },
+        padding: const EdgeInsets.only(bottom: 16),
+        children: [
+          // Resumen: datos neutros en blanco; verde solo ganados, rojo perdidos.
+          if (st != null) ...[
+            Row(
+              children: [
+                stat("${st.matchesPlayed}", "Partidos", AppColors.scorifyText),
+                sep(),
+                stat("${st.matchesWon}", "Ganados", AppColors.scorifyButterfly),
+                sep(),
+                stat("${st.matchesLost}", "Perdidos", AppColors.scorifyNegative),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+          ...matchesByMonth(context, _items, _myId),
+          if (_loading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.scorifyMint))),
+            )
+          else if (_error != null)
+            TextButton(onPressed: _loadMore, child: const Text("No se pudieron cargar más. Reintentar")),
+        ],
       ),
     );
   }

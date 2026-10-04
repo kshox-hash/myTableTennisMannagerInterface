@@ -1,4 +1,5 @@
 import 'package:myttmi/core/ui/tap_sound.dart';
+import 'package:myttmi/features/shell/app_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/ui/app_button.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
@@ -33,7 +34,15 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           child: Column(
             children: [
-              const TopHeader(title: "Mi rendimiento", showBack: false),
+              Builder(builder: (context) {
+                final scope = AppShellScope.of(context);
+                final back = scope?.returnTab;
+                return TopHeader(
+                  title: "Mi rendimiento",
+                  showBack: false,
+                  onBack: back == null ? null : () => scope!.switchTab(back),
+                );
+              }),
               const SizedBox(height: 14),
               _SubTabSwitch(
                 index: _sub,

@@ -1,4 +1,6 @@
 import "dart:math" as math;
+import "package:myttmi/core/ui/top_header.dart";
+import "package:myttmi/core/ui/stat_gauge.dart";
 
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -328,11 +330,12 @@ class _DiagonalPainter extends CustomPainter {
 }
 
 /// Rendimiento: anillo de efectividad, partidos/victorias/derrotas y una
-/// línea con la evolución de tu efectividad en los últimos partidos.
+/// curva con tu diferencia de sets acumulada partido a partido (sube con
+/// cada victoria —más con un 3-0—, baja con cada derrota).
 class HomePerformanceCard extends StatelessWidget {
   final int played;
   final int won;
-  final List<bool> trend; // resultados del más antiguo al más reciente
+  final List<int> trend; // sets ganados − perdidos por partido, del más antiguo al más reciente
   final VoidCallback onStats;
   const HomePerformanceCard({super.key, required this.played, required this.won, required this.trend, required this.onStats});
 
@@ -354,14 +357,6 @@ class HomePerformanceCard extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: Stack(
         children: [
-          if (trend.length >= 2)
-            Positioned(
-              right: 0,
-              bottom: 0,
-              width: 200,
-              height: 34,
-              child: CustomPaint(painter: _TrendPainter(trend)),
-            ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
             child: Column(
@@ -370,7 +365,15 @@ class HomePerformanceCard extends StatelessWidget {
                 const SizedBox(height: 14),
                 Row(
                   children: [
-                    _Ring(rate: rate, empty: played == 0),
+                    StatGauge(
+                      fraction: played == 0 ? 0 : rate,
+                      value: played == 0 ? "—" : "${(rate * 100).round()}%",
+                      caption: "Efectividad",
+                      size: 96,
+                      stroke: 6,
+                      open: false,
+                      valueSize: 22,
+                    ),
                     const SizedBox(width: 14),
                     stat("$played", "Partidos"),
                     sep(),
@@ -380,7 +383,7 @@ class HomePerformanceCard extends StatelessWidget {
                   ],
                 ),
                 // Espacio para la línea de tendencia, bajo los números.
-                const SizedBox(height: 20),
+                const SizedBox(height: 30),
               ],
             ),
           ),
@@ -390,122 +393,20 @@ class HomePerformanceCard extends StatelessWidget {
   }
 }
 
-class _Ring extends StatelessWidget {
-  final double rate;
-  final bool empty;
-  const _Ring({required this.rate, required this.empty});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 96,
-      height: 96,
-      child: CustomPaint(
-        painter: _RingPainter(empty ? 0 : rate),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(empty ? "—" : "${(rate * 100).round()}%", style: _t(22, w: FontWeight.w700, h: 1.1)),
-              Text("Efectividad", style: _t(10.5, c: AppColors.scorifyTextMuted)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RingPainter extends CustomPainter {
-  final double value;
-  _RingPainter(this.value);
-  @override
-  void paint(Canvas canvas, Size size) {
-    const stroke = 7.0;
-    final rect = Rect.fromLTWH(stroke / 2, stroke / 2, size.width - stroke, size.height - stroke);
-    canvas.drawArc(rect, 0, math.pi * 2, false,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = stroke
-          ..color = Colors.white.withValues(alpha: 0.08));
-    if (value <= 0) return;
-    final sweep = math.pi * 2 * value.clamp(0.0, 1.0);
-    canvas.drawArc(rect, -math.pi / 2, sweep, false,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = stroke
-          ..strokeCap = StrokeCap.round
-          ..shader = const SweepGradient(
-            startAngle: -math.pi / 2,
-            endAngle: math.pi * 1.5,
-            colors: [_lime, _mint, _lime],
-            transform: GradientRotation(-math.pi / 2),
-          ).createShader(rect));
-  }
-
-  @override
-  bool shouldRepaint(_RingPainter old) => old.value != value;
-}
-
-/// Línea de la efectividad acumulada partido a partido (decorativa, tenue).
-class _TrendPainter extends CustomPainter {
-  final List<bool> results;
-  _TrendPainter(this.results);
-  @override
-  void paint(Canvas canvas, Size size) {
-    final pts = <Offset>[];
-    var w = 0;
-    for (var i = 0; i < results.length; i++) {
-      if (results[i]) w++;
-      final rate = w / (i + 1);
-      final x = size.width * i / (results.length - 1);
-      final y = size.height - 6 - (size.height - 12) * rate;
-      pts.add(Offset(x, y));
-    }
-    final line = Path()..moveTo(pts.first.dx, pts.first.dy);
-    for (final p in pts.skip(1)) {
-      line.lineTo(p.dx, p.dy);
-    }
-    final fill = Path.from(line)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-    final rect = Offset.zero & size;
-    canvas.drawPath(
-        fill,
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [_lime.withValues(alpha: 0.16), Colors.transparent],
-          ).createShader(rect));
-    canvas.drawPath(
-        line,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.6
-          ..shader = LinearGradient(colors: [_lime.withValues(alpha: 0.15), _lime.withValues(alpha: 0.75)]).createShader(rect));
-  }
-
-  @override
-  bool shouldRepaint(_TrendPainter old) => old.results != results;
-}
-
-/// Racha actual: número grande, comparación con tu mejor racha anterior y
 /// los últimos 5 resultados (G/P).
 class HomeStreakCardV2 extends StatelessWidget {
   final List<bool> form; // últimos 5, del más antiguo al más reciente
   final int streak; // racha actual (cantidad)
   final bool winning;
   final int bestPrevious; // mejor racha de victorias anterior
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   const HomeStreakCardV2({
     super.key,
     required this.form,
     required this.streak,
     required this.winning,
     required this.bestPrevious,
-    required this.onTap,
+    this.onTap,
   });
 
   @override
@@ -578,7 +479,6 @@ class HomeStreakCardV2 extends StatelessWidget {
                         ),
                         child: Text(w ? "G" : "P", style: _t(12, w: FontWeight.w700, c: w ? AppColors.scorifyOnButterfly : Colors.white)),
                       ),
-                    const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
                   ],
                 ),
               ],
@@ -600,13 +500,25 @@ class HomeResult {
   HomeResult({required this.won, required this.score, required this.opponent, required this.date, required this.onTap});
 }
 
-class HomeResultsCard extends StatelessWidget {
+class HomeResultsCard extends StatefulWidget {
   final List<HomeResult> results;
   final VoidCallback onAll;
   const HomeResultsCard({super.key, required this.results, required this.onAll});
 
   @override
+  State<HomeResultsCard> createState() => _HomeResultsCardState();
+}
+
+class _HomeResultsCardState extends State<HomeResultsCard> {
+  int _page = 0;
+
+  @override
   Widget build(BuildContext context) {
+    final results = widget.results;
+    final onAll = widget.onAll;
+    final pages = ((results.length + 3) ~/ 4).clamp(1, 3);
+    final page = _page.clamp(0, pages - 1);
+    final shown = results.skip(page * 4).take(4).toList();
     return HomeCard(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
       child: Column(
@@ -617,10 +529,36 @@ class HomeResultsCard extends StatelessWidget {
             children: [
               for (var i = 0; i < 4; i++) ...[
                 if (i > 0) const SizedBox(width: 6),
-                Expanded(child: i < results.length ? _ResultTile(r: results[i]) : const SizedBox.shrink()),
+                Expanded(child: i < shown.length ? _ResultTile(r: shown[i]) : const SizedBox.shrink()),
               ],
             ],
           ),
+          if (pages > 1) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                PagerButton(next: false, onTap: page > 0 ? () => setState(() => _page = page - 1) : null),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      for (var i = 0; i < pages; i++)
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 3),
+                          width: i == page ? 18 : 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: i == page ? AppColors.scorifyMint : AppColors.scorifySurface2,
+                            borderRadius: BorderRadius.circular(99),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                PagerButton(next: true, onTap: page < pages - 1 ? () => setState(() => _page = page + 1) : null),
+              ],
+            ),
+          ],
         ],
       ),
     );

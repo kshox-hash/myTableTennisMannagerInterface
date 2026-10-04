@@ -1,4 +1,5 @@
 import "package:myttmi/core/ui/tap_sound.dart";
+import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/shell/shell_preload.dart";
 import "package:myttmi/features/home/widget/home_v2.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -192,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen>
       streak: streak,
       winning: winning,
       bestPrevious: best,
-      onTap: () => Navigator.pushNamed(context, AppRoutes.history),
+      // Solo informativa: el Historial está en "Ver todos" de Últimos resultados.
     );
   }
 
@@ -575,15 +576,20 @@ class _HomeScreenState extends State<HomeScreen>
                       HomePerformanceCard(
                         played: played,
                         won: stats?.matchesWon ?? 0,
-                        trend: _history.take(15).map((m) => m.winnerId == _profile?.idUser).toList().reversed.toList(),
-                        onStats: () => AppShellScope.of(context)?.switchTab(2),
+                        trend: _history
+                            .take(15)
+                            .map((m) => m.player1Id == _profile?.idUser ? m.setsPlayer1 - m.setsPlayer2 : m.setsPlayer2 - m.setsPlayer1)
+                            .toList()
+                            .reversed
+                            .toList(),
+                        onStats: () => AppShellScope.of(context)?.switchTab(2, link: true),
                       ),
                       const SizedBox(height: 12),
                       _streakCard(),
                       if (_history.isNotEmpty) ...[
                         const SizedBox(height: 12),
                         HomeResultsCard(
-                          results: _history.take(4).map(_toResult).toList(),
+                          results: _history.take(12).map(_toResult).toList(),
                           onAll: () => Navigator.pushNamed(context, AppRoutes.history),
                         ),
                       ],
@@ -620,6 +626,10 @@ class _MatchesCarouselState extends State<_MatchesCarousel> {
     super.dispose();
   }
 
+  void _go(int page, double w) {
+    _controller.animateTo(page * w, duration: const Duration(milliseconds: 320), curve: Curves.easeOutCubic);
+  }
+
   @override
   Widget build(BuildContext context) {
     final pages = widget.pages;
@@ -653,35 +663,38 @@ class _MatchesCarouselState extends State<_MatchesCarousel> {
               ),
             ),
             const SizedBox(height: 12),
-            // Con muchos partidos los puntitos no caben: se muestra "3 / 12".
-            if (pages.length > 6)
-              Text(
-                "${_page + 1} / ${pages.length}",
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.scorifyTextMuted,
+            // ‹ puntitos › (con muchos partidos, "3 / 12" en vez de puntitos).
+            Row(
+              children: [
+                PagerButton(next: false, onTap: _page > 0 ? () => _go(_page - 1, w) : null),
+                Expanded(
+                  child: pages.length > 6
+                      ? Center(
+                          child: Text(
+                            "${_page + 1} / ${pages.length}",
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted),
+                          ),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            for (var i = 0; i < pages.length; i++)
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                margin: const EdgeInsets.symmetric(horizontal: 3),
+                                width: i == _page ? 18 : 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: i == _page ? AppColors.scorifyMint : AppColors.scorifySurface2,
+                                  borderRadius: BorderRadius.circular(99),
+                                ),
+                              ),
+                          ],
+                        ),
                 ),
-              )
-            else
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  for (var i = 0; i < pages.length; i++)
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      margin: const EdgeInsets.symmetric(horizontal: 3),
-                      width: i == _page ? 18 : 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: i == _page
-                            ? AppColors.scorifyMint
-                            : AppColors.scorifySurface2,
-                        borderRadius: BorderRadius.circular(99),
-                      ),
-                    ),
-                ],
-              ),
+                PagerButton(next: true, onTap: _page < pages.length - 1 ? () => _go(_page + 1, w) : null),
+              ],
+            ),
           ],
         );
       },

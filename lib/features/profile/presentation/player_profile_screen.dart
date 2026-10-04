@@ -1,13 +1,12 @@
 import "package:flutter/material.dart";
+import "package:myttmi/core/ui/match_list.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
-import "package:myttmi/core/constants/match_status_labels.dart";
 import "package:myttmi/core/ui/achievement_row.dart";
 import "package:myttmi/core/ui/glass_card.dart";
 import "package:myttmi/core/ui/identicon.dart";
 import "package:myttmi/core/ui/list_states.dart";
-import "package:myttmi/core/ui/match_history_row.dart";
 import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/profile/api/profile_api.dart";
@@ -146,31 +145,10 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                                   message: "Sin partidos jugados todavía.",
                                 );
                               }
+                              // Desde el punto de vista de este jugador (no "Tú").
                               return Column(
-                                children: items.map((m) {
-                                  final isP1 = m.player1Id == widget.userId;
-                                  final opponent = isP1
-                                      ? m.player2Name
-                                      : m.player1Name;
-                                  final opponentId = isP1
-                                      ? m.player2Id
-                                      : m.player1Id;
-                                  final mySets = isP1
-                                      ? m.setsPlayer1
-                                      : m.setsPlayer2;
-                                  final oppSets = isP1
-                                      ? m.setsPlayer2
-                                      : m.setsPlayer1;
-                                  final won = m.winnerId == widget.userId;
-                                  return MatchHistoryRow(
-                                    opponentName: "vs $opponent",
-                                    opponentId: opponentId,
-                                    meta:
-                                        "${m.tournamentName} · ${m.categoryLabel} · ${matchStatusLabel[m.status] ?? m.status}",
-                                    won: won,
-                                    scoreText: "$mySets-$oppSets",
-                                  );
-                                }).toList(),
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: matchesByMonth(context, items, widget.userId),
                               );
                             },
                           ),

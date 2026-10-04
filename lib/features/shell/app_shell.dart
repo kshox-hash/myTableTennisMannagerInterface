@@ -46,8 +46,14 @@ class _AppShellState extends State<AppShell>
     duration: _pulseDuration,
   );
 
-  void _switchTab(int index) {
+  // Pestaña a la que vuelve la flecha ← cuando se llegó con un enlace
+  // ("Ver estadísticas" en el Inicio). Tocando la barra de abajo no hay.
+  int? _returnTab;
+
+  void _switchTab(int index, {bool link = false}) {
     if (index == _index) return;
+    final from = _index;
+    setState(() => _returnTab = link ? from : null);
     _pulse.forward(from: 0);
     final delay = Duration(
       milliseconds:
@@ -126,6 +132,7 @@ class _AppShellState extends State<AppShell>
                   AppShellScope(
                     switchTab: _switchTab,
                     currentIndex: _index,
+                    returnTab: _returnTab,
                     child: IndexedStack(index: _index, children: _tabs),
                   ),
                   CyberTransition.glowOverlay(glow),
@@ -147,13 +154,16 @@ class _AppShellState extends State<AppShell>
 /// cada una recargar sus datos sola cuando el usuario vuelve a ella, en vez
 /// de necesitar un botón de actualizar manual.
 class AppShellScope extends InheritedWidget {
-  final void Function(int index) switchTab;
+  final void Function(int index, {bool link}) switchTab;
   final int currentIndex;
+  /// Pestaña de la que se vino con un enlace (para la flecha ←), o null.
+  final int? returnTab;
 
   const AppShellScope({
     super.key,
     required this.switchTab,
     required this.currentIndex,
+    this.returnTab,
     required super.child,
   });
 
@@ -163,5 +173,6 @@ class AppShellScope extends InheritedWidget {
   @override
   bool updateShouldNotify(AppShellScope oldWidget) =>
       switchTab != oldWidget.switchTab ||
-      currentIndex != oldWidget.currentIndex;
+      currentIndex != oldWidget.currentIndex ||
+      returnTab != oldWidget.returnTab;
 }
