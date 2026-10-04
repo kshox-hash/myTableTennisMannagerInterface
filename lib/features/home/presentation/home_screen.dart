@@ -1,5 +1,8 @@
 import "package:myttmi/core/ui/tap_sound.dart";
 import "package:myttmi/features/shell/shell_preload.dart";
+import "package:myttmi/features/home/widget/home_v2.dart";
+import "package:myttmi/core/constants/app_typography.dart";
+import "package:myttmi/features/player/models/tournament_match_model.dart";
 import "package:myttmi/features/calendar/api/calendar_api.dart";
 import "package:myttmi/features/calendar/models/calendar_event.dart";
 import "package:myttmi/features/tournament/api/tournament_api.dart";
@@ -26,7 +29,6 @@ import 'package:myttmi/features/notifications/api/notifications_api.dart';
 import '../../../routes/app_routes.dart';
 
 import '../widget/spin_header.dart';
-import '../widget/spin_next_match_panel.dart';
 import "package:myttmi/core/push/push_service.dart";
 import "package:myttmi/features/favorites/favorites_screen.dart";
 import "package:myttmi/features/referee/referee_api.dart";
@@ -71,6 +73,8 @@ class _HomeScreenState extends State<HomeScreen>
   // Sin partido asignado: el próximo campeonato en que estás inscrito, o
   // cuántos campeonatos tienen la inscripción abierta.
   CalendarEvent? _upcoming;
+  // Partidos jugados, del más reciente al más antiguo.
+  List<PlayerMatchHistoryItem> _history = const [];
   int _openCount = 0;
   int _groupSize = 0;
 
@@ -161,6 +165,92 @@ class _HomeScreenState extends State<HomeScreen>
     return "${_weekdays[d.weekday - 1]} ${d.day} ${_months[d.month - 1]} · $left";
   }
 
+  /// "Sáb. 27 Sep".
+  String _whenShort(DateTime d) {
+    const days = ["Lun.", "Mar.", "Mié.", "Jue.", "Vie.", "Sáb.", "Dom."];
+    const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    return "${days[d.weekday - 1]} ${d.day} ${months[d.month - 1]}";
+  }
+
+  Widget _streakCard() {
+    final me = _profile?.idUser;
+    final res = _history.map((m) => m.winnerId == me).toList(); // reciente primero
+    var streak = 0;
+    final winning = res.isEmpty || res.first;
+    for (final r in res) {
+      if (r != winning) break;
+      streak++;
+    }
+    // Mejor racha de victorias anterior (sin contar la actual).
+    var best = 0, run = 0;
+    for (final r in res.skip(winning ? streak : 0)) {
+      run = r ? run + 1 : 0;
+      if (run > best) best = run;
+    }
+    return HomeStreakCardV2(
+      form: _form,
+      streak: streak,
+      winning: winning,
+      bestPrevious: best,
+      onTap: () => Navigator.pushNamed(context, AppRoutes.history),
+    );
+  }
+
+  HomeResult _toResult(PlayerMatchHistoryItem m) {
+    final me = _profile?.idUser;
+    final iAm1 = m.player1Id == me;
+    final opp = iAm1 ? m.player2Name : m.player1Name;
+    final parts = opp.trim().split(RegExp(r"\s+"));
+    const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    final d = DateTime.tryParse(m.playedAt ?? "")?.toLocal();
+    return HomeResult(
+      won: m.winnerId == me,
+      score: iAm1 ? "${m.setsPlayer1} - ${m.setsPlayer2}" : "${m.setsPlayer2} - ${m.setsPlayer1}",
+      opponent: parts.length <= 2 ? opp.trim() : "${parts[0]} ${parts[1]}",
+      date: d == null ? "" : "${d.day} ${months[d.month - 1]}",
+      onTap: () => Navigator.pushNamed(context, AppRoutes.matchDetail, arguments: {"matchType": m.matchType, "matchId": m.idMatch}),
+    );
+  }
+
+  /// Sin partido asignado: próximo campeonato, o invitación a buscar.
+  Widget _noMatchCard() {
+    final up = _upcoming;
+    return HomeCard(
+      gradient: AppColors.featuredGradient,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          HomeCardTitle(
+            icon: up != null ? Icons.emoji_events_rounded : Icons.calendar_month_rounded,
+            title: up != null ? "Próximo campeonato" : "Próximo partido",
+          ),
+          const SizedBox(height: 10),
+          Text(
+            _loading ? "Cargando…" : (up?.tournamentName ?? "Sin partidos programados"),
+            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 17, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            up != null
+                ? "${_whenLabel(up.date)} · ${up.categoryName}"
+                : _openCount > 0
+                    ? "${_openCount == 1 ? "Hay 1 campeonato" : "Hay $_openCount campeonatos"} con la inscripción abierta"
+                    : "Inscríbete a un campeonato para entrar al fixture",
+            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, color: AppColors.scorifyTextMuted),
+          ),
+          const SizedBox(height: 14),
+          AppButton(
+            label: up != null ? "Ver campeonato" : "Ver torneos",
+            trailingIcon: Icons.chevron_right_rounded,
+            onPressed: up != null ? _openUpcoming : () => AppShellScope.of(context)?.switchTab(3),
+            height: 40,
+            expand: false,
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _openUpcoming() async {
     final e = _upcoming;
     if (e == null) return;
@@ -184,7 +274,10 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _loadForm(String? userId) async {
     if (userId == null || userId.isEmpty) return;
     try {
-      final history = await _playerApi.getPlayerMatchHistory(userId, limit: 10);
+      final history = await _playerApi.getPlayerMatchHistory(userId, limit: 40);
+      if (mounted) {
+        setState(() => _history = history.where((m) => m.status == "played" || m.status == "walkover").toList());
+      }
       final done = history
           .where((m) => m.status == "played" || m.status == "walkover")
           .take(5)
@@ -319,7 +412,6 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
-  Widget _fillHeight(bool enabled, Widget child) => enabled ? IntrinsicHeight(child: child) : child;
 
   Widget _panelFor(PlayerNextMatch? m) {
     final stage = m == null
@@ -331,41 +423,34 @@ class _HomeScreenState extends State<HomeScreen>
             else if (m.round != null)
               "Ronda ${m.round}",
           ].where((s) => s.trim().isNotEmpty).join(" · ");
-    return SpinNextMatchPanel(
-      hasMatch: m != null,
-      tournamentName: m?.tournamentName ?? "",
-      stageLabel: stage,
+    if (m == null) return const SizedBox.shrink();
+    final when = m.scheduledStartAt == null
+        ? "Por definir"
+        : "${_whenShort(m.scheduledStartAt!)}\n${m.scheduledStartAt!.hour.toString().padLeft(2, "0")}:${m.scheduledStartAt!.minute.toString().padLeft(2, "0")}";
+    return HomeMatchCard(
+      tournamentName: [m.tournamentName, if (stage.isNotEmpty) stage].join(" · "),
       myId: _profile?.idUser,
-      myName: (_profile?.displayName.isNotEmpty ?? false)
-          ? _profile!.displayName
-          : "Tú",
       myAvatarUrl: _profile?.avatarUrl,
-      opponentId: m?.opponentId,
-      opponentName: m?.opponentName ?? "Rival por definir",
-      opponentAvatarUrl: m?.opponentAvatarUrl,
-      tableNumber: m?.tableNumber,
-      scheduledAt: m?.scheduledStartAt,
-      statusLabel: m != null && m.tableNumber == null ? m.queueLabel : "",
-      emptySubtitle: _loading
-          ? "Cargando…"
-          : "Inscríbete a un campeonato para entrar al fixture",
-      onTap: m != null
-          ? () => Navigator.pushNamed(
-              context,
-              AppRoutes.tournamentTables,
-              arguments: {"tournamentId": m.idTournament, "tournamentName": m.tournamentName},
-            )
-          : () => AppShellScope.of(context)?.switchTab(3),
-      onOpponentProfile: m?.opponentId != null
-          ? () => Navigator.pushNamed(
-              context,
-              AppRoutes.playerProfile,
-              arguments: {
-                "userId": m!.opponentId,
-                "playerName": m.opponentName ?? "Jugador",
-              },
-            )
-          : null,
+      myClub: _profile?.club,
+      opponentId: m.opponentId,
+      opponentName: m.opponentName ?? "Por definir",
+      opponentAvatarUrl: m.opponentAvatarUrl,
+      opponentClub: m.opponentClub,
+      when: when,
+      table: m.tableNumber != null ? "Mesa ${m.tableNumber}" : "En cola",
+      place: m.address,
+      onDetail: () => Navigator.pushNamed(
+        context,
+        AppRoutes.matchDetail,
+        arguments: {"matchType": m.matchType, "matchId": m.idMatch},
+      ),
+      onOpponent: m.opponentId == null
+          ? null
+          : () => Navigator.pushNamed(
+                context,
+                AppRoutes.playerProfile,
+                arguments: {"userId": m.opponentId, "playerName": m.opponentName ?? "Jugador"},
+              ),
     );
   }
 
@@ -376,17 +461,6 @@ class _HomeScreenState extends State<HomeScreen>
     final stats = _dashboard?.stats;
     final played = stats?.matchesPlayed ?? 0;
 
-    final hero = HomeHero(
-      userId: _profile?.idUser,
-      name: (_profile?.displayName.isNotEmpty ?? false) ? _profile!.displayName : "Jugador",
-      country: _profile?.country,
-      club: _profile?.club,
-      age: _profile?.age,
-      gender: _profile?.gender,
-      memberSince: _profile?.createdAt,
-      avatarUrl: _profile?.avatarUrl,
-      onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
-    );
     final matches = nm == null
         ? const SizedBox.shrink()
         : _MatchesCarousel(
@@ -441,11 +515,20 @@ class _HomeScreenState extends State<HomeScreen>
                   // LayoutBuilder— no admite IntrinsicHeight.
                   // La tarjeta de partido (o la de sin partido) toma el alto
                   // que sobra, así llega hasta abajo en cualquier caso.
-                  child: _fillHeight(true, Column(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: staggerChildren([
-                      hero,
-                      const SizedBox(height: 12),
+                      HomeProfileRow(
+                        userId: _profile?.idUser,
+                        name: (_profile?.displayName.isNotEmpty ?? false) ? _profile!.displayName : "Jugador",
+                        country: _profile?.country,
+                        club: _profile?.club,
+                        age: _profile?.age,
+                        gender: _profile?.gender,
+                        avatarUrl: _profile?.avatarUrl,
+                        onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
+                      ),
+                      const SizedBox(height: 14),
                       if (_refMatches.isNotEmpty) ...[
                         HomeRefereeCard(
                           title: "${_refMatches.first.player1Name} vs ${_refMatches.first.player2Name}",
@@ -465,64 +548,47 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                         const SizedBox(height: 12),
                       ],
-                      HomeStatsBar(
-                        played: played,
-                        won: stats?.matchesWon ?? 0,
-                        winRate: played == 0 ? "—" : "${(stats!.winRate * 100).round()}%",
-                      ),
-                      // Con un partido por jugar: el partido y cómo vas en tu
-                      // grupo, al medio del Inicio (bajo tu perfil y tus
-                      // números; arriba del todo el perfil quedaba perdido).
-                      if (nm != null) ...[
+                      if (nm != null) matches else _noMatchCard(),
+                      if (nm != null && _myStanding != null && nm.matchType == "group") ...[
                         const SizedBox(height: 12),
-                        Expanded(child: matches),
-                        if (_myStanding != null && nm.matchType == "group") ...[
-                          const SizedBox(height: 12),
-                          HomeGroupCard(
-                            groupName: nm.groupName ?? "",
-                            position: _myStanding!.played == 0 ? null : _myStanding!.position,
-                            total: _groupSize,
-                            won: _myStanding!.won,
-                            lost: _myStanding!.lost,
-                            setsFor: _myStanding!.setsFor,
-                            setsAgainst: _myStanding!.setsAgainst,
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              AppRoutes.myCategory,
-                              arguments: {
-                                "tournamentId": nm.idTournament,
-                                "tournamentName": nm.tournamentName,
-                                "categoryId": nm.idCategory,
-                                "categoryLabel": nm.categoryDisplay,
-                              },
-                            ),
-                          ),
-                        ],
-                      ],
-                      const SizedBox(height: 12),
-                      HomeStreakCard(
-                        form: _form,
-                        onTap: () =>
-                            Navigator.pushNamed(context, AppRoutes.history),
-                      ),
-                      // Sin partido: la invitación a buscar campeonatos, abajo.
-                      if (nm == null) ...[
-                        const SizedBox(height: 12),
-                        Expanded(
-                          child: HomeNoMatchCard(
-                            loading: _loading,
-                            onBrowse: () =>
-                                AppShellScope.of(context)?.switchTab(3),
-                            upcomingName: _upcoming?.tournamentName,
-                            upcomingWhen: _upcoming == null ? null : _whenLabel(_upcoming!.date),
-                            upcomingCategory: _upcoming?.categoryName,
-                            onUpcoming: _openUpcoming,
-                            openCount: _openCount,
+                        HomeGroupCard(
+                          groupName: nm.groupName ?? "",
+                          position: _myStanding!.played == 0 ? null : _myStanding!.position,
+                          total: _groupSize,
+                          won: _myStanding!.won,
+                          lost: _myStanding!.lost,
+                          setsFor: _myStanding!.setsFor,
+                          setsAgainst: _myStanding!.setsAgainst,
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.myCategory,
+                            arguments: {
+                              "tournamentId": nm.idTournament,
+                              "tournamentName": nm.tournamentName,
+                              "categoryId": nm.idCategory,
+                              "categoryLabel": nm.categoryDisplay,
+                            },
                           ),
                         ),
                       ],
+                      const SizedBox(height: 12),
+                      HomePerformanceCard(
+                        played: played,
+                        won: stats?.matchesWon ?? 0,
+                        trend: _history.take(15).map((m) => m.winnerId == _profile?.idUser).toList().reversed.toList(),
+                        onStats: () => AppShellScope.of(context)?.switchTab(2),
+                      ),
+                      const SizedBox(height: 12),
+                      _streakCard(),
+                      if (_history.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        HomeResultsCard(
+                          results: _history.take(4).map(_toResult).toList(),
+                          onAll: () => Navigator.pushNamed(context, AppRoutes.history),
+                        ),
+                      ],
                     ]),
-                  )),
+                  ),
                 ),
               ),
               ),
@@ -558,14 +624,12 @@ class _MatchesCarouselState extends State<_MatchesCarousel> {
   Widget build(BuildContext context) {
     final pages = widget.pages;
     if (pages.length == 1) return pages.first;
-    // Ancho de la pantalla menos el margen del Inicio (16 a cada lado).
-    final w = MediaQuery.sizeOf(context).width - 32;
-    return Builder(
-      builder: (context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final w = constraints.maxWidth;
         return Column(
           children: [
-            Expanded(
-              child: NotificationListener<ScrollNotification>(
+            NotificationListener<ScrollNotification>(
               onNotification: (_) {
                 final p = (_controller.offset / w).round().clamp(
                   0,
@@ -578,14 +642,15 @@ class _MatchesCarouselState extends State<_MatchesCarousel> {
                 controller: _controller,
                 scrollDirection: Axis.horizontal,
                 physics: const PageScrollPhysics(),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (final page in pages) SizedBox(width: w, child: page),
-                  ],
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (final page in pages) SizedBox(width: w, child: page),
+                    ],
+                  ),
                 ),
               ),
-            ),
             ),
             const SizedBox(height: 12),
             // Con muchos partidos los puntitos no caben: se muestra "3 / 12".

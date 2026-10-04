@@ -12,6 +12,9 @@ class PlayerNextMatch {
   final String? opponentId;
   final String? opponentName;
   final String? opponentAvatarUrl;
+  final String? opponentClub;
+  /// Lugar del campeonato (dirección).
+  final String? address;
   final int? tableNumber;
   final String status;
   final String? groupName;
@@ -38,6 +41,8 @@ class PlayerNextMatch {
     this.opponentId,
     this.opponentName,
     this.opponentAvatarUrl,
+    this.opponentClub,
+    this.address,
     this.tableNumber,
     required this.status,
     this.groupName,
@@ -61,6 +66,8 @@ class PlayerNextMatch {
       opponentId: json["opponent_id"] as String?,
       opponentName: json["opponent_name"] as String?,
       opponentAvatarUrl: json["opponent_avatar_url"] as String?,
+      opponentClub: json["opponent_club"] as String?,
+      address: json["address"] as String?,
       tableNumber: intOrNull(json["table_number"]),
       status: (json["status"] ?? "").toString(),
       groupName: json["group_name"] as String?,

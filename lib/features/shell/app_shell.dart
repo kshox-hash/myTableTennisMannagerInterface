@@ -99,8 +99,8 @@ class _AppShellState extends State<AppShell>
         items: const [
           EFNavItem(label: "Inicio", icon: Icons.home_rounded),
           EFNavItem(label: "Calendario", icon: Icons.calendar_month_rounded),
-          EFNavItem(label: "Mi rendimiento", icon: Icons.emoji_events_rounded),
-          EFNavItem(label: "Campeonatos", icon: Icons.sports_tennis_rounded),
+          EFNavItem(label: "Mi rendimiento", icon: Icons.trending_up_rounded),
+          EFNavItem(label: "Campeonatos", icon: Icons.emoji_events_outlined),
         ],
       ),
       body: PrismBackground(
