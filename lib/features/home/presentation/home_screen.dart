@@ -408,7 +408,10 @@ class _HomeScreenState extends State<HomeScreen>
             ],
           );
 
-    return Padding(
+    return Stack(
+      children: [
+        const Positioned.fill(child: _HomeBackground()),
+        Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -489,6 +492,41 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                         const SizedBox(height: 12),
                       ],
+                      // Llamado a la acción sobre la foto, a la derecha (donde
+                      // apuntan las líneas), sin tapar al jugador.
+                      SizedBox(
+                        height: MediaQuery.sizeOf(context).height * 0.28,
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              const Text(
+                                "Tu próximo\ndesafío\nte espera",
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  fontFamily: "Montserrat",
+                                  fontSize: 24,
+                                  height: 1.15,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  shadows: [Shadow(color: Color(0xCC000000), blurRadius: 12)],
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              AppButton(
+                                label: "Ver campeonatos",
+                                trailingIcon: Icons.chevron_right_rounded,
+                                onPressed: () => AppShellScope.of(context)?.switchTab(3),
+                                height: 40,
+                                expand: false,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       if (nm != null) ...[
                         matches,
                         if (_myStanding != null && nm.matchType == "group") ...[
@@ -515,12 +553,6 @@ class _HomeScreenState extends State<HomeScreen>
                         ],
                         const SizedBox(height: 12),
                       ],
-                      HomeBanner(
-                        title: "Tu próximo desafío te espera",
-                        button: "Ver campeonatos",
-                        onTap: () => AppShellScope.of(context)?.switchTab(3),
-                      ),
-                      const SizedBox(height: 12),
                       HomeMyTournamentsCarousel(
                         onBrowse: () => AppShellScope.of(context)?.switchTab(3),
                         items: [
@@ -559,6 +591,35 @@ class _HomeScreenState extends State<HomeScreen>
           ),
         ],
       ),
+    ),
+      ],
+    );
+  }
+}
+
+/// Foto del Inicio (estilo FIFA): jugador a la izquierda, líneas hacia la
+/// derecha. Oscurecida arriba (encabezado y saludo) y abajo (tarjetas y
+/// barra de navegación) para que todo se lea.
+class _HomeBackground extends StatelessWidget {
+  const _HomeBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Stack(
+      fit: StackFit.expand,
+      children: [
+        Image(image: AssetImage("assets/images/home_bg.png"), fit: BoxFit.cover, alignment: Alignment(-0.4, -0.35)),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xB3060E12), Color(0x00060E12), Color(0x00060E12), Color(0xE6060E12)],
+              stops: [0, 0.22, 0.45, 0.85],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

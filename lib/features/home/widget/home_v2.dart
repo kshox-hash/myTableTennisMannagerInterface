@@ -15,6 +15,20 @@ import "package:myttmi/features/home/widget/home_layout.dart";
 /// rendimiento con anillo, racha actual y últimos resultados.
 
 const _mint = AppColors.scorifyMint;
+
+// Fondos semitransparentes: el Inicio tiene foto de fondo.
+const _glass = LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: [Color(0xD10E2A32), Color(0xD90F1E25)],
+  stops: [0, 0.7],
+);
+const _glassFeatured = LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: [Color(0xDB0F4652), Color(0xE00F1E25)],
+  stops: [0, 0.9],
+);
 const _lime = AppColors.scorifyButterfly;
 
 TextStyle _t(double size, {FontWeight w = FontWeight.w400, Color c = AppColors.scorifyText, double? ls, double? h}) =>
@@ -37,7 +51,7 @@ class HomeCard extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: Ink(
-            decoration: BoxDecoration(gradient: gradient ?? AppColors.cardGradient),
+            decoration: BoxDecoration(gradient: gradient ?? _glass),
             child: InkWell(onTap: onTap, child: Padding(padding: padding, child: child)),
           ),
         ),
@@ -255,7 +269,7 @@ class HomeMatchCard extends StatelessWidget {
     Widget sep() => Container(width: 1, height: 26, margin: const EdgeInsets.symmetric(horizontal: 8), color: Colors.white.withValues(alpha: 0.10));
 
     return HomeCard(
-      gradient: AppColors.featuredGradient,
+      gradient: _glassFeatured,
       padding: EdgeInsets.zero,
       child: Stack(
         children: [
@@ -845,7 +859,7 @@ class HomeOnboardingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final done = steps.where((s) => s.done).length;
     return HomeCard(
-      gradient: AppColors.featuredGradient,
+      gradient: _glassFeatured,
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1221,7 +1235,8 @@ class HomeMyTournamentsCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (items.isEmpty) return HomeMyTournamentsCard(items: items, onBrowse: onBrowse);
+    // Vacía no se muestra: el llamado "Ver campeonatos" sobre la foto ya invita.
+    if (items.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
