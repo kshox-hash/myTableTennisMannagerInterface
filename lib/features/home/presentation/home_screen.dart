@@ -150,20 +150,42 @@ class _HomeScreenState extends State<HomeScreen>
     });
   }
 
-  static String _dateShort(String? iso) {
-    final d = DateTime.tryParse(iso ?? "");
-    if (d == null) return "Fecha por definir";
-    const days = ["Lun.", "Mar.", "Mié.", "Jue.", "Vie.", "Sáb.", "Dom."];
-    const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-    return "${days[d.weekday - 1]} ${d.day} ${months[d.month - 1]}";
-  }
-
 
   /// "Sáb. 27 Sep".
   String _whenShort(DateTime d) {
     const days = ["Lun.", "Mar.", "Mié.", "Jue.", "Vie.", "Sáb.", "Dom."];
     const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
     return "${days[d.weekday - 1]} ${d.day} ${months[d.month - 1]}";
+  }
+
+  /// "Buenos días / Buenas tardes / Buenas noches, Ignacio 👋".
+  String? _greeting() {
+    final p = _profile;
+    if (p == null) return null;
+    final first = ((p.firstName ?? "").trim().isNotEmpty ? p.firstName! : p.displayName).trim().split(RegExp(r"\s+")).first;
+    final h = DateTime.now().hour;
+    final hi = h < 12 ? "Buenos días" : h < 20 ? "Buenas tardes" : "Buenas noches";
+    return "$hi, $first 👋";
+  }
+
+  /// Frase del momento bajo el saludo.
+  String? _contextLine() {
+    final nm = _dashboard?.nextMatch;
+    if (nm != null) {
+      if (nm.tableNumber != null) return "¡Te toca! Ve a la mesa ${nm.tableNumber}";
+      final at = nm.scheduledStartAt;
+      if (at != null && DateUtils.isSameDay(at, DateTime.now())) return "Tienes un partido hoy";
+      return "Tienes un partido por jugar";
+    }
+    if (_mine.isNotEmpty) return _mine.length == 1 ? "Estás inscrito en 1 campeonato" : "Estás inscrito en ${_mine.length} campeonatos";
+    return "Busca tu próximo campeonato";
+  }
+
+  /// "hoy" / "mañana" / "en 5 días".
+  static String _inDays(DateTime d) {
+    final now = DateTime.now();
+    final n = DateTime(d.year, d.month, d.day).difference(DateTime(now.year, now.month, now.day)).inDays;
+    return n <= 0 ? "HOY" : n == 1 ? "MAÑANA" : "EN $n DÍAS";
   }
 
   /// "Vs. este rival": cuántas veces se enfrentaron y cómo les fue.
@@ -356,6 +378,8 @@ class _HomeScreenState extends State<HomeScreen>
       table: m.tableNumber != null ? "Mesa ${m.tableNumber}" : "En cola",
       place: m.address,
       h2h: _h2h(m.opponentId),
+      startsAt: m.scheduledStartAt,
+      tableNumber: m.tableNumber,
       onDetail: () => Navigator.pushNamed(
         context,
         AppRoutes.matchDetail,
@@ -442,6 +466,8 @@ class _HomeScreenState extends State<HomeScreen>
                         gender: _profile?.gender,
                         avatarUrl: _profile?.avatarUrl,
                         onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
+                        greeting: _greeting(),
+                        context: _contextLine(),
                       ),
                       const SizedBox(height: 14),
                       if (_refMatches.isNotEmpty) ...[
@@ -495,14 +521,14 @@ class _HomeScreenState extends State<HomeScreen>
                         onTap: () => AppShellScope.of(context)?.switchTab(3),
                       ),
                       const SizedBox(height: 12),
-                      HomeMyTournamentsCard(
+                      HomeMyTournamentsCarousel(
                         onBrowse: () => AppShellScope.of(context)?.switchTab(3),
                         items: [
                           for (final e in _mine)
                             HomeMyTournament(
                               name: e.tournamentName,
                               detail: e.categoryName,
-                              status: e.inProgress ? "En curso" : _dateShort(e.date.toIso8601String()),
+                              status: e.inProgress ? "EN CURSO" : _inDays(e.date),
                               live: e.inProgress,
                               onTap: () => _openTournament(e.tournamentId),
                             ),

@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:math" as math;
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/core/ui/stat_gauge.dart";
@@ -87,7 +88,12 @@ class HomeProfileRow extends StatelessWidget {
   final String? gender;
   final String? avatarUrl;
   final VoidCallback onTap;
+  /// Saludo y frase del momento (si vienen, reemplazan nombre y datos).
+  final String? greeting;
+  final String? context;
   const HomeProfileRow({
+    this.greeting,
+    this.context,
     super.key,
     required this.userId,
     required this.name,
@@ -141,7 +147,7 @@ class HomeProfileRow extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(name, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(17, w: FontWeight.w600, h: 1.2)),
+                        child: Text(greeting ?? name, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(18, w: FontWeight.w600, h: 1.2)),
                       ),
                       const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
                     ],
@@ -150,10 +156,12 @@ class HomeProfileRow extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12.5, c: AppColors.scorifyTextMuted)),
+                        child: Text(this.context ?? sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(13, c: this.context != null ? _mint : AppColors.scorifyTextMuted)),
                       ),
-                      if (age != null) ...[meta(Icons.person_outline_rounded, "$age años"), const SizedBox(width: 12)],
-                      if (genderLabel != null) meta(gender == "female" ? Icons.female_rounded : Icons.male_rounded, genderLabel),
+                      if (this.context == null) ...[
+                        if (age != null) ...[meta(Icons.person_outline_rounded, "$age años"), const SizedBox(width: 12)],
+                        if (genderLabel != null) meta(gender == "female" ? Icons.female_rounded : Icons.male_rounded, genderLabel),
+                      ],
                     ],
                   ),
                 ],
@@ -182,6 +190,9 @@ class HomeMatchCard extends StatelessWidget {
   final String? place;
   /// Historial entre ambos ("Se han enfrentado 3 veces · 2-1").
   final String? h2h;
+  /// Para el estado en vivo: hora programada y mesa asignada.
+  final DateTime? startsAt;
+  final int? tableNumber;
   final VoidCallback onDetail;
   final VoidCallback? onOpponent;
   const HomeMatchCard({
@@ -198,6 +209,8 @@ class HomeMatchCard extends StatelessWidget {
     required this.table,
     this.place,
     this.h2h,
+    this.startsAt,
+    this.tableNumber,
     required this.onDetail,
     this.onOpponent,
   });
@@ -261,7 +274,12 @@ class HomeMatchCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const HomeCardTitle(icon: Icons.calendar_month_rounded, title: "Próximo partido"),
+                Row(
+                  children: [
+                    const Expanded(child: HomeCardTitle(icon: Icons.calendar_month_rounded, title: "Próximo partido")),
+                    _LiveStatus(startsAt: startsAt, tableNumber: tableNumber),
+                  ],
+                ),
                 const SizedBox(height: 4),
                 Text(tournamentName, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(13, c: AppColors.scorifyText.withValues(alpha: 0.85))),
                 const SizedBox(height: 16),
@@ -1115,6 +1133,155 @@ class HomeMyTournamentsCard extends StatelessWidget {
             ],
         ],
       ),
+    );
+  }
+}
+
+/// Estado del partido: "EN MESA 3" con un punto verde que late, o
+/// "Faltan 2 h 15 min" (se actualiza cada 30 s). Nada si no hay hora.
+class _LiveStatus extends StatefulWidget {
+  final DateTime? startsAt;
+  final int? tableNumber;
+  const _LiveStatus({this.startsAt, this.tableNumber});
+
+  @override
+  State<_LiveStatus> createState() => _LiveStatusState();
+}
+
+class _LiveStatusState extends State<_LiveStatus> with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..repeat(reverse: true);
+  Timer? _tick;
+
+  @override
+  void initState() {
+    super.initState();
+    _tick = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _tick?.cancel();
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.tableNumber != null) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FadeTransition(
+            opacity: Tween(begin: 0.35, end: 1.0).animate(_pulse),
+            child: Container(
+              width: 9,
+              height: 9,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _lime,
+                boxShadow: [BoxShadow(color: _lime.withValues(alpha: 0.6), blurRadius: 6)],
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text("EN MESA ${widget.tableNumber}", style: _t(12, w: FontWeight.w700, c: _lime, ls: 0.8)),
+        ],
+      );
+    }
+    final at = widget.startsAt;
+    if (at == null) return const SizedBox.shrink();
+    final left = at.difference(DateTime.now());
+    if (left.isNegative) return Text("Por comenzar", style: _t(12, w: FontWeight.w600, c: _mint));
+    final h = left.inHours, m = left.inMinutes % 60;
+    final text = left.inDays >= 1
+        ? "Faltan ${left.inDays} ${left.inDays == 1 ? "día" : "días"}"
+        : h > 0
+            ? "Faltan $h h $m min"
+            : "Faltan $m min";
+    return Text(text, style: _t(12, w: FontWeight.w600, c: _mint));
+  }
+}
+
+/// "Mis campeonatos" en carrusel: tarjetas con insignia de iniciales,
+/// nombre, categoría y un chip "en 5 días" / "EN CURSO".
+class HomeMyTournamentsCarousel extends StatelessWidget {
+  final List<HomeMyTournament> items;
+  final VoidCallback onBrowse;
+  const HomeMyTournamentsCarousel({super.key, required this.items, required this.onBrowse});
+
+  static String _initials(String name) {
+    final words = name.split(RegExp(r"\s+")).where((w) => w.length > 2 && w[0].toUpperCase() == w[0]).toList();
+    final src = words.isEmpty ? name.split(RegExp(r"\s+")) : words;
+    return src.take(2).map((w) => w.isEmpty ? "" : w[0].toUpperCase()).join();
+  }
+
+  static const _badgeColors = [Color(0xFF00B3D6), Color(0xFF22E3D0), Color(0xFFA6D32D), Color(0xFFFFA62B), Color(0xFF8B7CF6)];
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) return HomeMyTournamentsCard(items: items, onBrowse: onBrowse);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: HomeCardTitle(icon: Icons.emoji_events_outlined, title: "Mis campeonatos", action: "Ver todos", onAction: onBrowse),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 150,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (_, i) {
+              final it = items[i];
+              final color = _badgeColors[it.name.hashCode.abs() % _badgeColors.length];
+              return SizedBox(
+                width: items.length == 1 ? MediaQuery.sizeOf(context).width - 32 : 200,
+                child: HomeCard(
+                  onTap: it.onTap,
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              gradient: LinearGradient(colors: [color, color.withValues(alpha: 0.55)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                            ),
+                            child: Text(_initials(it.name), style: _t(15, w: FontWeight.w700, c: AppColors.scorifyOnMint)),
+                          ),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: (it.live ? _lime : _mint).withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(99),
+                            ),
+                            child: Text(it.status, style: _t(11.5, w: FontWeight.w700, c: it.live ? _lime : _mint)),
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      Text(it.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(14.5, w: FontWeight.w600, h: 1.2)),
+                      const SizedBox(height: 2),
+                      Text(it.detail, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12, c: AppColors.scorifyTextMuted)),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
