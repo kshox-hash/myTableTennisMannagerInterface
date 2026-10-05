@@ -494,7 +494,7 @@ class _JourneyCard extends StatelessWidget {
                             _roundLabel(m.round).toUpperCase(),
                             style: TextStyle(
                               color: color,
-                              fontSize: 10.5,
+                              fontSize: 11,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 1,
                             ),

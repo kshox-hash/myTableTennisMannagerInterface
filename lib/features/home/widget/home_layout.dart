@@ -36,7 +36,7 @@ class CountryFlag extends StatelessWidget {
 }
 
 TextStyle _label([Color c = AppColors.scorifyTextMuted]) =>
-    TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 1, color: c);
+    TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1, color: c);
 
 /// Tarjeta sólida, la base de todo el Inicio.
 class HomePanel extends StatelessWidget {

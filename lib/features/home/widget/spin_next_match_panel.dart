@@ -248,7 +248,7 @@ class _Chip extends StatelessWidget {
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(text, maxLines: 1, softWrap: false, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w600)),
+      child: Text(text, maxLines: 1, softWrap: false, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
     );
   }
 }

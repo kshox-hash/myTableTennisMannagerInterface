@@ -180,6 +180,8 @@ class HomeMatchCard extends StatelessWidget {
   final String when; // "Sáb. 27 Sep\n15:30" o "Por definir"
   final String table; // "Mesa 4" / "En cola"
   final String? place;
+  /// Historial entre ambos ("Se han enfrentado 3 veces · 2-1").
+  final String? h2h;
   final VoidCallback onDetail;
   final VoidCallback? onOpponent;
   const HomeMatchCard({
@@ -195,6 +197,7 @@ class HomeMatchCard extends StatelessWidget {
     required this.when,
     required this.table,
     this.place,
+    this.h2h,
     required this.onDetail,
     this.onOpponent,
   });
@@ -272,6 +275,16 @@ class HomeMatchCard extends StatelessWidget {
                     Expanded(child: player(opponentId, opponentAvatarUrl, opponentName, opponentClub, onTap: onOpponent)),
                   ],
                 ),
+                if (h2h != null) ...[
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      const Icon(Icons.compare_arrows_rounded, size: 16, color: _mint),
+                      const SizedBox(width: 6),
+                      Expanded(child: Text(h2h!, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12, c: AppColors.scorifyTextMuted))),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -606,6 +619,269 @@ class _ResultTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Campeonato con la inscripción abierta (para el carrusel del Inicio).
+class HomeOpenItem {
+  final String name;
+  final String when; // "Sáb. 12 Oct"
+  final String? place;
+  final VoidCallback onTap;
+  HomeOpenItem({required this.name, required this.when, this.place, required this.onTap});
+}
+
+/// "Inscripciones abiertas": la invitación principal a jugar.
+class HomeOpenTournamentsCard extends StatelessWidget {
+  final List<HomeOpenItem> items;
+  final VoidCallback onAll;
+  const HomeOpenTournamentsCard({super.key, required this.items, required this.onAll});
+
+  @override
+  Widget build(BuildContext context) {
+    return HomeCard(
+      padding: const EdgeInsets.fromLTRB(14, 14, 0, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 14),
+            child: HomeCardTitle(icon: Icons.how_to_reg_rounded, title: "Inscripciones abiertas", action: "Ver todos", onAction: onAll),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 112,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(right: 14),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (_, i) {
+                final it = items[i];
+                return SizedBox(
+                  width: items.length == 1 ? MediaQuery.sizeOf(context).width - 60 : 230,
+                  child: Material(
+                    color: Colors.white.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      onTap: it.onTap,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(it.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(14, w: FontWeight.w600, h: 1.2)),
+                            const Spacer(),
+                            Row(
+                              children: [
+                                const Icon(Icons.event_rounded, size: 14, color: _mint),
+                                const SizedBox(width: 5),
+                                Text(it.when, style: _t(12)),
+                              ],
+                            ),
+                            if ((it.place ?? "").trim().isNotEmpty) ...[
+                              const SizedBox(height: 3),
+                              Row(
+                                children: [
+                                  const Icon(Icons.place_outlined, size: 14, color: _mint),
+                                  const SizedBox(width: 5),
+                                  Expanded(child: Text(it.place!.trim(), maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12, c: AppColors.scorifyTextMuted))),
+                                ],
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Un evento de "Esta semana".
+class HomeWeekItem {
+  final String day; // "SÁB"
+  final String date; // "12"
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  HomeWeekItem({required this.day, required this.date, required this.title, required this.subtitle, required this.onTap});
+}
+
+class HomeWeekCard extends StatelessWidget {
+  final List<HomeWeekItem> items;
+  final VoidCallback onCalendar;
+  const HomeWeekCard({super.key, required this.items, required this.onCalendar});
+
+  @override
+  Widget build(BuildContext context) {
+    return HomeCard(
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
+      child: Column(
+        children: [
+          HomeCardTitle(icon: Icons.date_range_rounded, title: "Esta semana", action: "Calendario", onAction: onCalendar),
+          const SizedBox(height: 6),
+          for (var i = 0; i < items.length; i++) ...[
+            if (i > 0) Divider(height: 1, color: Colors.white.withValues(alpha: 0.08)),
+            InkWell(
+              onTap: items[i].onTap,
+              borderRadius: BorderRadius.circular(10),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 9),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      decoration: BoxDecoration(color: _mint.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(10)),
+                      child: Column(
+                        children: [
+                          Text(items[i].day, style: _t(11, w: FontWeight.w600, c: _mint, ls: 0.6)),
+                          Text(items[i].date, style: _t(17, w: FontWeight.w600, h: 1.1)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(items[i].title, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(14, w: FontWeight.w600)),
+                          Text(items[i].subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12, c: AppColors.scorifyTextMuted)),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Un logro positivo (solo se muestra cuando lo hay): racha o último podio.
+class HomeHighlightCard extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+  const HomeHighlightCard({super.key, required this.icon, required this.color, required this.title, required this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return HomeCard(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.14), shape: BoxShape.circle),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: _t(15, w: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(12.5, c: AppColors.scorifyTextMuted)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Un paso de la guía para nuevos.
+class HomeStep {
+  final String title;
+  final bool done;
+  final VoidCallback onTap;
+  HomeStep({required this.title, required this.done, required this.onTap});
+}
+
+/// "Empieza en MyTTM": guía para quien recién llega. Desaparece cuando
+/// completó todos los pasos.
+class HomeOnboardingCard extends StatelessWidget {
+  final List<HomeStep> steps;
+  const HomeOnboardingCard({super.key, required this.steps});
+
+  @override
+  Widget build(BuildContext context) {
+    final done = steps.where((s) => s.done).length;
+    return HomeCard(
+      gradient: AppColors.featuredGradient,
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Expanded(child: HomeCardTitle(icon: Icons.rocket_launch_rounded, title: "Empieza en MyTTM")),
+              Text("$done de ${steps.length}", style: _t(12, c: AppColors.scorifyTextMuted)),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(99),
+            child: LinearProgressIndicator(
+              value: steps.isEmpty ? 0 : done / steps.length,
+              minHeight: 5,
+              backgroundColor: Colors.white.withValues(alpha: 0.08),
+              color: _mint,
+            ),
+          ),
+          const SizedBox(height: 6),
+          for (final s in steps)
+            InkWell(
+              onTap: s.done ? null : s.onTap,
+              borderRadius: BorderRadius.circular(10),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 9),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: s.done ? appButtonGradient : null,
+                        border: s.done ? null : Border.all(color: AppColors.scorifyTextMuted, width: 1.5),
+                      ),
+                      child: s.done ? const Icon(Icons.check_rounded, size: 16, color: AppColors.scorifyOnButterfly) : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        s.title,
+                        style: _t(14,
+                            w: FontWeight.w500,
+                            c: s.done ? AppColors.scorifyTextMuted : AppColors.scorifyText),
+                      ),
+                    ),
+                    if (!s.done) const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -42,7 +42,7 @@ class SpinStatsRow extends StatelessWidget {
                     stats[i].label,
                     style: TextStyle(
                       color: AppColors.scorifyTextMuted,
-                      fontSize: 10.5,
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

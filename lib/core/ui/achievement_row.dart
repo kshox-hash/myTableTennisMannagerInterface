@@ -1,4 +1,5 @@
 import "package:myttmi/core/ui/section_card.dart";
+import "package:myttmi/core/ui/share_card.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -63,7 +64,9 @@ class Medal extends StatelessWidget {
 /// Fila de un podio: medalla + "Campeón · categoría" + torneo y fecha.
 class AchievementRow extends StatelessWidget {
   final PlayerAchievement achievement;
-  const AchievementRow({super.key, required this.achievement});
+  /// Tu nombre: si viene, aparece el botón para compartir el podio.
+  final String? shareAs;
+  const AchievementRow({super.key, required this.achievement, this.shareAs});
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +98,24 @@ class AchievementRow extends StatelessWidget {
               ],
             ),
           ),
+          if (shareAs != null)
+            IconButton(
+              tooltip: "Compartir",
+              icon: const Icon(Icons.ios_share_rounded, size: 20, color: AppColors.scorifyMint),
+              onPressed: () => ShareImage.share(
+                context,
+                ShareCard(
+                  kicker: a.position == 1 ? "¡CAMPEÓN!" : a.position == 2 ? "¡SUBCAMPEÓN!" : "¡3ER LUGAR!",
+                  accent: a.position == 1 ? const Color(0xFFE0A526) : a.position == 2 ? const Color(0xFFC0C7CF) : const Color(0xFFC07A4A),
+                  icon: Icons.emoji_events_rounded,
+                  headline: a.categoryLabel,
+                  tournament: a.tournamentName,
+                  date: date,
+                  playerName: shareAs!,
+                ),
+                text: "${_placeLabel(a.position)} en ${a.tournamentName} · MyTTM",
+              ),
+            ),
         ],
       ),
     );
@@ -107,7 +128,9 @@ class AchievementRow extends StatelessWidget {
 class AchievementsCard extends StatefulWidget {
   final List<PlayerAchievement> achievements;
   final bool showEmpty;
-  const AchievementsCard({super.key, required this.achievements, this.showEmpty = false});
+  /// Tu nombre (perfil propio): habilita compartir cada podio.
+  final String? shareAs;
+  const AchievementsCard({super.key, required this.achievements, this.showEmpty = false, this.shareAs});
 
   @override
   State<AchievementsCard> createState() => _AchievementsCardState();
@@ -166,7 +189,7 @@ class _AchievementsCardState extends State<AchievementsCard> {
               const SizedBox(height: 10),
               for (var i = 0; i < shown.length; i++) ...[
                 if (i > 0) const Divider(height: 1, thickness: 1, color: Color(0x14FFFFFF)),
-                AchievementRow(achievement: shown[i]),
+                AchievementRow(achievement: shown[i], shareAs: widget.shareAs),
               ],
               if (list.length > _preview)
                 Center(

@@ -1,4 +1,7 @@
 import "dart:async";
+import "package:myttmi/core/storage/session_storage.dart";
+import "package:myttmi/core/ui/app_button.dart";
+import "package:myttmi/core/ui/share_card.dart";
 import "package:myttmi/core/favorites/favorite_button.dart";
 import "package:myttmi/core/helpers/text_format.dart";
 
@@ -63,6 +66,19 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
   // Set cerrado = alguien llegó a 11 con 2 de ventaja (el último puede ir a medias).
   static bool _setClosed(int a, int b) =>
       (a >= 11 || b >= 11) && (a - b).abs() >= 2;
+
+  // Quién soy (para "Compartir victoria" si gané).
+  String? _myId;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_myId == null) {
+      SessionStorage().getUserId().then((id) {
+        if (mounted) setState(() => _myId = id);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -244,6 +260,34 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                               ),
                             ),
 
+                            if (_myId != null && m.winnerId != null && m.winnerId == _myId) ...[
+                              const SizedBox(height: 16),
+                              Center(
+                                child: AppButton(
+                                  label: "Compartir victoria",
+                                  icon: Icons.ios_share_rounded,
+                                  expand: false,
+                                  height: 40,
+                                  onPressed: () {
+                                    final iAm1 = m.player1Id == _myId;
+                                    ShareImage.share(
+                                      context,
+                                      ShareCard(
+                                        kicker: "¡VICTORIA!",
+                                        accent: AppColors.scorifyButterfly,
+                                        icon: Icons.sports_tennis_rounded,
+                                        headline: iAm1 ? "${m.setsPlayer1} - ${m.setsPlayer2}" : "${m.setsPlayer2} - ${m.setsPlayer1}",
+                                        subline: "vs. ${iAm1 ? m.player2Name : m.player1Name}",
+                                        tournament: m.tournamentName,
+                                        date: m.playedAt == null ? null : prettyDateTime(m.playedAt!),
+                                        playerName: iAm1 ? m.player1Name : m.player2Name,
+                                      ),
+                                      text: "Gané en ${m.tournamentName} · MyTTM",
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                             const SizedBox(height: 20),
                             GlassCard(
                               child: Column(

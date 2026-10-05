@@ -50,7 +50,7 @@ class StatGauge extends StatelessWidget {
                 Text(value,
                     style: TextStyle(fontFamily: AppTypography.body, fontSize: valueSize, height: 1.05, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                 if (caption != null)
-                  Text(caption!, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, color: AppColors.scorifyTextMuted)),
+                  Text(caption!, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted)),
               ],
             ),
           ),
@@ -64,7 +64,7 @@ class StatGauge extends StatelessWidget {
         gauge,
         const SizedBox(height: 2),
         Text(label!.toUpperCase(),
-            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w500, letterSpacing: 1, color: AppColors.scorifyTextMuted)),
+            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 1, color: AppColors.scorifyTextMuted)),
       ],
     );
   }

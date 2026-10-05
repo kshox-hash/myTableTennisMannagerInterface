@@ -221,7 +221,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                       Expanded(child: _BigNumber(value: "$setsWon", label: "Ganados", color: AppColors.scorifyText)),
                                       Column(
                                         children: [
-                                          const Text("DIFERENCIA", style: TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w500, letterSpacing: 1, color: AppColors.scorifyTextMuted)),
+                                          const Text("DIFERENCIA", style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 1, color: AppColors.scorifyTextMuted)),
                                           Text(
                                             "${setsWon - setsLost >= 0 ? "+" : ""}${setsWon - setsLost}",
                                             style: TextStyle(

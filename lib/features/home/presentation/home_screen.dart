@@ -1,6 +1,8 @@
 import "package:myttmi/core/ui/tap_sound.dart";
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/shell/shell_preload.dart";
+import "package:myttmi/features/tournament/models/tournament_model.dart";
+import "package:myttmi/features/player/models/achievement_model.dart";
 import "package:myttmi/features/home/widget/home_v2.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/features/player/models/tournament_match_model.dart";
@@ -63,7 +65,6 @@ class _HomeScreenState extends State<HomeScreen>
   PlayerDashboard? _dashboard;
   // Racha: resultado de los últimos partidos terminados, del más antiguo al
   // más reciente (true = ganado). Vacío si todavía no jugó.
-  List<bool> _form = const [];
   int _unreadCount = 0;
   bool _loading = true;
   // Modo día de torneo: mi fila en la tabla de mi grupo (del próximo
@@ -74,6 +75,11 @@ class _HomeScreenState extends State<HomeScreen>
   // Sin partido asignado: el próximo campeonato en que estás inscrito, o
   // cuántos campeonatos tienen la inscripción abierta.
   CalendarEvent? _upcoming;
+  // Inicio "hacia adelante": campeonatos con inscripción abierta, tus
+  // eventos de esta semana y un logro positivo (último podio).
+  List<Tournament> _open = const [];
+  List<CalendarEvent> _week = const [];
+  PlayerAchievement? _lastPodium;
   // Partidos jugados, del más reciente al más antiguo.
   List<PlayerMatchHistoryItem> _history = const [];
   int _openCount = 0;
@@ -111,7 +117,8 @@ class _HomeScreenState extends State<HomeScreen>
         _loadForm(_profile?.idUser),
         _loadGroup(_dashboard?.nextMatch),
         _loadReferee(),
-        if (_dashboard?.nextMatch == null) _loadUpcoming(),
+        _loadUpcoming(),
+        _loadPodium(),
       ]);
     } catch (_) {
       // Silencioso: la pantalla igual se puede usar sin estos datos.
@@ -124,35 +131,92 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
-  /// Sin partido: tu próximo campeonato (inscrito y aún sin empezar); si no
-  /// hay, cuántos campeonatos tienen la inscripción abierta.
+  /// Tu próximo campeonato (inscrito y sin empezar), tus eventos de los
+  /// próximos 7 días y los campeonatos con la inscripción abierta.
   Future<void> _loadUpcoming() async {
     final today = DateTime.now();
     final day = DateTime(today.year, today.month, today.day);
     CalendarEvent? next;
+    var week = <CalendarEvent>[];
+    final mine = <String>{};
     try {
       final events = await CalendarApi().myEvents(from: day, to: day.add(const Duration(days: 180)));
-      final pending = events.where((e) => !e.finished && !e.inProgress && !e.date.isBefore(day)).toList()
+      for (final e in events) {
+        mine.add(e.tournamentId);
+      }
+      final pending = events.where((e) => !e.finished && !e.date.isBefore(day)).toList()
         ..sort((a, b) => a.date.compareTo(b.date));
-      if (pending.isNotEmpty) next = pending.first;
+      final notStarted = pending.where((e) => !e.inProgress).toList();
+      if (notStarted.isNotEmpty) next = notStarted.first;
+      week = pending.where((e) => e.date.isBefore(day.add(const Duration(days: 7)))).take(4).toList();
     } catch (_) {}
-    var open = 0;
-    if (next == null) {
-      try {
-        final page = await TournamentApi().fetchTournaments(limit: 50);
-        open = page.items.where((t) {
-          if (t.isCancelled) return false;
-          final d = DateTime.tryParse(t.eventDate ?? "");
-          if (d != null && d.isBefore(day)) return false;
-          return t.categories.any((c) => c.phase == "enrollment");
-        }).length;
-      } catch (_) {}
-    }
+    var open = <Tournament>[];
+    try {
+      final page = await TournamentApi().fetchTournaments(limit: 50);
+      open = page.items.where((t) {
+        if (t.isCancelled || mine.contains(t.idTournament)) return false;
+        final d = DateTime.tryParse(t.eventDate ?? "");
+        if (d != null && d.isBefore(day)) return false;
+        return t.categories.any((c) => c.phase == "enrollment");
+      }).toList()
+        ..sort((a, b) => (a.eventDate ?? "9").compareTo(b.eventDate ?? "9"));
+    } catch (_) {}
     if (!mounted) return;
     setState(() {
       _upcoming = next;
-      _openCount = open;
+      _week = week;
+      _open = open.take(5).toList();
+      _openCount = open.length;
     });
+  }
+
+  /// Último podio (para el logro positivo del Inicio).
+  Future<void> _loadPodium() async {
+    final me = _profile?.idUser;
+    if (me == null) return;
+    try {
+      final list = await _playerApi.getPlayerAchievements(me);
+      list.sort((a, b) => (b.eventDate ?? "").compareTo(a.eventDate ?? ""));
+      if (mounted) setState(() => _lastPodium = list.isEmpty ? null : list.first);
+    } catch (_) {}
+  }
+
+  /// Logro positivo: racha de 2+ victorias o tu último podio. Si no hay nada
+  /// positivo que mostrar, no aparece (el Inicio no muestra derrotas).
+  Widget? _highlight() {
+    final me = _profile?.idUser;
+    var streak = 0;
+    for (final m in _history) {
+      if (m.winnerId != me) break;
+      streak++;
+    }
+    if (streak >= 2) {
+      return HomeHighlightCard(
+        icon: Icons.local_fire_department_rounded,
+        color: const Color(0xFFFFA62B),
+        title: "¡Vas en racha!",
+        subtitle: "$streak victorias seguidas. Sigue así.",
+      );
+    }
+    final p = _lastPodium;
+    if (p != null) {
+      final place = p.position == 1 ? "Campeón" : p.position == 2 ? "Subcampeón" : "3er lugar";
+      return HomeHighlightCard(
+        icon: Icons.emoji_events_rounded,
+        color: const Color(0xFFE0A526),
+        title: "Tu último podio: $place",
+        subtitle: "${p.categoryType} · ${p.tournamentName}",
+      );
+    }
+    return null;
+  }
+
+  static String _dateShort(String? iso) {
+    final d = DateTime.tryParse(iso ?? "");
+    if (d == null) return "Fecha por definir";
+    const days = ["Lun.", "Mar.", "Mié.", "Jue.", "Vie.", "Sáb.", "Dom."];
+    const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    return "${days[d.weekday - 1]} ${d.day} ${months[d.month - 1]}";
   }
 
   static const _weekdays = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"];
@@ -171,46 +235,6 @@ class _HomeScreenState extends State<HomeScreen>
     const days = ["Lun.", "Mar.", "Mié.", "Jue.", "Vie.", "Sáb.", "Dom."];
     const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
     return "${days[d.weekday - 1]} ${d.day} ${months[d.month - 1]}";
-  }
-
-  Widget _streakCard() {
-    final me = _profile?.idUser;
-    final res = _history.map((m) => m.winnerId == me).toList(); // reciente primero
-    var streak = 0;
-    final winning = res.isEmpty || res.first;
-    for (final r in res) {
-      if (r != winning) break;
-      streak++;
-    }
-    // Mejor racha de victorias anterior (sin contar la actual).
-    var best = 0, run = 0;
-    for (final r in res.skip(winning ? streak : 0)) {
-      run = r ? run + 1 : 0;
-      if (run > best) best = run;
-    }
-    return HomeStreakCardV2(
-      form: _form,
-      streak: streak,
-      winning: winning,
-      bestPrevious: best,
-      // Solo informativa: el Historial está en "Ver todos" de Últimos resultados.
-    );
-  }
-
-  HomeResult _toResult(PlayerMatchHistoryItem m) {
-    final me = _profile?.idUser;
-    final iAm1 = m.player1Id == me;
-    final opp = iAm1 ? m.player2Name : m.player1Name;
-    final parts = opp.trim().split(RegExp(r"\s+"));
-    const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-    final d = DateTime.tryParse(m.playedAt ?? "")?.toLocal();
-    return HomeResult(
-      won: m.winnerId == me,
-      score: iAm1 ? "${m.setsPlayer1} - ${m.setsPlayer2}" : "${m.setsPlayer2} - ${m.setsPlayer1}",
-      opponent: parts.length <= 2 ? opp.trim() : "${parts[0]} ${parts[1]}",
-      date: d == null ? "" : "${d.day} ${months[d.month - 1]}",
-      onTap: () => Navigator.pushNamed(context, AppRoutes.matchDetail, arguments: {"matchType": m.matchType, "matchId": m.idMatch}),
-    );
   }
 
   /// Sin partido asignado: próximo campeonato, o invitación a buscar.
@@ -252,6 +276,49 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  /// Guía para nuevos: completar el perfil, inscribirse y jugar el primer
+  /// partido. Null cuando ya hizo todo (o mientras carga).
+  Widget? _onboarding() {
+    final p = _profile;
+    if (p == null || _loading) return null;
+    final profileOk = (p.country ?? "").isNotEmpty && (p.gender ?? "").isNotEmpty && p.birthDate != null;
+    final played = (_dashboard?.stats.matchesPlayed ?? 0) > 0 || _history.isNotEmpty;
+    final enrolled = played || _dashboard?.nextMatch != null || _upcoming != null || _week.isNotEmpty;
+    if (profileOk && enrolled && played) return null;
+    return HomeOnboardingCard(steps: [
+      HomeStep(
+        title: "Completa tu perfil (país, género y fecha de nacimiento)",
+        done: profileOk,
+        onTap: () async {
+          await Navigator.pushNamed(context, AppRoutes.profile);
+          if (mounted) _load(silent: true);
+        },
+      ),
+      HomeStep(title: "Inscríbete en un campeonato", done: enrolled, onTap: () => AppShellScope.of(context)?.switchTab(3)),
+      HomeStep(title: "Juega tu primer partido", done: played, onTap: () => AppShellScope.of(context)?.switchTab(3)),
+    ]);
+  }
+
+  /// "Vs. este rival": cuántas veces se enfrentaron y cómo les fue.
+  String? _h2h(String? rival) {
+    if (rival == null || _profile == null) return null;
+    final me = _profile!.idUser;
+    final games = _history.where((m) => m.player1Id == rival || m.player2Id == rival).toList();
+    if (games.isEmpty) return "Primer enfrentamiento entre ustedes";
+    final w = games.where((m) => m.winnerId == me).length;
+    final l = games.length - w;
+    return "Se han enfrentado ${games.length} ${games.length == 1 ? "vez" : "veces"} · ${w == 1 ? "1 ganado" : "$w ganados"}, ${l == 1 ? "1 perdido" : "$l perdidos"}";
+  }
+
+  Future<void> _openTournament(String id) async {
+    try {
+      final t = await TournamentApi().getTournamentById(id);
+      if (!mounted) return;
+      await Navigator.pushNamed(context, AppRoutes.tournamentDetail, arguments: t);
+      if (mounted) _load(silent: true);
+    } catch (_) {}
+  }
+
   Future<void> _openUpcoming() async {
     final e = _upcoming;
     if (e == null) return;
@@ -279,14 +346,6 @@ class _HomeScreenState extends State<HomeScreen>
       if (mounted) {
         setState(() => _history = history.where((m) => m.status == "played" || m.status == "walkover").toList());
       }
-      final done = history
-          .where((m) => m.status == "played" || m.status == "walkover")
-          .take(5)
-          .map((m) => m.winnerId == userId)
-          .toList()
-          .reversed
-          .toList();
-      if (mounted) setState(() => _form = done);
     } catch (_) {}
   }
 
@@ -440,6 +499,7 @@ class _HomeScreenState extends State<HomeScreen>
       when: when,
       table: m.tableNumber != null ? "Mesa ${m.tableNumber}" : "En cola",
       place: m.address,
+      h2h: _h2h(m.opponentId),
       onDetail: () => Navigator.pushNamed(
         context,
         AppRoutes.matchDetail,
@@ -459,8 +519,6 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     final nm = _dashboard?.nextMatch;
 
-    final stats = _dashboard?.stats;
-    final played = stats?.matchesPlayed ?? 0;
 
     final matches = nm == null
         ? const SizedBox.shrink()
@@ -530,6 +588,10 @@ class _HomeScreenState extends State<HomeScreen>
                         onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
                       ),
                       const SizedBox(height: 14),
+                      if (_onboarding() != null) ...[
+                        _onboarding()!,
+                        const SizedBox(height: 12),
+                      ],
                       if (_refMatches.isNotEmpty) ...[
                         HomeRefereeCard(
                           title: "${_refMatches.first.player1Name} vs ${_refMatches.first.player2Name}",
@@ -572,25 +634,42 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         ),
                       ],
-                      const SizedBox(height: 12),
-                      HomePerformanceCard(
-                        played: played,
-                        won: stats?.matchesWon ?? 0,
-                        trend: _history
-                            .take(15)
-                            .map((m) => m.player1Id == _profile?.idUser ? m.setsPlayer1 - m.setsPlayer2 : m.setsPlayer2 - m.setsPlayer1)
-                            .toList()
-                            .reversed
-                            .toList(),
-                        onStats: () => AppShellScope.of(context)?.switchTab(2, link: true),
-                      ),
-                      const SizedBox(height: 12),
-                      _streakCard(),
-                      if (_history.isNotEmpty) ...[
+                      if (_highlight() != null) ...[
                         const SizedBox(height: 12),
-                        HomeResultsCard(
-                          results: _history.take(12).map(_toResult).toList(),
-                          onAll: () => Navigator.pushNamed(context, AppRoutes.history),
+                        _highlight()!,
+                      ],
+                      if (_week.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        HomeWeekCard(
+                          onCalendar: () => AppShellScope.of(context)?.switchTab(1),
+                          items: [
+                            for (final e in _week)
+                              HomeWeekItem(
+                                day: const ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"][e.date.weekday - 1],
+                                date: "${e.date.day}",
+                                title: e.tournamentName,
+                                subtitle: [e.categoryName, if ((e.location ?? "").trim().isNotEmpty) e.location!.trim()].join(" · "),
+                                onTap: () => _openTournament(e.tournamentId),
+                              ),
+                          ],
+                        ),
+                      ],
+                      if (_open.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        HomeOpenTournamentsCard(
+                          onAll: () => AppShellScope.of(context)?.switchTab(3),
+                          items: [
+                            for (final t in _open)
+                              HomeOpenItem(
+                                name: t.tournamentName,
+                                when: _dateShort(t.eventDate),
+                                place: t.address ?? t.region,
+                                onTap: () async {
+                                  await Navigator.pushNamed(context, AppRoutes.tournamentDetail, arguments: t);
+                                  if (mounted) _load(silent: true);
+                                },
+                              ),
+                          ],
                         ),
                       ],
                     ]),

@@ -150,7 +150,7 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
-                                        query.isEmpty ? "Todavía no hay ranking generado." : "Nadie coincide con esa búsqueda.",
+                                        query.isEmpty ? "El ranking llega pronto. Estamos definiendo la tabla oficial de puntos por nivel; mientras tanto, tus números están en Estadísticas." : "Nadie coincide con esa búsqueda.",
                                         style: _muted,
                                       ),
                                     ),

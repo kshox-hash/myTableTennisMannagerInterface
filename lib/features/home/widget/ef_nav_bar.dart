@@ -91,7 +91,7 @@ class _NavTab extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
               color: color,
             ),

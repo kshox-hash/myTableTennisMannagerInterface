@@ -3,8 +3,7 @@ import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/ui/card_border.dart";
 
-/// Tarjeta con cabecera: una franja un poco más clara arriba con el nombre
-/// de la sección en mayúsculas y letra fina ("SETS", "ÚLTIMOS PARTIDOS"),
+/// Tarjeta con título: ícono y nombre de la sección en mayúsculas de color ("SETS", "ÚLTIMOS PARTIDOS"),
 /// opcionalmente con un ícono y una acción a la derecha ("Ver historial").
 /// Se usa en toda la app para que las tarjetas con título se vean iguales.
 class SectionCard extends StatelessWidget {
@@ -39,15 +38,16 @@ class SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = titleColor ?? AppColors.scorifyText;
-    final header = Container(
-      color: const Color(0xFF17303B),
-      padding: EdgeInsets.fromLTRB(16, trailing == null ? 11 : 4, trailing == null ? 16 : 6, trailing == null ? 11 : 4),
+    // Mismo estilo de título que el Inicio: ícono + mayúsculas de color,
+    // dentro de la tarjeta (sin franja), y la acción a la derecha.
+    final color = titleColor ?? AppColors.scorifyMint;
+    final header = Padding(
+      padding: EdgeInsets.fromLTRB(16, trailing == null ? 14 : 8, trailing == null ? 16 : 6, 0),
       child: Row(
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 15, color: color),
-            const SizedBox(width: 7),
+            Icon(icon, size: 18, color: color),
+            const SizedBox(width: 8),
           ],
           Expanded(
             child: Text(
@@ -56,9 +56,9 @@ class SectionCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: AppTypography.body,
-                fontSize: 12.5,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.8,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.1,
                 color: color,
               ),
             ),

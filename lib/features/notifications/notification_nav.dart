@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:myttmi/features/tournament/api/tournament_api.dart";
 import "package:myttmi/features/notifications/models/notification_model.dart";
 import "package:myttmi/routes/app_routes.dart";
 import "package:myttmi/routes/cyber_page_route.dart";
@@ -33,5 +34,13 @@ void openNotification(NavigatorState nav, AppNotification n) {
         "categoryLabel": n.categoryLabel ?? n.tournamentName ?? "Mi categoría",
       },
     );
+    return;
+  }
+  // Solo el campeonato (p. ej. el recordatorio del día antes): su ficha.
+  if (n.idTournament != null) {
+    TournamentApi()
+        .getTournamentById(n.idTournament!)
+        .then((t) => nav.pushNamed(AppRoutes.tournamentDetail, arguments: t))
+        .catchError((_) => null);
   }
 }

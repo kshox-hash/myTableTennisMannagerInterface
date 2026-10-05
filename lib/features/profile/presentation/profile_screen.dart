@@ -362,7 +362,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               const SizedBox(height: 14),
                               FutureBuilder<List<PlayerAchievement>>(
                                 future: achievementsFuture,
-                                builder: (context, aSnap) => AchievementsCard(achievements: aSnap.data ?? [], showEmpty: aSnap.connectionState == ConnectionState.done),
+                                builder: (context, aSnap) => AchievementsCard(achievements: aSnap.data ?? [], showEmpty: aSnap.connectionState == ConnectionState.done, shareAs: p.displayName),
                               ),
                             ],
                             const SizedBox(height: 14),

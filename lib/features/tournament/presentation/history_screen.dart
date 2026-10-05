@@ -127,7 +127,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             children: [
               Text(v, style: TextStyle(fontFamily: AppTypography.body, fontSize: 24, fontWeight: FontWeight.w600, color: c)),
               Text(l.toUpperCase(),
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w500, letterSpacing: 1, color: AppColors.scorifyTextMuted)),
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 1, color: AppColors.scorifyTextMuted)),
             ],
           ),
         );
