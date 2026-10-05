@@ -526,7 +526,18 @@ class _HomeScreenState extends State<HomeScreen>
                         ],
                         const SizedBox(height: 12),
                       ],
-                      if (_challenge != null) ...[
+                      // La tarjeta grande siempre está: partido > campeonato > vacío.
+                      if (nm == null && _challenge == null) ...[
+                        HomeChallengeCard(
+                          kicker: "PRÓXIMO PARTIDO",
+                          name: "Sin partidos programados",
+                          subtitle: "Cuando te asignen un partido o te inscribas en un campeonato, aparecerá aquí.",
+                          button: "Buscar campeonatos",
+                          onTap: () => AppShellScope.of(context)?.switchTab(3),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      if (nm == null && _challenge != null) ...[
                         HomeChallengeCard(
                           name: _challenge!.tournamentName,
                           date: _dateLong(_challenge!.eventDate),

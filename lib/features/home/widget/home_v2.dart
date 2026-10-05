@@ -1350,13 +1350,28 @@ class HomeHeroText extends StatelessWidget {
 
 /// "Próximo desafío": tu próximo campeonato o el primero con inscripción.
 class HomeChallengeCard extends StatelessWidget {
+  final String kicker;
   final String name;
-  final String date;
+  final String? date;
   final String? place;
   final int? players;
   final String? chip; // "En inscripción" / "Inscrito"
+  /// Texto bajo el nombre (estado vacío).
+  final String? subtitle;
+  final String button;
   final VoidCallback onTap;
-  const HomeChallengeCard({super.key, required this.name, required this.date, this.place, this.players, this.chip, required this.onTap});
+  const HomeChallengeCard({
+    super.key,
+    this.kicker = "PRÓXIMO DESAFÍO",
+    required this.name,
+    this.date,
+    this.place,
+    this.players,
+    this.chip,
+    this.subtitle,
+    this.button = "Ver campeonato",
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1394,7 +1409,7 @@ class HomeChallengeCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Expanded(child: Text("PRÓXIMO DESAFÍO", style: _t(12.5, w: FontWeight.w600, c: _lime, ls: 1.2))),
+                    Expanded(child: Text(kicker, style: _t(12.5, w: FontWeight.w600, c: _lime, ls: 1.2))),
                     if (chip != null)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -1409,18 +1424,22 @@ class HomeChallengeCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(name, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(21, w: FontWeight.w700, h: 1.2)),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 6),
+                  Text(subtitle!, style: _t(13, c: AppColors.scorifyTextMuted, h: 1.35)),
+                ],
                 const SizedBox(height: 14),
                 Wrap(
                   spacing: 18,
                   runSpacing: 8,
                   children: [
-                    info(Icons.calendar_month_outlined, date),
+                    if (date != null) info(Icons.calendar_month_outlined, date!),
                     if ((place ?? "").trim().isNotEmpty) info(Icons.place_outlined, place!.trim()),
                     if (players != null) info(Icons.people_outline_rounded, "$players ${players == 1 ? "jugador" : "jugadores"}"),
                   ],
                 ),
                 const SizedBox(height: 16),
-                AppButton.outline(label: "Ver campeonato", trailingIcon: Icons.arrow_forward_rounded, onPressed: onTap, height: 38, expand: false),
+                AppButton.outline(label: button, trailingIcon: Icons.arrow_forward_rounded, onPressed: onTap, height: 38, expand: false),
               ],
             ),
           ),
