@@ -566,7 +566,7 @@ class _HomeScreenState extends State<HomeScreen>
                             ),
                         ],
                       ),
-                      if (_week.isNotEmpty) ...[
+                      ...[
                         const SizedBox(height: 12),
                         HomeWeekCard(
                           onCalendar: () => AppShellScope.of(context)?.switchTab(1),

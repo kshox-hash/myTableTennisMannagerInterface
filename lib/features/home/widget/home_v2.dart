@@ -762,6 +762,11 @@ class HomeWeekCard extends StatelessWidget {
         children: [
           HomeCardTitle(icon: Icons.date_range_rounded, title: "Próximos eventos", action: "Calendario", onAction: onCalendar),
           const SizedBox(height: 6),
+          if (items.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 10),
+              child: Text("No tienes eventos en los próximos 14 días.", style: _t(13, c: AppColors.scorifyTextMuted)),
+            ),
           for (var i = 0; i < items.length; i++) ...[
             if (i > 0) Divider(height: 1, color: Colors.white.withValues(alpha: 0.08)),
             InkWell(
@@ -1097,7 +1102,7 @@ class HomeMyTournamentsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          HomeCardTitle(icon: Icons.emoji_events_outlined, title: "Mis campeonatos", action: items.isEmpty ? null : "Ver todos", onAction: onBrowse),
+          HomeCardTitle(icon: Icons.emoji_events_outlined, title: "Mis campeonatos", action: items.isEmpty ? "Explorar" : "Ver todos", onAction: onBrowse),
           const SizedBox(height: 6),
           if (items.isEmpty)
             Padding(
@@ -1105,9 +1110,7 @@ class HomeMyTournamentsCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Aún no estás inscrito en ningún campeonato.", style: _t(13, c: AppColors.scorifyTextMuted)),
-                  const SizedBox(height: 12),
-                  AppButton(label: "Buscar campeonatos", trailingIcon: Icons.chevron_right_rounded, onPressed: onBrowse, height: 36, expand: false),
+                  Text("Aún no estás inscrito en ningún campeonato. Cuando te inscribas, aparecerán aquí.", style: _t(13, c: AppColors.scorifyTextMuted)),
                 ],
               ),
             )
@@ -1235,8 +1238,7 @@ class HomeMyTournamentsCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Vacía no se muestra: el llamado "Ver campeonatos" sobre la foto ya invita.
-    if (items.isEmpty) return const SizedBox.shrink();
+    if (items.isEmpty) return HomeMyTournamentsCard(items: items, onBrowse: onBrowse);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
