@@ -80,6 +80,7 @@ class _HomeScreenState extends State<HomeScreen>
   List<Tournament> _open = const [];
   List<CalendarEvent> _week = const [];
   PlayerAchievement? _lastPodium;
+  int _podiums = 0;
   // Partidos jugados, del más reciente al más antiguo.
   List<PlayerMatchHistoryItem> _history = const [];
   int _openCount = 0;
@@ -177,7 +178,12 @@ class _HomeScreenState extends State<HomeScreen>
     try {
       final list = await _playerApi.getPlayerAchievements(me);
       list.sort((a, b) => (b.eventDate ?? "").compareTo(a.eventDate ?? ""));
-      if (mounted) setState(() => _lastPodium = list.isEmpty ? null : list.first);
+      if (mounted) {
+        setState(() {
+          _lastPodium = list.isEmpty ? null : list.first;
+          _podiums = list.length;
+        });
+      }
     } catch (_) {}
   }
 
@@ -634,6 +640,19 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         ),
                       ],
+                      const SizedBox(height: 12),
+                      HomeQuickActions(items: [
+                        HomeQuick(Icons.emoji_events_outlined, "Campeonatos", () => AppShellScope.of(context)?.switchTab(3)),
+                        HomeQuick(Icons.calendar_month_rounded, "Calendario", () => AppShellScope.of(context)?.switchTab(1)),
+                        HomeQuick(Icons.history_rounded, "Historial", () => Navigator.pushNamed(context, AppRoutes.history)),
+                        HomeQuick(Icons.favorite_rounded, "Guardados", () => Navigator.push(context, CyberPageRoute(builder: (_) => const FavoritesScreen()))),
+                      ]),
+                      const SizedBox(height: 12),
+                      HomeSeasonCard(
+                        played: _dashboard?.stats.matchesPlayed ?? 0,
+                        tournaments: _history.map((m) => m.tournamentName).toSet().length,
+                        podiums: _podiums,
+                      ),
                       if (_highlight() != null) ...[
                         const SizedBox(height: 12),
                         _highlight()!,

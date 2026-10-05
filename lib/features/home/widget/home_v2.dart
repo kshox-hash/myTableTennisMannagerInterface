@@ -886,3 +886,82 @@ class HomeOnboardingCard extends StatelessWidget {
     );
   }
 }
+
+/// Acceso rápido del Inicio (ícono + texto).
+class HomeQuick {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  HomeQuick(this.icon, this.label, this.onTap);
+}
+
+/// Fila de accesos rápidos: siempre visible, ordena el Inicio.
+class HomeQuickActions extends StatelessWidget {
+  final List<HomeQuick> items;
+  const HomeQuickActions({super.key, required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        for (var i = 0; i < items.length; i++) ...[
+          if (i > 0) const SizedBox(width: 10),
+          Expanded(
+            child: HomeCard(
+              onTap: items[i].onTap,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Column(
+                children: [
+                  Icon(items[i].icon, color: _mint, size: 24),
+                  const SizedBox(height: 6),
+                  FittedBox(fit: BoxFit.scaleDown, child: Text(items[i].label, style: _t(11.5, w: FontWeight.w500))),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// "Tu temporada": solo números que suben (jugados, campeonatos, podios).
+class HomeSeasonCard extends StatelessWidget {
+  final int played;
+  final int tournaments;
+  final int podiums;
+  const HomeSeasonCard({super.key, required this.played, required this.tournaments, required this.podiums});
+
+  @override
+  Widget build(BuildContext context) {
+    Widget stat(IconData icon, String value, String label) => Expanded(
+          child: Column(
+            children: [
+              Icon(icon, size: 20, color: _mint),
+              const SizedBox(height: 4),
+              Text(value, style: _t(22, w: FontWeight.w600, h: 1.1)),
+              Text(label.toUpperCase(), style: _t(11, w: FontWeight.w500, c: AppColors.scorifyTextMuted, ls: 0.8)),
+            ],
+          ),
+        );
+    Widget sep() => Container(width: 1, height: 44, color: Colors.white.withValues(alpha: 0.10));
+    return HomeCard(
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      child: Column(
+        children: [
+          const HomeCardTitle(icon: Icons.auto_graph_rounded, title: "Tu temporada"),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              stat(Icons.sports_tennis_rounded, "$played", "Partidos"),
+              sep(),
+              stat(Icons.flag_rounded, "$tournaments", "Campeonatos"),
+              sep(),
+              stat(Icons.emoji_events_rounded, "$podiums", "Podios"),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
