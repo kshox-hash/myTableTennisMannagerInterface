@@ -728,7 +728,7 @@ class HomeWeekCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
       child: Column(
         children: [
-          HomeCardTitle(icon: Icons.date_range_rounded, title: "Esta semana", action: "Calendario", onAction: onCalendar),
+          HomeCardTitle(icon: Icons.date_range_rounded, title: "Próximos eventos", action: "Calendario", onAction: onCalendar),
           const SizedBox(height: 6),
           for (var i = 0; i < items.length; i++) ...[
             if (i > 0) Divider(height: 1, color: Colors.white.withValues(alpha: 0.08)),
@@ -960,6 +960,159 @@ class HomeSeasonCard extends StatelessWidget {
               stat(Icons.emoji_events_rounded, "$podiums", "Podios"),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Banner deportivo del centro del Inicio. Si existe la imagen
+/// (assets/images/home_banner.jpg) va de fondo; mientras tanto, un fondo
+/// provisional con degradado y una paleta tenue.
+class HomeBanner extends StatelessWidget {
+  final String title;
+  final String button;
+  final VoidCallback onTap;
+  final String? imageAsset;
+  const HomeBanner({super.key, required this.title, required this.button, required this.onTap, this.imageAsset});
+
+  @override
+  Widget build(BuildContext context) {
+    return CardBorder(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: SizedBox(
+          height: 170,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (imageAsset != null)
+                Image.asset(imageAsset!, fit: BoxFit.cover, alignment: Alignment.centerRight)
+              else ...[
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [Color(0xFF060E12), Color(0xFF0F4652)],
+                    ),
+                  ),
+                ),
+                const Positioned.fill(child: CustomPaint(painter: _DiagonalPainter())),
+                Positioned(
+                  right: -10,
+                  bottom: -16,
+                  child: Transform.rotate(
+                    angle: -0.4,
+                    child: Icon(Icons.sports_tennis_rounded, size: 150, color: _mint.withValues(alpha: 0.18)),
+                  ),
+                ),
+              ],
+              // Oscurece la izquierda para que el texto se lea sobre la foto.
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [Color(0xE6060E12), Color(0x00060E12)],
+                    stops: [0.25, 0.75],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 200,
+                      child: Text(title, style: _t(20, w: FontWeight.w700, h: 1.2)),
+                    ),
+                    const SizedBox(height: 14),
+                    AppButton(label: button, trailingIcon: Icons.chevron_right_rounded, onPressed: onTap, height: 38, expand: false),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Un campeonato en el que estás inscrito.
+class HomeMyTournament {
+  final String name;
+  final String detail; // categoría
+  final String status; // "En curso" / "Sáb. 12 Oct"
+  final bool live;
+  final VoidCallback onTap;
+  HomeMyTournament({required this.name, required this.detail, required this.status, required this.live, required this.onTap});
+}
+
+/// "Mis campeonatos": en curso o por jugar. Vacío: invita a inscribirse.
+class HomeMyTournamentsCard extends StatelessWidget {
+  final List<HomeMyTournament> items;
+  final VoidCallback onBrowse;
+  const HomeMyTournamentsCard({super.key, required this.items, required this.onBrowse});
+
+  @override
+  Widget build(BuildContext context) {
+    return HomeCard(
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          HomeCardTitle(icon: Icons.emoji_events_outlined, title: "Mis campeonatos", action: items.isEmpty ? null : "Ver todos", onAction: onBrowse),
+          const SizedBox(height: 6),
+          if (items.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Aún no estás inscrito en ningún campeonato.", style: _t(13, c: AppColors.scorifyTextMuted)),
+                  const SizedBox(height: 12),
+                  AppButton(label: "Buscar campeonatos", trailingIcon: Icons.chevron_right_rounded, onPressed: onBrowse, height: 36, expand: false),
+                ],
+              ),
+            )
+          else
+            for (var i = 0; i < items.length; i++) ...[
+              if (i > 0) Divider(height: 1, color: Colors.white.withValues(alpha: 0.08)),
+              InkWell(
+                onTap: items[i].onTap,
+                borderRadius: BorderRadius.circular(10),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(items[i].name, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(14, w: FontWeight.w600)),
+                            Text(items[i].detail, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12, c: AppColors.scorifyTextMuted)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: (items[i].live ? _lime : _mint).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(99),
+                        ),
+                        child: Text(items[i].status, style: _t(11.5, w: FontWeight.w600, c: items[i].live ? _lime : _mint)),
+                      ),
+                      const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
+                    ],
+                  ),
+                ),
+              ),
+            ],
         ],
       ),
     );
