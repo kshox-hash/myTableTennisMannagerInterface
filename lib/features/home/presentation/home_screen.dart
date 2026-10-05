@@ -1,6 +1,7 @@
 import "package:myttmi/core/ui/tap_sound.dart";
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/shell/shell_preload.dart";
+import "package:myttmi/features/tournament/models/tournament_model.dart";
 import "package:myttmi/features/home/widget/home_v2.dart";
 import "package:myttmi/features/player/models/tournament_match_model.dart";
 import "package:myttmi/features/calendar/api/calendar_api.dart";
@@ -74,6 +75,7 @@ class _HomeScreenState extends State<HomeScreen>
   // eventos de esta semana y un logro positivo (último podio).
   List<CalendarEvent> _week = const [];
   List<CalendarEvent> _mine = const [];
+  Tournament? _challenge;
   // Partidos jugados, del más reciente al más antiguo.
   List<PlayerMatchHistoryItem> _history = const [];
   int _groupSize = 0;
@@ -143,8 +145,22 @@ class _HomeScreenState extends State<HomeScreen>
         ..sort((a, b) => a.inProgress == b.inProgress ? a.date.compareTo(b.date) : (a.inProgress ? -1 : 1));
       mineList = [for (final e in current) if (seen.add(e.tournamentId)) e].take(4).toList();
     } catch (_) {}
+    Tournament? challenge;
+    try {
+      final page = await TournamentApi().fetchTournaments(limit: 50);
+      final upcoming = page.items.where((t) {
+        if (t.isCancelled) return false;
+        final d = DateTime.tryParse(t.eventDate ?? "");
+        return d == null || !d.isBefore(day);
+      }).toList()
+        ..sort((a, b) => (a.eventDate ?? "9").compareTo(b.eventDate ?? "9"));
+      final mineT = upcoming.where((t) => t.categories.any((c) => c.isEnrolled && c.phase != "finished"));
+      final openT = upcoming.where((t) => t.categories.any((c) => c.phase == "enrollment"));
+      challenge = mineT.isNotEmpty ? mineT.first : (openT.isNotEmpty ? openT.first : null);
+    } catch (_) {}
     if (!mounted) return;
     setState(() {
+      _challenge = challenge;
       _week = week;
       _mine = mineList;
     });
@@ -168,24 +184,13 @@ class _HomeScreenState extends State<HomeScreen>
     return "$hi, $first 👋";
   }
 
-  /// Frase del momento bajo el saludo.
-  String? _contextLine() {
-    final nm = _dashboard?.nextMatch;
-    if (nm != null) {
-      if (nm.tableNumber != null) return "¡Te toca! Ve a la mesa ${nm.tableNumber}";
-      final at = nm.scheduledStartAt;
-      if (at != null && DateUtils.isSameDay(at, DateTime.now())) return "Tienes un partido hoy";
-      return "Tienes un partido por jugar";
-    }
-    if (_mine.isNotEmpty) return _mine.length == 1 ? "Estás inscrito en 1 campeonato" : "Estás inscrito en ${_mine.length} campeonatos";
-    return "Busca tu próximo campeonato";
-  }
-
-  /// "hoy" / "mañana" / "en 5 días".
-  static String _inDays(DateTime d) {
-    final now = DateTime.now();
-    final n = DateTime(d.year, d.month, d.day).difference(DateTime(now.year, now.month, now.day)).inDays;
-    return n <= 0 ? "HOY" : n == 1 ? "MAÑANA" : "EN $n DÍAS";
+  /// "Domingo, 1 Jun 2025".
+  static String _dateLong(String? iso) {
+    final d = DateTime.tryParse(iso ?? "");
+    if (d == null) return "Fecha por definir";
+    const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+    const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    return "${days[d.weekday - 1]}, ${d.day} ${months[d.month - 1]} ${d.year}";
   }
 
   /// "Vs. este rival": cuántas veces se enfrentaron y cómo les fue.
@@ -460,19 +465,22 @@ class _HomeScreenState extends State<HomeScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: staggerChildren([
-                      HomeProfileRow(
-                        userId: _profile?.idUser,
-                        name: (_profile?.displayName.isNotEmpty ?? false) ? _profile!.displayName : "Jugador",
-                        country: _profile?.country,
-                        club: _profile?.club,
-                        age: _profile?.age,
-                        gender: _profile?.gender,
-                        avatarUrl: _profile?.avatarUrl,
-                        onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
-                        greeting: _greeting(),
-                        context: _contextLine(),
+                      // Portada: texto a la derecha de la foto.
+                      SizedBox(
+                        height: MediaQuery.sizeOf(context).height * 0.50,
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: SizedBox(
+                            width: MediaQuery.sizeOf(context).width * 0.50,
+                            child: HomeHeroText(
+                              greeting: _greeting() ?? "Hola 👋",
+                              onGreeting: () => Navigator.pushNamed(context, AppRoutes.profile),
+                              onCta: () => AppShellScope.of(context)?.switchTab(3),
+                            ),
+                          ),
+                        ),
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 8),
                       if (_refMatches.isNotEmpty) ...[
                         HomeRefereeCard(
                           title: "${_refMatches.first.player1Name} vs ${_refMatches.first.player2Name}",
@@ -492,41 +500,6 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                         const SizedBox(height: 12),
                       ],
-                      // Llamado a la acción sobre la foto, a la derecha (donde
-                      // apuntan las líneas), sin tapar al jugador.
-                      SizedBox(
-                        height: MediaQuery.sizeOf(context).height * 0.28,
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              const Text(
-                                "Tu próximo\ndesafío\nte espera",
-                                textAlign: TextAlign.right,
-                                style: TextStyle(
-                                  fontFamily: "Montserrat",
-                                  fontSize: 24,
-                                  height: 1.15,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                  shadows: [Shadow(color: Color(0xCC000000), blurRadius: 12)],
-                                ),
-                              ),
-                              const SizedBox(height: 14),
-                              AppButton(
-                                label: "Ver campeonatos",
-                                trailingIcon: Icons.chevron_right_rounded,
-                                onPressed: () => AppShellScope.of(context)?.switchTab(3),
-                                height: 40,
-                                expand: false,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
                       if (nm != null) ...[
                         matches,
                         if (_myStanding != null && nm.matchType == "group") ...[
@@ -553,35 +526,52 @@ class _HomeScreenState extends State<HomeScreen>
                         ],
                         const SizedBox(height: 12),
                       ],
-                      HomeMyTournamentsCarousel(
-                        onBrowse: () => AppShellScope.of(context)?.switchTab(3),
-                        items: [
-                          for (final e in _mine)
-                            HomeMyTournament(
-                              name: e.tournamentName,
-                              detail: e.categoryName,
-                              status: e.inProgress ? "EN CURSO" : _inDays(e.date),
-                              live: e.inProgress,
-                              onTap: () => _openTournament(e.tournamentId),
-                            ),
-                        ],
-                      ),
-                      ...[
+                      if (_challenge != null) ...[
+                        HomeChallengeCard(
+                          name: _challenge!.tournamentName,
+                          date: _dateLong(_challenge!.eventDate),
+                          place: _challenge!.address ?? _challenge!.region,
+                          players: _challenge!.categories.fold<int>(0, (n, c) => n + c.enrolledCount),
+                          chip: _challenge!.categories.any((c) => c.isEnrolled) ? "Inscrito" : "En inscripción",
+                          onTap: () async {
+                            await Navigator.pushNamed(context, AppRoutes.tournamentDetail, arguments: _challenge);
+                            if (mounted) _load(silent: true);
+                          },
+                        ),
                         const SizedBox(height: 12),
-                        HomeWeekCard(
-                          onCalendar: () => AppShellScope.of(context)?.switchTab(1),
-                          items: [
-                            for (final e in _week)
-                              HomeWeekItem(
-                                day: const ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"][e.date.weekday - 1],
-                                date: "${e.date.day}",
-                                title: e.tournamentName,
-                                subtitle: [e.categoryName, if ((e.location ?? "").trim().isNotEmpty) e.location!.trim()].join(" · "),
-                                onTap: () => _openTournament(e.tournamentId),
+                      ],
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              child: HomeTile(
+                                icon: Icons.emoji_events_outlined,
+                                title: "Mis campeonatos",
+                                text: _mine.isEmpty
+                                    ? "No tienes campeonatos inscritos todavía."
+                                    : "Estás en ${_mine.length} ${_mine.length == 1 ? "campeonato" : "campeonatos"}. Próximo: ${_mine.first.tournamentName}.",
+                                action: _mine.isEmpty ? "Explorar" : "Ver",
+                                onTap: () => _mine.isEmpty
+                                    ? AppShellScope.of(context)?.switchTab(3)
+                                    : _openTournament(_mine.first.tournamentId),
                               ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: HomeTile(
+                                icon: Icons.calendar_month_outlined,
+                                title: "Próximos eventos",
+                                text: _week.isEmpty
+                                    ? "Consulta los próximos torneos y fechas importantes."
+                                    : "${_week.length} ${_week.length == 1 ? "evento" : "eventos"} en los próximos 14 días.",
+                                action: "Ver calendario",
+                                onTap: () => AppShellScope.of(context)?.switchTab(1),
+                              ),
+                            ),
                           ],
                         ),
-                      ],
+                      ),
                     ]),
                   ),
                 ),
@@ -605,17 +595,46 @@ class _HomeBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Stack(
-      fit: StackFit.expand,
+    final h = MediaQuery.sizeOf(context).height;
+    return Stack(
       children: [
-        Image(image: AssetImage("assets/images/home_bg.png"), fit: BoxFit.cover, alignment: Alignment(-0.4, -0.35)),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xB3060E12), Color(0x00060E12), Color(0x00060E12), Color(0xE6060E12)],
-              stops: [0, 0.22, 0.45, 0.85],
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: h * 0.62,
+          child: const Image(image: AssetImage("assets/images/home_bg.png"), fit: BoxFit.cover, alignment: Alignment(-0.7, -0.45)),
+        ),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: h * 0.62,
+          child: const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0x99060E12), Color(0x00060E12), Color(0x00060E12), Color(0xFF060E12)],
+                stops: [0, 0.2, 0.6, 1],
+              ),
+            ),
+          ),
+        ),
+        // Oscurece la derecha: el texto de la portada se lee sobre la foto.
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: h * 0.62,
+          child: const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [Color(0x00060E12), Color(0x00060E12), Color(0xB3060E12)],
+                stops: [0, 0.4, 0.85],
+              ),
             ),
           ),
         ),

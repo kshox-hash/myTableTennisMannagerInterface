@@ -1302,3 +1302,188 @@ class HomeMyTournamentsCarousel extends StatelessWidget {
     );
   }
 }
+
+/// Portada del Inicio (a la derecha de la foto): saludo, titular con
+/// "desafío" en degradado, bajada y botón.
+class HomeHeroText extends StatelessWidget {
+  final String greeting;
+  final VoidCallback onGreeting;
+  final VoidCallback onCta;
+  const HomeHeroText({super.key, required this.greeting, required this.onGreeting, required this.onCta});
+
+  @override
+  Widget build(BuildContext context) {
+    const shadow = [Shadow(color: Color(0xCC000000), blurRadius: 14)];
+    TextStyle big(Color c) => TextStyle(fontFamily: AppTypography.body, fontSize: 30, height: 1.08, fontWeight: FontWeight.w700, color: c, shadows: shadow);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onTap: onGreeting,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(greeting, maxLines: 1, style: _t(14.5, w: FontWeight.w500).copyWith(shadows: shadow)),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Container(width: 36, height: 3, decoration: BoxDecoration(color: _mint, borderRadius: BorderRadius.circular(2))),
+        const SizedBox(height: 14),
+        Text("Tu próximo", style: big(Colors.white)),
+        ShaderMask(
+          shaderCallback: (r) => appButtonGradient.createShader(r),
+          child: Text("desafío", style: big(Colors.white)),
+        ),
+        Text("te espera", style: big(Colors.white)),
+        const SizedBox(height: 12),
+        Text(
+          "Compite, mejora y lleva tu juego al siguiente nivel. Los mejores torneos te están esperando.",
+          style: _t(12.5, c: AppColors.scorifyText.withValues(alpha: 0.8), h: 1.4).copyWith(shadows: shadow),
+        ),
+        const SizedBox(height: 16),
+        AppButton(label: "Ver campeonatos", trailingIcon: Icons.arrow_forward_rounded, onPressed: onCta, height: 38),
+      ],
+    );
+  }
+}
+
+/// "Próximo desafío": tu próximo campeonato o el primero con inscripción.
+class HomeChallengeCard extends StatelessWidget {
+  final String name;
+  final String date;
+  final String? place;
+  final int? players;
+  final String? chip; // "En inscripción" / "Inscrito"
+  final VoidCallback onTap;
+  const HomeChallengeCard({super.key, required this.name, required this.date, this.place, this.players, this.chip, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    Widget info(IconData icon, String text) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: _mint),
+            const SizedBox(width: 8),
+            Flexible(child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(13))),
+          ],
+        );
+    return HomeCard(
+      gradient: _glassFeatured,
+      padding: EdgeInsets.zero,
+      child: Stack(
+        children: [
+          const Positioned.fill(child: CustomPaint(painter: _DiagonalPainter())),
+          Positioned(
+            right: 18,
+            bottom: 26,
+            child: Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const RadialGradient(colors: [Colors.white, Color(0xFFB9C1C9)], center: Alignment(-0.3, -0.3)),
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 12, offset: const Offset(0, 6))],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 16, 16, 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: Text("PRÓXIMO DESAFÍO", style: _t(12.5, w: FontWeight.w600, c: _lime, ls: 1.2))),
+                    if (chip != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _lime.withValues(alpha: 0.10),
+                          border: Border.all(color: _lime.withValues(alpha: 0.6)),
+                          borderRadius: BorderRadius.circular(99),
+                        ),
+                        child: Text(chip!, style: _t(11.5, w: FontWeight.w600, c: _lime)),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(name, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(21, w: FontWeight.w700, h: 1.2)),
+                const SizedBox(height: 14),
+                Wrap(
+                  spacing: 18,
+                  runSpacing: 8,
+                  children: [
+                    info(Icons.calendar_month_outlined, date),
+                    if ((place ?? "").trim().isNotEmpty) info(Icons.place_outlined, place!.trim()),
+                    if (players != null) info(Icons.people_outline_rounded, "$players ${players == 1 ? "jugador" : "jugadores"}"),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                AppButton.outline(label: "Ver campeonato", trailingIcon: Icons.arrow_forward_rounded, onPressed: onTap, height: 38, expand: false),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tarjeta chica (mitad de ancho): ícono, título, texto y enlace.
+class HomeTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String text;
+  final String action;
+  final VoidCallback onTap;
+  const HomeTile({super.key, required this.icon, required this.title, required this.text, required this.action, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return HomeCard(
+      onTap: onTap,
+      padding: const EdgeInsets.fromLTRB(14, 14, 12, 12),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -14,
+            bottom: 8,
+            child: Icon(icon, size: 70, color: Colors.white.withValues(alpha: 0.04)),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, color: _mint, size: 26),
+                  const Spacer(),
+                  const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
+                ],
+              ),
+              const SizedBox(height: 10),
+              FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text(title, maxLines: 1, style: _t(15.5, w: FontWeight.w700))),
+              const SizedBox(height: 4),
+              SizedBox(
+                height: 48,
+                child: Text(text, maxLines: 3, overflow: TextOverflow.ellipsis, style: _t(12, c: AppColors.scorifyTextMuted, h: 1.35)),
+              ),
+              const SizedBox(height: 6),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(action, style: _t(12.5, w: FontWeight.w600, c: _mint)),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.arrow_forward_rounded, size: 15, color: _mint),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
