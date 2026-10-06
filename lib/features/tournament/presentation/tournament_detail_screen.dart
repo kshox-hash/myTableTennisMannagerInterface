@@ -30,6 +30,26 @@ String? _formatWhen(String? date, String? time) {
   return hhmm == null ? day : "$day · $hhmm hrs";
 }
 
+// Campeonato de varios días: "Sáb 14 – Dom 15 Dic 2026 · 10:00 hrs".
+String? _formatWhenRange(String? date, String? end, String? time) {
+  final d = DateTime.tryParse(date ?? "");
+  final e = DateTime.tryParse(end ?? "");
+  if (d == null || e == null || !e.isAfter(d)) return _formatWhen(date, time);
+  final hhmm = (time ?? "").length >= 5 ? time!.substring(0, 5) : null;
+  final from = d.month == e.month ? "${_weekdays[d.weekday - 1]} ${d.day}" : "${_weekdays[d.weekday - 1]} ${d.day} ${_months[d.month - 1]}";
+  final to = "${_weekdays[e.weekday - 1]} ${e.day} ${_months[e.month - 1]} ${e.year}";
+  return hhmm == null ? "$from – $to" : "$from – $to · $hhmm hrs";
+}
+
+// Día de juego de una categoría: "Sáb 14 Dic · 10:00 hrs".
+String? _categoryDay(String? date, String? time) {
+  final d = DateTime.tryParse(date ?? "");
+  if (d == null) return null;
+  final hhmm = (time ?? "").length >= 5 ? time!.substring(0, 5) : null;
+  final day = "${_weekdays[d.weekday - 1]} ${d.day} ${_months[d.month - 1]}";
+  return hhmm == null ? day : "$day · $hhmm hrs";
+}
+
 // 5000 → "$5.000"
 String _money(int v) {
   final s = v.toString();
@@ -272,7 +292,7 @@ class _HeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = tournament;
-    final when = _formatWhen(t.eventDate, t.eventTime);
+    final when = _formatWhenRange(t.eventDate, t.endDate, t.eventTime);
     final enrolled = t.categories.fold<int>(0, (s, c) => s + c.enrolledCount);
     final allFinite = t.categories.isNotEmpty && t.categories.every((c) => c.quotas != null);
     final quota = allFinite ? t.categories.fold<int>(0, (s, c) => s + (c.quotas ?? 0)) : null;
@@ -419,6 +439,19 @@ class _CategoryCardState extends State<_CategoryCard> {
               _Fact(label: "Cupos", value: c.quotas != null ? "$enrolledCount / ${c.quotas}" : "Sin límite"),
             ],
           ),
+          if (_categoryDay(c.playDate, c.startTime) != null) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Icon(Icons.event_rounded, size: 15, color: AppColors.scorifyMint),
+                const SizedBox(width: 6),
+                Text(
+                  "Se juega: ${_categoryDay(c.playDate, c.startTime)}",
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                ),
+              ],
+            ),
+          ],
           if (c.quotas != null && c.quotas! > 0) ...[
             const SizedBox(height: 12),
             ClipRRect(

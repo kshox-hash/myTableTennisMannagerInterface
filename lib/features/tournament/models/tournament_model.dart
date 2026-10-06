@@ -18,6 +18,9 @@ class TournamentCategory {
   /// género y año de nacimiento): GENDER_REQUIRED | GENDER_MISMATCH |
   /// BIRTH_DATE_REQUIRED | AGE_NOT_ELIGIBLE. null = puede.
   final String? ineligibleReason;
+  // Día y hora de inicio de la categoría (campeonatos de varios días).
+  final String? playDate; // YYYY-MM-DD
+  final String? startTime; // HH:mm
 
   TournamentCategory({
     required this.idCategory,
@@ -33,6 +36,8 @@ class TournamentCategory {
     this.isEnrolled = false,
     this.isPaid = false,
     this.ineligibleReason,
+    this.playDate,
+    this.startTime,
   });
 
   /// Label combinado para mostrar en UI — el backend nunca manda un
@@ -57,6 +62,8 @@ class TournamentCategory {
       isEnrolled: json["is_enrolled"] == true,
       isPaid: json["is_paid"] == true,
       ineligibleReason: json["ineligible_reason"] as String?,
+      playDate: json["play_date"] as String?,
+      startTime: json["start_time"] as String?,
     );
   }
 
@@ -89,6 +96,7 @@ class Tournament {
   final String? region;
   final String? eventDate; // YYYY-MM-DD
   final String? eventTime; // HH:mm
+  final String? endDate; // último día (null = un solo día)
   final String createdBy;
   final String status; // active | cancelled
   final List<TournamentCategory> categories;
@@ -104,6 +112,7 @@ class Tournament {
     this.region,
     this.eventDate,
     this.eventTime,
+    this.endDate,
     required this.createdBy,
     this.status = "active",
     required this.categories,
@@ -127,6 +136,7 @@ class Tournament {
       region: json["region"] as String?,
       eventDate: json["event_date"] as String?,
       eventTime: json["event_time"] as String?,
+      endDate: json["end_date"] as String?,
       createdBy: (json["created_by"] ?? "").toString(),
       status: (json["status"] ?? "active").toString(),
       categories: cats,
