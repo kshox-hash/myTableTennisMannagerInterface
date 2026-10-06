@@ -10,7 +10,6 @@ import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/achievement_row.dart";
 import "package:myttmi/core/ui/glass_card.dart";
-import "package:myttmi/core/ui/identicon.dart";
 import "package:myttmi/core/ui/list_states.dart";
 import "package:myttmi/core/ui/pill_button.dart";
 import "package:myttmi/core/ui/prism_background.dart";

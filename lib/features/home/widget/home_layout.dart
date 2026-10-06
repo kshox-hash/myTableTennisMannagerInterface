@@ -5,7 +5,6 @@ import "package:flutter/material.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
-import "package:myttmi/core/ui/identicon.dart";
 
 // Piezas del Inicio: cabecera con avatar, barra de datos, racha, botones,
 // KPIs, próximo partido vacío y accesos. Estilo sólido del resto de la app
