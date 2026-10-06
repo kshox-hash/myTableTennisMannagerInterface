@@ -49,19 +49,21 @@ class ApiActivity {
 
   /// Espera a que la pantalla recién armada termine de traer sus datos:
   /// hasta que no quede ningún pedido en curso (un instante seguido, por si
-  /// encadena otro), o [max] como tope. Si en los primeros ~120 ms no pidió
+  /// encadena otro), o [max] como tope (corto: el toque responde rápido y,
+  /// si el servidor tarda, la pantalla entra con su esqueleto). Si en los
+  /// primeros ~80 ms no pidió
   /// nada, no espera más (pantallas sin datos del servidor).
-  static Future<void> settle({Duration max = const Duration(milliseconds: 1200)}) async {
+  static Future<void> settle({Duration max = const Duration(milliseconds: 350)}) async {
     final sw = Stopwatch()..start();
     final startedBefore = _startedCount;
     await SchedulerBinding.instance.endOfFrame;
     var quietSince = -1;
     while (sw.elapsedMilliseconds < max.inMilliseconds) {
       final any = _startedCount > startedBefore;
-      if (!any && sw.elapsedMilliseconds >= 120) return;
+      if (!any && sw.elapsedMilliseconds >= 80) return;
       if (any && _inFlight == 0) {
         if (quietSince < 0) quietSince = sw.elapsedMilliseconds;
-        if (sw.elapsedMilliseconds - quietSince >= 60) break;
+        if (sw.elapsedMilliseconds - quietSince >= 30) break;
       } else {
         quietSince = -1;
       }

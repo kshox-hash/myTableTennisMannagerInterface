@@ -15,6 +15,24 @@ mixin TabAutoRefreshMixin<T extends StatefulWidget> on State<T> {
   void onTabActivated();
 
   int? _lastIndex;
+  // Al volver a la app (desde WhatsApp, la cámara, etc.) la pestaña que se
+  // está viendo se recarga: lo que cargó el organizador aparece sin tener
+  // que deslizar. No hay recarga cada X segundos.
+  late final _ResumeObserver _resume = _ResumeObserver(() {
+    if (mounted && AppShellScope.of(context)?.currentIndex == tabIndex) onTabActivated();
+  });
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(_resume);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(_resume);
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -24,5 +42,15 @@ mixin TabAutoRefreshMixin<T extends StatefulWidget> on State<T> {
       onTabActivated();
     }
     _lastIndex = current;
+  }
+}
+
+class _ResumeObserver extends WidgetsBindingObserver {
+  final VoidCallback onResume;
+  _ResumeObserver(this.onResume);
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) onResume();
   }
 }

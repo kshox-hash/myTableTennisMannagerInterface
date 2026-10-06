@@ -37,7 +37,7 @@ class AppTypography {
   static const TextStyle h1 = TextStyle(
     fontFamily: body,
     fontWeight: FontWeight.w700,
-    fontSize: 20,
+    fontSize: 22,
     color: AppColors.scorifyText,
   );
 

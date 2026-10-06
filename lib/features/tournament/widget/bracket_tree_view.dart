@@ -358,7 +358,7 @@ class _MatchBox extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(2),
             child: ColoredBox(
               color: const Color(0xEB1C3440),
               child: Column(
@@ -497,7 +497,7 @@ class _PlayerRow extends StatelessWidget {
               height: 26,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(2),
                 color: highlighted
                     ? Colors.white
                     : isWinner
@@ -536,7 +536,7 @@ class _ChampionCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
       decoration: BoxDecoration(
         color: AppColors.scorifyButterfly,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(2),
         boxShadow: [
           BoxShadow(
             color: AppColors.scorifyButterfly.withValues(alpha: 0.35),

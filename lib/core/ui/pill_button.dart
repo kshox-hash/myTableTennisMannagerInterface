@@ -70,37 +70,32 @@ class InfoChip extends StatelessWidget {
   Widget build(BuildContext context) {
     late final Color fg;
     late final Color bg;
-    late final Color border;
 
     switch (tone) {
       case ChipTone.neutral:
         fg = AppColors.scorifyTextMuted;
         bg = Colors.white.withOpacity(0.06);
-        border = Colors.white.withOpacity(0.10);
         break;
       case ChipTone.positive:
         fg = AppColors.scorifyMint;
         bg = AppColors.scorifyMint.withOpacity(0.14);
-        border = AppColors.scorifyCardBorder;
         break;
       case ChipTone.negative:
         fg = AppColors.scorifyNegative;
         bg = AppColors.scorifyNegative.withOpacity(0.14);
-        border = AppColors.scorifyNegative.withOpacity(0.35);
         break;
       case ChipTone.pending:
         fg = AppColors.scorifyPending;
         bg = AppColors.scorifyPending.withOpacity(0.14);
-        border = AppColors.scorifyPending.withOpacity(0.35);
         break;
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(2),
         color: bg,
-        border: Border.all(color: border),
+
       ),
       child: Text(
         label,

@@ -23,7 +23,7 @@ class SpinModeRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(2),
       child: Container(
         decoration: BoxDecoration(
           gradient: AppColors.cardGradient,
@@ -45,7 +45,7 @@ class SpinModeRow extends StatelessWidget {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: accent.withOpacity(0.14),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(2),
                       ),
                       child: Icon(icon, color: accent, size: 20),
                     ),

@@ -1,4 +1,3 @@
-import "package:myttmi/core/ui/tap_sound.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/favorites/favorite_button.dart";
@@ -239,7 +238,7 @@ class _MatchCard extends StatelessWidget {
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: pillBg, borderRadius: BorderRadius.circular(999)),
+                decoration: BoxDecoration(color: pillBg, borderRadius: BorderRadius.circular(2)),
                 child: Text(pillText,
                     style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: pillFg)),
               ),
@@ -297,7 +296,7 @@ class _Player extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => _openProfile(context, id, name),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(2),
       child: Padding(
         padding: const EdgeInsets.all(2),
         child: Column(
@@ -402,7 +401,7 @@ class _GroupsByCategoryState extends State<_GroupsByCategory> {
             children: const [
               Padding(
                 padding: EdgeInsets.only(top: 30),
-                child: EmptyState(icon: Icons.groups_outlined, message: "Todavía no hay grupos generados."),
+                child: EmptyState(icon: Icons.groups_rounded, message: "Todavía no hay grupos generados."),
               ),
             ],
           );
@@ -453,7 +452,7 @@ class _BracketByCategory extends StatelessWidget {
         children: const [
           Padding(
             padding: EdgeInsets.only(top: 30),
-            child: EmptyState(icon: Icons.account_tree_outlined, message: "Todavía no hay llave generada."),
+            child: EmptyState(icon: Icons.account_tree_rounded, message: "Todavía no hay llave generada."),
           ),
         ],
       );
@@ -501,20 +500,19 @@ class _Segmented extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(99)),
       child: Row(
         children: [
           for (final it in items)
             Expanded(
               child: DecoratedBox(decoration: selectedPillDecoration(it.selected), child: Material(
                 color: Colors.transparent,
-                shape: const StadiumBorder(),
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
                 child: InkWell(
                   onTap: () {
-                    if (!it.selected) TapSound.play();
                     it.onTap();
                   },
-                  customBorder: const StadiumBorder(),
+                  customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: Row(
@@ -560,10 +558,10 @@ class _FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: selected ? AppColors.scorifyText : AppColors.scorifySurface2,
-      shape: const StadiumBorder(),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2))),
       child: InkWell(
         onTap: onTap,
-        customBorder: const StadiumBorder(),
+        customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2))),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
           child: Text(

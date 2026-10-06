@@ -72,7 +72,7 @@ class _RefereeScanScreenState extends State<RefereeScanScreen> {
               const SizedBox(height: 16),
               Expanded(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(2),
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
@@ -97,7 +97,7 @@ class _RefereeScanScreenState extends State<RefereeScanScreen> {
                           height: 230,
                           decoration: BoxDecoration(
                             border: Border.all(color: AppColors.scorifyButterfly, width: 3),
-                            borderRadius: BorderRadius.circular(18),
+                            borderRadius: BorderRadius.circular(2),
                           ),
                         ),
                       ),

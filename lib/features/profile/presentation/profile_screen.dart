@@ -180,7 +180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   InputDecoration _inputDeco(IconData? icon) {
-    final border = OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none);
+    final border = OutlineInputBorder(borderRadius: BorderRadius.circular(2), borderSide: BorderSide.none);
     return InputDecoration(
       isDense: true,
       filled: true,
@@ -190,7 +190,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       border: border,
       enabledBorder: border,
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(2),
         borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.4),
       ),
     );
@@ -266,7 +266,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   const SizedBox(height: 20),
                                   Row(
                                     children: [
-                                      Expanded(child: _FormField(label: "Nombre", child: _textInput(_firstNameCtrl, Icons.badge_outlined))),
+                                      Expanded(child: _FormField(label: "Nombre", child: _textInput(_firstNameCtrl, Icons.badge_rounded))),
                                       const SizedBox(width: 10),
                                       Expanded(child: _FormField(label: "Apellido", child: _textInput(_lastNameCtrl, null))),
                                     ],
@@ -275,10 +275,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   _FormField(
                                     label: "Fecha de nacimiento",
                                     child: InkWell(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(2),
                                       onTap: _pickBirthDate,
                                       child: InputDecorator(
-                                        decoration: _inputDeco(Icons.cake_outlined).copyWith(
+                                        decoration: _inputDeco(Icons.cake_rounded).copyWith(
                                           suffixIcon: const Icon(Icons.calendar_month_rounded, color: AppColors.scorifyMint, size: 20),
                                         ),
                                         child: Text(_formatBirthDate(_birthDate), style: AppTypography.bodyText),
@@ -292,10 +292,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       initialValue: _gender,
                                       isExpanded: true,
                                       dropdownColor: AppColors.scorifySurface2,
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(2),
                                       icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.scorifyTextMuted),
                                       style: AppTypography.bodyText,
-                                      decoration: _inputDeco(Icons.wc_outlined),
+                                      decoration: _inputDeco(Icons.wc_rounded),
                                       items: const [
                                         DropdownMenuItem(value: "male", child: Text("Masculino")),
                                         DropdownMenuItem(value: "female", child: Text("Femenino")),
@@ -305,7 +305,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 14),
-                                  _FormField(label: "País", child: _textInput(_countryCtrl, Icons.public_outlined)),
+                                  _FormField(label: "País", child: _textInput(_countryCtrl, Icons.public_rounded)),
                                   const SizedBox(height: 22),
                                   Row(
                                     children: [
@@ -348,14 +348,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               crossAxisSpacing: 10,
                               childAspectRatio: 2.3,
                               children: [
-                                _InfoTile(icon: Icons.cake_outlined, label: "Edad", value: p.age == null ? "—" : "${p.age} años"),
-                                _InfoTile(icon: Icons.wc_outlined, label: "Género", value: _genderLabel(p.gender)),
+                                _InfoTile(icon: Icons.cake_rounded, label: "Edad", value: p.age == null ? "—" : "${p.age} años"),
+                                _InfoTile(icon: Icons.wc_rounded, label: "Género", value: _genderLabel(p.gender)),
                                 _InfoTile(
-                                  icon: Icons.public_outlined,
+                                  icon: Icons.public_rounded,
                                   label: "País",
                                   value: (p.country ?? "").trim().isEmpty ? "Sin especificar" : p.country!,
                                 ),
-                                _InfoTile(icon: Icons.calendar_today_outlined, label: "Miembro desde", value: _memberSince(p.createdAt)),
+                                _InfoTile(icon: Icons.calendar_today_rounded, label: "Miembro desde", value: _memberSince(p.createdAt)),
                               ],
                             ),
                             if (achievementsFuture != null) ...[
@@ -477,7 +477,7 @@ class _ClubSectionState extends State<_ClubSection> {
   Widget build(BuildContext context) {
     return SectionCard(
       title: "Mi club",
-      icon: Icons.shield_outlined,
+      icon: Icons.shield_rounded,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -492,7 +492,7 @@ class _ClubSectionState extends State<_ClubSection> {
           else if (widget.currentClub != null)
             Row(
               children: [
-                const Icon(Icons.groups_2_outlined, color: AppColors.scorifyMint, size: 18),
+                const Icon(Icons.groups_2_rounded, color: AppColors.scorifyMint, size: 18),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text.rich(
@@ -553,7 +553,7 @@ class _ClubSectionState extends State<_ClubSection> {
                     labelStyle: AppTypography.bodyMuted,
                     filled: true,
                     fillColor: AppColors.scorifyInput,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(2), borderSide: BorderSide.none),
                   ),
                   items: _clubs
                       .map((c) => DropdownMenuItem(
@@ -628,13 +628,13 @@ class _DuesCardState extends State<_DuesCard> {
     final unit = d.feeFrequency == "weekly" ? (d.owedPeriods == 1 ? "semana" : "semanas") : (d.owedPeriods == 1 ? "mes" : "meses");
     return SectionCard(
       title: "Cuotas del club",
-      icon: Icons.payments_outlined,
+      icon: Icons.payments_rounded,
       child: Row(
         children: [
           Container(
             width: 44,
             height: 44,
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(2)),
             child: Icon(ok ? Icons.verified_rounded : Icons.error_outline_rounded, color: color),
           ),
           const SizedBox(width: 12),
@@ -669,7 +669,7 @@ class _ProfileHero extends StatelessWidget {
     final p = profile;
     Widget chip(IconData icon, String text) => Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(999)),
+          decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(2)),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -703,11 +703,11 @@ class _ProfileHero extends StatelessWidget {
             runSpacing: 8,
             children: [
               chip(Icons.sports_tennis_rounded, "Jugador"),
-              if ((p.club ?? "").isNotEmpty) chip(Icons.shield_outlined, p.club!),
+              if ((p.club ?? "").isNotEmpty) chip(Icons.shield_rounded, p.club!),
             ],
           ),
           const SizedBox(height: 16),
-          AppButton.outline(label: "Editar perfil", icon: Icons.edit_outlined, onPressed: onEdit),
+          AppButton.outline(label: "Editar perfil", icon: Icons.edit_rounded, onPressed: onEdit),
         ],
       ),
     );
@@ -724,7 +724,7 @@ class _InfoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(2)),
       child: Row(
         children: [
           Icon(icon, color: AppColors.scorifyMint, size: 20),

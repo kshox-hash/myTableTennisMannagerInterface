@@ -1,4 +1,5 @@
 import "package:myttmi/core/ui/card_border.dart";
+import "package:url_launcher/url_launcher.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:share_plus/share_plus.dart";
@@ -254,6 +255,15 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
   }
 }
 
+/// Abre WhatsApp con el organizador (número chileno sin +56 se completa).
+Future<void> _whatsApp(BuildContext context, Tournament t) async {
+  var digits = (t.contactPhone ?? "").replaceAll(RegExp(r"\D"), "");
+  if (digits.length == 9 && digits.startsWith("9")) digits = "56$digits";
+  final text = Uri.encodeComponent("Hola, te escribo por el campeonato ${t.tournamentName}.");
+  final ok = await launchUrl(Uri.parse("https://wa.me/$digits?text=$text"), mode: LaunchMode.externalApplication);
+  if (!ok && context.mounted) showToast(context, "No se pudo abrir WhatsApp.", error: true);
+}
+
 class _HeroCard extends StatelessWidget {
   final Tournament tournament;
   final bool started;
@@ -305,7 +315,7 @@ class _HeroCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
               color: AppColors.scorifySurface2,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(2),
             ),
             child: Row(
               children: [
@@ -315,6 +325,15 @@ class _HeroCard extends StatelessWidget {
               ],
             ),
           ),
+          // Contacto con el organizador (si dejó su WhatsApp en la web).
+          if ((t.contactPhone ?? "").replaceAll(RegExp(r"\D"), "").length >= 8) ...[
+            const SizedBox(height: 12),
+            AppButton.outline(
+              label: "Escribir al organizador",
+              icon: Icons.chat_rounded,
+              onPressed: () => _whatsApp(context, t),
+            ),
+          ],
         ],
       ),
     );
@@ -403,7 +422,7 @@ class _CategoryCardState extends State<_CategoryCard> {
           if (c.quotas != null && c.quotas! > 0) ...[
             const SizedBox(height: 12),
             ClipRRect(
-              borderRadius: BorderRadius.circular(99),
+              borderRadius: BorderRadius.circular(2),
               child: LinearProgressIndicator(
                 value: (enrolledCount / c.quotas!).clamp(0.0, 1.0),
                 minHeight: 6,
@@ -443,7 +462,7 @@ class _CategoryCardState extends State<_CategoryCard> {
       children: [
         InkWell(
           onTap: () => setState(() => _expanded = !_expanded),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(2),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
@@ -491,7 +510,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                           padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
                           decoration: BoxDecoration(
                             color: AppColors.scorifySurface2,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(2),
                           ),
                           child: Row(
                             children: [
@@ -528,7 +547,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                               IconButton(
                                 tooltip: "Ver perfil",
                                 visualDensity: VisualDensity.compact,
-                                icon: const Icon(Icons.visibility_outlined, size: 20, color: AppColors.scorifyMint),
+                                icon: const Icon(Icons.visibility_rounded, size: 20, color: AppColors.scorifyMint),
                                 onPressed: () => Navigator.pushNamed(
                                   context,
                                   AppRoutes.playerProfile,
@@ -737,7 +756,7 @@ class _Pill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(2)),
       child: Text(
         label,
         style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: fg),
@@ -754,12 +773,12 @@ class _QuickLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CardBorder(child: DecoratedBox(decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(16)), child: Material(
+    return CardBorder(child: DecoratedBox(decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(2)), child: Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(2),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(2),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 14),
           child: Column(
@@ -793,7 +812,7 @@ class _NoticeBanner extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.scorifyMint.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(2),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/section_card.dart';
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/match_list.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
@@ -129,7 +130,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                               achievements: aSnap.data ?? [],
                             ),
                           ),
-                          Text("Historial", style: AppTypography.h1),
+                          const SectionLabel("Historial", icon: Icons.history_rounded),
                           const SizedBox(height: 10),
                           FutureBuilder<List<PlayerMatchHistoryItem>>(
                             future: _historyFuture,

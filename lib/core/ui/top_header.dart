@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:myttmi/features/notifications/presentation/notifications_screen.dart';
+import 'package:myttmi/core/ui/side_panel_route.dart';
+import 'package:myttmi/features/notifications/notification_popups.dart';
+import 'package:myttmi/features/shell/app_shell.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
 
@@ -26,6 +30,10 @@ class TopHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
+        if (onBack == null && !showBack && AppShellScope.of(context)?.openMenu != null) ...[
+          HeaderIconButton(icon: Icons.menu_rounded, onTap: AppShellScope.of(context)!.openMenu!),
+          const SizedBox(width: 12),
+        ],
         if (onBack != null || (showBack && Navigator.canPop(context))) ...[
           BackCircleButton(onTap: onBack ?? () => Navigator.pop(context)),
           const SizedBox(width: 12),
@@ -52,6 +60,33 @@ class TopHeader extends StatelessWidget {
           const SizedBox(width: 10),
           ...actions!,
         ],
+        // Secciones principales: la campana, igual que en el Inicio.
+        if (onBack == null && !showBack && AppShellScope.of(context)?.openMenu != null) ...[
+          const SizedBox(width: 10),
+          ValueListenableBuilder<int>(
+            valueListenable: NotificationPopups.unread,
+            builder: (context, unread, _) => Stack(
+              clipBehavior: Clip.none,
+              children: [
+                HeaderIconButton(
+                  icon: Icons.notifications_none_rounded,
+                  onTap: () => Navigator.push(context, SidePanelRoute(child: const NotificationsScreen())),
+                ),
+                if (unread > 0)
+                  Positioned(
+                    right: -3,
+                    top: -3,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                      decoration: BoxDecoration(color: AppColors.scorifyBadge, borderRadius: BorderRadius.circular(99)),
+                      child: Text(unread > 9 ? "9+" : "$unread",
+                          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white)),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -66,22 +101,12 @@ class HeaderIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(12),
+      color: AppColors.scorifyInput,
+      shape: const CircleBorder(),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          width: 38,
-          height: 38,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: AppColors.scorifyMint.withOpacity(0.10),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.scorifyCardBorder),
-          ),
-          child: Icon(icon, color: AppColors.scorifyText, size: 18),
-        ),
+        customBorder: const CircleBorder(),
+        child: SizedBox(width: 40, height: 40, child: Icon(icon, color: AppColors.scorifyText, size: 21)),
       ),
     );
   }
@@ -130,16 +155,16 @@ class PagerButton extends StatelessWidget {
     final enabled = onTap != null;
     return Material(
       color: Colors.white.withValues(alpha: 0.06),
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(2),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(2),
         child: Container(
           width: 32,
           height: 28,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(2),
             border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
           ),
           child: Icon(next ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,

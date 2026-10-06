@@ -5,7 +5,7 @@ import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 
 /// Turquesa de gráficos y estadísticas (solo ahí; no en botones ni textos).
-const statAqua = Color(0xFF22E3D0);
+const statAqua = AppColors.scorifyMint;
 
 /// Medidor circular con brillo (estilo FIFA): arco de fondo tenue, arco de
 /// avance en color con un halo suave y el valor al centro.

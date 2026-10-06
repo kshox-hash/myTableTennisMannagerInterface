@@ -1,4 +1,3 @@
-import "package:myttmi/core/ui/tap_sound.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:myttmi/core/ui/card_border.dart";
 import "dart:async";
@@ -180,14 +179,13 @@ class _ViewSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(99)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           for (final v in const [2, 4, 6])
             GestureDetector(
               onTap: () {
-                if (v != value) TapSound.play();
                 onChanged(v);
               },
               child: Container(
@@ -263,9 +261,9 @@ class _LiveCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final d = detail;
-    return CardBorder(child: DecoratedBox(decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(16)), child: Material(
+    return CardBorder(child: DecoratedBox(decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(2)), child: Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(2),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: d == null ? null : onOpen,
@@ -344,7 +342,7 @@ class _LiveCard extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(color: pillBg, borderRadius: BorderRadius.circular(999)),
+                decoration: BoxDecoration(color: pillBg, borderRadius: BorderRadius.circular(2)),
                 child: Text(
                   pill,
                   maxLines: 1,

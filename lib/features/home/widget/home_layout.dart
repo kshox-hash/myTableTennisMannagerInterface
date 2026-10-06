@@ -49,7 +49,7 @@ class HomePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(16);
+    final radius = BorderRadius.circular(2);
     return CardBorder(child: Material(
       color: Colors.transparent,
       borderRadius: radius,
@@ -99,7 +99,7 @@ class HomeHero extends StatelessWidget {
     final since = memberSince?.toLocal();
     Widget chip(IconData icon, String text) => Container(
           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-          decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(999)),
+          decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(2)),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -170,8 +170,8 @@ class HomeHero extends StatelessWidget {
             spacing: 6,
             runSpacing: 6,
             children: [
-              chip(Icons.shield_outlined, (club ?? "").trim().isEmpty ? "Sin club" : club!),
-              if (age != null) chip(Icons.cake_outlined, "$age años"),
+              chip(Icons.shield_rounded, (club ?? "").trim().isEmpty ? "Sin club" : club!),
+              if (age != null) chip(Icons.cake_rounded, "$age años"),
               if (genderLabel != null) chip(Icons.person_outline_rounded, genderLabel),
             ],
           ),
@@ -291,7 +291,7 @@ class HomeStreakCard extends StatelessWidget {
                 // Ganado: el mismo degradado del botón principal.
                 gradient: won ? appButtonGradient : null,
                 color: won ? null : AppColors.scorifyNegative,
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(2),
               ),
               child: Icon(won ? Icons.check_rounded : Icons.close_rounded, color: won ? AppColors.scorifyOnButterfly : Colors.white, size: 14),
             ),
@@ -418,7 +418,7 @@ class HomeNoMatchCard extends StatelessWidget {
                       style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
                   const SizedBox(height: 12),
                   AppButton(
-                    label: "Ver torneos",
+                    label: "Ver campeonatos",
                     onPressed: onBrowse,
                     trailingIcon: Icons.chevron_right_rounded,
                     height: 36,
@@ -472,7 +472,7 @@ class HomeGroupCard extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: leading ? AppColors.scorifyButterfly : AppColors.scorifySurface2,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(2),
             ),
             child: Text(
               position == null ? "–" : "${position}°",
@@ -530,7 +530,7 @@ class HomeRefereeCard extends StatelessWidget {
             width: 44,
             height: 44,
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: AppColors.scorifyButterfly, borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: AppColors.scorifyButterfly, borderRadius: BorderRadius.circular(2)),
             child: const Icon(Icons.sports_rounded, color: AppColors.scorifyOnButterfly),
           ),
           const SizedBox(width: 12),

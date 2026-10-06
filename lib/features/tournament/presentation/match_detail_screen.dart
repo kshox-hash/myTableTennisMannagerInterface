@@ -180,7 +180,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: AppColors.scorifyNegative,
-                                      borderRadius: BorderRadius.circular(999),
+                                      borderRadius: BorderRadius.circular(2),
                                     ),
                                     child: const Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -260,6 +260,29 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                               ),
                             ),
 
+                            // W.O.: qué significa para cada jugador.
+                            if (m.status == "walkover") ...[
+                              const SizedBox(height: 16),
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(color: AppColors.scorifyPending.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(2)),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Icon(Icons.info_rounded, size: 18, color: AppColors.scorifyPending),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        m.winnerId == null
+                                            ? "W.O.: el partido no se jugó porque un jugador no se presentó."
+                                            : "W.O.: ${m.winnerId == m.player1Id ? m.player2Name : m.player1Name} no se presentó. El partido se da por ganado a ${m.winnerId == m.player1Id ? m.player1Name : m.player2Name} y cuenta como derrota para quien no se presentó.",
+                                        style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, height: 1.35, color: AppColors.scorifyText),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                             if (_myId != null && m.winnerId != null && m.winnerId == _myId) ...[
                               const SizedBox(height: 16),
                               Center(
@@ -409,7 +432,7 @@ class _PlayerRow extends StatelessWidget {
               color: _closed(sp.mine, sp.theirs)
                   ? Colors.transparent
                   : AppColors.scorifyNegative.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(2),
             ),
             child: Text(
               "${sp.mine}",
@@ -434,7 +457,7 @@ class _PlayerRow extends StatelessWidget {
             color: isWinner
                 ? AppColors.scorifyButterfly
                 : AppColors.scorifySurface2,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(2),
           ),
           child: Text(
             "$sets",

@@ -69,9 +69,10 @@ class Endpoints {
   static const ranking = "$base/ranking";
 
   // NOTIFICACIONES
-  static const notifications = "$base/notifications";
-  static const notificationsUnreadCount = "$base/notifications/unread-count";
-  static const notificationsReadAll = "$base/notifications/read-all";
+  // La app es el rol jugador: no trae los avisos de organizador.
+  static const notifications = "$base/notifications?audience=player";
+  static const notificationsUnreadCount = "$base/notifications/unread-count?audience=player";
+  static const notificationsReadAll = "$base/notifications/read-all?audience=player";
   static const deviceToken = "$base/notifications/device-token";
 
   // Árbitro desde la app

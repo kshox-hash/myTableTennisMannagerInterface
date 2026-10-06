@@ -15,7 +15,7 @@ import "package:myttmi/core/navigation/deep_links.dart";
 class ToastLayout {
   ToastLayout._();
   static ModalRoute<dynamic>? shellRoute;
-  static const double navBarHeight = 62;
+  static const double navBarHeight = 0; // sin barra de abajo (menú ☰)
 }
 
 enum PopupTone { good, bad, info, time }
@@ -206,7 +206,7 @@ class _PopupState extends State<_Popup> with SingleTickerProviderStateMixin {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: n.emoji != null ? AppColors.scorifyDeep : fg.withValues(alpha: 0.16),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(2),
           ),
           child: n.emoji != null
               ? Text(n.emoji!, style: const TextStyle(fontSize: 17))
@@ -229,7 +229,7 @@ class _PopupState extends State<_Popup> with SingleTickerProviderStateMixin {
               elevation: 12,
               shadowColor: Colors.black,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(2),
                 side: n.highlight ? BorderSide(color: fg, width: 1.5) : const BorderSide(color: Color(0x26FFFFFF)),
               ),
               clipBehavior: Clip.antiAlias,

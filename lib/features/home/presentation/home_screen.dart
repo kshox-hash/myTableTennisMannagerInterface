@@ -1,4 +1,3 @@
-import "package:myttmi/core/ui/tap_sound.dart";
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/shell/shell_preload.dart";
 import "package:myttmi/features/tournament/models/tournament_model.dart";
@@ -8,7 +7,6 @@ import "package:myttmi/features/calendar/api/calendar_api.dart";
 import "package:myttmi/features/calendar/models/calendar_event.dart";
 import "package:myttmi/features/tournament/api/tournament_api.dart";
 import "package:myttmi/core/ui/stagger_in.dart";
-import 'package:myttmi/core/ui/app_button.dart';
 import 'package:flutter/material.dart';
 import "package:myttmi/features/home/widget/home_layout.dart";
 import "package:myttmi/core/ui/side_panel_route.dart";
@@ -16,9 +14,7 @@ import "package:myttmi/features/notifications/presentation/notifications_screen.
 import "package:myttmi/routes/cyber_page_route.dart";
 
 import 'package:myttmi/core/constants/app_colors.dart';
-import 'package:myttmi/core/storage/session_storage.dart';
 import 'package:myttmi/features/shell/app_shell.dart';
-import 'package:myttmi/features/shell/splash_gate.dart';
 import 'package:myttmi/features/shell/tab_auto_refresh.dart';
 import 'package:myttmi/features/player/api/player_api.dart';
 import 'package:myttmi/features/player/models/player_dashboard_model.dart';
@@ -30,11 +26,8 @@ import 'package:myttmi/features/notifications/api/notifications_api.dart';
 import '../../../routes/app_routes.dart';
 
 import '../widget/spin_header.dart';
-import "package:myttmi/core/push/push_service.dart";
-import "package:myttmi/features/favorites/favorites_screen.dart";
 import "package:myttmi/features/referee/referee_api.dart";
 import "package:myttmi/features/referee/referee_screen.dart";
-import "package:myttmi/features/referee/referee_scan_screen.dart";
 import "package:myttmi/features/notifications/notification_popups.dart";
 
 /// Pestaña "Inicio" del shell — ya no arma su propio Scaffold/fondo/nav, eso
@@ -184,6 +177,19 @@ class _HomeScreenState extends State<HomeScreen>
     return "$hi, $first 👋";
   }
 
+  /// Frase del momento bajo el saludo.
+  String _contextLine() {
+    final nm = _dashboard?.nextMatch;
+    if (nm != null) {
+      if (nm.tableNumber != null) return "¡Te toca! Ve a la mesa ${nm.tableNumber}";
+      final at = nm.scheduledStartAt;
+      if (at != null && DateUtils.isSameDay(at, DateTime.now())) return "Tienes un partido hoy";
+      return "Tienes un partido por jugar";
+    }
+    if (_mine.isNotEmpty) return _mine.length == 1 ? "Estás en 1 campeonato" : "Estás en ${_mine.length} campeonatos";
+    return "Busca tu próximo campeonato";
+  }
+
   /// "Domingo, 1 Jun 2025".
   static String _dateLong(String? iso) {
     final d = DateTime.tryParse(iso ?? "");
@@ -250,111 +256,6 @@ class _HomeScreenState extends State<HomeScreen>
       });
     } catch (_) {}
   }
-
-  Future<void> _confirmLogout() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: AppColors.scorifyDeep,
-        title: const Text(
-          "Cerrar sesión",
-          style: TextStyle(color: AppColors.scorifyText),
-        ),
-        content: Text(
-          "¿Quieres cerrar sesión y volver al login?",
-          style: TextStyle(color: AppColors.scorifyText.withOpacity(0.85)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              "Cancelar",
-              style: TextStyle(color: AppColors.scorifyText.withOpacity(0.85)),
-            ),
-          ),
-          AppButton(
-            label: "Cerrar sesión",
-            icon: Icons.logout,
-            onPressed: () => Navigator.pop(context, true),
-            height: 40,
-            expand: false,
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      await PushService.unregister();
-      await SessionStorage().clearAll();
-      if (!mounted) return;
-
-      Navigator.pushAndRemoveUntil(
-        context,
-        CyberPageRoute(builder: (_) => const SplashGate()),
-        (route) => false,
-      );
-    }
-  }
-
-  Future<void> _openSettings() async {
-    final action = await showModalBottomSheet<String>(
-      context: context,
-      backgroundColor: AppColors.scorifyDeep.withOpacity(0.95),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-      ),
-      builder: (_) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 10),
-              ListTile(
-                leading: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.scorifyText),
-                title: const Text(
-                  "Arbitrar con QR",
-                  style: TextStyle(color: AppColors.scorifyText),
-                ),
-                onTap: () => Navigator.pop(context, "referee_scan"),
-              ),
-              // Sonido al tocar botones (se guarda en el teléfono).
-              ValueListenableBuilder<bool>(
-                valueListenable: TapSound.enabled,
-                builder: (_, on, __) => SwitchListTile(
-                  secondary: Icon(on ? Icons.volume_up_rounded : Icons.volume_off_rounded, color: AppColors.scorifyText),
-                  title: const Text("Sonidos", style: TextStyle(color: AppColors.scorifyText)),
-                  value: on,
-                  activeThumbColor: AppColors.scorifyOnMint,
-                  activeTrackColor: AppColors.scorifyMint,
-                  onChanged: TapSound.setEnabled,
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.logout, color: AppColors.scorifyText),
-                title: const Text(
-                  "Cerrar sesión",
-                  style: TextStyle(color: AppColors.scorifyText),
-                ),
-                onTap: () => Navigator.pop(context, "logout"),
-              ),
-              const SizedBox(height: 6),
-            ],
-          ),
-        );
-      },
-    );
-
-    if (!mounted) return;
-
-    // Perfil e historial ya están en el Inicio (tarjeta y botones).
-    if (action == "logout") {
-      await _confirmLogout();
-    } else if (action == "referee_scan") {
-      await Navigator.push(context, CyberPageRoute(builder: (_) => const RefereeScanScreen()));
-      if (mounted) _load(silent: true);
-    }
-  }
-
 
   Widget _panelFor(PlayerNextMatch? m) {
     final stage = m == null
@@ -424,17 +325,12 @@ class _HomeScreenState extends State<HomeScreen>
             valueListenable: NotificationPopups.unread,
             builder: (context, unread, _) => SpinHeader(
             notificationsCount: unread,
-            onFavorites: () => Navigator.push(
-              context,
-              CyberPageRoute(builder: (_) => const FavoritesScreen()),
-            ),
             // Panel lateral en vez de página completa; al cerrarlo se
             // refresca el contador de no leídas.
             onNotifications: () => Navigator.push(
               context,
               SidePanelRoute(child: const NotificationsScreen()),
             ).then((_) => _load()),
-            onSettings: _openSettings,
           ),
           ),
 
@@ -462,23 +358,30 @@ class _HomeScreenState extends State<HomeScreen>
                   // LayoutBuilder— no admite IntrinsicHeight.
                   // La tarjeta de partido (o la de sin partido) toma el alto
                   // que sobra, así llega hasta abajo en cualquier caso.
-                  child: Column(
+                  child: IntrinsicHeight(
+                    child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: staggerChildren([
-                      // Portada: texto a la derecha de la foto.
-                      SizedBox(
-                        height: MediaQuery.sizeOf(context).height * 0.50,
+                      // Portada: toma el alto que sobra (las tarjetas quedan
+                      // abajo, sin hueco); texto a la derecha de la foto.
+                      Expanded(
+                        child: ConstrainedBox(
+                        // Alto mínimo; crece si el texto no cabe (sin desborde).
+                        constraints: BoxConstraints(minHeight: MediaQuery.sizeOf(context).height * 0.27),
+                        // Abajo a la derecha: la zona oscura libre (solo
+                        // líneas), sin tapar al jugador.
                         child: Align(
-                          alignment: Alignment.centerRight,
+                          alignment: const Alignment(1, 0.75),
                           child: SizedBox(
                             width: MediaQuery.sizeOf(context).width * 0.50,
                             child: HomeHeroText(
-                              greeting: _greeting() ?? "Hola 👋",
+                              greeting: _greeting() ?? "Hola",
+                              contextLine: _contextLine(),
                               onGreeting: () => Navigator.pushNamed(context, AppRoutes.profile),
-                              onCta: () => AppShellScope.of(context)?.switchTab(3),
                             ),
                           ),
                         ),
+                      ),
                       ),
                       const SizedBox(height: 8),
                       if (_refMatches.isNotEmpty) ...[
@@ -531,9 +434,9 @@ class _HomeScreenState extends State<HomeScreen>
                         HomeChallengeCard(
                           kicker: "PRÓXIMO PARTIDO",
                           name: "Sin partidos programados",
-                          subtitle: "Cuando te asignen un partido o te inscribas en un campeonato, aparecerá aquí.",
+                          subtitle: "Aún no tienes partidos asignados.",
                           button: "Buscar campeonatos",
-                          onTap: () => AppShellScope.of(context)?.switchTab(3),
+                          onTap: () => AppShellScope.of(context)?.switchTab(3, link: true),
                         ),
                         const SizedBox(height: 12),
                       ],
@@ -557,33 +460,32 @@ class _HomeScreenState extends State<HomeScreen>
                           children: [
                             Expanded(
                               child: HomeTile(
-                                icon: Icons.emoji_events_outlined,
+                                icon: Icons.emoji_events_rounded,
+                                value: "${_mine.length}",
+                                caption: _mine.length == 1 ? "inscrito" : "inscritos",
                                 title: "Mis campeonatos",
-                                text: _mine.isEmpty
-                                    ? "No tienes campeonatos inscritos todavía."
-                                    : "Estás en ${_mine.length} ${_mine.length == 1 ? "campeonato" : "campeonatos"}. Próximo: ${_mine.first.tournamentName}.",
                                 action: _mine.isEmpty ? "Explorar" : "Ver",
                                 onTap: () => _mine.isEmpty
-                                    ? AppShellScope.of(context)?.switchTab(3)
+                                    ? AppShellScope.of(context)?.switchTab(3, link: true)
                                     : _openTournament(_mine.first.tournamentId),
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: HomeTile(
-                                icon: Icons.calendar_month_outlined,
+                                icon: Icons.calendar_month_rounded,
+                                value: "${_week.length}",
+                                caption: "en 14 días",
                                 title: "Próximos eventos",
-                                text: _week.isEmpty
-                                    ? "Consulta los próximos torneos y fechas importantes."
-                                    : "${_week.length} ${_week.length == 1 ? "evento" : "eventos"} en los próximos 14 días.",
-                                action: "Ver calendario",
-                                onTap: () => AppShellScope.of(context)?.switchTab(1),
+                                action: "Calendario",
+                                onTap: () => AppShellScope.of(context)?.switchTab(1, link: true),
                               ),
                             ),
                           ],
                         ),
                       ),
                     ]),
+                  ),
                   ),
                 ),
               ),
@@ -613,14 +515,15 @@ class _HomeBackground extends StatelessWidget {
           top: 0,
           left: 0,
           right: 0,
-          height: h * 0.62,
-          child: const Image(image: AssetImage("assets/images/home_bg.png"), fit: BoxFit.cover, alignment: Alignment(-0.7, -0.45)),
+          height: h * 0.72,
+          // Decodificada al ancho de la pantalla (no a 1080 px): menos trabajo al dibujar.
+          child: Image(image: ResizeImage(const AssetImage("assets/images/home_bg.png"), width: (MediaQuery.sizeOf(context).width * MediaQuery.devicePixelRatioOf(context)).round()), fit: BoxFit.cover, alignment: Alignment(-0.7, -0.45)),
         ),
         Positioned(
           top: 0,
           left: 0,
           right: 0,
-          height: h * 0.62,
+          height: h * 0.72,
           child: const DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -637,7 +540,7 @@ class _HomeBackground extends StatelessWidget {
           top: 0,
           left: 0,
           right: 0,
-          height: h * 0.62,
+          height: h * 0.72,
           child: const DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -682,9 +585,9 @@ class _MatchesCarouselState extends State<_MatchesCarousel> {
   Widget build(BuildContext context) {
     final pages = widget.pages;
     if (pages.length == 1) return pages.first;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final w = constraints.maxWidth;
+    final w = MediaQuery.sizeOf(context).width - 32;
+    return Builder(
+      builder: (context) {
         return Column(
           children: [
             NotificationListener<ScrollNotification>(

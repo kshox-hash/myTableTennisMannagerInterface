@@ -84,6 +84,8 @@ class Tournament {
   final String tournamentName;
   final String? description;
   final String? address;
+  /// WhatsApp de contacto del organizador (lo ingresa en la web).
+  final String? contactPhone;
   final String? region;
   final String? eventDate; // YYYY-MM-DD
   final String? eventTime; // HH:mm
@@ -98,6 +100,7 @@ class Tournament {
     required this.tournamentName,
     this.description,
     this.address,
+    this.contactPhone,
     this.region,
     this.eventDate,
     this.eventTime,
@@ -120,6 +123,7 @@ class Tournament {
       tournamentName: prettyTitle((json["tournament_name"] ?? "").toString()),
       description: json["description"] as String?,
       address: json["address"] as String?,
+      contactPhone: json["contact_phone"] as String?,
       region: json["region"] as String?,
       eventDate: json["event_date"] as String?,
       eventTime: json["event_time"] as String?,

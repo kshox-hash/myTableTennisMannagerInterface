@@ -1,5 +1,6 @@
-import "package:myttmi/core/ui/card_border.dart";
 import "package:myttmi/core/ui/app_button.dart";
+import "package:myttmi/core/ui/user_avatar.dart";
+import "package:myttmi/core/ui/section_card.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -37,6 +38,8 @@ class _RefereeScreenState extends State<RefereeScreen> {
   bool _loading = true;
   bool _saving = false;
   bool _done = false;
+  // Lo cerró este árbitro recién: se le agradece en pantalla.
+  bool _thanked = false;
   String _savedLive = ""; // sets ya guardados en vivo (para no repetir el envío)
 
   List<TextEditingController> _a = [];
@@ -171,8 +174,10 @@ class _RefereeScreenState extends State<RefereeScreen> {
         sets: sets,
       );
       if (!mounted) return;
-      setState(() => _done = true);
-      showToast(context, "Resultado guardado. ¡Gracias por arbitrar!");
+      setState(() {
+        _done = true;
+        _thanked = true;
+      });
     } catch (e) {
       if (mounted) showToast(context, e.toString().replaceFirst("Exception: ", ""), error: true);
     } finally {
@@ -214,44 +219,70 @@ class _RefereeScreenState extends State<RefereeScreen> {
     final s1 = _wins(valid, 1), s2 = _wins(valid, 2);
     final decided = _decided(valid);
     final problem = _problem;
-    final mesa = m.tableNumber != null ? "Mesa ${m.tableNumber} · " : "";
+    final current = decided ? -1 : valid.length; // set que se está jugando
+
+    // Mensaje de ayuda con ícono (guía / error / guardado).
+    final (IconData hintIcon, Color hintColor, String hintText) = problem != null
+        ? (Icons.warning_amber_rounded, AppColors.scorifyNegative, problem)
+        : valid.isEmpty
+            ? (Icons.info_rounded, AppColors.scorifyMint, "Al terminar cada set, escribe su marcador. Se guarda solo y los jugadores lo ven en vivo.")
+            : decided
+                ? (Icons.check_circle_rounded, AppColors.scorifyButterfly, "Partido decidido. Revisa los sets y confirma el resultado.")
+                : (Icons.check_circle_rounded, AppColors.scorifyButterfly,
+                    "${valid.length} ${valid.length == 1 ? "set guardado" : "sets guardados"} en vivo");
 
     return ListView(
       children: [
-        Text(
-          "$mesa${m.categoryType} · Mejor de ${m.bestOfSets}",
-          textAlign: TextAlign.center,
-          style: AppTypography.bodyMuted.copyWith(fontSize: 13),
-        ),
-        const SizedBox(height: 14),
-        // Marcador de sets
-        Row(
-          children: [
-            Expanded(child: _nameBig(m.player1Name, s1 > s2)),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: decided ? AppColors.scorifyButterfly : AppColors.scorifySurface2,
-                borderRadius: BorderRadius.circular(12),
+        // ── Marcador ──
+        SectionCard(
+          title: "Marcador",
+          icon: Icons.scoreboard_rounded,
+          gradient: AppColors.featuredGradient,
+          trailing: Padding(padding: const EdgeInsets.only(right: 10), child: _LiveBadge(decided: decided, started: valid.isNotEmpty)),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 18),
+          child: Column(
+            children: [
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  if (m.tableNumber != null) _chip("MESA ${m.tableNumber}", AppColors.scorifyMint),
+                  _chip(m.categoryType, AppColors.scorifyTextMuted),
+                  _chip("Mejor de ${m.bestOfSets}", AppColors.scorifyTextMuted),
+                ],
               ),
-              child: Text(
-                "$s1 - $s2",
-                style: TextStyle(
-                  fontFamily: AppTypography.body,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: decided ? AppColors.scorifyOnButterfly : AppColors.scorifyText,
-                ),
+              const SizedBox(height: 16),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: _player(m.player1Id, m.player1Name, s1 > s2)),
+                  Column(
+                    children: [
+                      Text("$s1 – $s2",
+                          style: TextStyle(
+                            fontFamily: AppTypography.body,
+                            fontSize: 40,
+                            height: 1.1,
+                            fontWeight: FontWeight.w700,
+                            color: decided ? AppColors.scorifyButterfly : AppColors.scorifyText,
+                          )),
+                      const Text("SETS",
+                          style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.4, color: AppColors.scorifyTextMuted)),
+                    ],
+                  ),
+                  Expanded(child: _player(m.player2Id, m.player2Name, s2 > s1)),
+                ],
               ),
-            ),
-            Expanded(child: _nameBig(m.player2Name, s2 > s1, right: true)),
-          ],
+            ],
+          ),
         ),
-        const SizedBox(height: 16),
-        // Grilla: una fila por jugador, una columna por set (igual al panel).
-        CardBorder(child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(16)),
+        const SizedBox(height: 12),
+        // ── Marcador por set ──
+        SectionCard(
+          title: "Marcador por set",
+          icon: Icons.grid_view_rounded,
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 14),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Column(
@@ -259,50 +290,65 @@ class _RefereeScreenState extends State<RefereeScreen> {
               children: [
                 Row(
                   children: [
-                    const SizedBox(width: 104),
+                    const SizedBox(width: 92),
                     for (var i = 0; i < _a.length; i++)
                       SizedBox(
-                        width: 56,
-                        child: Text("Set ${i + 1}",
+                        width: 58,
+                        child: Text("S${i + 1}",
                             textAlign: TextAlign.center,
-                            style: AppTypography.bodyMuted.copyWith(fontSize: 11.5, fontWeight: FontWeight.w600)),
+                            style: TextStyle(
+                              fontFamily: AppTypography.body,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.8,
+                              color: i == current ? AppColors.scorifyMint : AppColors.scorifyTextMuted,
+                            )),
                       ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                _row(1, m.player1Name),
                 const SizedBox(height: 8),
-                _row(2, m.player2Name),
+                _row(1, m.player1Name, current),
+                const SizedBox(height: 8),
+                _row(2, m.player2Name, current),
               ],
             ),
           ),
-        )),
-        const SizedBox(height: 10),
-        if (problem != null)
-          Text(problem, style: const TextStyle(color: AppColors.scorifyNegative, fontSize: 13, fontWeight: FontWeight.w600))
-        else if (!_done)
-          Text(
-            valid.isEmpty
-                ? "Al terminar cada set, escribe su marcador. Se guarda solo y los jugadores lo ven en vivo."
-                : decided
-                    ? "Partido decidido. Revisa los sets y confirma el resultado."
-                    : "${valid.length} ${valid.length == 1 ? "set guardado" : "sets guardados"} en vivo ✓",
-            style: AppTypography.bodyMuted.copyWith(fontSize: 12.5),
+        ),
+        const SizedBox(height: 12),
+        if (!_done)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(color: hintColor.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(2)),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(hintIcon, size: 18, color: hintColor),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(hintText,
+                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, height: 1.35, color: problem != null ? hintColor : AppColors.scorifyText)),
+                ),
+              ],
+            ),
           ),
         const SizedBox(height: 18),
         if (_done)
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(14)),
+          SectionCard(
+            title: _thanked ? "¡Gracias por arbitrar!" : "Partido terminado",
+            icon: _thanked ? Icons.favorite_rounded : Icons.check_circle_rounded,
+            titleColor: AppColors.scorifyButterfly,
+            gradient: _thanked ? AppColors.featuredGradient : AppColors.cardGradient,
             child: Text(
-              "Partido terminado: ${s1 >= s2 ? m.player1Name : m.player2Name} ganó ${s1 >= s2 ? s1 : s2}-${s1 >= s2 ? s2 : s1}.",
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontFamily: AppTypography.body, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+              _thanked
+                  ? "Ganó ${s1 >= s2 ? m.player1Name : m.player2Name} ${s1 >= s2 ? s1 : s2}-${s1 >= s2 ? s2 : s1}. El resultado quedó guardado como oficial. Tu ayuda hace que el campeonato avance a tiempo."
+                  : "Ganó ${s1 >= s2 ? m.player1Name : m.player2Name} ${s1 >= s2 ? s1 : s2}-${s1 >= s2 ? s2 : s1}. El resultado ya está cargado.",
+              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, height: 1.4, color: AppColors.scorifyText),
             ),
           )
         else
           AppButton(
             label: "Confirmar resultado",
+            icon: Icons.check_rounded,
             onPressed: decided && problem == null ? _confirm : null,
             loading: _saving,
             height: 48,
@@ -311,41 +357,64 @@ class _RefereeScreenState extends State<RefereeScreen> {
     );
   }
 
-  Widget _nameBig(String name, bool winning, {bool right = false}) => Text(
-        name,
-        maxLines: 2,
-        textAlign: right ? TextAlign.right : TextAlign.left,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontFamily: AppTypography.body,
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-          color: winning ? AppColors.scorifyButterfly : AppColors.scorifyText,
-        ),
+  Widget _chip(String text, Color c) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(color: c.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(99)),
+        child: Text(text, style: TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 0.4, color: c)),
       );
 
-  Widget _row(int player, String name) {
+  /// Jugador en el marcador: foto y nombre; el que va ganando en verde.
+  Widget _player(String? id, String name, bool leading) => Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: leading ? appButtonGradient : null,
+              color: leading ? null : AppColors.scorifySurface2,
+            ),
+            child: UserAvatar(userId: id, size: 52),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            name,
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: AppTypography.body,
+              fontSize: 14,
+              height: 1.25,
+              fontWeight: FontWeight.w600,
+              color: leading ? AppColors.scorifyButterfly : AppColors.scorifyText,
+            ),
+          ),
+        ],
+      );
+
+  Widget _row(int player, String name, int current) {
     final ctrls = player == 1 ? _a : _b;
+    final short = name.trim().split(RegExp(r"\s+")).take(2).join(" ");
     return Row(
       children: [
         SizedBox(
-          width: 104,
-          child: Text(name,
+          width: 92,
+          child: Text(short,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
         ),
-        for (var i = 0; i < ctrls.length; i++) SizedBox(width: 56, child: Center(child: _cell(i, player, ctrls[i]))),
+        for (var i = 0; i < ctrls.length; i++) SizedBox(width: 58, child: Center(child: _cell(i, player, ctrls[i], i == current))),
       ],
     );
   }
 
-  Widget _cell(int i, int player, TextEditingController c) {
+  Widget _cell(int i, int player, TextEditingController c, bool current) {
     final s = _set(i);
     final won = s != null && _legal(s.$1, s.$2) && (player == 1 ? s.$1 > s.$2 : s.$2 > s.$1);
     return SizedBox(
-      width: 48,
-      height: 46,
+      width: 52,
+      height: 52,
       child: TextField(
         controller: c,
         enabled: !_done && !_saving,
@@ -356,23 +425,70 @@ class _RefereeScreenState extends State<RefereeScreen> {
         onChanged: (_) => _onChanged(),
         style: TextStyle(
           fontFamily: AppTypography.body,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
           color: won ? AppColors.scorifyButterfly : AppColors.scorifyText,
         ),
         decoration: InputDecoration(
           counterText: "",
           isDense: true,
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
           filled: true,
-          fillColor: AppColors.scorifyInput,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+          // Set ganado: fondo verde suave; el que se juega: borde turquesa.
+          fillColor: won ? AppColors.scorifyButterfly.withValues(alpha: 0.12) : AppColors.scorifyInput,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(2),
+            borderSide: current ? BorderSide(color: AppColors.scorifyMint.withValues(alpha: 0.6), width: 1.2) : BorderSide.none,
+          ),
+          disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(2), borderSide: BorderSide.none),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(2), borderSide: BorderSide.none),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.5),
+            borderRadius: BorderRadius.circular(2),
+            borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.8),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// "EN VIVO" con punto que late mientras se juega; "DECIDIDO" al final.
+class _LiveBadge extends StatefulWidget {
+  final bool decided;
+  final bool started;
+  const _LiveBadge({required this.decided, required this.started});
+
+  @override
+  State<_LiveBadge> createState() => _LiveBadgeState();
+}
+
+class _LiveBadgeState extends State<_LiveBadge> with SingleTickerProviderStateMixin {
+  late final AnimationController _p = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000))..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _p.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.decided) {
+      return const Text("DECIDIDO",
+          style: TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 1, color: AppColors.scorifyButterfly));
+    }
+    if (!widget.started) return const SizedBox.shrink();
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        FadeTransition(
+          opacity: Tween(begin: 0.3, end: 1.0).animate(_p),
+          child: Container(width: 8, height: 8, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.scorifyNegative)),
+        ),
+        const SizedBox(width: 6),
+        const Text("EN VIVO",
+            style: TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 1, color: AppColors.scorifyNegative)),
+      ],
     );
   }
 }

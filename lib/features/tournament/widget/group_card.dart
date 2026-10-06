@@ -42,9 +42,9 @@ class GroupCard extends StatelessWidget {
           for (var i = 0; i < members.length; i++)
             Material(
               color: members[i].idUser == myUserId ? AppColors.scorifyMint.withValues(alpha: 0.10) : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(2),
               child: InkWell(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(2),
                 onTap: () => Navigator.pushNamed(
                   context,
                   AppRoutes.playerProfile,

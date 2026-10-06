@@ -40,7 +40,7 @@ class GlassCard extends StatelessWidget {
     this.backgroundAlignment = Alignment.center,
   });
 
-  static const _radius = 16.0;
+  static const _radius = 2.0;
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +94,7 @@ class GlassCard extends StatelessWidget {
             ? AppColors.cardGradient
             : null,
         // Sin sombra: plano, como las tarjetas del landing.
-        boxShadow: null,
+        boxShadow: const [BoxShadow(color: Color(0x4D000000), blurRadius: 16, offset: Offset(0, 6))],
       ),
       clipBehavior: Clip.antiAlias,
       child: Material(

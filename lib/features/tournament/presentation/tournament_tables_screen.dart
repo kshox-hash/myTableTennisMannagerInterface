@@ -89,7 +89,7 @@ class _TournamentTablesScreenState extends State<TournamentTablesScreen> {
                           physics: const BouncingScrollPhysics(),
                           children: [
                             _MyTurnCard(board: board, myUserId: _myUserId),
-                            Text("Mesas", style: AppTypography.h1),
+                            const SectionLabel("Mesas", icon: Icons.table_restaurant_rounded),
                             const SizedBox(height: 10),
                             GridView.count(
                               crossAxisCount: 2,
@@ -103,7 +103,7 @@ class _TournamentTablesScreenState extends State<TournamentTablesScreen> {
                                   .toList(),
                             ),
                             const SizedBox(height: 22),
-                            Text("Próximos partidos", style: AppTypography.h1),
+                            const SectionLabel("Próximos partidos", icon: Icons.schedule_rounded),
                             const SizedBox(height: 4),
                             Text(
                               "Orden estimado en que se repartirían las mesas.",
@@ -175,7 +175,7 @@ class _TableCard extends StatelessWidget {
                   color: occupied
                       ? AppColors.scorifyMint.withOpacity(0.16)
                       : Colors.white.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BorderRadius.circular(2),
                 ),
                 child: Text(
                   occupied ? (m.calledOutOfOrder ? "Adelantado" : "En juego") : "Libre",
@@ -313,7 +313,7 @@ class _MyTurnCard extends StatelessWidget {
             Container(
               width: 72,
               height: 72,
-              decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16)),
+              decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(2)),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

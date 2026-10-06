@@ -9,7 +9,7 @@ import "package:myttmi/core/constants/app_colors.dart";
 class CardBorder extends StatelessWidget {
   final Widget child;
   final double radius;
-  const CardBorder({super.key, required this.child, this.radius = 16});
+  const CardBorder({super.key, required this.child, this.radius = 2});
 
   @override
   Widget build(BuildContext context) {

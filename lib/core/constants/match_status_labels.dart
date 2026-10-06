@@ -7,7 +7,7 @@ const Map<String, String> matchStatusLabel = {
   "pending": "Por definir",
   "ready": "Listo para jugar",
   "played": "Jugado",
-  "walkover": "No se jugó",
+  "walkover": "W.O. (no se presentó)",
   "bye": "Pase directo",
 };
 

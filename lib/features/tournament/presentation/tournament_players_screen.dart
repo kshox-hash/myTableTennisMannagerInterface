@@ -126,10 +126,10 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
                           if (groupsGenerated) ...[
                             Material(
                               color: AppColors.scorifyMint.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(18),
+                              borderRadius: BorderRadius.circular(2),
                               child: InkWell(
                                 onTap: _goGroups,
-                                borderRadius: BorderRadius.circular(18),
+                                borderRadius: BorderRadius.circular(2),
                                 child: Padding(
                                   padding: const EdgeInsets.all(16),
                                   child: Row(
@@ -205,7 +205,7 @@ class _CategoryPlayersState extends State<_CategoryPlayers> {
         children: [
           InkWell(
             onTap: () => setState(() => _open = !_open),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(2),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 8, 6, 8),
               child: Row(
@@ -216,7 +216,7 @@ class _CategoryPlayersState extends State<_CategoryPlayers> {
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(999)),
+                    decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(2)),
                     child: Text("${players.length} inscritos",
                         style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                   ),
@@ -230,7 +230,7 @@ class _CategoryPlayersState extends State<_CategoryPlayers> {
             const SizedBox(height: 4),
             for (var i = 0; i < players.length; i++)
               InkWell(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(2),
                 onTap: () => Navigator.pushNamed(
                   context,
                   AppRoutes.playerProfile,
@@ -262,7 +262,7 @@ class _CategoryPlayersState extends State<_CategoryPlayers> {
                           ],
                         ),
                       ),
-                      const Icon(Icons.visibility_outlined, size: 19, color: AppColors.scorifyMint),
+                      const Icon(Icons.visibility_rounded, size: 19, color: AppColors.scorifyMint),
                     ],
                   ),
                 ),

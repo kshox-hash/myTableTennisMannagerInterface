@@ -113,7 +113,7 @@ class ShareCard extends StatelessWidget {
           const Spacer(),
           Text(playerName, style: t(15)),
           const SizedBox(height: 2),
-          Text("Torneos de tenis de mesa · myttm.cl", style: t(12, w: FontWeight.w400, c: AppColors.scorifyTextMuted, ls: 0.3)),
+          Text("Campeonatos de tenis de mesa · myttm.cl", style: t(12, w: FontWeight.w400, c: AppColors.scorifyTextMuted, ls: 0.3)),
         ],
       ),
     );

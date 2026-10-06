@@ -1,4 +1,3 @@
-import "package:myttmi/core/ui/tap_sound.dart";
 import "package:myttmi/core/ui/stagger_in.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
@@ -231,7 +230,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
                     const Padding(
                       padding: EdgeInsets.only(top: 24),
                       child: EmptyState(
-                        icon: Icons.emoji_events_outlined,
+                        icon: Icons.emoji_events_rounded,
                         message: "No hay campeonatos con ese filtro.",
                       ),
                     )
@@ -288,7 +287,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
                   initialValue: _region ?? "",
                   isExpanded: true,
                   dropdownColor: AppColors.scorifySurface2,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(2),
                   icon: const Icon(
                     Icons.keyboard_arrow_down_rounded,
                     color: AppColors.scorifyTextMuted,
@@ -346,7 +345,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
 
   InputDecoration _inputDeco({String? hint}) {
     final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(2),
       borderSide: BorderSide.none,
     );
     return InputDecoration(
@@ -359,7 +358,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
       border: border,
       enabledBorder: border,
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(2),
         borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.4),
       ),
     );
@@ -381,13 +380,12 @@ class _FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(decoration: selectedPillDecoration(selected), child: Material(
       color: selected ? Colors.transparent : AppColors.scorifySurface2,
-      shape: const StadiumBorder(),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
       child: InkWell(
         onTap: () {
-          if (!selected) TapSound.play();
           onTap();
         },
-        customBorder: const StadiumBorder(),
+        customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 9),
           child: FittedBox(
@@ -553,7 +551,7 @@ class _StatusChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(2),
       ),
       child: Text(
         label,

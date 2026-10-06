@@ -24,7 +24,7 @@ class SpinStatsRow extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
                 gradient: AppColors.cardGradient,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(2),
                 border: Border.all(color: AppColors.scorifyCardBorder),
               ),
               child: Column(

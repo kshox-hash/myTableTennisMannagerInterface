@@ -35,15 +35,15 @@ class AuthTextField extends StatelessWidget {
         filled: true,
         fillColor: AppColors.scorifyInput,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(2),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(2),
           borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(2),
           borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.4),
         ),
       ),

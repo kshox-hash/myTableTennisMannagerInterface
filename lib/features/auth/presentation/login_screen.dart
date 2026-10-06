@@ -127,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "Torneos de tenis de mesa",
+                    "Campeonatos de tenis de mesa",
                     style: AppTypography.bodyMuted,
                   ),
                   const SizedBox(height: 32),
@@ -178,7 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               backgroundColor: Colors.white,
                               foregroundColor: const Color(0xFF1F1F1F),
                               side: BorderSide.none,
-                              shape: const StadiumBorder(),
+                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2))),
                             ),
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,

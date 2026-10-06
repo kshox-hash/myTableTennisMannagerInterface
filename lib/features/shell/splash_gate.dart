@@ -216,7 +216,7 @@ class _SplashGateState extends State<SplashGate> {
                 const BrandLogo(markSize: 46, wordmarkSize: 34),
                 const SizedBox(height: 6),
                 Text(
-                  "TORNEOS DE TENIS DE MESA",
+                  "CAMPEONATOS DE TENIS DE MESA",
                   style: TextStyle(
                     fontFamily: AppTypography.body,
                     fontSize: 12.5,
@@ -260,7 +260,7 @@ class _SplashGateState extends State<SplashGate> {
                           child: Container(
                             decoration: BoxDecoration(
                               gradient: appButtonGradient,
-                              borderRadius: BorderRadius.circular(99),
+                              borderRadius: BorderRadius.circular(2),
                             ),
                           ),
                         ),

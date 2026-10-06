@@ -1,5 +1,3 @@
-import 'package:myttmi/core/ui/tap_sound.dart';
-import 'package:myttmi/features/shell/app_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/ui/app_button.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
@@ -34,15 +32,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           child: Column(
             children: [
-              Builder(builder: (context) {
-                final scope = AppShellScope.of(context);
-                final back = scope?.returnTab;
-                return TopHeader(
-                  title: "Mi rendimiento",
-                  showBack: false,
-                  onBack: back == null ? null : () => scope!.switchTab(back),
-                );
-              }),
+              const TopHeader(title: "Mi rendimiento", showBack: false),
               const SizedBox(height: 14),
               _SubTabSwitch(
                 index: _sub,
@@ -82,7 +72,7 @@ class _SubTabSwitch extends StatelessWidget {
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: AppColors.scorifyCardFill,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(99),
       ),
       child: Row(
         children: List.generate(_labels.length, (i) {
@@ -91,18 +81,17 @@ class _SubTabSwitch extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 gradient: selected ? appButtonGradient : null,
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(99),
                 border: selected ? Border.all(color: Colors.white.withValues(alpha: 0.35)) : null,
               ),
               child: Material(
               color: Colors.transparent,
-              shape: const StadiumBorder(),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
               child: InkWell(
                 onTap: () {
-                  if (i != index) TapSound.play();
                   onChanged(i);
                 },
-                customBorder: const StadiumBorder(),
+                customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Center(

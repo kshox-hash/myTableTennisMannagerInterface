@@ -211,7 +211,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                             const SizedBox(height: 22),
                             SectionCard(
                               title: "Sets",
-                              icon: Icons.scoreboard_outlined,
+                              icon: Icons.scoreboard_rounded,
                               padding: const EdgeInsets.all(18),
                               child: Column(
                                 children: [
@@ -343,7 +343,7 @@ class _RecentRow extends StatelessWidget {
     final cat = range.isEmpty || range == "General" ? m.categoryType : "${m.categoryType} $range";
 
     return InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(2),
       onTap: () => Navigator.pushNamed(context, AppRoutes.matchDetail, arguments: {"matchType": m.matchType, "matchId": m.idMatch}),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),

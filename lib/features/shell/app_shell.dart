@@ -1,4 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:myttmi/features/referee/referee_scan_screen.dart';
+import 'package:myttmi/features/shell/splash_gate.dart';
+import 'package:myttmi/core/storage/session_storage.dart';
+import 'package:myttmi/core/ui/confirm_dialog.dart';
+import 'package:myttmi/features/profile/models/profile_model.dart';
+import 'package:myttmi/features/profile/api/profile_api.dart';
+import 'package:myttmi/features/favorites/favorites_screen.dart';
+import 'package:myttmi/routes/app_routes.dart';
+import 'package:myttmi/features/shell/app_drawer.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/navigation/deep_links.dart';
 import 'package:myttmi/core/push/push_service.dart';
@@ -7,7 +16,6 @@ import 'package:myttmi/core/ui/app_toast.dart';
 import 'package:myttmi/core/ui/prism_background.dart';
 import 'package:myttmi/features/calendar/presentation/calendar_screen.dart';
 import 'package:myttmi/features/home/presentation/home_screen.dart';
-import 'package:myttmi/features/home/widget/ef_nav_bar.dart';
 import 'package:myttmi/features/performance/presentation/performance_screen.dart';
 import 'package:myttmi/features/tournament/presentation/tournaments_screen.dart';
 import 'package:myttmi/routes/cyber_page_route.dart';
@@ -49,11 +57,62 @@ class _AppShellState extends State<AppShell>
   // Pestaña a la que vuelve la flecha ← cuando se llegó con un enlace
   // ("Ver estadísticas" en el Inicio). Tocando la barra de abajo no hay.
   int? _returnTab;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  UserProfile? _me;
+
+  Future<void> _loadMe() async {
+    try {
+      final me = await ProfileApi().getMe();
+      if (mounted) setState(() => _me = me);
+    } catch (_) {}
+  }
+
+  /// Ajustes: arbitrar con QR y sonidos.
+  Future<void> _openSettings() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.scorifyDeep,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(2))),
+      builder: (sheet) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 10),
+            ListTile(
+              leading: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.scorifyText),
+              title: const Text("Arbitrar con QR", style: TextStyle(color: AppColors.scorifyText)),
+              onTap: () {
+                Navigator.pop(sheet);
+                Navigator.push(context, CyberPageRoute(builder: (_) => const RefereeScanScreen()));
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _logout() async {
+    final ok = await confirmAction(
+      context,
+      title: "Cerrar sesión",
+      message: "¿Quieres cerrar sesión y volver al inicio de sesión?",
+      confirmLabel: "Cerrar sesión",
+      danger: true,
+    );
+    if (!ok) return;
+    await PushService.unregister();
+    await SessionStorage().clearAll();
+    if (!mounted) return;
+    Navigator.pushAndRemoveUntil(context, CyberPageRoute(builder: (_) => const SplashGate()), (route) => false);
+  }
 
   void _switchTab(int index, {bool link = false}) {
     if (index == _index) return;
     final from = _index;
-    setState(() => _returnTab = link ? from : null);
+    // Al Inicio no se "vuelve": es la raíz.
+    setState(() => _returnTab = link && index != 0 ? from : null);
     _pulse.forward(from: 0);
     final delay = Duration(
       milliseconds:
@@ -74,6 +133,7 @@ class _AppShellState extends State<AppShell>
     PushService.register();
     // Avisos tipo Facebook de las notificaciones nuevas (abajo a la izquierda).
     NotificationPopups.start();
+    _loadMe();
   }
 
   @override
@@ -97,17 +157,36 @@ class _AppShellState extends State<AppShell>
     final opacity = CyberTransition.contentOpacity(_pulse);
     final glow = CyberTransition.glow(_pulse);
 
-    return Scaffold(
+    return PopScope(
+      canPop: _index == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _index != 0) _switchTab(_returnTab ?? 0);
+      },
+      child: Scaffold(
+      key: _scaffoldKey,
       backgroundColor: AppColors.scorifyBg,
-      bottomNavigationBar: EFBottomNav(
-        currentIndex: _index,
-        onTap: _switchTab,
-        items: const [
-          EFNavItem(label: "Inicio", icon: Icons.home_rounded),
-          EFNavItem(label: "Calendario", icon: Icons.calendar_month_rounded),
-          EFNavItem(label: "Mi rendimiento", icon: Icons.trending_up_rounded),
-          EFNavItem(label: "Campeonatos", icon: Icons.emoji_events_outlined),
+      // Menú lateral (☰) en vez de la barra de navegación de abajo.
+      drawer: AppDrawer(
+        main: [
+          DrawerItem(Icons.home_rounded, "Inicio", () => _switchTab(0, link: true), selected: _index == 0),
+          DrawerItem(Icons.calendar_month_rounded, "Calendario", () => _switchTab(1, link: true), selected: _index == 1),
+          DrawerItem(Icons.trending_up_rounded, "Mi rendimiento", () => _switchTab(2, link: true), selected: _index == 2),
+          DrawerItem(Icons.emoji_events_rounded, "Campeonatos", () => _switchTab(3, link: true), selected: _index == 3),
         ],
+        more: [
+          DrawerItem(Icons.history_rounded, "Historial", () => Navigator.pushNamed(context, AppRoutes.history)),
+          DrawerItem(Icons.favorite_border_rounded, "Partidos guardados",
+              () => Navigator.push(context, CyberPageRoute(builder: (_) => const FavoritesScreen()))),
+          DrawerItem(Icons.settings_rounded, "Ajustes", _openSettings),
+        ],
+        name: _me?.displayName,
+        userId: _me?.idUser,
+        avatarUrl: _me?.avatarUrl,
+        onProfile: () async {
+          await Navigator.pushNamed(context, AppRoutes.profile);
+          _loadMe();
+        },
+        onLogout: _logout,
       ),
       body: PrismBackground(
         child: SafeArea(
@@ -133,6 +212,7 @@ class _AppShellState extends State<AppShell>
                     switchTab: _switchTab,
                     currentIndex: _index,
                     returnTab: _returnTab,
+                    openMenu: () => _scaffoldKey.currentState?.openDrawer(),
                     child: IndexedStack(index: _index, children: _tabs),
                   ),
                   CyberTransition.glowOverlay(glow),
@@ -142,6 +222,7 @@ class _AppShellState extends State<AppShell>
           ),
         ),
       ),
+    ),
     );
   }
 }
@@ -158,12 +239,15 @@ class AppShellScope extends InheritedWidget {
   final int currentIndex;
   /// Pestaña de la que se vino con un enlace (para la flecha ←), o null.
   final int? returnTab;
+  /// Abre el menú lateral (☰).
+  final VoidCallback? openMenu;
 
   const AppShellScope({
     super.key,
     required this.switchTab,
     required this.currentIndex,
     this.returnTab,
+    this.openMenu,
     required super.child,
   });
 

@@ -16,26 +16,17 @@ import "package:myttmi/features/home/widget/home_layout.dart";
 
 const _mint = AppColors.scorifyMint;
 
-// Fondos semitransparentes: el Inicio tiene foto de fondo.
-const _glass = LinearGradient(
-  begin: Alignment.topLeft,
-  end: Alignment.bottomRight,
-  colors: [Color(0xD10E2A32), Color(0xD90F1E25)],
-  stops: [0, 0.7],
-);
-const _glassFeatured = LinearGradient(
-  begin: Alignment.topLeft,
-  end: Alignment.bottomRight,
-  colors: [Color(0xDB0F4652), Color(0xE00F1E25)],
-  stops: [0, 0.9],
-);
+// Tarjetas del Inicio: color sólido oscuro al 85% (el fondo se intuye).
+// El color va en los detalles; la principal lleva una línea en degradado.
+const _glass = LinearGradient(colors: [Color(0xD90B1A20), Color(0xD90B1A20)]);
+const _glassFeatured = LinearGradient(colors: [Color(0xE00B1A20), Color(0xE00B1A20)]);
 const _lime = AppColors.scorifyButterfly;
 
 TextStyle _t(double size, {FontWeight w = FontWeight.w400, Color c = AppColors.scorifyText, double? ls, double? h}) =>
     TextStyle(fontFamily: AppTypography.body, fontSize: size, fontWeight: w, color: c, letterSpacing: ls, height: h);
 
 /// Tarjeta del Inicio: fondo en degradado tenue y borde sutil.
-class HomeCard extends StatelessWidget {
+class HomeCard extends StatefulWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final Gradient? gradient;
@@ -43,16 +34,60 @@ class HomeCard extends StatelessWidget {
   const HomeCard({super.key, required this.child, this.padding = const EdgeInsets.all(16), this.gradient, this.onTap});
 
   @override
+  State<HomeCard> createState() => _HomeCardState();
+}
+
+// Vidrio liviano (sin desenfoque, que sobre un video es caro): fondo
+// semitransparente, filete claro arriba y sombra suave para que flote.
+class _HomeCardState extends State<HomeCard> {
+  bool _down = false;
+
+  void _press(bool v) {
+    if (widget.onTap != null && _down != v) setState(() => _down = v);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final r = BorderRadius.circular(16);
-    return CardBorder(
-      child: ClipRRect(
-        borderRadius: r,
-        child: Material(
-          color: Colors.transparent,
-          child: Ink(
-            decoration: BoxDecoration(gradient: gradient ?? _glass),
-            child: InkWell(onTap: onTap, child: Padding(padding: padding, child: child)),
+    const radius = 2.0; // esquinas casi rectas (estilo menú FIFA)
+    final r = BorderRadius.circular(radius);
+    return AnimatedScale(
+      scale: _down ? 0.98 : 1,
+      duration: const Duration(milliseconds: 110),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: r,
+          boxShadow: const [BoxShadow(color: Color(0x59000000), blurRadius: 18, offset: Offset(0, 8))],
+        ),
+        child: CardBorder(
+          radius: radius,
+          child: ClipRRect(
+            borderRadius: r,
+            child: Material(
+              color: Colors.transparent,
+              child: Ink(
+                decoration: BoxDecoration(gradient: widget.gradient ?? _glass),
+                child: InkWell(
+                  onTap: widget.onTap,
+                  onTapDown: (_) => _press(true),
+                  onTapUp: (_) => _press(false),
+                  onTapCancel: () => _press(false),
+                  child: Stack(
+                    children: [
+                      // Tarjeta principal: línea fina en degradado arriba.
+                      if (widget.gradient == _glassFeatured)
+                        const Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          height: 3,
+                          child: DecoratedBox(decoration: BoxDecoration(gradient: appButtonGradient)),
+                        ),
+                      Padding(padding: widget.padding, child: widget.child),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -80,7 +115,7 @@ class HomeCardTitle extends StatelessWidget {
         if (action != null)
           InkWell(
             onTap: onAction,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(2),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
               child: Text("$action ›", style: _t(12, w: FontWeight.w500, c: _mint)),
@@ -136,7 +171,7 @@ class HomeProfileRow extends StatelessWidget {
         );
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(2),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
@@ -233,7 +268,7 @@ class HomeMatchCard extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget player(String? id, String? url, String name, String? club, {VoidCallback? onTap}) => InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(2),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -323,7 +358,7 @@ class HomeMatchCard extends StatelessWidget {
                     info(Icons.event_rounded, when),
                     sep(),
                     info(Icons.table_restaurant_rounded, table),
-                    if ((place ?? "").trim().isNotEmpty) ...[sep(), info(Icons.place_outlined, place!.trim(), flex: 3)],
+                    if ((place ?? "").trim().isNotEmpty) ...[sep(), info(Icons.place_rounded, place!.trim(), flex: 3)],
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -618,10 +653,10 @@ class _ResultTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white.withValues(alpha: 0.04),
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(2),
       child: InkWell(
         onTap: r.onTap,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(2),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(8, 8, 6, 8),
           child: Column(
@@ -696,10 +731,10 @@ class HomeOpenTournamentsCard extends StatelessWidget {
                   width: items.length == 1 ? MediaQuery.sizeOf(context).width - 60 : 230,
                   child: Material(
                     color: Colors.white.withValues(alpha: 0.04),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(2),
                     child: InkWell(
                       onTap: it.onTap,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(2),
                       child: Padding(
                         padding: const EdgeInsets.all(12),
                         child: Column(
@@ -718,7 +753,7 @@ class HomeOpenTournamentsCard extends StatelessWidget {
                               const SizedBox(height: 3),
                               Row(
                                 children: [
-                                  const Icon(Icons.place_outlined, size: 14, color: _mint),
+                                  const Icon(Icons.place_rounded, size: 14, color: _mint),
                                   const SizedBox(width: 5),
                                   Expanded(child: Text(it.place!.trim(), maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12, c: AppColors.scorifyTextMuted))),
                                 ],
@@ -771,7 +806,7 @@ class HomeWeekCard extends StatelessWidget {
             if (i > 0) Divider(height: 1, color: Colors.white.withValues(alpha: 0.08)),
             InkWell(
               onTap: items[i].onTap,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(2),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 9),
                 child: Row(
@@ -779,7 +814,7 @@ class HomeWeekCard extends StatelessWidget {
                     Container(
                       width: 42,
                       padding: const EdgeInsets.symmetric(vertical: 5),
-                      decoration: BoxDecoration(color: _mint.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(10)),
+                      decoration: BoxDecoration(color: _mint.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(2)),
                       child: Column(
                         children: [
                           Text(items[i].day, style: _t(11, w: FontWeight.w600, c: _mint, ls: 0.6)),
@@ -889,7 +924,7 @@ class HomeOnboardingCard extends StatelessWidget {
           for (final s in steps)
             InkWell(
               onTap: s.done ? null : s.onTap,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(2),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 9),
                 child: Row(
@@ -1017,7 +1052,7 @@ class HomeBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return CardBorder(
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(99),
         child: SizedBox(
           height: 170,
           child: Stack(
@@ -1102,7 +1137,7 @@ class HomeMyTournamentsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          HomeCardTitle(icon: Icons.emoji_events_outlined, title: "Mis campeonatos", action: items.isEmpty ? "Explorar" : "Ver todos", onAction: onBrowse),
+          HomeCardTitle(icon: Icons.emoji_events_rounded, title: "Mis campeonatos", action: items.isEmpty ? "Explorar" : "Ver todos", onAction: onBrowse),
           const SizedBox(height: 6),
           if (items.isEmpty)
             Padding(
@@ -1119,7 +1154,7 @@ class HomeMyTournamentsCard extends StatelessWidget {
               if (i > 0) Divider(height: 1, color: Colors.white.withValues(alpha: 0.08)),
               InkWell(
                 onTap: items[i].onTap,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(2),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Row(
@@ -1138,7 +1173,7 @@ class HomeMyTournamentsCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                         decoration: BoxDecoration(
                           color: (items[i].live ? _lime : _mint).withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(99),
+                          borderRadius: BorderRadius.circular(2),
                         ),
                         child: Text(items[i].status, style: _t(11.5, w: FontWeight.w600, c: items[i].live ? _lime : _mint)),
                       ),
@@ -1244,7 +1279,7 @@ class HomeMyTournamentsCarousel extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 2),
-          child: HomeCardTitle(icon: Icons.emoji_events_outlined, title: "Mis campeonatos", action: "Ver todos", onAction: onBrowse),
+          child: HomeCardTitle(icon: Icons.emoji_events_rounded, title: "Mis campeonatos", action: "Ver todos", onAction: onBrowse),
         ),
         const SizedBox(height: 10),
         SizedBox(
@@ -1271,7 +1306,7 @@ class HomeMyTournamentsCarousel extends StatelessWidget {
                             height: 42,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(2),
                               gradient: LinearGradient(colors: [color, color.withValues(alpha: 0.55)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                             ),
                             child: Text(_initials(it.name), style: _t(15, w: FontWeight.w700, c: AppColors.scorifyOnMint)),
@@ -1281,7 +1316,7 @@ class HomeMyTournamentsCarousel extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                             decoration: BoxDecoration(
                               color: (it.live ? _lime : _mint).withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(99),
+                              borderRadius: BorderRadius.circular(2),
                             ),
                             child: Text(it.status, style: _t(11.5, w: FontWeight.w700, c: it.live ? _lime : _mint)),
                           ),
@@ -1306,44 +1341,36 @@ class HomeMyTournamentsCarousel extends StatelessWidget {
 /// Portada del Inicio (a la derecha de la foto): saludo, titular con
 /// "desafío" en degradado, bajada y botón.
 class HomeHeroText extends StatelessWidget {
-  final String greeting;
+  final String greeting; // "Buenas tardes, Ignacio"
+  final String? contextLine; // "Tienes un partido hoy"
   final VoidCallback onGreeting;
-  final VoidCallback onCta;
-  const HomeHeroText({super.key, required this.greeting, required this.onGreeting, required this.onCta});
+  const HomeHeroText({super.key, required this.greeting, this.contextLine, required this.onGreeting});
 
   @override
   Widget build(BuildContext context) {
     const shadow = [Shadow(color: Color(0xCC000000), blurRadius: 14)];
-    TextStyle big(Color c) => TextStyle(fontFamily: AppTypography.body, fontSize: 30, height: 1.08, fontWeight: FontWeight.w700, color: c, shadows: shadow);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GestureDetector(
-          onTap: onGreeting,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(greeting, maxLines: 1, style: _t(14.5, w: FontWeight.w500).copyWith(shadows: shadow)),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Container(width: 36, height: 3, decoration: BoxDecoration(color: _mint, borderRadius: BorderRadius.circular(2))),
-        const SizedBox(height: 14),
-        Text("Tu próximo", style: big(Colors.white)),
-        ShaderMask(
-          shaderCallback: (r) => appButtonGradient.createShader(r),
-          child: Text("desafío", style: big(Colors.white)),
-        ),
-        Text("te espera", style: big(Colors.white)),
-        const SizedBox(height: 12),
-        Text(
-          "Compite, mejora y lleva tu juego al siguiente nivel. Los mejores torneos te están esperando.",
-          style: _t(12.5, c: AppColors.scorifyText.withValues(alpha: 0.8), h: 1.4).copyWith(shadows: shadow),
-        ),
-        const SizedBox(height: 16),
-        AppButton(label: "Ver campeonatos", trailingIcon: Icons.arrow_forward_rounded, onPressed: onCta, height: 38),
-      ],
+    final parts = greeting.replaceAll(" 👋", "").split(", ");
+    return GestureDetector(
+      onTap: onGreeting,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(parts.first, style: _t(14, w: FontWeight.w500, c: AppColors.scorifyText.withValues(alpha: 0.85)).copyWith(shadows: shadow)),
+          if (parts.length > 1)
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Text(parts.sublist(1).join(", "), maxLines: 1, style: _t(26, w: FontWeight.w700, h: 1.15).copyWith(shadows: shadow)),
+            ),
+          const SizedBox(height: 10),
+          Container(width: 32, height: 3, decoration: BoxDecoration(gradient: appButtonGradient, borderRadius: BorderRadius.circular(99))),
+          if (contextLine != null) ...[
+            const SizedBox(height: 10),
+            Text(contextLine!, textAlign: TextAlign.right, style: _t(13, w: FontWeight.w500, c: _mint, h: 1.3).copyWith(shadows: shadow)),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -1375,13 +1402,17 @@ class HomeChallengeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget info(IconData icon, String text) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 18, color: _mint),
-            const SizedBox(width: 8),
-            Flexible(child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(13))),
-          ],
+    Widget info(IconData icon, String text) => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(2)),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 15, color: _mint),
+              const SizedBox(width: 6),
+              Flexible(child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12.5))),
+            ],
+          ),
         );
     return HomeCard(
       gradient: _glassFeatured,
@@ -1389,19 +1420,6 @@ class HomeChallengeCard extends StatelessWidget {
       child: Stack(
         children: [
           const Positioned.fill(child: CustomPaint(painter: _DiagonalPainter())),
-          Positioned(
-            right: 18,
-            bottom: 26,
-            child: Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const RadialGradient(colors: [Colors.white, Color(0xFFB9C1C9)], center: Alignment(-0.3, -0.3)),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 12, offset: const Offset(0, 6))],
-              ),
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 16, 16, 18),
             child: Column(
@@ -1415,8 +1433,7 @@ class HomeChallengeCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: _lime.withValues(alpha: 0.10),
-                          border: Border.all(color: _lime.withValues(alpha: 0.6)),
-                          borderRadius: BorderRadius.circular(99),
+                          borderRadius: BorderRadius.circular(2),
                         ),
                         child: Text(chip!, style: _t(11.5, w: FontWeight.w600, c: _lime)),
                       ),
@@ -1430,16 +1447,16 @@ class HomeChallengeCard extends StatelessWidget {
                 ],
                 const SizedBox(height: 14),
                 Wrap(
-                  spacing: 18,
+                  spacing: 8,
                   runSpacing: 8,
                   children: [
-                    if (date != null) info(Icons.calendar_month_outlined, date!),
-                    if ((place ?? "").trim().isNotEmpty) info(Icons.place_outlined, place!.trim()),
+                    if (date != null) info(Icons.calendar_month_rounded, date!),
+                    if ((place ?? "").trim().isNotEmpty) info(Icons.place_rounded, place!.trim()),
                     if (players != null) info(Icons.people_outline_rounded, "$players ${players == 1 ? "jugador" : "jugadores"}"),
                   ],
                 ),
                 const SizedBox(height: 16),
-                AppButton.outline(label: button, trailingIcon: Icons.arrow_forward_rounded, onPressed: onTap, height: 38, expand: false),
+                AppButton(label: button, trailingIcon: Icons.arrow_forward_rounded, onPressed: onTap, height: 38, expand: false),
               ],
             ),
           ),
@@ -1449,56 +1466,49 @@ class HomeChallengeCard extends StatelessWidget {
   }
 }
 
-/// Tarjeta chica (mitad de ancho): ícono, título, texto y enlace.
+/// Tarjeta chica (mitad de ancho): ícono en círculo, un número grande
+/// con su etiqueta y una sola acción.
 class HomeTile extends StatelessWidget {
   final IconData icon;
-  final String title;
-  final String text;
+  final String value; // "2"
+  final String title; // "Mis campeonatos"
+  final String caption; // "inscritos"
   final String action;
   final VoidCallback onTap;
-  const HomeTile({super.key, required this.icon, required this.title, required this.text, required this.action, required this.onTap});
+  const HomeTile({
+    super.key,
+    required this.icon,
+    required this.value,
+    required this.title,
+    required this.caption,
+    required this.action,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return HomeCard(
       onTap: onTap,
-      padding: const EdgeInsets.fromLTRB(14, 14, 12, 12),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Positioned(
-            right: -14,
-            bottom: 8,
-            child: Icon(icon, size: 70, color: Colors.white.withValues(alpha: 0.04)),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
-              Row(
-                children: [
-                  Icon(icon, color: _mint, size: 26),
-                  const Spacer(),
-                  const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
-                ],
-              ),
-              const SizedBox(height: 10),
-              FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text(title, maxLines: 1, style: _t(15.5, w: FontWeight.w700))),
-              const SizedBox(height: 4),
-              SizedBox(
-                height: 48,
-                child: Text(text, maxLines: 3, overflow: TextOverflow.ellipsis, style: _t(12, c: AppColors.scorifyTextMuted, h: 1.35)),
-              ),
-              const SizedBox(height: 6),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(action, style: _t(12.5, w: FontWeight.w600, c: _mint)),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.arrow_forward_rounded, size: 15, color: _mint),
-                  ],
-                ),
-              ),
+              Text(value, style: _t(28, w: FontWeight.w700, h: 1)),
+              const SizedBox(width: 6),
+              Flexible(child: Text(caption, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12, c: AppColors.scorifyTextMuted))),
+            ],
+          ),
+          const SizedBox(height: 4),
+          FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text(title, maxLines: 1, style: _t(14, w: FontWeight.w600))),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Text(action, style: _t(12.5, w: FontWeight.w600, c: _mint)),
+              const SizedBox(width: 4),
+              const Icon(Icons.arrow_forward_rounded, size: 15, color: _mint),
             ],
           ),
         ],

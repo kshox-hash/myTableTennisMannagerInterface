@@ -35,7 +35,7 @@ class AppButton extends StatefulWidget {
     this.trailingIcon,
     this.variant = AppButtonVariant.primary,
     this.loading = false,
-    this.height = 44,
+    this.height = 40,
     this.expand = true,
   });
 
@@ -46,7 +46,7 @@ class AppButton extends StatefulWidget {
     this.icon,
     this.trailingIcon,
     this.loading = false,
-    this.height = 44,
+    this.height = 40,
     this.expand = true,
   }) : variant = AppButtonVariant.outline;
 
@@ -66,7 +66,7 @@ class _AppButtonState extends State<AppButton> {
   @override
   Widget build(BuildContext context) {
     final v = widget.variant;
-    final radius = BorderRadius.circular(widget.height / 2);
+    final radius = BorderRadius.circular(widget.height / 2); // botones redondeados (píldora)
     final disabled = widget.onPressed == null;
     final small = widget.height < 40;
 
@@ -196,6 +196,6 @@ class _AppButtonState extends State<AppButton> {
 /// filtros): el mismo degradado y filete claro del botón principal.
 BoxDecoration selectedPillDecoration(bool selected) => BoxDecoration(
       gradient: selected ? appButtonGradient : null,
-      borderRadius: BorderRadius.circular(999),
+      borderRadius: BorderRadius.circular(99),
       border: selected ? Border.all(color: Colors.white.withValues(alpha: 0.35)) : null,
     );

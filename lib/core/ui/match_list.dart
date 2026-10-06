@@ -21,7 +21,7 @@ class CompactMatchRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(2),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 11),
         child: Row(

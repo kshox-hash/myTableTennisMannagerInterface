@@ -217,7 +217,7 @@ class _Count extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(14)),
+      decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(2)),
       child: Column(
         children: [
           Opacity(opacity: count == 0 ? 0.35 : 1, child: Medal(position: position, size: 34)),
