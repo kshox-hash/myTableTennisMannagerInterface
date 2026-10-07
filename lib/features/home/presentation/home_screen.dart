@@ -316,7 +316,6 @@ class _HomeScreenState extends State<HomeScreen>
 
     return Stack(
       children: [
-        const Positioned.fill(child: _HomeBackground()),
         Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -503,60 +502,6 @@ class _HomeScreenState extends State<HomeScreen>
 /// Foto del Inicio (estilo FIFA): jugador a la izquierda, líneas hacia la
 /// derecha. Oscurecida arriba (encabezado y saludo) y abajo (tarjetas y
 /// barra de navegación) para que todo se lea.
-class _HomeBackground extends StatelessWidget {
-  const _HomeBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    final h = MediaQuery.sizeOf(context).height;
-    return Stack(
-      children: [
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          height: h * 0.72,
-          // Decodificada al ancho de la pantalla (no a 1080 px): menos trabajo al dibujar.
-          child: Image(image: ResizeImage(const AssetImage("assets/images/home_bg.png"), width: (MediaQuery.sizeOf(context).width * MediaQuery.devicePixelRatioOf(context)).round()), fit: BoxFit.cover, alignment: Alignment(-0.7, -0.45)),
-        ),
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          height: h * 0.72,
-          child: const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0x99060E12), Color(0x00060E12), Color(0x00060E12), Color(0xFF060E12)],
-                stops: [0, 0.2, 0.6, 1],
-              ),
-            ),
-          ),
-        ),
-        // Oscurece la derecha: el texto de la portada se lee sobre la foto.
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          height: h * 0.72,
-          child: const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [Color(0x00060E12), Color(0x00060E12), Color(0xB3060E12)],
-                stops: [0, 0.4, 0.85],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 /// Carrusel horizontal de tarjetas de partido: se desliza de a una, con
 /// puntitos que indican cuántas hay. Con una sola tarjeta no muestra puntos.
 class _MatchesCarousel extends StatefulWidget {
