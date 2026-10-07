@@ -16,11 +16,11 @@ class PrismBackground extends StatelessWidget {
     begin: Alignment(-0.36, -1),
     end: Alignment(0.36, 1),
     colors: [
-      Color(0x730E6E4A),
-      Color(0x1F0E6E4A),
+      Color(0x420E6E4A),
+      Color(0x120E6E4A),
       Color(0x00060E12),
-      Color(0x1F0096B2),
-      Color(0x4D0096B2),
+      Color(0x120096B2),
+      Color(0x2E0096B2),
     ],
     stops: [0, 0.30, 0.55, 0.82, 1],
   );
