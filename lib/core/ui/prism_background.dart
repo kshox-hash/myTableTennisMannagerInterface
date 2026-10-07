@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Fondo de toda la app: diagonal suave en verde esmeralda (el color del
 /// jugador: entre el lima y el celeste de la marca). Entra desde arriba a la
-/// izquierda, se desvanece al centro y termina con un toque lima abajo.
+/// izquierda, se desvanece al centro y termina con un brillo turquesa abajo.
 /// Antes eran franjas verticales a los costados, que junto a los bordes de las
 /// tarjetas se veían como muchas líneas verticales; y el centro no es negro
 /// puro, así las tarjetas se despegan del fondo. Es un solo degradado: se
@@ -19,8 +19,8 @@ class PrismBackground extends StatelessWidget {
       Color(0x730E6E4A),
       Color(0x1F0E6E4A),
       Color(0x00060E12),
-      Color(0x1A3C781E),
-      Color(0x403C781E),
+      Color(0x1F0096B2),
+      Color(0x4D0096B2),
     ],
     stops: [0, 0.30, 0.55, 0.82, 1],
   );
