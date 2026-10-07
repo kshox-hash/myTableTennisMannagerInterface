@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 /// Fondo de toda la app (menos Inicio, que tiene la foto). Son solo
 /// degradados que se pintan una vez (sin imágenes ni blur, para no cargar
 /// la navegación), en 4 capas:
-///  1. negro puro al centro y turquesa de marca hacia los costados, con
+///  1. negro puro al centro y verde esmeralda (entre el lima y el celeste
+///     de la marca) hacia los costados, con
 ///     muchos pasos para que la transición no tenga cortes;
 ///  2. viñeta arriba y abajo (profundidad; encabezado y pie se leen mejor);
-///  3. luz de escenario celeste muy tenue arriba al centro;
+///  3. luz de escenario esmeralda muy tenue arriba al centro;
 ///  4. toque lima apenas visible abajo a la izquierda (los dos colores de marca).
 class PrismBackground extends StatelessWidget {
   final Widget child;
@@ -16,9 +17,9 @@ class PrismBackground extends StatelessWidget {
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
     colors: [
-      Color(0xFF06505E), Color(0xFF054653), Color(0xFF04343D), Color(0xFF03222A), Color(0xFF011014),
+      Color(0xFF084E34), Color(0xFF07452E), Color(0xFF053424), Color(0xFF03221A), Color(0xFF01100C),
       Colors.black, Colors.black,
-      Color(0xFF011014), Color(0xFF03222A), Color(0xFF04343D), Color(0xFF054653), Color(0xFF06505E),
+      Color(0xFF01100C), Color(0xFF03221A), Color(0xFF053424), Color(0xFF07452E), Color(0xFF084E34),
     ],
     stops: [0, 0.08, 0.17, 0.27, 0.37, 0.46, 0.54, 0.63, 0.73, 0.83, 0.92, 1],
   );
@@ -33,7 +34,7 @@ class PrismBackground extends StatelessWidget {
   static const _stageLight = RadialGradient(
     center: Alignment(0, -1.08),
     radius: 0.75,
-    colors: [Color(0x2900B3D6), Color(0x0000B3D6)],
+    colors: [Color(0x292ECC8C), Color(0x002ECC8C)],
     transform: _Stretch(Alignment(0, -1.08), 2.6, 0.75),
   );
 
