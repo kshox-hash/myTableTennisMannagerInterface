@@ -1,4 +1,5 @@
 import "package:myttmi/core/ui/top_header.dart";
+import "package:myttmi/features/home/widget/home_video_background.dart";
 import "package:myttmi/features/shell/shell_preload.dart";
 import "package:myttmi/features/tournament/models/tournament_model.dart";
 import "package:myttmi/features/home/widget/home_v2.dart";
@@ -316,6 +317,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     return Stack(
       children: [
+        const Positioned.fill(child: HomeVideoBackground()),
         Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -367,10 +369,10 @@ class _HomeScreenState extends State<HomeScreen>
                         child: ConstrainedBox(
                         // Alto mínimo; crece si el texto no cabe (sin desborde).
                         constraints: BoxConstraints(minHeight: MediaQuery.sizeOf(context).height * 0.27),
-                        // Abajo a la derecha: la zona oscura libre (solo
-                        // líneas), sin tapar al jugador.
+                        // A la izquierda, a la altura de la copa del video
+                        // (que va a la derecha): encabezado en dos columnas.
                         child: Align(
-                          alignment: const Alignment(1, 0.75),
+                          alignment: const Alignment(-1, -0.3),
                           child: SizedBox(
                             width: MediaQuery.sizeOf(context).width * 0.50,
                             child: HomeHeroText(

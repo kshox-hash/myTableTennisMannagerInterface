@@ -43,6 +43,7 @@ dependencies:
   firebase_messaging: ^16.7.0
   mobile_scanner: ^7.4.2
   url_launcher: ^6.3.3
+  video_player: ^2.11.1
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +70,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/videos/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -1353,21 +1353,21 @@ class HomeHeroText extends StatelessWidget {
     return GestureDetector(
       onTap: onGreeting,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(parts.first, style: _t(14, w: FontWeight.w500, c: AppColors.scorifyText.withValues(alpha: 0.85)).copyWith(shadows: shadow)),
           if (parts.length > 1)
             FittedBox(
               fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
+              alignment: Alignment.centerLeft,
               child: Text(parts.sublist(1).join(", "), maxLines: 1, style: _t(26, w: FontWeight.w700, h: 1.15).copyWith(shadows: shadow)),
             ),
           const SizedBox(height: 10),
           Container(width: 32, height: 3, decoration: BoxDecoration(gradient: appButtonGradient, borderRadius: BorderRadius.circular(99))),
           if (contextLine != null) ...[
             const SizedBox(height: 10),
-            Text(contextLine!, textAlign: TextAlign.right, style: _t(13, w: FontWeight.w500, c: _mint, h: 1.3).copyWith(shadows: shadow)),
+            Text(contextLine!, textAlign: TextAlign.left, style: _t(13, w: FontWeight.w500, c: _mint, h: 1.3).copyWith(shadows: shadow)),
           ],
         ],
       ),
