@@ -366,7 +366,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                             const SizedBox(height: 14),
                             _ClubSection(currentClub: p.club),
-                            if (p.club != null) ...[
+                            if (kClubDuesEnabled && p.club != null) ...[
                               const SizedBox(height: 12),
                               const _DuesCard(),
                             ],
@@ -587,54 +587,158 @@ class _ClubSectionState extends State<_ClubSection> {
   }
 }
 
-/// Cuotas del club: "Estás al día" o "Debes 2 meses · $10.000".
+/// Cuotas en pausa a pedido (el sistema se sentía rígido): la tarjeta no
+/// se muestra, pero el código queda. Volver a true para reactivarla.
+const bool kClubDuesEnabled = false;
+
+/// Cuotas del club, en positivo: la cuota del socio y su último pago, con
+/// el historial completo en una hoja. Solo aparece si el dueño del club
+/// activó "Mostrar a los socios su historial de pagos" — si no, el servidor
+/// responde null y no se dibuja nada. Nunca muestra deudas.
 class _DuesCard extends StatefulWidget {
   const _DuesCard();
+
   @override
   State<_DuesCard> createState() => _DuesCardState();
 }
 
+const _months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+const _methodLabel = {"cash": "Efectivo", "transfer": "Transferencia", "other": "Otro"};
+
+String _money(int v) {
+  final s = v.toString();
+  final b = StringBuffer();
+  for (var i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 == 0) b.write(".");
+    b.write(s[i]);
+  }
+  return "\$${b.toString()}";
+}
+
+String _day(DateTime d) => "${d.day} ${_months[d.month - 1].substring(0, 3)} ${d.year}";
+
+/// "septiembre 2026", o "agosto – octubre 2026" si cubre varios meses.
+String _covers(ClubPayment p, String frequency) {
+  if (frequency == "weekly") {
+    final weeks = p.periods == 1 ? "1 semana" : "${p.periods} semanas";
+    return "$weeks desde el ${_day(p.firstPeriod)}";
+  }
+  final first = p.firstPeriod;
+  final last = DateTime(first.year, first.month + p.periods - 1);
+  if (p.periods == 1) return "${_months[first.month - 1]} ${first.year}";
+  final from = first.year == last.year ? _months[first.month - 1] : "${_months[first.month - 1]} ${first.year}";
+  return "$from – ${_months[last.month - 1]} ${last.year}";
+}
+
 class _DuesCardState extends State<_DuesCard> {
-  MyClubDues? _dues;
+  MyClubPayments? _data;
   bool _loaded = false;
 
   @override
   void initState() {
     super.initState();
-    ClubsApi().getMyDues().then((d) {
-      if (mounted) setState(() { _dues = d; _loaded = true; });
+    ClubsApi().getMyPayments().then((d) {
+      if (mounted) setState(() { _data = d; _loaded = true; });
     }).catchError((_) {
       if (mounted) setState(() => _loaded = true);
     });
   }
 
-  static String _money(int v) {
-    final s = v.toString();
-    final b = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) b.write(".");
-      b.write(s[i]);
+  String _feeText(MyClubPayments d) {
+    final per = d.feeFrequency == "weekly" ? "semanal" : "mensual";
+    switch (d.feeMode) {
+      case "standard":
+      case "custom":
+        return d.feeAmount != null ? "Tu cuota: ${_money(d.feeAmount!)} $per" : "Tu cuota $per";
+      case "exempt":
+        return "Tu cuota: Exento";
+      case "paused":
+        return "Cuota en pausa";
+      default:
+        return "Sin cuota asignada";
     }
-    return "\$${b.toString()}";
+  }
+
+  void _openHistory(MyClubPayments d) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.scorifyDeep,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(12))),
+      builder: (_) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 20, 20, 8),
+                child: Text("Mis pagos", style: TextStyle(color: AppColors.scorifyText, fontSize: 18, fontWeight: FontWeight.w700)),
+              ),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  itemCount: d.payments.length,
+                  separatorBuilder: (_, __) => const Divider(color: Color(0x14FFFFFF), height: 1),
+                  itemBuilder: (_, i) {
+                    final p = d.payments[i];
+                    final method = p.method != null ? " · ${_methodLabel[p.method] ?? ""}" : "";
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.receipt_long_rounded, color: AppColors.scorifyButterfly, size: 20),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(_covers(p, d.feeFrequency),
+                                    style: const TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w600)),
+                                Text("${_day(p.paidOn)}$method",
+                                    style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 12)),
+                              ],
+                            ),
+                          ),
+                          Text(_money(p.amount),
+                              style: const TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w700)),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final d = _dues;
+    final d = _data;
     if (!_loaded || d == null) return const SizedBox.shrink();
-    final ok = d.upToDate;
-    final color = ok ? AppColors.scorifyButterfly : AppColors.scorifyNegative;
-    final unit = d.feeFrequency == "weekly" ? (d.owedPeriods == 1 ? "semana" : "semanas") : (d.owedPeriods == 1 ? "mes" : "meses");
+    final last = d.lastPayment;
     return SectionCard(
       title: "Cuotas del club",
       icon: Icons.payments_rounded,
+      onTap: last != null ? () => _openHistory(d) : null,
       child: Row(
         children: [
           Container(
             width: 44,
             height: 44,
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(2)),
-            child: Icon(ok ? Icons.verified_rounded : Icons.error_outline_rounded, color: color),
+            decoration: BoxDecoration(
+              color: (last != null ? AppColors.scorifyButterfly : AppColors.scorifyTextMuted).withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(2),
+            ),
+            child: Icon(
+              last != null ? Icons.verified_rounded : Icons.receipt_long_rounded,
+              color: last != null ? AppColors.scorifyButterfly : AppColors.scorifyTextMuted,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -642,14 +746,18 @@ class _DuesCardState extends State<_DuesCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  ok ? "Estás al día" : "Debes ${d.owedPeriods} $unit",
-                  style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w600),
+                  last != null ? "Último pago: ${_covers(last, d.feeFrequency)}" : "Aún no hay pagos registrados",
+                  style: const TextStyle(color: AppColors.scorifyText, fontSize: 15, fontWeight: FontWeight.w600),
                 ),
-                if (!ok && d.owedAmount > 0)
-                  Text("Total pendiente: ${_money(d.owedAmount)}", style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 12, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text(
+                  last != null ? "${_money(last.amount)} · ${_feeText(d)}" : _feeText(d),
+                  style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 12, fontWeight: FontWeight.w600),
+                ),
               ],
             ),
           ),
+          if (last != null) const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
         ],
       ),
     );

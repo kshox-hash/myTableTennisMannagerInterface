@@ -23,14 +23,15 @@ class ClubsApi {
     return headers;
   }
 
-  /// Estado de cuotas del jugador con su club (null si no tiene club).
-  Future<MyClubDues?> getMyDues() async {
-    final uri = Uri.parse("$baseUrl${Endpoints.clubs}/me/dues");
+  /// Cuota y pagos del socio con su club. null si no tiene club o si el
+  /// dueño no activó "Mostrar a los socios su historial de pagos".
+  Future<MyClubPayments?> getMyPayments() async {
+    final uri = Uri.parse("$baseUrl${Endpoints.clubs}/me/payments");
     final res = await apiHttp.get(uri, headers: await _headers()).timeout(const Duration(seconds: 60));
     if (res.statusCode != 200) throw Exception("HTTP ${res.statusCode}: ${res.body}");
     final decoded = jsonDecode(res.body) as Map<String, dynamic>;
     final data = decoded["data"];
-    return data == null ? null : MyClubDues.fromJson(data as Map<String, dynamic>);
+    return data == null ? null : MyClubPayments.fromJson(data as Map<String, dynamic>);
   }
 
   Future<List<PublicClub>> list() async {
