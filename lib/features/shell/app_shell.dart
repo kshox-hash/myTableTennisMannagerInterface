@@ -18,6 +18,7 @@ import 'package:myttmi/features/calendar/presentation/calendar_screen.dart';
 import 'package:myttmi/features/home/presentation/home_screen.dart';
 import 'package:myttmi/features/performance/presentation/performance_screen.dart';
 import 'package:myttmi/features/tournament/presentation/tournaments_screen.dart';
+import "package:myttmi/features/player/presentation/celebration_dialog.dart";
 import 'package:myttmi/routes/cyber_page_route.dart';
 
 /// Shell de navegación persistente: Inicio/Calendario/Mi rendimiento/
@@ -133,6 +134,12 @@ class _AppShellState extends State<AppShell>
     PushService.register();
     // Avisos tipo Facebook de las notificaciones nuevas (abajo a la izquierda).
     NotificationPopups.start();
+    // Posición final de un campeonato recién terminado (aparece sola).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 1200), () {
+        if (mounted) Celebrations.check(context);
+      });
+    });
     _loadMe();
   }
 
