@@ -64,6 +64,16 @@ String _formatDate(String date) {
   return p.length == 3 ? "${p[2]}-${p[1]}-${p[0]}" : date;
 }
 
+/// Campeonato de varios días: "14 al 15-11-2026" (o "30-11 al 01-12-2026").
+String _formatRange(String start, String? end) {
+  if (end == null || end == start) return _formatDate(start);
+  final a = start.split("-");
+  final b = end.split("-");
+  if (a.length != 3 || b.length != 3) return _formatDate(start);
+  if (a[0] == b[0] && a[1] == b[1]) return "${a[2]} al ${b[2]}-${b[1]}-${b[0]}";
+  return "${a[2]}-${a[1]} al ${_formatDate(end)}";
+}
+
 class TournamentsScreen extends StatefulWidget {
   const TournamentsScreen({super.key});
 
@@ -496,7 +506,7 @@ class _TournamentCard extends StatelessWidget {
                 _Meta(
                   icon: Icons.calendar_today_rounded,
                   color: AppColors.scorifyMint,
-                  text: _formatDate(t.eventDate!),
+                  text: _formatRange(t.eventDate!, t.endDate),
                 ),
               _Meta(
                 icon: Icons.emoji_events_rounded,
