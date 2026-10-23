@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/features/tournament/models/tournament_model.dart";
 import "package:myttmi/features/tournament/api/tournament_api.dart";
@@ -277,7 +278,7 @@ class _CategoryPlayersState extends State<_CategoryPlayers> {
                         child: Text("${i + 1}",
                             style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted)),
                       ),
-                      ClipOval(child: Identicon(seed: players[i].idUser, size: 36)),
+                      UserAvatar(userId: players[i].idUser, url: players[i].avatarUrl, size: 36),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(

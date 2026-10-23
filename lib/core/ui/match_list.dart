@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/user_avatar.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -12,10 +13,12 @@ import "package:myttmi/routes/app_routes.dart";
 class CompactMatchRow extends StatelessWidget {
   final bool? won; // null = no aplica
   final String opponent;
+  /// Para la foto del rival (null = sin foto).
+  final String? opponentId;
   final String meta;
   final String score;
   final VoidCallback? onTap;
-  const CompactMatchRow({super.key, this.won, required this.opponent, required this.meta, required this.score, this.onTap});
+  const CompactMatchRow({super.key, this.won, required this.opponent, this.opponentId, required this.meta, required this.score, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +37,11 @@ class CompactMatchRow extends StatelessWidget {
                 color: won == null ? AppColors.scorifyTextFaint : (won! ? AppColors.scorifyButterfly : AppColors.scorifyNegative),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
+            if (opponentId != null) ...[
+              UserAvatar(userId: opponentId, size: 30),
+              const SizedBox(width: 10),
+            ],
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,6 +108,7 @@ List<Widget> matchesByMonth(BuildContext context, List<PlayerMatchHistoryItem> i
               return CompactMatchRow(
                 won: m.winnerId == null ? null : m.winnerId == ownerId,
                 opponent: isP1 ? m.player2Name : m.player1Name,
+                opponentId: isP1 ? m.player2Id : m.player1Id,
                 meta: [
                   if (d != null) "${d.day} ${_monthShort[d.month - 1]}",
                   m.tournamentName,

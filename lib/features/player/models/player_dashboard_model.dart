@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/avatar_cache.dart";
 import "package:myttmi/core/helpers/text_format.dart";
 import "package:myttmi/core/constants/match_status_labels.dart";
 import "package:myttmi/core/helpers/json_parse.dart";
@@ -56,6 +57,7 @@ class PlayerNextMatch {
   });
 
   factory PlayerNextMatch.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     return PlayerNextMatch(
       idMatch: (json["id_match"] ?? "").toString(),
       matchType: (json["match_type"] ?? "group").toString(),

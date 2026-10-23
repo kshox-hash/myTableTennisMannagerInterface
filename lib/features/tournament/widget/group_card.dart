@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/ui/section_card.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -59,7 +60,7 @@ class GroupCard extends StatelessWidget {
                         child: Text("${i + 1}",
                             style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted)),
                       ),
-                      ClipOval(child: Identicon(seed: members[i].idUser, size: 30)),
+                      UserAvatar(userId: members[i].idUser, size: 30),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(

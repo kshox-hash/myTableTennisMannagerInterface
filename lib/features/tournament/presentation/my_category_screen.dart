@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/user_avatar.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -362,7 +363,9 @@ class _GeneralStandingsList extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
+                UserAvatar(userId: s.idUser, size: 30),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -847,7 +850,7 @@ class _GroupTable extends StatelessWidget {
                           ),
                         ),
                       ),
-                      ClipOval(child: Identicon(seed: s.idUser, size: 26)),
+                      UserAvatar(userId: s.idUser, size: 26),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -1005,7 +1008,7 @@ class _Side extends StatelessWidget {
       children: [
         ClipOval(
           child: id != null
-              ? Identicon(seed: id, size: 44)
+              ? UserAvatar(userId: id, size: 44)
               : Container(
                   width: 44,
                   height: 44,

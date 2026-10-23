@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/avatar_cache.dart";
 import "package:myttmi/core/helpers/json_parse.dart";
 
 /// Vista de TODOS los grupos de una categoría (no solo "el mío") — usa el
@@ -30,6 +31,7 @@ class GroupMemberInfo {
   }
 
   factory GroupMemberInfo.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     return GroupMemberInfo(
       idUser: (json["id_user"] ?? "").toString(),
       firstName: json["first_name"] as String?,
@@ -63,6 +65,7 @@ class GroupStandingInfo {
   });
 
   factory GroupStandingInfo.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     return GroupStandingInfo(
       idUser: (json["id_user"] ?? "").toString(),
       played: intOrDefault(json["played"]),
@@ -102,6 +105,7 @@ class GroupMatchInfo {
   });
 
   factory GroupMatchInfo.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     return GroupMatchInfo(
       idMatch: (json["id_match"] ?? "").toString(),
       round: intOrNull(json["round_number"]),

@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/features/tournament/api/tournament_api.dart";
 import "package:myttmi/core/ui/category_filter.dart";
 import "package:myttmi/core/ui/app_button.dart";
@@ -334,7 +335,7 @@ class _Player extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: winner ? AppColors.scorifyButterfly : Colors.transparent,
               ),
-              child: ClipOval(child: Identicon(seed: id, size: 40)),
+              child: UserAvatar(userId: id, size: 40),
             ),
             const SizedBox(height: 8),
             Text(

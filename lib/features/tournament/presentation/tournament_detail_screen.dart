@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/helpers/image_url.dart";
 import "package:myttmi/core/ui/card_border.dart";
 import "package:url_launcher/url_launcher.dart";
@@ -941,25 +942,12 @@ class _PlayerAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fallback = Identicon(seed: player.idUser, size: size);
-    final url = (player.avatarUrl ?? "").trim();
     return Container(
       width: size + 4,
       height: size + 4,
       padding: const EdgeInsets.all(2),
       decoration: const BoxDecoration(color: AppColors.scorifyCardFill, shape: BoxShape.circle),
-      child: ClipOval(
-        child: url.isEmpty
-            ? fallback
-            : Image.network(
-                safeImageUrl(url)!,
-                width: size,
-                height: size,
-                cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).round(),
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => fallback,
-              ),
-      ),
+      child: UserAvatar(userId: player.idUser, url: player.avatarUrl, size: size),
     );
   }
 }

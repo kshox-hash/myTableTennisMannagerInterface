@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/user_avatar.dart";
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
@@ -454,24 +455,26 @@ class _PlayerRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Container(
-              width: 24,
-              height: 24,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: highlighted ? Colors.white : AppColors.scorifySurface2,
-              ),
-              child: Text(
-                initial,
-                style: TextStyle(
-                  fontFamily: AppTypography.body,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: highlighted ? const Color(0xFF4DD2EE) : AppColors.scorifyTextMuted,
-                ),
-              ),
-            ),
+            idUser.isEmpty
+                ? Container(
+                    width: 24,
+                    height: 24,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: highlighted ? Colors.white : AppColors.scorifySurface2,
+                    ),
+                    child: Text(
+                      initial,
+                      style: TextStyle(
+                        fontFamily: AppTypography.body,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: highlighted ? const Color(0xFF4DD2EE) : AppColors.scorifyTextMuted,
+                      ),
+                    ),
+                  )
+                : UserAvatar(userId: idUser, size: 24),
             const SizedBox(width: 8),
             Expanded(
               child: Text(

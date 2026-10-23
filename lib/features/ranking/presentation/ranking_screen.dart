@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/user_avatar.dart";
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
@@ -193,7 +194,7 @@ class _MyRankCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          ClipOval(child: Identicon(seed: me.idUser, size: 46)),
+          UserAvatar(userId: me.idUser, size: 46),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -268,7 +269,7 @@ class _PodiumStep extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-            child: ClipOval(child: Identicon(seed: e.idUser, size: size)),
+            child: UserAvatar(userId: e.idUser, size: size),
           ),
           const SizedBox(height: 8),
           Text(
@@ -325,7 +326,7 @@ class _RankRow extends StatelessWidget {
                   style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted),
                 ),
               ),
-              ClipOval(child: Identicon(seed: player.idUser, size: 32)),
+              UserAvatar(userId: player.idUser, size: 32),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(

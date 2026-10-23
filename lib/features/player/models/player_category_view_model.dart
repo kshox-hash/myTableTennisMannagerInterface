@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/avatar_cache.dart";
 import "package:myttmi/core/helpers/json_parse.dart";
 
 class SetScore {
@@ -46,6 +47,7 @@ class PlayerStanding {
   });
 
   factory PlayerStanding.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     return PlayerStanding(
       idUser: (json["id_user"] ?? "").toString(),
       playerName: (json["player_name"] ?? "").toString(),
@@ -108,6 +110,7 @@ class PlayerMatch {
   String? get opponentId => mySlot == "player1" ? player2Id : player1Id;
 
   factory PlayerMatch.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     return PlayerMatch(
       idMatch: (json["id_match"] ?? "").toString(),
       matchNumber: intOrDefault(json["match_number"]),
@@ -194,6 +197,7 @@ class CategoryParticipant {
   });
 
   factory CategoryParticipant.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     return CategoryParticipant(
       idUser: (json["id_user"] ?? "").toString(),
       playerName: (json["player_name"] ?? "").toString(),
@@ -218,6 +222,7 @@ class CategoryStandingRow {
   });
 
   factory CategoryStandingRow.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     return CategoryStandingRow(
       position: intOrDefault(json["position"]),
       idUser: (json["id_user"] ?? "").toString(),
@@ -268,6 +273,7 @@ class TournamentParticipant extends CategoryParticipant {
       : "$categoryType $categoryRange";
 
   factory TournamentParticipant.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     return TournamentParticipant(
       idUser: (json["id_user"] ?? "").toString(),
       playerName: (json["player_name"] ?? "").toString(),

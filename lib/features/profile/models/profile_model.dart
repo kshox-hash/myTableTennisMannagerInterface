@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/avatar_cache.dart";
 import "package:myttmi/core/helpers/json_parse.dart";
 class UserProfile {
   final String idUser;
@@ -42,6 +43,7 @@ class UserProfile {
   }
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     DateTime? parseDate(dynamic v) {
       if (v == null) return null;
       return DateTime.tryParse(v.toString());
@@ -109,6 +111,7 @@ class PublicPlayerProfile {
   });
 
   factory PublicPlayerProfile.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     final first = (json["first_name"] as String?)?.trim();
     final last = (json["last_name"] as String?)?.trim();
     final joined = [first, last].where((s) => s != null && s.isNotEmpty).join(" ");

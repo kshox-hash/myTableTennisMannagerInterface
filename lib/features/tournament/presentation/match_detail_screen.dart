@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/user_avatar.dart";
 import "dart:async";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/app_button.dart";
@@ -220,6 +221,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                               child: Column(
                                 children: [
                                   _PlayerRow(
+                                    id: m.player1Id,
                                     name: m.player1Name,
                                     club: m.player1Club,
                                     seed: m.player1Seed,
@@ -243,6 +245,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                     ),
                                   ),
                                   _PlayerRow(
+                                    id: m.player2Id,
                                     name: m.player2Name,
                                     club: m.player2Club,
                                     seed: m.player2Seed,
@@ -367,6 +370,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
 /// que ganó en verde, el que perdió en gris, y el que se está jugando en
 /// blanco con fondo rojo suave. A la derecha, los sets ganados.
 class _PlayerRow extends StatelessWidget {
+  final String? id;
   final String name;
   final String? club;
   final int? seed;
@@ -375,6 +379,7 @@ class _PlayerRow extends StatelessWidget {
   final List<({int mine, int theirs})> setPoints;
 
   const _PlayerRow({
+    this.id,
     required this.name,
     this.club,
     this.seed,
@@ -394,16 +399,7 @@ class _PlayerRow extends StatelessWidget {
 
     return Row(
       children: [
-        Container(
-          width: 40,
-          height: 40,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: accent.withValues(alpha: 0.16),
-          ),
-          child: Icon(Icons.person_rounded, color: accent, size: 22),
-        ),
+        UserAvatar(userId: id, size: 40),
         const SizedBox(width: 10),
         Expanded(
           child: Column(

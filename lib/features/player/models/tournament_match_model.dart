@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/avatar_cache.dart";
 import "package:myttmi/core/helpers/text_format.dart";
 import "package:myttmi/core/helpers/json_parse.dart";
 import "package:myttmi/features/player/models/player_category_view_model.dart";
@@ -66,6 +67,7 @@ class TournamentMatch {
       : "$categoryType $categoryRange";
 
   factory TournamentMatch.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     return TournamentMatch(
       idMatch: (json["id_match"] ?? "").toString(),
       matchType: (json["match_type"] ?? "group").toString(),
@@ -165,6 +167,7 @@ class MatchDetail {
       : "$categoryType $categoryRange";
 
   factory MatchDetail.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     return MatchDetail(
       idMatch: (json["id_match"] ?? "").toString(),
       matchType: (json["match_type"] ?? "group").toString(),
@@ -248,6 +251,7 @@ class PlayerMatchHistoryItem {
       : "$categoryType $categoryRange";
 
   factory PlayerMatchHistoryItem.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     return PlayerMatchHistoryItem(
       idMatch: (json["id_match"] ?? "").toString(),
       matchType: (json["match_type"] ?? "group").toString(),

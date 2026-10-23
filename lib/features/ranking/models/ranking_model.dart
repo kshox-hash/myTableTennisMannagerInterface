@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/avatar_cache.dart";
 import "package:myttmi/core/helpers/json_parse.dart";
 
 class RankingEntry {
@@ -20,6 +21,7 @@ class RankingEntry {
   });
 
   factory RankingEntry.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     final first = (json["first_name"] as String?)?.trim();
     final last = (json["last_name"] as String?)?.trim();
     final joined = [first, last].where((s) => s != null && s.isNotEmpty).join(" ");

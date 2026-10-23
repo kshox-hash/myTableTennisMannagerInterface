@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/avatar_cache.dart";
 import "package:myttmi/core/helpers/json_parse.dart";
 
 // Un partido de la cola/mesas — misma forma tanto si está en juego (mesa
@@ -45,6 +46,7 @@ class QueueMatch {
   }
 
   factory QueueMatch.fromJson(Map<String, dynamic> json) {
+    AvatarCache.rememberRow(json);
     return QueueMatch(
       idMatch: (json["id_match"] ?? "").toString(),
       categoryType: (json["category_type"] ?? "").toString(),

@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/avatar_cache.dart";
 import "package:myttmi/core/helpers/image_url.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -16,10 +17,15 @@ class UserAvatar extends StatelessWidget {
     final fallback = userId == null || userId!.isEmpty
         ? Container(width: size, height: size, color: AppColors.scorifySurface2)
         : Identicon(seed: userId!, size: size);
-    final u = safeImageUrl(url);
-    // Decodificada al tamaño en pantalla (no la foto completa): en listas
-    // largas era lo que trababa el scroll.
-    final px = (size * MediaQuery.devicePixelRatioOf(context)).round();
+    // Si esta pantalla no trae la foto, se usa la que ya se vio en otra
+    // (AvatarCache); si la trae, queda anotada para las demás.
+    AvatarCache.remember(userId, url);
+    final u = safeImageUrl((url ?? "").trim().isNotEmpty ? url : AvatarCache.urlFor(userId));
+    // Decodificada chica (no la foto completa: en listas largas era lo que
+    // trababa el scroll) y en dos tamaños fijos, para que la misma foto se
+    // decodifique UNA vez y la reutilicen todos los avatares de la app
+    // (el caché de imágenes de Flutter la guarda por dirección + tamaño).
+    final px = size * MediaQuery.devicePixelRatioOf(context) <= 128 ? 128 : 256;
     return ClipOval(
       child: u == null
           ? fallback
