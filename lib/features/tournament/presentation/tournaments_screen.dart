@@ -1,3 +1,5 @@
+import "package:myttmi/core/helpers/image_url.dart";
+import "package:myttmi/core/ui/page_skeleton.dart";
 import "package:myttmi/core/ui/stagger_in.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
@@ -87,7 +89,9 @@ class _TournamentsScreenState extends State<TournamentsScreen>
   int get tabIndex => 3;
 
   @override
-  void onTabActivated() => _reload();
+  // Al volver a la pestaña se actualiza en silencio (sin esqueleto): se ve lo
+  // que había y se reemplaza cuando llegan los datos nuevos.
+  void onTabActivated() => _reload(silent: true);
 
   late final TournamentApi api;
   final ScrollController _scrollController = ScrollController();
@@ -101,6 +105,8 @@ class _TournamentsScreenState extends State<TournamentsScreen>
   int _page = 1;
   int _totalPages = 1;
   bool _loading = true;
+  // Primera carga: esqueleto de la pestaña entera (no solo de la lista).
+  bool _loadedOnce = false;
   bool _loadingMore = false;
   String? _error;
 
@@ -128,9 +134,9 @@ class _TournamentsScreenState extends State<TournamentsScreen>
     }
   }
 
-  Future<void> _reload() async {
+  Future<void> _reload({bool silent = false}) async {
     setState(() {
-      _loading = true;
+      if (!silent) _loading = true;
       _error = null;
     });
     try {
@@ -149,7 +155,12 @@ class _TournamentsScreenState extends State<TournamentsScreen>
       if (!mounted) return;
       setState(() => _error = e.toString());
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadedOnce = true;
+        });
+      }
     }
   }
 
@@ -201,6 +212,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (!_loadedOnce) return const PageSkeleton();
     final visible = _visible;
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -471,9 +483,10 @@ class _TournamentCard extends StatelessWidget {
                   child: (t.organizerAvatarUrl ?? "").isEmpty
                       ? Identicon(seed: t.createdBy, size: 22)
                       : Image.network(
-                          t.organizerAvatarUrl!,
+                          safeImageUrl(t.organizerAvatarUrl)!,
                           width: 22,
                           height: 22,
+                          cacheWidth: (22 * MediaQuery.devicePixelRatioOf(context)).round(),
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Identicon(seed: t.createdBy, size: 22),
                         ),

@@ -46,7 +46,6 @@ class Medal extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(colors: c, begin: Alignment.topLeft, end: Alignment.bottomRight),
-        boxShadow: [BoxShadow(color: c.last.withValues(alpha: 0.35), blurRadius: 10)],
       ),
       child: Text(
         "$position°",

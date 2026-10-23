@@ -3,6 +3,7 @@ import 'package:myttmi/core/ui/app_button.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
 import 'package:myttmi/core/ui/top_header.dart';
+import 'package:myttmi/core/ui/page_skeleton.dart';
 import 'package:myttmi/features/ranking/presentation/ranking_screen.dart';
 import 'package:myttmi/features/stats/presentation/stats_screen.dart';
 
@@ -19,6 +20,10 @@ class PerformanceScreen extends StatefulWidget {
 
 class _PerformanceScreenState extends State<PerformanceScreen> {
   int _sub = 0;
+  // Esqueleto de la pestaña entera hasta que las estadísticas cargan la
+  // primera vez (antes se veían el título y el selector y, abajo, el bloque
+  // cargando por separado).
+  bool _ready = false;
 
   @override
   Widget build(BuildContext context) {
@@ -26,32 +31,39 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
     // contenido de cada sub-pestaña ya trae el suyo (RankingScreen y
     // StatsScreen se usaban antes como pestañas completas del shell), así
     // que envolverlo de nuevo acá duplicaría el margen.
-    return Column(
+    return Stack(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          child: Column(
-            children: [
-              const TopHeader(title: "Mi rendimiento", showBack: false),
-              const SizedBox(height: 14),
-              _SubTabSwitch(
-                index: _sub,
-                onChanged: (i) => setState(() => _sub = i),
+        Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Column(
+                children: [
+                  const TopHeader(title: "Mi rendimiento", showBack: false),
+                  const SizedBox(height: 14),
+                  _SubTabSwitch(index: _sub, onChanged: (i) => setState(() => _sub = i)),
+                ],
               ),
-            ],
-          ),
+            ),
+            Expanded(
+              child: IndexedStack(
+                index: _sub,
+                // Estadísticas primero: el ranking global espera la tabla oficial
+                // de puntos por nivel, y mientras tanto suele estar vacío.
+                children: [
+                  StatsScreen(
+                    showHeader: false,
+                    onLoaded: () {
+                      if (!_ready && mounted) setState(() => _ready = true);
+                    },
+                  ),
+                  const RankingScreen(showHeader: false),
+                ],
+              ),
+            ),
+          ],
         ),
-        Expanded(
-          child: IndexedStack(
-            index: _sub,
-            // Estadísticas primero: el ranking global espera la tabla oficial
-            // de puntos por nivel, y mientras tanto suele estar vacío.
-            children: const [
-              StatsScreen(showHeader: false),
-              RankingScreen(showHeader: false),
-            ],
-          ),
-        ),
+        if (!_ready) const Positioned.fill(child: PageSkeleton()),
       ],
     );
   }
@@ -70,10 +82,7 @@ class _SubTabSwitch extends StatelessWidget {
     // Mismo selector tipo píldora que Partidos/Campeonatos.
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: AppColors.scorifyCardFill,
-        borderRadius: BorderRadius.circular(99),
-      ),
+      decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(99)),
       child: Row(
         children: List.generate(_labels.length, (i) {
           final selected = i == index;
@@ -85,29 +94,32 @@ class _SubTabSwitch extends StatelessWidget {
                 border: selected ? Border.all(color: Colors.white.withValues(alpha: 0.35)) : null,
               ),
               child: Material(
-              color: Colors.transparent,
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
-              child: InkWell(
-                onTap: () {
-                  onChanged(i);
-                },
-                customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Center(
-                    child: Text(
-                      _labels[i],
-                      style: TextStyle(
-                        fontFamily: AppTypography.body,
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w600,
-                        color: selected ? AppColors.scorifyOnMint : AppColors.scorifyText,
+                color: Colors.transparent,
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
+                child: InkWell(
+                  onTap: () {
+                    onChanged(i);
+                  },
+                  customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Center(
+                      child: Text(
+                        _labels[i].toUpperCase(),
+                        style: TextStyle(
+                          fontFamily: AppTypography.display,
+                          fontSize: 19,
+                          fontStyle: FontStyle.italic,
+                          letterSpacing: 0.6,
+                          height: 1.0,
+                          fontWeight: FontWeight.w600,
+                          color: selected ? AppColors.scorifyOnMint : AppColors.scorifyText,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
             ),
           );
         }),

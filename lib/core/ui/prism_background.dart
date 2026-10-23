@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 
-/// Fondo de toda la app: azul marino liso (sin degradados ni resplandores,
-/// a pedido — ver AppColors). Se deja el widget para no tocar a las
-/// pantallas que lo envuelven.
+/// Fondo de toda la app: azul marino liso. Sin degradados a propósito —
+/// prioridad a la fluidez del scroll (el diseño se retoma después).
 class PrismBackground extends StatelessWidget {
   final Widget child;
   const PrismBackground({super.key, required this.child});

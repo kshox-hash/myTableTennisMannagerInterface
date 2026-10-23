@@ -1,3 +1,5 @@
+import "package:myttmi/features/tournament/api/tournament_api.dart";
+import "package:myttmi/core/ui/category_filter.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/favorites/favorite_button.dart";
@@ -69,10 +71,27 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
   // Llaves queda bloqueada hasta que exista algún partido de llave (mientras
   // se juegan los grupos no hay nada que mostrar ahí).
   bool _hasBracket = false;
+  // Una categoría a la vez (arranca en la mía). null = todas.
+  List<CategoryOption> _cats = const [];
+  String? _cat;
+  // La lista espera a saber la categoría inicial (si no, pedía todo y
+  // enseguida volvía a pedir solo la mía).
+  bool _catsLoaded = false;
 
   @override
   void initState() {
     super.initState();
+    TournamentApi().getTournamentById(widget.tournamentId).then((t) {
+      if (!mounted) return;
+      final opts = categoryOptions(t.categories);
+      setState(() {
+        _cats = opts;
+        _cat = CategoryFilterBar.initial(opts, t.categories.where((c) => c.isEnrolled).map((c) => c.idCategory));
+        _catsLoaded = true;
+      });
+    }).catchError((_) {
+      if (mounted) setState(() => _catsLoaded = true);
+    });
     _mode = switch (widget.initialMode) {
       "groups" => _ViewMode.groups,
       "bracket" => _ViewMode.bracket,
@@ -129,6 +148,10 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
                     (label: "Llaves", selected: _mode == _ViewMode.bracket, locked: !_hasBracket, onTap: () => _setMode(_ViewMode.bracket)),
                   ],
                 ),
+                if (_cats.length > 1) ...[
+                  const SizedBox(height: 10),
+                  CategoryFilterBar(options: _cats, selected: _cat, onChanged: (id) => setState(() => _cat = id)),
+                ],
                 if (_mode == _ViewMode.list) ...[
                   const SizedBox(height: 10),
                   Row(
@@ -148,12 +171,15 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
                   ),
                 ],
                 const SizedBox(height: 14),
-                if (_mode == _ViewMode.list)
+                if (_mode == _ViewMode.list && !_catsLoaded)
+                  const Expanded(child: LoadingState())
+                else if (_mode == _ViewMode.list)
                   Expanded(
                     child: _PagedMatchList(
-                      key: ValueKey(_statusFilter),
+                      key: ValueKey("$_statusFilter|$_cat"),
                       tournamentId: widget.tournamentId,
                       status: _statusFilter == "all" ? null : _statusFilter,
+                      categoryId: _cat,
                     ),
                   )
                 else
@@ -181,7 +207,8 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
                           );
                         }
 
-                        final matches = snap.data ?? [];
+                        final all = snap.data ?? [];
+                        final matches = _cat == null ? all : all.where((m) => m.idCategory == _cat).toList();
 
                         if (_mode == _ViewMode.bracket) {
                           return _BracketByCategory(matches: matches);
@@ -217,7 +244,7 @@ class _MatchCard extends StatelessWidget {
     final (pillText, pillBg, pillFg) = played
         ? ("Finalizado", AppColors.scorifySurface2, AppColors.scorifyTextMuted)
         : m.tableNumber != null
-            ? ("En mesa ${m.tableNumber}", AppColors.scorifyMint, AppColors.scorifyOnMint)
+            ? ("En mesa ${m.tableNumber}", AppColors.scorifyLive, AppColors.scorifyOnLive)
             : (matchStatusText(m.status, m.resultReason), AppColors.scorifySurface2, AppColors.scorifyText);
     final meta = "Partido ${m.matchNumber}";
 
@@ -585,7 +612,8 @@ class _FilterChip extends StatelessWidget {
 class _PagedMatchList extends StatefulWidget {
   final String tournamentId;
   final String? status;
-  const _PagedMatchList({super.key, required this.tournamentId, this.status});
+  final String? categoryId;
+  const _PagedMatchList({super.key, required this.tournamentId, this.status, this.categoryId});
 
   @override
   State<_PagedMatchList> createState() => _PagedMatchListState();
@@ -628,6 +656,7 @@ class _PagedMatchListState extends State<_PagedMatchList> {
       final page = await _api.getTournamentMatchesPage(
         widget.tournamentId,
         status: widget.status,
+        categoryId: widget.categoryId,
         limit: _pageSize,
         offset: _items.length,
       );

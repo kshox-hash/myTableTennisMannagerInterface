@@ -131,6 +131,7 @@ class PlayerApi {
   Future<({List<TournamentMatch> items, int total})> getTournamentMatchesPage(
     String tournamentId, {
     String? status,
+    String? categoryId,
     int limit = 20,
     int offset = 0,
   }) async {
@@ -138,6 +139,7 @@ class PlayerApi {
       Endpoints.tournamentMatches(tournamentId),
       query: {
         if (status != null) "status": status,
+        if (categoryId != null) "category": categoryId,
         "limit": limit.toString(),
         "offset": offset.toString(),
       },

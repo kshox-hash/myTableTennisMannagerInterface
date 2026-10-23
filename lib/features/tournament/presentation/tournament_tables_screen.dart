@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/category_filter.dart";
 import "package:myttmi/core/ui/section_card.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/storage/session_storage.dart";
@@ -31,6 +32,10 @@ class _TournamentTablesScreenState extends State<TournamentTablesScreen> {
   final _api = TournamentApi();
   Future<TablesQueueBoard>? _future;
   String? _myUserId;
+  // Cola filtrada por categoría (las mesas son físicas y compartidas: esas
+  // se ven todas). null = todas; arranca en la categoría de mi partido.
+  String? _cat;
+  bool _catChosen = false;
 
   @override
   void initState() {
@@ -85,6 +90,20 @@ class _TournamentTablesScreenState extends State<TournamentTablesScreen> {
                         }
 
                         final board = snap.data!;
+                        final labels = <String>{for (final m in board.nextMatches) m.categoryLabel}.toList();
+                        final options = [for (final l in labels) (id: l, label: l)];
+                        if (!_catChosen && options.isNotEmpty) {
+                          _cat = CategoryFilterBar.initial(
+                            options,
+                            board.nextMatches.where((m) => _myUserId != null && m.involves(_myUserId!)).map((m) => m.categoryLabel),
+                          );
+                          _catChosen = true;
+                        }
+                        // La posición es la de la cola completa (el orden real de las mesas).
+                        final queue = [
+                          for (final e in board.nextMatches.asMap().entries)
+                            if (_cat == null || e.value.categoryLabel == _cat) e,
+                        ];
                         return ListView(
                           physics: const BouncingScrollPhysics(),
                           children: [
@@ -110,7 +129,11 @@ class _TournamentTablesScreenState extends State<TournamentTablesScreen> {
                               style: AppTypography.bodyMuted,
                             ),
                             const SizedBox(height: 12),
-                            if (board.nextMatches.isEmpty)
+                            if (options.length > 1) ...[
+                              CategoryFilterBar(options: options, selected: _cat, onChanged: (id) => setState(() => _cat = id)),
+                              const SizedBox(height: 12),
+                            ],
+                            if (queue.isEmpty)
                               const Padding(
                                 padding: EdgeInsets.only(top: 12),
                                 child: EmptyState(
@@ -119,7 +142,7 @@ class _TournamentTablesScreenState extends State<TournamentTablesScreen> {
                                 ),
                               )
                             else
-                              ...board.nextMatches.asMap().entries.map(
+                              ...queue.map(
                                 (entry) => Padding(
                                   padding: const EdgeInsets.only(bottom: 8),
                                   child: _QueueRow(

@@ -42,7 +42,8 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
   int get tabIndex => 2;
 
   @override
-  void onTabActivated() => _load();
+  // Al volver a la pestaña se actualiza en silencio (sin esqueleto).
+  void onTabActivated() => _load(silent: true);
 
   final TextEditingController _search = TextEditingController();
   final _api = RankingApi();
@@ -64,9 +65,9 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
     super.dispose();
   }
 
-  Future<void> _load() async {
+  Future<void> _load({bool silent = false}) async {
     setState(() {
-      _loading = true;
+      if (!silent) _loading = true;
       _error = null;
     });
     try {

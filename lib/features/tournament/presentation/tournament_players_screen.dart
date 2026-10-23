@@ -1,3 +1,7 @@
+import "package:myttmi/core/storage/session_storage.dart";
+import "package:myttmi/features/tournament/models/tournament_model.dart";
+import "package:myttmi/features/tournament/api/tournament_api.dart";
+import "package:myttmi/core/ui/category_filter.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -15,7 +19,8 @@ class _PlayersData {
   // Si ya hay partidos de grupo/llave generados, los inscritos ya se pueden
   // ver organizados en "Partidos" — evitamos repetir esa lista acá.
   final bool groupsGenerated;
-  _PlayersData({required this.participants, required this.groupsGenerated});
+  final List<CategoryOption> categories;
+  _PlayersData({required this.participants, required this.groupsGenerated, this.categories = const []});
 }
 
 class TournamentPlayersScreen extends StatefulWidget {
@@ -36,6 +41,9 @@ class TournamentPlayersScreen extends StatefulWidget {
 class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
   final _api = PlayerApi();
   late Future<_PlayersData> _future;
+  // Una categoría a la vez (arranca en la mía). null = todas.
+  String? _cat;
+  bool _catChosen = false;
 
   @override
   void initState() {
@@ -47,12 +55,22 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
     final results = await Future.wait([
       _api.getTournamentParticipants(widget.tournamentId),
       _api.getTournamentMatches(widget.tournamentId),
+      TournamentApi().getTournamentById(widget.tournamentId).then<Tournament?>((t) => t, onError: (_) => null),
+      SessionStorage().getUserId(),
     ]);
     final participants = results[0] as List<TournamentParticipant>;
     final matches = results[1] as List<dynamic>;
+    final t = results[2] as Tournament?;
+    final myId = results[3] as String?;
+    final options = t == null ? <CategoryOption>[] : categoryOptions(t.categories);
+    if (!_catChosen) {
+      _cat = CategoryFilterBar.initial(options, participants.where((p) => p.idUser == myId).map((p) => p.idCategory));
+      _catChosen = true;
+    }
     return _PlayersData(
       participants: participants,
       groupsGenerated: matches.isNotEmpty,
+      categories: options,
     );
   }
 
@@ -101,13 +119,26 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
                         );
                       }
 
-                      final players = snap.data?.participants ?? [];
+                      final all = snap.data?.participants ?? [];
+                      final options = snap.data?.categories ?? const <CategoryOption>[];
+                      final players = _cat == null ? all : all.where((p) => p.idCategory == _cat).toList();
+                      final bar = options.length > 1
+                          ? Padding(
+                              padding: const EdgeInsets.only(bottom: 14),
+                              child: CategoryFilterBar(options: options, selected: _cat, onChanged: (id) => setState(() => _cat = id)),
+                            )
+                          : const SizedBox.shrink();
                       final groupsGenerated =
                           snap.data?.groupsGenerated ?? false;
                       if (players.isEmpty) {
-                        return const EmptyState(
-                          icon: Icons.people_outline_rounded,
-                          message: "Todavía no hay inscritos.",
+                        return ListView(
+                          children: [
+                            bar,
+                            const EmptyState(
+                              icon: Icons.people_outline_rounded,
+                              message: "Todavía no hay inscritos.",
+                            ),
+                          ],
                         );
                       }
 
@@ -123,6 +154,7 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
                       return ListView(
                         padding: const EdgeInsets.only(bottom: 24),
                         children: [
+                          bar,
                           if (groupsGenerated) ...[
                             Material(
                               color: AppColors.scorifyMint.withValues(alpha: 0.12),

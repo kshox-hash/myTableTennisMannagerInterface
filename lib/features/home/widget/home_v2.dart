@@ -28,6 +28,10 @@ const homeGradientMain = AppColors.featuredGradient;
 const homeGradientTeal = AppColors.cardGradient;
 const homeGradientEmerald = AppColors.cardGradient;
 
+/// Números grandes (marcadores, KPIs): Teko, condensada y deportiva.
+TextStyle _num(double size, {Color c = AppColors.scorifyText}) =>
+    TextStyle(fontFamily: AppTypography.display, fontSize: size, fontWeight: FontWeight.w600, color: c, height: 1.0);
+
 TextStyle _t(double size, {FontWeight w = FontWeight.w400, Color c = AppColors.scorifyText, double? ls, double? h}) =>
     TextStyle(fontFamily: AppTypography.body, fontSize: size, fontWeight: w, color: c, letterSpacing: ls, height: h);
 
@@ -61,6 +65,7 @@ class _HomeCardState extends State<HomeCard> {
       duration: const Duration(milliseconds: 110),
       child: CardBorder(
         radius: radius,
+        highlight: widget.gradient == _glassFeatured,
         child: ClipRRect(
           borderRadius: r,
           child: Material(
@@ -100,8 +105,9 @@ class HomeCardTitle extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            title.toUpperCase(),
-            style: _t(13, w: FontWeight.w600, c: color, ls: 1.1),
+            // Título en blanco; el color de la sección va solo en el ícono.
+            title,
+            style: _t(15, w: FontWeight.w700),
           ),
         ),
         if (action != null)
@@ -427,7 +433,7 @@ class HomePerformanceCard extends StatelessWidget {
     Widget stat(String value, String label) => Expanded(
       child: Column(
         children: [
-          Text(value, style: _t(26, w: FontWeight.w600, h: 1.1)),
+          Text(value, style: _num(36)),
           const SizedBox(height: 2),
           Text(label, style: _t(12, c: AppColors.scorifyTextMuted)),
         ],
@@ -522,7 +528,7 @@ class HomeStreakCardV2 extends StatelessWidget {
                         child: Text("Juega tu primer partido", style: _t(16, w: FontWeight.w600)),
                       )
                     else ...[
-                      Text("$streak", style: _t(44, w: FontWeight.w700, h: 1.0)),
+                      Text("$streak", style: _num(58)),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
@@ -956,7 +962,7 @@ class HomeOnboardingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final done = steps.where((s) => s.done).length;
     return HomeCard(
-      gradient: _glassFeatured,
+      gradient: _glass,
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1071,7 +1077,7 @@ class HomeSeasonCard extends StatelessWidget {
         children: [
           Icon(icon, size: 20, color: _mint),
           const SizedBox(height: 4),
-          Text(value, style: _t(22, w: FontWeight.w600, h: 1.1)),
+          Text(value, style: _num(32)),
           Text(
             label.toUpperCase(),
             style: _t(11, w: FontWeight.w500, c: AppColors.scorifyTextMuted, ls: 0.8),
@@ -1263,7 +1269,7 @@ class HomeMyTournamentsCard extends StatelessWidget {
   }
 }
 
-/// Estado del partido: "EN MESA 3" con un punto verde que late, o
+/// Estado del partido: "EN MESA 3" con un punto cyan (está pasando ahora) que late, o
 /// "Faltan 2 h 15 min" (se actualiza cada 30 s). Nada si no hay hora.
 class _LiveStatus extends StatefulWidget {
   final DateTime? startsAt;
@@ -1307,15 +1313,14 @@ class _LiveStatusState extends State<_LiveStatus> with SingleTickerProviderState
               height: 9,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _lime,
-                boxShadow: [BoxShadow(color: _lime.withValues(alpha: 0.6), blurRadius: 6)],
+                color: AppColors.scorifyLive,
               ),
             ),
           ),
           const SizedBox(width: 6),
           Text(
             "EN MESA ${widget.tableNumber}",
-            style: _t(12, w: FontWeight.w700, c: _lime, ls: 0.8),
+            style: _t(12, w: FontWeight.w700, c: AppColors.scorifyLive, ls: 0.8),
           ),
         ],
       );
@@ -1633,7 +1638,7 @@ class HomeTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    Text(value, style: _t(28, w: FontWeight.w700, h: 1)),
+                    Text(value, style: _num(38)),
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(

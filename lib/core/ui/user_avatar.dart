@@ -1,3 +1,4 @@
+import "package:myttmi/core/helpers/image_url.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/ui/identicon.dart";
@@ -15,14 +16,18 @@ class UserAvatar extends StatelessWidget {
     final fallback = userId == null || userId!.isEmpty
         ? Container(width: size, height: size, color: AppColors.scorifySurface2)
         : Identicon(seed: userId!, size: size);
-    final u = (url ?? "").trim();
+    final u = safeImageUrl(url);
+    // Decodificada al tamaño en pantalla (no la foto completa): en listas
+    // largas era lo que trababa el scroll.
+    final px = (size * MediaQuery.devicePixelRatioOf(context)).round();
     return ClipOval(
-      child: u.isEmpty
+      child: u == null
           ? fallback
           : Image.network(
               u,
               width: size,
               height: size,
+              cacheWidth: px,
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => fallback,
               loadingBuilder: (context, child, progress) => progress == null ? child : fallback,

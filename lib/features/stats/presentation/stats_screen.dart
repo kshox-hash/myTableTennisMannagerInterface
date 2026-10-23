@@ -26,8 +26,11 @@ class StatsScreen extends StatefulWidget {
   // false cuando vive embebido dentro de una sub-pestaña (p.ej. "Mi
   // rendimiento") que ya muestra su propio encabezado.
   final bool showHeader;
+  /// Avisa cuando terminó la primera carga ("Mi rendimiento" muestra el
+  /// esqueleto de pestaña completa hasta entonces).
+  final VoidCallback? onLoaded;
 
-  const StatsScreen({super.key, this.showHeader = true});
+  const StatsScreen({super.key, this.showHeader = true, this.onLoaded});
 
   @override
   State<StatsScreen> createState() => _StatsScreenState();
@@ -38,7 +41,8 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
   int get tabIndex => 2;
 
   @override
-  void onTabActivated() => _load();
+  // Al volver a la pestaña se actualiza en silencio (sin esqueleto).
+  void onTabActivated() => _load(silent: true);
 
   final _profileApi = ProfileApi();
   final _playerApi = PlayerApi();
@@ -56,9 +60,9 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
     _load();
   }
 
-  Future<void> _load() async {
+  Future<void> _load({bool silent = false}) async {
     setState(() {
-      _loading = true;
+      if (!silent) _loading = true;
       _error = null;
     });
     try {
@@ -79,6 +83,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
       setState(() => _error = e.toString());
     } finally {
       if (mounted) setState(() => _loading = false);
+      widget.onLoaded?.call();
     }
   }
 

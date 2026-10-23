@@ -7,7 +7,9 @@ import "package:myttmi/core/constants/app_colors.dart";
 class CardBorder extends StatelessWidget {
   final Widget child;
   final double radius;
-  const CardBorder({super.key, required this.child, this.radius = 14});
+  /// Tarjeta destacada (la principal de la pantalla): filete azul brillante.
+  final bool highlight;
+  const CardBorder({super.key, required this.child, this.radius = 14, this.highlight = false});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +17,10 @@ class CardBorder extends StatelessWidget {
       position: DecorationPosition.foreground,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: AppColors.scorifyCardBorder),
+        border: Border.all(
+          color: highlight ? AppColors.scorifyCardBorderStrong : AppColors.scorifyCardBorder,
+          width: highlight ? 1.3 : 1,
+        ),
       ),
       child: child,
     );

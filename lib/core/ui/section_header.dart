@@ -24,12 +24,11 @@ class SectionHeader extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            title.toUpperCase(),
-            style: TextStyle(
-              color: AppColors.scorifyTextMuted,
-              fontSize: 11.5,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.5,
+            title,
+            style: const TextStyle(
+              color: AppColors.scorifyText,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),

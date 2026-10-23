@@ -1,3 +1,4 @@
+import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/shell/shell_preload.dart";
 import "package:myttmi/features/tournament/models/tournament_model.dart";
@@ -136,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen>
       final seen = <String>{};
       final current = events.where((e) => !e.finished && (e.inProgress || !e.date.isBefore(day))).toList()
         ..sort((a, b) => a.inProgress == b.inProgress ? a.date.compareTo(b.date) : (a.inProgress ? -1 : 1));
-      mineList = [for (final e in current) if (seen.add(e.tournamentId)) e].take(4).toList();
+      mineList = [for (final e in current) if (seen.add(e.tournamentId)) e];
     } catch (_) {}
     Tournament? challenge;
     try {
@@ -208,6 +209,51 @@ class _HomeScreenState extends State<HomeScreen>
     final w = games.where((m) => m.winnerId == me).length;
     final l = games.length - w;
     return "Se han enfrentado ${games.length} ${games.length == 1 ? "vez" : "veces"} · ${w == 1 ? "1 ganado" : "$w ganados"}, ${l == 1 ? "1 perdido" : "$l perdidos"}";
+  }
+
+  /// Mi campeonato en curso (grupos o llave), si hay — aunque ya no me
+  /// quede partido por jugar.
+  CalendarEvent? get _live {
+    for (final e in _mine) {
+      if (e.inProgress) return e;
+    }
+    return null;
+  }
+
+  /// Con varios campeonatos inscritos, "Ver" deja elegir cuál abrir (antes
+  /// abría siempre el primero y el resto no se podía ver).
+  Future<void> _pickTournament() async {
+    final id = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: AppColors.scorifyDeep,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (sheet) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 18, 20, 8),
+              child: Text("Mis campeonatos",
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
+            ),
+            for (final e in _mine)
+              ListTile(
+                leading: Icon(
+                  e.inProgress ? Icons.sports_tennis_rounded : Icons.event_rounded,
+                  color: e.inProgress ? AppColors.scorifyLive : AppColors.scorifyMint,
+                ),
+                title: Text(e.tournamentName, style: const TextStyle(color: AppColors.scorifyText, fontWeight: FontWeight.w600)),
+                subtitle: Text(e.inProgress ? "En juego" : "Por jugar", style: const TextStyle(color: AppColors.scorifyTextMuted)),
+                trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint),
+                onTap: () => Navigator.pop(sheet, e.tournamentId),
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (id != null && mounted) _openTournament(id);
   }
 
   Future<void> _openTournament(String id) async {
@@ -428,8 +474,33 @@ class _HomeScreenState extends State<HomeScreen>
                         ],
                         const SizedBox(height: 12),
                       ],
-                      // La tarjeta grande siempre está: partido > campeonato > vacío.
-                      if (nm == null && _challenge == null) ...[
+                      // La tarjeta grande siempre está: partido > campeonato en curso >
+                      // próximo campeonato > vacío. "En curso" viene de MIS inscripciones
+                      // (calendario): antes, al jugar mis partidos, el campeonato
+                      // desaparecía del Inicio porque se buscaba en la lista general
+                      // (filtrada por región y solo con torneos por empezar).
+                      if (nm == null && _live != null) ...[
+                        HomeChallengeCard(
+                          kicker: "CAMPEONATO EN CURSO",
+                          name: _live!.tournamentName,
+                          subtitle: _live!.categoryName,
+                          place: _live!.location,
+                          chip: "En juego",
+                          button: "Ver mi categoría",
+                          onTap: () async {
+                            final e = _live!;
+                            await Navigator.pushNamed(context, AppRoutes.myCategory, arguments: {
+                              "tournamentId": e.tournamentId,
+                              "tournamentName": e.tournamentName,
+                              "categoryId": e.categoryId,
+                              "categoryLabel": e.categoryName,
+                            });
+                            if (mounted) _load(silent: true);
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      if (nm == null && _live == null && _challenge == null) ...[
                         HomeChallengeCard(
                           kicker: "PRÓXIMO PARTIDO",
                           name: "Sin partidos programados",
@@ -439,7 +510,7 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                         const SizedBox(height: 12),
                       ],
-                      if (nm == null && _challenge != null) ...[
+                      if (nm == null && _live == null && _challenge != null) ...[
                         HomeChallengeCard(
                           name: _challenge!.tournamentName,
                           date: _dateLong(_challenge!.eventDate),
@@ -467,7 +538,9 @@ class _HomeScreenState extends State<HomeScreen>
                                 action: _mine.isEmpty ? "Explorar" : "Ver",
                                 onTap: () => _mine.isEmpty
                                     ? AppShellScope.of(context)?.switchTab(3, link: true)
-                                    : _openTournament(_mine.first.tournamentId),
+                                    : _mine.length == 1
+                                        ? _openTournament(_mine.first.tournamentId)
+                                        : _pickTournament(),
                               ),
                             ),
                             const SizedBox(width: 12),

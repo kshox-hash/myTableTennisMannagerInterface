@@ -48,7 +48,8 @@ class StatGauge extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(value,
-                    style: TextStyle(fontFamily: AppTypography.body, fontSize: valueSize, height: 1.05, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                    // Número en Teko (condensada deportiva), como los demás marcadores.
+                    style: TextStyle(fontFamily: AppTypography.display, fontSize: valueSize * 1.35, height: 1.0, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                 if (caption != null)
                   Text(caption!, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted)),
               ],
@@ -91,20 +92,13 @@ class _GaugePainter extends CustomPainter {
           ..color = Colors.white.withValues(alpha: 0.08));
     if (value <= 0) return;
     final sweep = total * value;
-    // Halo: el mismo arco, más ancho y difuminado.
-    canvas.drawArc(rect, start, sweep, false,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = stroke * 1.2
-          ..strokeCap = StrokeCap.round
-          ..color = color.withValues(alpha: 0.22)
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, stroke * 0.7));
-    canvas.drawArc(rect, start, sweep, false,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = stroke
-          ..strokeCap = StrokeCap.round
-          ..color = color);
+    // Liso, sin halo difuminado (el desenfoque era caro de pintar).
+    final arc = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.round
+      ..color = color;
+    canvas.drawArc(rect, start, sweep, false, arc);
   }
 
   @override

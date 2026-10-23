@@ -1,3 +1,4 @@
+import "package:myttmi/core/helpers/image_url.dart";
 import "package:myttmi/core/ui/card_border.dart";
 import "package:url_launcher/url_launcher.dart";
 import "package:myttmi/core/ui/app_button.dart";
@@ -282,6 +283,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                               onSubscribe: () => _subscribe(c),
                               onUnsubscribe: () => _unsubscribe(c),
                               onOpen: () => _goMyCategory(c),
+                              onSeeAll: () => _go(AppRoutes.tournamentPlayers),
                             ),
                             const SizedBox(height: 12),
                           ],
@@ -403,6 +405,9 @@ class _CategoryCard extends StatefulWidget {
   final VoidCallback onSubscribe;
   final VoidCallback onUnsubscribe;
   final VoidCallback onOpen;
+  /// Lista completa de inscritos (pantalla aparte): la tarjeta muestra a
+  /// lo más [_maxInline] para no estirarse con 50 jugadores.
+  final VoidCallback onSeeAll;
 
   const _CategoryCard({
     required this.category,
@@ -412,6 +417,7 @@ class _CategoryCard extends StatefulWidget {
     required this.onSubscribe,
     required this.onUnsubscribe,
     required this.onOpen,
+    required this.onSeeAll,
   });
 
   @override
@@ -420,6 +426,7 @@ class _CategoryCard extends StatefulWidget {
 
 class _CategoryCardState extends State<_CategoryCard> {
   bool _expanded = false;
+  static const _maxInline = 8;
 
   @override
   Widget build(BuildContext context) {
@@ -572,7 +579,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                   padding: const EdgeInsets.only(top: 8),
                   child: Column(
                     children: [
-                      for (var i = 0; i < players.length; i++)
+                      for (var i = 0; i < players.length && i < _maxInline; i++)
                         Container(
                           margin: const EdgeInsets.only(bottom: 6),
                           padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
@@ -623,6 +630,18 @@ class _CategoryCardState extends State<_CategoryCard> {
                                 ),
                               ),
                             ],
+                          ),
+                        ),
+                      if (players.length > _maxInline)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: widget.onSeeAll,
+                            icon: const Icon(Icons.people_alt_rounded, size: 18, color: AppColors.scorifyMint),
+                            label: Text(
+                              "Ver los ${players.length} inscritos",
+                              style: _meta.copyWith(color: AppColors.scorifyMint, fontWeight: FontWeight.w600),
+                            ),
                           ),
                         ),
                     ],
@@ -772,9 +791,10 @@ class _Kpi extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(
-              fontFamily: AppTypography.body,
-              fontSize: 20,
+              fontFamily: AppTypography.display,
+              fontSize: 28,
               fontWeight: FontWeight.w600,
+              height: 1.0,
               color: AppColors.scorifyText,
             ),
           ),
@@ -931,7 +951,14 @@ class _PlayerAvatar extends StatelessWidget {
       child: ClipOval(
         child: url.isEmpty
             ? fallback
-            : Image.network(url, width: size, height: size, fit: BoxFit.cover, errorBuilder: (_, __, ___) => fallback),
+            : Image.network(
+                safeImageUrl(url)!,
+                width: size,
+                height: size,
+                cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).round(),
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => fallback,
+              ),
       ),
     );
   }

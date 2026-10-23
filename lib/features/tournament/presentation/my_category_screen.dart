@@ -737,9 +737,10 @@ class _Kpi extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            fontFamily: AppTypography.body,
-            fontSize: 20,
+            fontFamily: AppTypography.display,
+            fontSize: 28,
             fontWeight: FontWeight.w600,
+            height: 1.0,
             color: color,
           ),
         ),
@@ -916,8 +917,8 @@ class _MatchCard extends StatelessWidget {
         : m.tableNumber != null
         ? (
             "En mesa ${m.tableNumber}",
-            AppColors.scorifyMint,
-            AppColors.scorifyOnMint,
+            AppColors.scorifyLive,
+            AppColors.scorifyOnLive,
           )
         : (
             matchStatusText(m.status, m.resultReason),

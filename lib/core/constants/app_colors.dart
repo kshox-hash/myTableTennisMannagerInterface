@@ -15,8 +15,9 @@ class AppColors {
   static const Color scorifyDeep = Color(0xFF0B1528);
   // Navbar / superficie más oscura.
   static const Color scorifyNavbar = Color(0xFF070E1C);
-  // Input / superficie un paso más clara que la tarjeta.
-  static const Color scorifySurface2 = Color(0xFF111E36);
+  // Bloque interior (KPIs, chips, filas dentro de una tarjeta): un paso
+  // claramente más claro que la tarjeta, para que se lea como "dentro de".
+  static const Color scorifySurface2 = Color(0xFF172A4D);
 
   // Acento principal: azul eléctrico. Botones, nav activo, foco, chips
   // primarios, categorías/torneos.
@@ -25,8 +26,19 @@ class AppColors {
   static const Color scorifyMintDark = Color(0xFF0B5BD6);
   // Cyan: el otro extremo de los degradados (botones, anillos, gráficos).
   static const Color scorifyCyan = Color(0xFF00C8FF);
-  // Filete azul tenue de las tarjetas (ver CardBorder).
-  static const Color scorifyCardBorder = Color(0x3D3B82F6);
+  // Filete de las tarjetas comunes: casi invisible, solo separa del fondo
+  // (ver CardBorder). La tarjeta destacada usa scorifyCardBorderStrong.
+  static const Color scorifyCardBorder = Color(0x1F8DA6D9);
+  static const Color scorifyCardBorderStrong = Color(0x992D8CFF);
+
+  // Jerarquía de color (cada color significa UNA cosa en toda la app):
+  //   azul (scorifyMint) = lo que se toca: botones, enlaces, pestaña activa
+  //   cyan (scorifyLive) = está pasando ahora: en mesa, te toca, en vivo
+  //   verde (scorifyButterfly) = victoria / partido ganado
+  //   ámbar (scorifyPending) = pendiente / esperando
+  //   rojo (scorifyNegative) = derrota / error
+  static const Color scorifyLive = Color(0xFF00C8FF);
+  static const Color scorifyOnLive = Color(0xFF03141C);
 
   // Acento de PARTIDOS / victorias: verde. Texto oscuro encima.
   static const Color scorifyButterfly = Color(0xFF2FD67B);
@@ -51,7 +63,11 @@ class AppColors {
   /// Todas las tarjetas: marino liso.
   static const LinearGradient cardGradient = LinearGradient(colors: [Color(0xFF0B1528), Color(0xFF0B1528)]);
 
-  /// Tarjeta destacada (mi temporada / próximo partido): un marino con más
-  /// azul, para que resalte sobre las demás — también liso.
-  static const LinearGradient featuredGradient = LinearGradient(colors: [Color(0xFF102447), Color(0xFF102447)]);
+  /// Tarjeta HÉROE: una sola por pantalla (próximo partido, el campeonato
+  /// en su detalle…). Es la única tarjeta con degradado de verdad: azul
+  /// eléctrico arriba a la izquierda que baja a un azul profundo con un
+  /// toque índigo — el punto focal de la pantalla. El resto, plano.
+  // Por ahora LISO (prioridad a la fluidez): un azul más claro que las
+  // demás tarjetas + el filete brillante la siguen marcando como principal.
+  static const LinearGradient featuredGradient = LinearGradient(colors: [Color(0xFF13296B), Color(0xFF13296B)]);
 }

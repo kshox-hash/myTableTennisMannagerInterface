@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:myttmi/core/api/api_http.dart';
+import 'package:myttmi/core/ui/page_skeleton.dart';
 
 /// Timings compartidos por CyberPageRoute (push/pop entre pantallas) y por
 /// el pulso de cambio de pestaña del shell (ver app_shell.dart), para que
@@ -85,18 +85,20 @@ class CyberTransition {
 /// de atrás se oscurece y se aleja apenas. Al volver, lo mismo al revés.
 /// Se usa en TODAS las rutas con nombre (ver app_routes.dart).
 class CyberPageRoute<T> extends PageRouteBuilder<T> {
-  /// Esperar a que la pantalla traiga sus datos antes de mostrarla.
+  /// Mostrar un esqueleto de página completa hasta que la pantalla termine
+  /// de traer sus datos (ver LoadingCurtain). false en pantallas sin datos
+  /// del servidor (login, splash).
   final bool waitForData;
 
-  // waitForData arranca en false: la pantalla entra al instante con su
-  // esqueleto (LoadingState) y los datos aparecen al llegar. Esperarlos
-  // antes de animar (hasta ~0,35 s, ver ApiActivity.settle) se sentía como
-  // un retraso en cada toque.
-  CyberPageRoute({required WidgetBuilder builder, super.settings, this.waitForData = false})
+  // La transición parte al instante (antes esperaba hasta ~0,35 s los
+  // datos y se sentía como un retraso en cada toque): entra el esqueleto
+  // de página completa y, cuando llegan los datos, la pantalla entera.
+  CyberPageRoute({required WidgetBuilder builder, super.settings, this.waitForData = true})
       : super(
           transitionDuration: const Duration(milliseconds: 220),
           reverseTransitionDuration: const Duration(milliseconds: 180),
-          pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              waitForData ? LoadingCurtain(child: builder(context)) : builder(context),
           // Liviana: solo fundido + un leve desplazamiento de la que entra. La
           // de atrás queda quieta (antes se escalaba y se le aplicaba un
           // Opacity a toda la pantalla, que obliga a pintarla en una capa
@@ -112,19 +114,4 @@ class CyberPageRoute<T> extends PageRouteBuilder<T> {
             );
           },
         );
-
-  /// La pantalla nueva se arma invisible (la anterior sigue a la vista) y la
-  /// transición parte recién cuando terminó de traer sus datos (tope 1,2 s):
-  /// así aparece completa, sin bloques que se cargan después.
-  @override
-  TickerFuture didPush() {
-    final started = super.didPush();
-    if (!waitForData) return started;
-    controller!.stop();
-    controller!.value = 0;
-    ApiActivity.settle().then((_) {
-      if (isActive && controller != null && controller!.value == 0) controller!.forward();
-    });
-    return started;
-  }
 }

@@ -11,11 +11,10 @@ import "package:myttmi/core/constants/app_typography.dart";
 ///  - danger: rojo, para confirmar algo que no se puede deshacer.
 enum AppButtonVariant { primary, outline, danger }
 
-const appButtonGradient = LinearGradient(
-  colors: [AppColors.scorifyMint, AppColors.scorifyCyan],
-  begin: Alignment.centerLeft,
-  end: Alignment.centerRight,
-);
+// Sobrio: azul de marca → azul profundo (antes terminaba en cyan
+// brillante y se veía chillón). Vertical, como un botón con algo de volumen.
+// Por ahora color liso (prioridad a la fluidez; el diseño se retoma después).
+const appButtonGradient = LinearGradient(colors: [Color(0xFF2457D6), Color(0xFF2457D6)]);
 
 class AppButton extends StatefulWidget {
   final String label;
@@ -128,7 +127,7 @@ class _AppButtonState extends State<AppButton> {
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: radius,
-              border: disabled ? null : Border.all(color: Colors.white.withValues(alpha: 0.18), width: 1),
+              border: disabled ? null : Border.all(color: Colors.white.withValues(alpha: 0.10), width: 1),
             ),
             child: inner,
           ),
@@ -142,12 +141,12 @@ class _AppButtonState extends State<AppButton> {
             gradient: disabled
                 ? null
                 : LinearGradient(
-                    // Azul → cyan, apagado.
+                    // Azul → azul profundo, apagado (sin cyan, como el principal).
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
                       AppColors.scorifyMint.withValues(alpha: 0.9),
-                      AppColors.scorifyCyan.withValues(alpha: 0.7),
+                      const Color(0xFF1E4BC4),
                     ],
                   ),
             color: disabled ? AppColors.scorifySurface2 : null,
@@ -197,5 +196,5 @@ class _AppButtonState extends State<AppButton> {
 BoxDecoration selectedPillDecoration(bool selected) => BoxDecoration(
       gradient: selected ? appButtonGradient : null,
       borderRadius: BorderRadius.circular(99),
-      border: selected ? Border.all(color: Colors.white.withValues(alpha: 0.35)) : null,
+      border: selected ? Border.all(color: Colors.white.withValues(alpha: 0.12)) : null,
     );

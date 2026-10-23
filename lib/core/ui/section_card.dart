@@ -49,17 +49,17 @@ class SectionCard extends StatelessWidget {
             Icon(icon, size: 18, color: color),
             const SizedBox(width: 8),
           ],
+          // Título en blanco (jerarquía: el azul queda para lo que se toca).
           Expanded(
             child: Text(
-              title.toUpperCase(),
+              title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: AppTypography.body,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.1,
-                color: color,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: AppColors.scorifyText,
               ),
             ),
           ),
@@ -70,6 +70,7 @@ class SectionCard extends StatelessWidget {
     final body = Padding(padding: padding, child: child);
     return CardBorder(
       radius: _radius,
+      highlight: gradient == AppColors.featuredGradient,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(_radius),
         child: Material(
@@ -117,8 +118,8 @@ class SectionLabel extends StatelessWidget {
     return Row(
       children: [
         if (icon != null) ...[Icon(icon, size: 18, color: AppColors.scorifyMint), const SizedBox(width: 8)],
-        Text(text.toUpperCase(),
-            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 1.1, color: AppColors.scorifyMint)),
+        Text(text,
+            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
       ],
     );
   }

@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/page_skeleton.dart";
 import "package:myttmi/core/ui/stagger_in.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/app_toast.dart";
@@ -43,7 +44,8 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
   int get tabIndex => 1;
 
   @override
-  void onTabActivated() => _reloadAll();
+  // Al volver a la pestaña se actualiza en silencio (sin esqueleto).
+  void onTabActivated() => _reloadAll(silent: true);
 
   DateTime _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month, 1);
   DateTime _selectedDay = DateTime.now();
@@ -52,6 +54,8 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
   final _tournamentApi = TournamentApi();
 
   bool _loading = false;
+  // Primera carga: esqueleto de la pestaña entera (no solo del día).
+  bool _loadedOnce = false;
   String? _error;
   final Map<DateTime, List<CalendarEvent>> _itemsByDay = {};
 
@@ -65,8 +69,8 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
     _reloadAll();
   }
 
-  void _reloadAll() {
-    _loadMonth(_focusedMonth);
+  void _reloadAll({bool silent = false}) {
+    _loadMonth(_focusedMonth, silent: silent);
     _loadUpcoming();
   }
 
@@ -86,9 +90,9 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
     }
   }
 
-  Future<void> _loadMonth(DateTime month) async {
+  Future<void> _loadMonth(DateTime month, {bool silent = false}) async {
     setState(() {
-      _loading = true;
+      if (!silent) _loading = true;
       _error = null;
     });
     final first = DateTime(month.year, month.month, 1);
@@ -108,7 +112,12 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadedOnce = true;
+        });
+      }
     }
   }
 
@@ -133,6 +142,7 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
 
   @override
   Widget build(BuildContext context) {
+    if (!_loadedOnce) return const PageSkeleton();
     final dayItems = _itemsByDay[_dayKey(_selectedDay)] ?? const <CalendarEvent>[];
 
     // Deslizar hacia abajo recarga el mes y los próximos campeonatos.
