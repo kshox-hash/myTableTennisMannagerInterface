@@ -17,7 +17,7 @@ Future<bool> confirmAction(
     context: context,
     builder: (ctx) => AlertDialog(
       backgroundColor: AppColors.scorifyDeep,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       title: Text(
         title,
         style: const TextStyle(

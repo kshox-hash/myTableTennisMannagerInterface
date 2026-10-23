@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:myttmi/core/constants/app_config.dart';
 import 'package:myttmi/features/referee/referee_scan_screen.dart';
 import 'package:myttmi/features/shell/splash_gate.dart';
 import 'package:myttmi/core/storage/session_storage.dart';
@@ -49,7 +51,7 @@ class _AppShellState extends State<AppShell>
   // un solo widget: el IndexedStack se apaga, en el punto más bajo se
   // cambia el índice (no se ve, así que no hay salto brusco) y se vuelve
   // a encender — en vez de un cambio instantáneo sin transición.
-  static const _pulseDuration = Duration(milliseconds: 280);
+  static const _pulseDuration = Duration(milliseconds: 180);
   late final AnimationController _pulse = AnimationController(
     vsync: this,
     duration: _pulseDuration,
@@ -73,7 +75,7 @@ class _AppShellState extends State<AppShell>
     await showModalBottomSheet<void>(
       context: context,
       backgroundColor: AppColors.scorifyDeep,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(2))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(12))),
       builder: (sheet) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -87,11 +89,62 @@ class _AppShellState extends State<AppShell>
                 Navigator.push(context, CyberPageRoute(builder: (_) => const RefereeScanScreen()));
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.privacy_tip_outlined, color: AppColors.scorifyText),
+              title: const Text("Política de privacidad", style: TextStyle(color: AppColors.scorifyText)),
+              trailing: const Icon(Icons.open_in_new_rounded, size: 18, color: AppColors.scorifyTextMuted),
+              onTap: () {
+                Navigator.pop(sheet);
+                launchUrl(Uri.parse(AppConfig.privacyUrl), mode: LaunchMode.externalApplication);
+              },
+            ),
+            const Divider(height: 1, color: AppColors.scorifySurface2),
+            ListTile(
+              leading: const Icon(Icons.delete_forever_rounded, color: AppColors.scorifyNegative),
+              title: const Text("Eliminar cuenta", style: TextStyle(color: AppColors.scorifyNegative)),
+              onTap: () {
+                Navigator.pop(sheet);
+                _deleteAccount();
+              },
+            ),
             const SizedBox(height: 8),
           ],
         ),
       ),
     );
+  }
+
+  // Exigido por Google Play: la cuenta se puede borrar desde la app. Doble
+  // confirmación porque no se puede deshacer.
+  Future<void> _deleteAccount() async {
+    final ok = await confirmAction(
+      context,
+      title: "Eliminar cuenta",
+      message:
+          "Se borrarán tu nombre, email, foto y ficha de jugador. Tus resultados de partidos quedarán como \"Jugador eliminado\". Esto no se puede deshacer.",
+      confirmLabel: "Continuar",
+      danger: true,
+    );
+    if (!ok || !mounted) return;
+    final sure = await confirmAction(
+      context,
+      title: "¿Seguro?",
+      message: "Tu cuenta se eliminará ahora y no podrás recuperarla.",
+      confirmLabel: "Eliminar mi cuenta",
+      danger: true,
+    );
+    if (!sure) return;
+    try {
+      await ProfileApi().deleteAccount();
+    } catch (e) {
+      if (mounted) showToast(context, e.toString(), error: true);
+      return;
+    }
+    await PushService.unregister();
+    await SessionStorage().clearAll();
+    if (!mounted) return;
+    showToast(context, "Tu cuenta fue eliminada.");
+    Navigator.pushAndRemoveUntil(context, CyberPageRoute(builder: (_) => const SplashGate()), (route) => false);
   }
 
   Future<void> _logout() async {
@@ -175,10 +228,10 @@ class _AppShellState extends State<AppShell>
       // Menú lateral (☰) en vez de la barra de navegación de abajo.
       drawer: AppDrawer(
         main: [
-          DrawerItem(Icons.home_rounded, "Inicio", () => _switchTab(0, link: true), selected: _index == 0),
-          DrawerItem(Icons.calendar_month_rounded, "Calendario", () => _switchTab(1, link: true), selected: _index == 1),
-          DrawerItem(Icons.trending_up_rounded, "Mi rendimiento", () => _switchTab(2, link: true), selected: _index == 2),
-          DrawerItem(Icons.emoji_events_rounded, "Campeonatos", () => _switchTab(3, link: true), selected: _index == 3),
+          DrawerItem(Icons.home_rounded, "Inicio", () => _switchTab(0), selected: _index == 0),
+          DrawerItem(Icons.calendar_month_rounded, "Calendario", () => _switchTab(1), selected: _index == 1),
+          DrawerItem(Icons.trending_up_rounded, "Mi rendimiento", () => _switchTab(2), selected: _index == 2),
+          DrawerItem(Icons.emoji_events_rounded, "Campeonatos", () => _switchTab(3), selected: _index == 3),
         ],
         more: [
           DrawerItem(Icons.history_rounded, "Historial", () => Navigator.pushNamed(context, AppRoutes.history)),

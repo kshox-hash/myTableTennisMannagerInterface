@@ -102,6 +102,12 @@ class Tournament {
   final List<TournamentCategory> categories;
   final String? organizerName;
   final String? organizerAvatarUrl;
+  /// Da puntos para el ranking (lo decide el organizador; 041).
+  final bool isRanked;
+  /// Nivel de puntos: local | regional | nacional (068).
+  final String rankingLevel;
+  /// "league" = liga interna de un club (045); "tournament" = campeonato.
+  final String kind;
 
   Tournament({
     required this.idTournament,
@@ -118,7 +124,12 @@ class Tournament {
     required this.categories,
     this.organizerName,
     this.organizerAvatarUrl,
+    this.isRanked = true,
+    this.rankingLevel = "local",
+    this.kind = "tournament",
   });
+
+  bool get isLeague => kind == "league";
 
   bool get isCancelled => status == "cancelled";
 
@@ -142,6 +153,9 @@ class Tournament {
       categories: cats,
       organizerName: json["organizer_name"] as String?,
       organizerAvatarUrl: json["organizer_avatar_url"] as String?,
+      isRanked: json["is_ranked"] != false,
+      rankingLevel: (json["ranking_level"] ?? "local").toString(),
+      kind: (json["kind"] ?? "tournament").toString(),
     );
   }
 }

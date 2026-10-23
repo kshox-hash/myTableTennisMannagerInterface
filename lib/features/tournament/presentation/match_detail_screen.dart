@@ -180,7 +180,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: AppColors.scorifyNegative,
-                                      borderRadius: BorderRadius.circular(2),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: const Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -265,7 +265,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                               const SizedBox(height: 16),
                               Container(
                                 padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(color: AppColors.scorifyPending.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(2)),
+                                decoration: BoxDecoration(color: AppColors.scorifyPending.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(12)),
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -274,8 +274,12 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                     Expanded(
                                       child: Text(
                                         m.winnerId == null
-                                            ? "W.O.: el partido no se jugó porque un jugador no se presentó."
-                                            : "W.O.: ${m.winnerId == m.player1Id ? m.player2Name : m.player1Name} no se presentó. El partido se da por ganado a ${m.winnerId == m.player1Id ? m.player1Name : m.player2Name} y cuenta como derrota para quien no se presentó.",
+                                            ? walkoverText(m.resultReason)
+                                            : walkoverText(
+                                                m.resultReason,
+                                                loserName: m.winnerId == m.player1Id ? m.player2Name : m.player1Name,
+                                                winnerName: m.winnerId == m.player1Id ? m.player1Name : m.player2Name,
+                                              ),
                                         style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, height: 1.35, color: AppColors.scorifyText),
                                       ),
                                     ),
@@ -318,7 +322,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                   _InfoRow(
                                     label: "Estado",
                                     value:
-                                        matchStatusLabel[m.status] ?? m.status,
+                                        matchStatusText(m.status, m.resultReason),
                                   ),
                                   if (m.tableNumber != null)
                                     _InfoRow(
@@ -432,7 +436,7 @@ class _PlayerRow extends StatelessWidget {
               color: _closed(sp.mine, sp.theirs)
                   ? Colors.transparent
                   : AppColors.scorifyNegative.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               "${sp.mine}",
@@ -457,7 +461,7 @@ class _PlayerRow extends StatelessWidget {
             color: isWinner
                 ? AppColors.scorifyButterfly
                 : AppColors.scorifySurface2,
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             "$sets",

@@ -48,7 +48,7 @@ class HomePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(2);
+    final radius = BorderRadius.circular(12);
     return CardBorder(child: Material(
       color: Colors.transparent,
       borderRadius: radius,
@@ -98,7 +98,7 @@ class HomeHero extends StatelessWidget {
     final since = memberSince?.toLocal();
     Widget chip(IconData icon, String text) => Container(
           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-          decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(2)),
+          decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(12)),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -290,7 +290,7 @@ class HomeStreakCard extends StatelessWidget {
                 // Ganado: el mismo degradado del botón principal.
                 gradient: won ? appButtonGradient : null,
                 color: won ? null : AppColors.scorifyNegative,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(won ? Icons.check_rounded : Icons.close_rounded, color: won ? AppColors.scorifyOnButterfly : Colors.white, size: 14),
             ),
@@ -471,7 +471,7 @@ class HomeGroupCard extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: leading ? AppColors.scorifyButterfly : AppColors.scorifySurface2,
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               position == null ? "–" : "${position}°",
@@ -529,7 +529,7 @@ class HomeRefereeCard extends StatelessWidget {
             width: 44,
             height: 44,
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: AppColors.scorifyButterfly, borderRadius: BorderRadius.circular(2)),
+            decoration: BoxDecoration(color: AppColors.scorifyButterfly, borderRadius: BorderRadius.circular(12)),
             child: const Icon(Icons.sports_rounded, color: AppColors.scorifyOnButterfly),
           ),
           const SizedBox(width: 12),

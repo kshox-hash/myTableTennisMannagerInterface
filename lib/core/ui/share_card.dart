@@ -79,7 +79,7 @@ class ShareCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF0F4652), Color(0xFF060E12), Color(0xFF060E12)],
+          colors: [Color(0xFF12305E), Color(0xFF050A14), Color(0xFF050A14)],
           stops: [0, 0.55, 1],
         ),
       ),

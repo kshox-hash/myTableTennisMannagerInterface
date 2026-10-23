@@ -23,6 +23,8 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.1.0" apply false
     // Firebase (push): lee app/google-services.json
     id("com.google.gms.google-services") version "4.4.2" apply false
+    // Crashlytics: sube los símbolos para leer los reportes de errores
+    id("com.google.firebase.crashlytics") version "3.0.2" apply false
 }
 
 include(":app")

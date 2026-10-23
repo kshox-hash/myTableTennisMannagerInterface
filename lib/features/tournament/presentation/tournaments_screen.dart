@@ -297,7 +297,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
                   initialValue: _region ?? "",
                   isExpanded: true,
                   dropdownColor: AppColors.scorifySurface2,
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(12),
                   icon: const Icon(
                     Icons.keyboard_arrow_down_rounded,
                     color: AppColors.scorifyTextMuted,
@@ -355,7 +355,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
 
   InputDecoration _inputDeco({String? hint}) {
     final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(2),
+      borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide.none,
     );
     return InputDecoration(
@@ -368,7 +368,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
       border: border,
       enabledBorder: border,
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.4),
       ),
     );
@@ -561,7 +561,7 @@ class _StatusChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         label,

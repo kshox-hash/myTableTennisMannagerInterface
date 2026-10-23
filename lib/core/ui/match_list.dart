@@ -21,7 +21,7 @@ class CompactMatchRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(2),
+      borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 11),
         child: Row(
@@ -97,7 +97,7 @@ List<Widget> matchesByMonth(BuildContext context, List<PlayerMatchHistoryItem> i
                   ? "Grupo ${m.groupName}"
                   : m.round != null
                       ? matchRoundLabel(m.round!)
-                      : (matchStatusLabel[m.status] ?? "");
+                      : matchStatusText(m.status, m.resultReason);
               return CompactMatchRow(
                 won: m.winnerId == null ? null : m.winnerId == ownerId,
                 opponent: isP1 ? m.player2Name : m.player1Name,

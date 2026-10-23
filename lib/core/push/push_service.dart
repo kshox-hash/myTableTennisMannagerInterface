@@ -25,6 +25,8 @@ class PushService {
   PushService._();
 
   static bool _ready = false;
+  /// Firebase inicializado (lo usan también Crashlytics/Analytics, ver monitoring.dart).
+  static bool get firebaseReady => _ready;
   static bool _listening = false;
   static String? _token;
 

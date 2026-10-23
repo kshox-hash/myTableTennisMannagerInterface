@@ -218,7 +218,7 @@ class _MatchCard extends StatelessWidget {
         ? ("Finalizado", AppColors.scorifySurface2, AppColors.scorifyTextMuted)
         : m.tableNumber != null
             ? ("En mesa ${m.tableNumber}", AppColors.scorifyMint, AppColors.scorifyOnMint)
-            : (matchStatusLabel[m.status] ?? m.status, AppColors.scorifySurface2, AppColors.scorifyText);
+            : (matchStatusText(m.status, m.resultReason), AppColors.scorifySurface2, AppColors.scorifyText);
     final meta = "Partido ${m.matchNumber}";
 
     return GlassCard(
@@ -238,7 +238,7 @@ class _MatchCard extends StatelessWidget {
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: pillBg, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(color: pillBg, borderRadius: BorderRadius.circular(12)),
                 child: Text(pillText,
                     style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: pillFg)),
               ),
@@ -296,7 +296,7 @@ class _Player extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => _openProfile(context, id, name),
-      borderRadius: BorderRadius.circular(2),
+      borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.all(2),
         child: Column(
@@ -558,10 +558,10 @@ class _FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: selected ? AppColors.scorifyText : AppColors.scorifySurface2,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
       child: InkWell(
         onTap: onTap,
-        customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2))),
+        customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
           child: Text(
@@ -729,7 +729,7 @@ class _PagedMatchListState extends State<_PagedMatchList> {
               padding: const EdgeInsets.only(top: 6, bottom: 10),
               child: Row(
                 children: [
-                  Container(width: 4, height: 18, decoration: BoxDecoration(color: AppColors.scorifyMint, borderRadius: BorderRadius.circular(2))),
+                  Container(width: 4, height: 18, decoration: BoxDecoration(color: AppColors.scorifyMint, borderRadius: BorderRadius.circular(12))),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(parts.last,

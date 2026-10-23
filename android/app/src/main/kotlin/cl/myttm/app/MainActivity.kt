@@ -1,4 +1,4 @@
-package com.example.myttmi
+package cl.myttm.app
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

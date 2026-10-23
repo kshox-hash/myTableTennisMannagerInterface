@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/navigation/deep_links.dart";
 import "package:myttmi/core/push/push_service.dart";
+import "package:myttmi/core/monitoring.dart";
 import "package:myttmi/core/favorites/favorite_matches.dart";
 import "package:myttmi/features/shell/splash_gate.dart";
 import "package:myttmi/routes/app_routes.dart";
@@ -9,6 +10,7 @@ import "package:myttmi/routes/app_routes.dart";
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PushService.init();
+  await Monitoring.init();
   await FavoriteMatches.load();
   DeepLinks.init();
   runApp(const MyApp());
@@ -20,7 +22,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "myTTMI",
+      title: "MyTTM",
       debugShowCheckedModeBanner: false,
       // Base oscura acorde al sistema "Marcador" — antes era el
       // ThemeData(useMaterial3: true) por defecto (blanco/teal), que es lo
@@ -37,26 +39,27 @@ class MyApp extends StatelessWidget {
           primary: AppColors.scorifyMint,
           onPrimary: AppColors.scorifyOnMint,
         ),
-        // Botones de acción verdes con la misma letra que la web
+        // Botones de acción azules con la misma letra que la web
         // (Montserrat 600, 14 px).
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
-            backgroundColor: AppColors.scorifyButterfly,
-            foregroundColor: AppColors.scorifyOnButterfly,
+            backgroundColor: AppColors.scorifyMint,
+            foregroundColor: AppColors.scorifyOnMint,
             textStyle: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w600, fontSize: 14),
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2))),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.scorifyButterfly,
-            foregroundColor: AppColors.scorifyOnButterfly,
+            backgroundColor: AppColors.scorifyMint,
+            foregroundColor: AppColors.scorifyOnMint,
             textStyle: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w600, fontSize: 14),
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2))),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
           ),
         ),
       ),
       navigatorKey: DeepLinks.navigatorKey,
+      navigatorObservers: Monitoring.observers,
       onGenerateRoute: AppRoutes.onGenerateRoute,
       // "home" en vez de "initialRoute": un initialRoute con barras (ej.
       // "/splash") hace que Flutter arme el stack inicial dividiendo el

@@ -28,14 +28,20 @@ class TopHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shell = AppShellScope.of(context);
+    // Pestaña principal a la que se llegó con un enlace (p. ej. "Ver todos"
+    // en el Inicio): flecha ← que vuelve a la pestaña de origen, en vez del
+    // menú — igual que una pantalla empujada. Desde el menú no hay flecha.
+    final returnTab = onBack == null && !showBack ? shell?.returnTab : null;
+    final back = onBack ?? (returnTab != null ? () => shell!.switchTab(returnTab) : null);
     return Row(
       children: [
-        if (onBack == null && !showBack && AppShellScope.of(context)?.openMenu != null) ...[
-          HeaderIconButton(icon: Icons.menu_rounded, onTap: AppShellScope.of(context)!.openMenu!),
+        if (back == null && !showBack && shell?.openMenu != null) ...[
+          HeaderIconButton(icon: Icons.menu_rounded, onTap: shell!.openMenu!),
           const SizedBox(width: 12),
         ],
-        if (onBack != null || (showBack && Navigator.canPop(context))) ...[
-          BackCircleButton(onTap: onBack ?? () => Navigator.pop(context)),
+        if (back != null || (showBack && Navigator.canPop(context))) ...[
+          BackCircleButton(onTap: back ?? () => Navigator.pop(context)),
           const SizedBox(width: 12),
         ],
         Expanded(
@@ -61,7 +67,7 @@ class TopHeader extends StatelessWidget {
           ...actions!,
         ],
         // Secciones principales: la campana, igual que en el Inicio.
-        if (onBack == null && !showBack && AppShellScope.of(context)?.openMenu != null) ...[
+        if (onBack == null && !showBack && shell?.openMenu != null) ...[
           const SizedBox(width: 10),
           ValueListenableBuilder<int>(
             valueListenable: NotificationPopups.unread,
@@ -155,16 +161,16 @@ class PagerButton extends StatelessWidget {
     final enabled = onTap != null;
     return Material(
       color: Colors.white.withValues(alpha: 0.06),
-      borderRadius: BorderRadius.circular(2),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
           width: 32,
           height: 28,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
           ),
           child: Icon(next ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,

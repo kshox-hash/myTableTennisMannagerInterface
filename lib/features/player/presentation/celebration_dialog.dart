@@ -490,7 +490,7 @@ class _ResultPage extends StatelessWidget {
                   height: 13,
                   decoration: BoxDecoration(
                     color: AppColors.scorifyMint,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 const SizedBox(width: 8),

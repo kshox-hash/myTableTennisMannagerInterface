@@ -1,3 +1,4 @@
+import "package:myttmi/core/helpers/friendly_error.dart";
 import "package:myttmi/core/ui/section_card.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
@@ -179,7 +180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   InputDecoration _inputDeco(IconData? icon) {
-    final border = OutlineInputBorder(borderRadius: BorderRadius.circular(2), borderSide: BorderSide.none);
+    final border = OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none);
     return InputDecoration(
       isDense: true,
       filled: true,
@@ -189,7 +190,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       border: border,
       enabledBorder: border,
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.4),
       ),
     );
@@ -274,7 +275,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   _FormField(
                                     label: "Fecha de nacimiento",
                                     child: InkWell(
-                                      borderRadius: BorderRadius.circular(2),
+                                      borderRadius: BorderRadius.circular(12),
                                       onTap: _pickBirthDate,
                                       child: InputDecorator(
                                         decoration: _inputDeco(Icons.cake_rounded).copyWith(
@@ -291,7 +292,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       initialValue: _gender,
                                       isExpanded: true,
                                       dropdownColor: AppColors.scorifySurface2,
-                                      borderRadius: BorderRadius.circular(2),
+                                      borderRadius: BorderRadius.circular(12),
                                       icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.scorifyTextMuted),
                                       style: AppTypography.bodyText,
                                       decoration: _inputDeco(Icons.wc_rounded),
@@ -552,7 +553,7 @@ class _ClubSectionState extends State<_ClubSection> {
                     labelStyle: AppTypography.bodyMuted,
                     filled: true,
                     fillColor: AppColors.scorifyInput,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(2), borderSide: BorderSide.none),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   ),
                   items: _clubs
                       .map((c) => DropdownMenuItem(
@@ -579,7 +580,7 @@ class _ClubSectionState extends State<_ClubSection> {
             ),
           if (_error != null) ...[
             const SizedBox(height: 8),
-            Text(_error!, style: AppTypography.bodyMuted.copyWith(color: Colors.redAccent)),
+            Text(friendlyError(_error!), style: AppTypography.bodyMuted.copyWith(color: Colors.redAccent)),
           ],
         ],
       ),
@@ -733,7 +734,7 @@ class _DuesCardState extends State<_DuesCard> {
             height: 44,
             decoration: BoxDecoration(
               color: (last != null ? AppColors.scorifyButterfly : AppColors.scorifyTextMuted).withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               last != null ? Icons.verified_rounded : Icons.receipt_long_rounded,
@@ -776,7 +777,7 @@ class _ProfileHero extends StatelessWidget {
     final p = profile;
     Widget chip(IconData icon, String text) => Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(2)),
+          decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(12)),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -831,7 +832,7 @@ class _InfoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(2)),
+      decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(12)),
       child: Row(
         children: [
           Icon(icon, color: AppColors.scorifyMint, size: 20),

@@ -100,4 +100,14 @@ class ProfileApi {
 
     return PublicPlayerProfile.fromJson(decoded["data"] as Map<String, dynamic>);
   }
+
+  /// Elimina la cuenta: el servidor borra los datos personales (nombre,
+  /// email, foto, ficha) y deja los resultados de partidos anónimos.
+  Future<void> deleteAccount() async {
+    final uri = Uri.parse("$baseUrl${Endpoints.me}");
+    final res = await apiHttp.delete(uri, headers: await _authHeaders());
+    if (res.statusCode != 200) {
+      throw Exception("HTTP ${res.statusCode}: ${res.body}");
+    }
+  }
 }

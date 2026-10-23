@@ -4,8 +4,10 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>La cámara se usa para escanear el código QR del partido que vas a arbitrar.</string>
 	<key>CFBundleDisplayName</key>
-	<string>Myttmi</string>
+	<string>MyTTM</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

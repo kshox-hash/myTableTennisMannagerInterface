@@ -1,5 +1,4 @@
 import "package:myttmi/core/ui/top_header.dart";
-import "package:myttmi/features/home/widget/home_video_background.dart";
 import "package:myttmi/features/shell/shell_preload.dart";
 import "package:myttmi/features/tournament/models/tournament_model.dart";
 import "package:myttmi/features/home/widget/home_v2.dart";
@@ -317,7 +316,6 @@ class _HomeScreenState extends State<HomeScreen>
 
     return Stack(
       children: [
-        const Positioned.fill(child: HomeVideoBackground()),
         Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -461,6 +459,7 @@ class _HomeScreenState extends State<HomeScreen>
                           children: [
                             Expanded(
                               child: HomeTile(
+                                gradient: homeGradientTeal,
                                 icon: Icons.emoji_events_rounded,
                                 value: "${_mine.length}",
                                 caption: _mine.length == 1 ? "inscrito" : "inscritos",
@@ -474,6 +473,7 @@ class _HomeScreenState extends State<HomeScreen>
                             const SizedBox(width: 12),
                             Expanded(
                               child: HomeTile(
+                                gradient: homeGradientEmerald,
                                 icon: Icons.calendar_month_rounded,
                                 value: "${_week.length}",
                                 caption: "en 14 días",

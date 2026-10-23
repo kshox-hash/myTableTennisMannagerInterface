@@ -16,11 +16,17 @@ import "package:myttmi/features/home/widget/home_layout.dart";
 
 const _mint = AppColors.scorifyMint;
 
-// Tarjetas del Inicio: color sólido oscuro al 85% (el fondo se intuye).
-// El color va en los detalles; la principal lleva una línea en degradado.
-const _glass = LinearGradient(colors: [Color(0xD90B1A20), Color(0xD90B1A20)]);
-const _glassFeatured = LinearGradient(colors: [Color(0xE00B1A20), Color(0xE00B1A20)]);
+// Tarjetas del Inicio: marino con filete azul (rediseño 2026-10), las
+// mismas de AppColors. La principal (mi temporada) lleva tinte azul.
+const _glass = AppColors.cardGradient;
+const _glassFeatured = AppColors.featuredGradient;
 const _lime = AppColors.scorifyButterfly;
+
+// Degradados de las tarjetas de Inicio: la principal con tinte azul, el
+// resto marino como cualquier tarjeta.
+const homeGradientMain = AppColors.featuredGradient;
+const homeGradientTeal = AppColors.cardGradient;
+const homeGradientEmerald = AppColors.cardGradient;
 
 TextStyle _t(double size, {FontWeight w = FontWeight.w400, Color c = AppColors.scorifyText, double? ls, double? h}) =>
     TextStyle(fontFamily: AppTypography.body, fontSize: size, fontWeight: w, color: c, letterSpacing: ls, height: h);
@@ -48,44 +54,25 @@ class _HomeCardState extends State<HomeCard> {
 
   @override
   Widget build(BuildContext context) {
-    const radius = 2.0; // esquinas casi rectas (estilo menú FIFA)
+    const radius = 14.0; // esquinas redondeadas (rediseño 2026-10)
     final r = BorderRadius.circular(radius);
     return AnimatedScale(
       scale: _down ? 0.98 : 1,
       duration: const Duration(milliseconds: 110),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
+      child: CardBorder(
+        radius: radius,
+        child: ClipRRect(
           borderRadius: r,
-          boxShadow: const [BoxShadow(color: Color(0x59000000), blurRadius: 18, offset: Offset(0, 8))],
-        ),
-        child: CardBorder(
-          radius: radius,
-          child: ClipRRect(
-            borderRadius: r,
-            child: Material(
-              color: Colors.transparent,
-              child: Ink(
-                decoration: BoxDecoration(gradient: widget.gradient ?? _glass),
-                child: InkWell(
-                  onTap: widget.onTap,
-                  onTapDown: (_) => _press(true),
-                  onTapUp: (_) => _press(false),
-                  onTapCancel: () => _press(false),
-                  child: Stack(
-                    children: [
-                      // Tarjeta principal: línea fina en degradado arriba.
-                      if (widget.gradient == _glassFeatured)
-                        const Positioned(
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          height: 3,
-                          child: DecoratedBox(decoration: BoxDecoration(gradient: appButtonGradient)),
-                        ),
-                      Padding(padding: widget.padding, child: widget.child),
-                    ],
-                  ),
-                ),
+          child: Material(
+            color: Colors.transparent,
+            child: Ink(
+              decoration: BoxDecoration(gradient: widget.gradient ?? _glass),
+              child: InkWell(
+                onTap: widget.onTap,
+                onTapDown: (_) => _press(true),
+                onTapUp: (_) => _press(false),
+                onTapCancel: () => _press(false),
+                child: Padding(padding: widget.padding, child: widget.child),
               ),
             ),
           ),
@@ -111,14 +98,22 @@ class HomeCardTitle extends StatelessWidget {
       children: [
         Icon(icon, size: 18, color: color),
         const SizedBox(width: 8),
-        Expanded(child: Text(title.toUpperCase(), style: _t(13, w: FontWeight.w600, c: color, ls: 1.1))),
+        Expanded(
+          child: Text(
+            title.toUpperCase(),
+            style: _t(13, w: FontWeight.w600, c: color, ls: 1.1),
+          ),
+        ),
         if (action != null)
           InkWell(
             onTap: onAction,
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(12),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-              child: Text("$action ›", style: _t(12, w: FontWeight.w500, c: _mint)),
+              child: Text(
+                "$action ›",
+                style: _t(12, w: FontWeight.w500, c: _mint),
+              ),
             ),
           ),
       ],
@@ -137,6 +132,7 @@ class HomeProfileRow extends StatelessWidget {
   final String? gender;
   final String? avatarUrl;
   final VoidCallback onTap;
+
   /// Saludo y frase del momento (si vienen, reemplazan nombre y datos).
   final String? greeting;
   final String? context;
@@ -156,22 +152,24 @@ class HomeProfileRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final genderLabel = switch (gender) { "male" => "Masculino", "female" => "Femenino", "other" => "Otro", _ => null };
-    final sub = [
-      if ((country ?? "").isNotEmpty) country!,
-      if ((club ?? "").trim().isNotEmpty) club!.trim(),
-    ].join(" · ");
+    final genderLabel = switch (gender) {
+      "male" => "Masculino",
+      "female" => "Femenino",
+      "other" => "Otro",
+      _ => null,
+    };
+    final sub = [if ((country ?? "").isNotEmpty) country!, if ((club ?? "").trim().isNotEmpty) club!.trim()].join(" · ");
     Widget meta(IconData icon, String text) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 15, color: _mint),
-            const SizedBox(width: 5),
-            Text(text, style: _t(12.5, c: AppColors.scorifyText)),
-          ],
-        );
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 15, color: _mint),
+        const SizedBox(width: 5),
+        Text(text, style: _t(12.5, c: AppColors.scorifyText)),
+      ],
+    );
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(2),
+      borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
@@ -184,8 +182,7 @@ class HomeProfileRow extends StatelessWidget {
                   decoration: const BoxDecoration(shape: BoxShape.circle, gradient: appButtonGradient),
                   child: UserAvatar(userId: userId, url: avatarUrl, size: 54),
                 ),
-                if ((country ?? "").isNotEmpty)
-                  Positioned(right: -2, bottom: -2, child: CountryFlag(country: country!, size: 16)),
+                if ((country ?? "").isNotEmpty) Positioned(right: -2, bottom: -2, child: CountryFlag(country: country!, size: 16)),
               ],
             ),
             const SizedBox(width: 14),
@@ -196,7 +193,12 @@ class HomeProfileRow extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(greeting ?? name, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(18, w: FontWeight.w600, h: 1.2)),
+                        child: Text(
+                          greeting ?? name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: _t(18, w: FontWeight.w600, h: 1.2),
+                        ),
                       ),
                       const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
                     ],
@@ -205,7 +207,12 @@ class HomeProfileRow extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(this.context ?? sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(13, c: this.context != null ? _mint : AppColors.scorifyTextMuted)),
+                        child: Text(
+                          this.context ?? sub,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: _t(13, c: this.context != null ? _mint : AppColors.scorifyTextMuted),
+                        ),
                       ),
                       if (this.context == null) ...[
                         if (age != null) ...[meta(Icons.person_outline_rounded, "$age años"), const SizedBox(width: 12)],
@@ -237,8 +244,10 @@ class HomeMatchCard extends StatelessWidget {
   final String when; // "Sáb. 27 Sep\n15:30" o "Por definir"
   final String table; // "Mesa 4" / "En cola"
   final String? place;
+
   /// Historial entre ambos ("Se han enfrentado 3 veces · 2-1").
   final String? h2h;
+
   /// Para el estado en vivo: hora programada y mesa asignada.
   final DateTime? startsAt;
   final int? tableNumber;
@@ -267,57 +276,63 @@ class HomeMatchCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget player(String? id, String? url, String name, String? club, {VoidCallback? onTap}) => InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(2),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: _mint.withValues(alpha: 0.7), width: 1.5)),
-                child: UserAvatar(userId: id, url: url, size: 40),
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(13.5, w: FontWeight.w600)),
-                    if ((club ?? "").trim().isNotEmpty)
-                      Text(club!.trim(), maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(11, c: AppColors.scorifyTextMuted)),
-                  ],
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: _mint.withValues(alpha: 0.7), width: 1.5),
+            ),
+            child: UserAvatar(userId: id, url: url, size: 40),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: _t(13.5, w: FontWeight.w600),
                 ),
-              ),
-            ],
+                if ((club ?? "").trim().isNotEmpty)
+                  Text(
+                    club!.trim(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: _t(11, c: AppColors.scorifyTextMuted),
+                  ),
+              ],
+            ),
           ),
-        );
+        ],
+      ),
+    );
     Widget info(IconData icon, String text, {int flex = 2}) => Expanded(
-          flex: flex,
-          child: Row(
-            children: [
-              Icon(icon, size: 17, color: _mint),
-              const SizedBox(width: 6),
-              Expanded(child: Text(text, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(11.5, h: 1.3))),
-            ],
+      flex: flex,
+      child: Row(
+        children: [
+          Icon(icon, size: 17, color: _mint),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(text, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(11.5, h: 1.3)),
           ),
-        );
-    Widget sep() => Container(width: 1, height: 26, margin: const EdgeInsets.symmetric(horizontal: 8), color: Colors.white.withValues(alpha: 0.10));
+        ],
+      ),
+    );
+    Widget sep() =>
+        Container(width: 1, height: 26, margin: const EdgeInsets.symmetric(horizontal: 8), color: Colors.white.withValues(alpha: 0.10));
 
     return HomeCard(
       gradient: _glassFeatured,
       padding: EdgeInsets.zero,
       child: Stack(
         children: [
-          // Decoración a la derecha: franja diagonal y una paleta tenue.
-          const Positioned.fill(child: CustomPaint(painter: _DiagonalPainter())),
-          Positioned(
-            right: -18,
-            top: 18,
-            child: Transform.rotate(
-              angle: -0.5,
-              child: Icon(Icons.sports_tennis_rounded, size: 110, color: Colors.white.withValues(alpha: 0.05)),
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
             child: Column(
@@ -325,19 +340,29 @@ class HomeMatchCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Expanded(child: HomeCardTitle(icon: Icons.calendar_month_rounded, title: "Próximo partido")),
+                    const Expanded(
+                      child: HomeCardTitle(icon: Icons.calendar_month_rounded, title: "Próximo partido"),
+                    ),
                     _LiveStatus(startsAt: startsAt, tableNumber: tableNumber),
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(tournamentName, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(13, c: AppColors.scorifyText.withValues(alpha: 0.85))),
+                Text(
+                  tournamentName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: _t(13, c: AppColors.scorifyText.withValues(alpha: 0.85)),
+                ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(child: player(myId, myAvatarUrl, "Tú", myClub)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text("VS", style: _t(14, w: FontWeight.w600, c: AppColors.scorifyTextMuted)),
+                      child: Text(
+                        "VS",
+                        style: _t(14, w: FontWeight.w600, c: AppColors.scorifyTextMuted),
+                      ),
                     ),
                     Expanded(child: player(opponentId, opponentAvatarUrl, opponentName, opponentClub, onTap: onOpponent)),
                   ],
@@ -348,7 +373,14 @@ class HomeMatchCard extends StatelessWidget {
                     children: [
                       const Icon(Icons.compare_arrows_rounded, size: 16, color: _mint),
                       const SizedBox(width: 6),
-                      Expanded(child: Text(h2h!, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12, c: AppColors.scorifyTextMuted))),
+                      Expanded(
+                        child: Text(
+                          h2h!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: _t(12, c: AppColors.scorifyTextMuted),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -378,37 +410,6 @@ class HomeMatchCard extends StatelessWidget {
   }
 }
 
-class _DiagonalPainter extends CustomPainter {
-  const _DiagonalPainter();
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Franja diagonal con brillo turquesa→verde (como en el diseño).
-    final p = Paint()
-      ..shader = LinearGradient(
-        colors: [_mint.withValues(alpha: 0.0), _lime.withValues(alpha: 0.35), _mint.withValues(alpha: 0.0)],
-      ).createShader(Offset.zero & size)
-      ..strokeWidth = 1.4;
-    canvas.drawLine(Offset(size.width * 0.62, 0), Offset(size.width * 0.38, size.height), p);
-    final glow = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topRight,
-        end: Alignment.bottomLeft,
-        colors: [_mint.withValues(alpha: 0.10), Colors.transparent],
-        stops: const [0, 0.6],
-      ).createShader(Offset.zero & size);
-    final path = Path()
-      ..moveTo(size.width * 0.62, 0)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width, size.height)
-      ..lineTo(size.width * 0.38, size.height)
-      ..close();
-    canvas.drawPath(path, glow);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
 /// Rendimiento: anillo de efectividad, partidos/victorias/derrotas y una
 /// curva con tu diferencia de sets acumulada partido a partido (sube con
 /// cada victoria —más con un 3-0—, baja con cada derrota).
@@ -424,14 +425,14 @@ class HomePerformanceCard extends StatelessWidget {
     final lost = math.max(0, played - won);
     final rate = played == 0 ? 0.0 : won / played;
     Widget stat(String value, String label) => Expanded(
-          child: Column(
-            children: [
-              Text(value, style: _t(26, w: FontWeight.w600, h: 1.1)),
-              const SizedBox(height: 2),
-              Text(label, style: _t(12, c: AppColors.scorifyTextMuted)),
-            ],
-          ),
-        );
+      child: Column(
+        children: [
+          Text(value, style: _t(26, w: FontWeight.w600, h: 1.1)),
+          const SizedBox(height: 2),
+          Text(label, style: _t(12, c: AppColors.scorifyTextMuted)),
+        ],
+      ),
+    );
     Widget sep() => Container(width: 1, height: 44, color: Colors.white.withValues(alpha: 0.10));
     return HomeCard(
       padding: EdgeInsets.zero,
@@ -507,11 +508,6 @@ class HomeStreakCardV2 extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: Stack(
         children: [
-          Positioned(
-            right: 70,
-            bottom: -18,
-            child: Icon(Icons.local_fire_department_rounded, size: 96, color: Colors.white.withValues(alpha: 0.04)),
-          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 10, 14),
             child: Column(
@@ -522,7 +518,9 @@ class HomeStreakCardV2 extends StatelessWidget {
                 Row(
                   children: [
                     if (form.isEmpty)
-                      Expanded(child: Text("Juega tu primer partido", style: _t(16, w: FontWeight.w600)))
+                      Expanded(
+                        child: Text("Juega tu primer partido", style: _t(16, w: FontWeight.w600)),
+                      )
                     else ...[
                       Text("$streak", style: _t(44, w: FontWeight.w700, h: 1.0)),
                       const SizedBox(width: 10),
@@ -530,15 +528,22 @@ class HomeStreakCardV2 extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(winning ? (streak == 1 ? "victoria" : "victorias") : (streak == 1 ? "derrota" : "derrotas"),
-                                style: _t(19, w: FontWeight.w600)),
+                            Text(
+                              winning ? (streak == 1 ? "victoria" : "victorias") : (streak == 1 ? "derrota" : "derrotas"),
+                              style: _t(19, w: FontWeight.w600),
+                            ),
                             if (compare != null)
                               Row(
                                 children: [
                                   if (compare.startsWith("+")) Icon(Icons.arrow_upward_rounded, size: 13, color: _mint),
                                   const SizedBox(width: 2),
                                   Flexible(
-                                    child: Text(compare, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(11, c: AppColors.scorifyTextMuted)),
+                                    child: Text(
+                                      compare,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: _t(11, c: AppColors.scorifyTextMuted),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -557,7 +562,10 @@ class HomeStreakCardV2 extends StatelessWidget {
                           gradient: w ? appButtonGradient : null,
                           color: w ? null : AppColors.scorifyNegative,
                         ),
-                        child: Text(w ? "G" : "P", style: _t(12, w: FontWeight.w700, c: w ? AppColors.scorifyOnButterfly : Colors.white)),
+                        child: Text(
+                          w ? "G" : "P",
+                          style: _t(12, w: FontWeight.w700, c: w ? AppColors.scorifyOnButterfly : Colors.white),
+                        ),
                       ),
                   ],
                 ),
@@ -603,7 +611,13 @@ class _HomeResultsCardState extends State<HomeResultsCard> {
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
       child: Column(
         children: [
-          HomeCardTitle(icon: Icons.schedule_rounded, title: "Últimos resultados", action: "Ver todos", onAction: onAll, color: AppColors.scorifyText),
+          HomeCardTitle(
+            icon: Icons.schedule_rounded,
+            title: "Últimos resultados",
+            action: "Ver todos",
+            onAction: onAll,
+            color: AppColors.scorifyText,
+          ),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -653,10 +667,10 @@ class _ResultTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white.withValues(alpha: 0.04),
-      borderRadius: BorderRadius.circular(2),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: r.onTap,
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(8, 8, 6, 8),
           child: Column(
@@ -673,14 +687,27 @@ class _ResultTile extends StatelessWidget {
                       gradient: r.won ? appButtonGradient : null,
                       color: r.won ? null : AppColors.scorifyNegative,
                     ),
-                    child: Text(r.won ? "G" : "P", style: _t(10, w: FontWeight.w700, c: r.won ? AppColors.scorifyOnButterfly : Colors.white)),
+                    child: Text(
+                      r.won ? "G" : "P",
+                      style: _t(10, w: FontWeight.w700, c: r.won ? AppColors.scorifyOnButterfly : Colors.white),
+                    ),
                   ),
                   const SizedBox(width: 6),
-                  Flexible(child: FittedBox(fit: BoxFit.scaleDown, child: Text(r.score, style: _t(15, w: FontWeight.w600)))),
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(r.score, style: _t(15, w: FontWeight.w600)),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 6),
-              Text("vs. ${r.opponent}", maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(10, c: AppColors.scorifyTextMuted)),
+              Text(
+                "vs. ${r.opponent}",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: _t(10, c: AppColors.scorifyTextMuted),
+              ),
               const SizedBox(height: 2),
               Text(r.date, style: _t(10, c: AppColors.scorifyTextMuted)),
             ],
@@ -731,16 +758,21 @@ class HomeOpenTournamentsCard extends StatelessWidget {
                   width: items.length == 1 ? MediaQuery.sizeOf(context).width - 60 : 230,
                   child: Material(
                     color: Colors.white.withValues(alpha: 0.04),
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(12),
                     child: InkWell(
                       onTap: it.onTap,
-                      borderRadius: BorderRadius.circular(2),
+                      borderRadius: BorderRadius.circular(12),
                       child: Padding(
                         padding: const EdgeInsets.all(12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(it.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(14, w: FontWeight.w600, h: 1.2)),
+                            Text(
+                              it.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: _t(14, w: FontWeight.w600, h: 1.2),
+                            ),
                             const Spacer(),
                             Row(
                               children: [
@@ -755,7 +787,14 @@ class HomeOpenTournamentsCard extends StatelessWidget {
                                 children: [
                                   const Icon(Icons.place_rounded, size: 14, color: _mint),
                                   const SizedBox(width: 5),
-                                  Expanded(child: Text(it.place!.trim(), maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12, c: AppColors.scorifyTextMuted))),
+                                  Expanded(
+                                    child: Text(
+                                      it.place!.trim(),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: _t(12, c: AppColors.scorifyTextMuted),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ],
@@ -806,7 +845,7 @@ class HomeWeekCard extends StatelessWidget {
             if (i > 0) Divider(height: 1, color: Colors.white.withValues(alpha: 0.08)),
             InkWell(
               onTap: items[i].onTap,
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(12),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 9),
                 child: Row(
@@ -814,10 +853,13 @@ class HomeWeekCard extends StatelessWidget {
                     Container(
                       width: 42,
                       padding: const EdgeInsets.symmetric(vertical: 5),
-                      decoration: BoxDecoration(color: _mint.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(2)),
+                      decoration: BoxDecoration(color: _mint.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(12)),
                       child: Column(
                         children: [
-                          Text(items[i].day, style: _t(11, w: FontWeight.w600, c: _mint, ls: 0.6)),
+                          Text(
+                            items[i].day,
+                            style: _t(11, w: FontWeight.w600, c: _mint, ls: 0.6),
+                          ),
                           Text(items[i].date, style: _t(17, w: FontWeight.w600, h: 1.1)),
                         ],
                       ),
@@ -827,8 +869,18 @@ class HomeWeekCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(items[i].title, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(14, w: FontWeight.w600)),
-                          Text(items[i].subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12, c: AppColors.scorifyTextMuted)),
+                          Text(
+                            items[i].title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: _t(14, w: FontWeight.w600),
+                          ),
+                          Text(
+                            items[i].subtitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: _t(12, c: AppColors.scorifyTextMuted),
+                          ),
                         ],
                       ),
                     ),
@@ -871,7 +923,12 @@ class HomeHighlightCard extends StatelessWidget {
               children: [
                 Text(title, style: _t(15, w: FontWeight.w600)),
                 const SizedBox(height: 2),
-                Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(12.5, c: AppColors.scorifyTextMuted)),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: _t(12.5, c: AppColors.scorifyTextMuted),
+                ),
               ],
             ),
           ),
@@ -906,7 +963,9 @@ class HomeOnboardingCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(child: HomeCardTitle(icon: Icons.rocket_launch_rounded, title: "Empieza en MyTTM")),
+              const Expanded(
+                child: HomeCardTitle(icon: Icons.rocket_launch_rounded, title: "Empieza en MyTTM"),
+              ),
               Text("$done de ${steps.length}", style: _t(12, c: AppColors.scorifyTextMuted)),
             ],
           ),
@@ -924,7 +983,7 @@ class HomeOnboardingCard extends StatelessWidget {
           for (final s in steps)
             InkWell(
               onTap: s.done ? null : s.onTap,
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(12),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 9),
                 child: Row(
@@ -943,9 +1002,7 @@ class HomeOnboardingCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         s.title,
-                        style: _t(14,
-                            w: FontWeight.w500,
-                            c: s.done ? AppColors.scorifyTextMuted : AppColors.scorifyText),
+                        style: _t(14, w: FontWeight.w500, c: s.done ? AppColors.scorifyTextMuted : AppColors.scorifyText),
                       ),
                     ),
                     if (!s.done) const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
@@ -986,7 +1043,10 @@ class HomeQuickActions extends StatelessWidget {
                 children: [
                   Icon(items[i].icon, color: _mint, size: 24),
                   const SizedBox(height: 6),
-                  FittedBox(fit: BoxFit.scaleDown, child: Text(items[i].label, style: _t(11.5, w: FontWeight.w500))),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(items[i].label, style: _t(11.5, w: FontWeight.w500)),
+                  ),
                 ],
               ),
             ),
@@ -1007,15 +1067,18 @@ class HomeSeasonCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget stat(IconData icon, String value, String label) => Expanded(
-          child: Column(
-            children: [
-              Icon(icon, size: 20, color: _mint),
-              const SizedBox(height: 4),
-              Text(value, style: _t(22, w: FontWeight.w600, h: 1.1)),
-              Text(label.toUpperCase(), style: _t(11, w: FontWeight.w500, c: AppColors.scorifyTextMuted, ls: 0.8)),
-            ],
+      child: Column(
+        children: [
+          Icon(icon, size: 20, color: _mint),
+          const SizedBox(height: 4),
+          Text(value, style: _t(22, w: FontWeight.w600, h: 1.1)),
+          Text(
+            label.toUpperCase(),
+            style: _t(11, w: FontWeight.w500, c: AppColors.scorifyTextMuted, ls: 0.8),
           ),
-        );
+        ],
+      ),
+    );
     Widget sep() => Container(width: 1, height: 44, color: Colors.white.withValues(alpha: 0.10));
     return HomeCard(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
@@ -1060,33 +1123,23 @@ class HomeBanner extends StatelessWidget {
             children: [
               if (imageAsset != null)
                 Image.asset(imageAsset!, fit: BoxFit.cover, alignment: Alignment.centerRight)
-              else ...[
+              else
                 const DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
-                      colors: [Color(0xFF060E12), Color(0xFF0F4652)],
+                      colors: [Color(0xFF050A14), Color(0xFF12305E)],
                     ),
                   ),
                 ),
-                const Positioned.fill(child: CustomPaint(painter: _DiagonalPainter())),
-                Positioned(
-                  right: -10,
-                  bottom: -16,
-                  child: Transform.rotate(
-                    angle: -0.4,
-                    child: Icon(Icons.sports_tennis_rounded, size: 150, color: _mint.withValues(alpha: 0.18)),
-                  ),
-                ),
-              ],
               // Oscurece la izquierda para que el texto se lea sobre la foto.
               const DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
-                    colors: [Color(0xE6060E12), Color(0x00060E12)],
+                    colors: [Color(0xE6050A14), Color(0x00050A14)],
                     stops: [0.25, 0.75],
                   ),
                 ),
@@ -1137,7 +1190,12 @@ class HomeMyTournamentsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          HomeCardTitle(icon: Icons.emoji_events_rounded, title: "Mis campeonatos", action: items.isEmpty ? "Explorar" : "Ver todos", onAction: onBrowse),
+          HomeCardTitle(
+            icon: Icons.emoji_events_rounded,
+            title: "Mis campeonatos",
+            action: items.isEmpty ? "Explorar" : "Ver todos",
+            onAction: onBrowse,
+          ),
           const SizedBox(height: 6),
           if (items.isEmpty)
             Padding(
@@ -1145,7 +1203,10 @@ class HomeMyTournamentsCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Aún no estás inscrito en ningún campeonato. Cuando te inscribas, aparecerán aquí.", style: _t(13, c: AppColors.scorifyTextMuted)),
+                  Text(
+                    "Aún no estás inscrito en ningún campeonato. Cuando te inscribas, aparecerán aquí.",
+                    style: _t(13, c: AppColors.scorifyTextMuted),
+                  ),
                 ],
               ),
             )
@@ -1154,7 +1215,7 @@ class HomeMyTournamentsCard extends StatelessWidget {
               if (i > 0) Divider(height: 1, color: Colors.white.withValues(alpha: 0.08)),
               InkWell(
                 onTap: items[i].onTap,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(12),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Row(
@@ -1163,8 +1224,18 @@ class HomeMyTournamentsCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(items[i].name, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(14, w: FontWeight.w600)),
-                            Text(items[i].detail, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12, c: AppColors.scorifyTextMuted)),
+                            Text(
+                              items[i].name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: _t(14, w: FontWeight.w600),
+                            ),
+                            Text(
+                              items[i].detail,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: _t(12, c: AppColors.scorifyTextMuted),
+                            ),
                           ],
                         ),
                       ),
@@ -1173,9 +1244,12 @@ class HomeMyTournamentsCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                         decoration: BoxDecoration(
                           color: (items[i].live ? _lime : _mint).withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(2),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(items[i].status, style: _t(11.5, w: FontWeight.w600, c: items[i].live ? _lime : _mint)),
+                        child: Text(
+                          items[i].status,
+                          style: _t(11.5, w: FontWeight.w600, c: items[i].live ? _lime : _mint),
+                        ),
                       ),
                       const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
                     ],
@@ -1201,7 +1275,8 @@ class _LiveStatus extends StatefulWidget {
 }
 
 class _LiveStatusState extends State<_LiveStatus> with SingleTickerProviderStateMixin {
-  late final AnimationController _pulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..repeat(reverse: true);
+  late final AnimationController _pulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))
+    ..repeat(reverse: true);
   Timer? _tick;
 
   @override
@@ -1238,21 +1313,31 @@ class _LiveStatusState extends State<_LiveStatus> with SingleTickerProviderState
             ),
           ),
           const SizedBox(width: 6),
-          Text("EN MESA ${widget.tableNumber}", style: _t(12, w: FontWeight.w700, c: _lime, ls: 0.8)),
+          Text(
+            "EN MESA ${widget.tableNumber}",
+            style: _t(12, w: FontWeight.w700, c: _lime, ls: 0.8),
+          ),
         ],
       );
     }
     final at = widget.startsAt;
     if (at == null) return const SizedBox.shrink();
     final left = at.difference(DateTime.now());
-    if (left.isNegative) return Text("Por comenzar", style: _t(12, w: FontWeight.w600, c: _mint));
+    if (left.isNegative)
+      return Text(
+        "Por comenzar",
+        style: _t(12, w: FontWeight.w600, c: _mint),
+      );
     final h = left.inHours, m = left.inMinutes % 60;
     final text = left.inDays >= 1
         ? "Faltan ${left.inDays} ${left.inDays == 1 ? "día" : "días"}"
         : h > 0
-            ? "Faltan $h h $m min"
-            : "Faltan $m min";
-    return Text(text, style: _t(12, w: FontWeight.w600, c: _mint));
+        ? "Faltan $h h $m min"
+        : "Faltan $m min";
+    return Text(
+      text,
+      style: _t(12, w: FontWeight.w600, c: _mint),
+    );
   }
 }
 
@@ -1269,7 +1354,7 @@ class HomeMyTournamentsCarousel extends StatelessWidget {
     return src.take(2).map((w) => w.isEmpty ? "" : w[0].toUpperCase()).join();
   }
 
-  static const _badgeColors = [Color(0xFF00B3D6), Color(0xFF22E3D0), Color(0xFFA6D32D), Color(0xFFFFA62B), Color(0xFF8B7CF6)];
+  static const _badgeColors = [Color(0xFF2D8CFF), Color(0xFF00C8FF), Color(0xFF2FD67B), Color(0xFFFFA62B), Color(0xFF8B7CF6)];
 
   @override
   Widget build(BuildContext context) {
@@ -1306,26 +1391,42 @@ class HomeMyTournamentsCarousel extends StatelessWidget {
                             height: 42,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(2),
-                              gradient: LinearGradient(colors: [color, color.withValues(alpha: 0.55)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                              borderRadius: BorderRadius.circular(12),
+                              color: color,
                             ),
-                            child: Text(_initials(it.name), style: _t(15, w: FontWeight.w700, c: AppColors.scorifyOnMint)),
+                            child: Text(
+                              _initials(it.name),
+                              style: _t(15, w: FontWeight.w700, c: AppColors.scorifyOnMint),
+                            ),
                           ),
                           const Spacer(),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                             decoration: BoxDecoration(
                               color: (it.live ? _lime : _mint).withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(2),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Text(it.status, style: _t(11.5, w: FontWeight.w700, c: it.live ? _lime : _mint)),
+                            child: Text(
+                              it.status,
+                              style: _t(11.5, w: FontWeight.w700, c: it.live ? _lime : _mint),
+                            ),
                           ),
                         ],
                       ),
                       const Spacer(),
-                      Text(it.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(14.5, w: FontWeight.w600, h: 1.2)),
+                      Text(
+                        it.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: _t(14.5, w: FontWeight.w600, h: 1.2),
+                      ),
                       const SizedBox(height: 2),
-                      Text(it.detail, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12, c: AppColors.scorifyTextMuted)),
+                      Text(
+                        it.detail,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: _t(12, c: AppColors.scorifyTextMuted),
+                      ),
                     ],
                   ),
                 ),
@@ -1356,18 +1457,33 @@ class HomeHeroText extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(parts.first, style: _t(14, w: FontWeight.w500, c: AppColors.scorifyText.withValues(alpha: 0.85)).copyWith(shadows: shadow)),
+          Text(
+            parts.first,
+            style: _t(14, w: FontWeight.w500, c: AppColors.scorifyText.withValues(alpha: 0.85)).copyWith(shadows: shadow),
+          ),
           if (parts.length > 1)
             FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              child: Text(parts.sublist(1).join(", "), maxLines: 1, style: _t(26, w: FontWeight.w700, h: 1.15).copyWith(shadows: shadow)),
+              child: Text(
+                parts.sublist(1).join(", "),
+                maxLines: 1,
+                style: _t(26, w: FontWeight.w700, h: 1.15).copyWith(shadows: shadow),
+              ),
             ),
           const SizedBox(height: 10),
-          Container(width: 32, height: 3, decoration: BoxDecoration(gradient: appButtonGradient, borderRadius: BorderRadius.circular(99))),
+          Container(
+            width: 32,
+            height: 3,
+            decoration: BoxDecoration(gradient: appButtonGradient, borderRadius: BorderRadius.circular(99)),
+          ),
           if (contextLine != null) ...[
             const SizedBox(height: 10),
-            Text(contextLine!, textAlign: TextAlign.left, style: _t(13, w: FontWeight.w500, c: _mint, h: 1.3).copyWith(shadows: shadow)),
+            Text(
+              contextLine!,
+              textAlign: TextAlign.left,
+              style: _t(13, w: FontWeight.w500, c: _mint, h: 1.3).copyWith(shadows: shadow),
+            ),
           ],
         ],
       ),
@@ -1403,23 +1519,24 @@ class HomeChallengeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget info(IconData icon, String text) => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(2)),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 15, color: _mint),
-              const SizedBox(width: 6),
-              Flexible(child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12.5))),
-            ],
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(12)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: _mint),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12.5)),
           ),
-        );
+        ],
+      ),
+    );
     return HomeCard(
-      gradient: _glassFeatured,
+      gradient: homeGradientMain,
       padding: EdgeInsets.zero,
       child: Stack(
         children: [
-          const Positioned.fill(child: CustomPaint(painter: _DiagonalPainter())),
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 16, 16, 18),
             child: Column(
@@ -1427,20 +1544,30 @@ class HomeChallengeCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Expanded(child: Text(kicker, style: _t(12.5, w: FontWeight.w600, c: _lime, ls: 1.2))),
+                    Expanded(
+                      child: Text(
+                        kicker,
+                        style: _t(12.5, w: FontWeight.w600, c: _lime, ls: 1.2),
+                      ),
+                    ),
                     if (chip != null)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: _lime.withValues(alpha: 0.10),
-                          borderRadius: BorderRadius.circular(2),
+                        decoration: BoxDecoration(color: _lime.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(12)),
+                        child: Text(
+                          chip!,
+                          style: _t(11.5, w: FontWeight.w600, c: _lime),
                         ),
-                        child: Text(chip!, style: _t(11.5, w: FontWeight.w600, c: _lime)),
                       ),
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text(name, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(21, w: FontWeight.w700, h: 1.2)),
+                Text(
+                  name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: _t(21, w: FontWeight.w700, h: 1.2),
+                ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 6),
                   Text(subtitle!, style: _t(13, c: AppColors.scorifyTextMuted, h: 1.35)),
@@ -1475,8 +1602,12 @@ class HomeTile extends StatelessWidget {
   final String caption; // "inscritos"
   final String action;
   final VoidCallback onTap;
+
+  /// Degradado de fondo (homeGradientTeal / homeGradientEmerald).
+  final Gradient? gradient;
   const HomeTile({
     super.key,
+    this.gradient,
     required this.icon,
     required this.value,
     required this.title,
@@ -1489,27 +1620,50 @@ class HomeTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return HomeCard(
       onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      gradient: gradient,
+      padding: EdgeInsets.zero,
+      child: Stack(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(value, style: _t(28, w: FontWeight.w700, h: 1)),
-              const SizedBox(width: 6),
-              Flexible(child: Text(caption, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12, c: AppColors.scorifyTextMuted))),
-            ],
-          ),
-          const SizedBox(height: 4),
-          FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text(title, maxLines: 1, style: _t(14, w: FontWeight.w600))),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Text(action, style: _t(12.5, w: FontWeight.w600, c: _mint)),
-              const SizedBox(width: 4),
-              const Icon(Icons.arrow_forward_rounded, size: 15, color: _mint),
-            ],
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(value, style: _t(28, w: FontWeight.w700, h: 1)),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        caption,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: _t(12, c: AppColors.scorifyTextMuted),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(title, maxLines: 1, style: _t(14, w: FontWeight.w600)),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Text(
+                      action,
+                      style: _t(12.5, w: FontWeight.w600, c: _mint),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.arrow_forward_rounded, size: 15, color: _mint),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),

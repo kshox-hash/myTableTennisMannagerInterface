@@ -1,3 +1,4 @@
+import "package:myttmi/core/helpers/friendly_error.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/ui/section_card.dart";
@@ -148,7 +149,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
       _savedLive = key;
       HapticFeedback.mediumImpact();
       _api.saveLive(widget.matchType, widget.matchId, valid).catchError((e) {
-        if (mounted) showToast(context, "No se pudo guardar el set en vivo: ${e.toString().replaceFirst("Exception: ", "")}", error: true);
+        if (mounted) showToast(context, "No se pudo guardar el set en vivo: ${friendlyError(e)}", error: true);
       });
     }
   }
@@ -318,7 +319,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
         if (!_done)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(color: hintColor.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(2)),
+            decoration: BoxDecoration(color: hintColor.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(12)),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -437,13 +438,13 @@ class _RefereeScreenState extends State<RefereeScreen> {
           // Set ganado: fondo verde suave; el que se juega: borde turquesa.
           fillColor: won ? AppColors.scorifyButterfly.withValues(alpha: 0.12) : AppColors.scorifyInput,
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(12),
             borderSide: current ? BorderSide(color: AppColors.scorifyMint.withValues(alpha: 0.6), width: 1.2) : BorderSide.none,
           ),
-          disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(2), borderSide: BorderSide.none),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(2), borderSide: BorderSide.none),
+          disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.8),
           ),
         ),

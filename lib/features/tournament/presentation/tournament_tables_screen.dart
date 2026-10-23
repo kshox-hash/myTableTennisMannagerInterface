@@ -175,7 +175,7 @@ class _TableCard extends StatelessWidget {
                   color: occupied
                       ? AppColors.scorifyMint.withOpacity(0.16)
                       : Colors.white.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   occupied ? (m.calledOutOfOrder ? "Adelantado" : "En juego") : "Libre",
@@ -313,7 +313,7 @@ class _MyTurnCard extends StatelessWidget {
             Container(
               width: 72,
               height: 72,
-              decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

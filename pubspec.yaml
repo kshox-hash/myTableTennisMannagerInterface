@@ -1,5 +1,5 @@
 name: myttmi
-description: "A new Flutter project."
+description: "MyTTM — campeonatos de tenis de mesa: inscripciones, partidos, resultados y ranking."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -43,8 +43,10 @@ dependencies:
   firebase_messaging: ^16.7.0
   mobile_scanner: ^7.4.2
   url_launcher: ^6.3.3
-  video_player: ^2.11.1
   lottie: ^3.6.1
+  firebase_crashlytics: ^5.4.0
+  firebase_analytics: ^12.6.0
+  flutter_secure_storage: ^11.2.0
 
 dev_dependencies:
   flutter_test:
@@ -71,7 +73,6 @@ flutter:
 
   assets:
     - assets/images/
-    - assets/videos/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

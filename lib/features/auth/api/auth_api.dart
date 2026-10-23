@@ -99,7 +99,8 @@ class AuthApi {
         .timeout(const Duration(seconds: 60));
 
     if (res.statusCode != 201 && res.statusCode != 200) {
-      throw Exception("Register error: ${res.body}");
+      // El mensaje del servidor ("Email ya existe"), no el JSON crudo.
+      throw Exception(_serverMessage(res.body) ?? "No se pudo crear la cuenta. Intenta de nuevo.");
     }
 
     final decoded = jsonDecode(res.body) as Map<String, dynamic>;
@@ -108,5 +109,46 @@ class AuthApi {
     }
 
     return AuthResponse.fromJson(decoded);
+  }
+
+  /// Recuperar contraseña, paso 1: el servidor manda un código de 6 dígitos
+  /// al email (responde igual exista o no la cuenta).
+  Future<void> forgotPassword(String email) async {
+    final res = await http
+        .post(
+          Uri.parse("$baseUrl/api/v1/auth/password/forgot"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"email": email.trim()}),
+        )
+        .timeout(const Duration(seconds: 60));
+    if (res.statusCode != 200) {
+      throw Exception(_serverMessage(res.body) ?? "No se pudo enviar el código. Intenta de nuevo.");
+    }
+  }
+
+  /// Paso 2: con el código correcto se cambia la contraseña y queda la
+  /// sesión iniciada.
+  Future<AuthResponse> resetPassword({required String email, required String code, required String password}) async {
+    final res = await http
+        .post(
+          Uri.parse("$baseUrl/api/v1/auth/password/reset"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"email": email.trim(), "code": code.trim(), "password": password}),
+        )
+        .timeout(const Duration(seconds: 60));
+    if (res.statusCode != 200) {
+      throw Exception(_serverMessage(res.body) ?? "No se pudo cambiar la contraseña. Intenta de nuevo.");
+    }
+    return AuthResponse.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+  }
+
+  /// El "message" del cuerpo de error del servidor, si viene.
+  static String? _serverMessage(String body) {
+    try {
+      final m = (jsonDecode(body) as Map<String, dynamic>)["message"];
+      return m is String && m.isNotEmpty ? m : null;
+    } catch (_) {
+      return null;
+    }
   }
 }

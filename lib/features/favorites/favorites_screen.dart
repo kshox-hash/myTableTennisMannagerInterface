@@ -261,9 +261,9 @@ class _LiveCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final d = detail;
-    return CardBorder(child: DecoratedBox(decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(2)), child: Material(
+    return CardBorder(child: DecoratedBox(decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(12)), child: Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(2),
+      borderRadius: BorderRadius.circular(12),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: d == null ? null : onOpen,
@@ -342,7 +342,7 @@ class _LiveCard extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(color: pillBg, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(color: pillBg, borderRadius: BorderRadius.circular(12)),
                 child: Text(
                   pill,
                   maxLines: 1,

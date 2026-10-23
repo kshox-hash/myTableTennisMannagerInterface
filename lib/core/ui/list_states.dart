@@ -1,3 +1,4 @@
+import 'package:myttmi/core/helpers/friendly_error.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
@@ -30,7 +31,7 @@ class _LoadingStateState extends State<LoadingState> with SingleTickerProviderSt
     Widget bar(double w, double h) => Container(
           width: w,
           height: h,
-          decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(2)),
+          decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(12)),
         );
     return FadeTransition(
       opacity: Tween(begin: 0.45, end: 1.0).animate(CurvedAnimation(parent: _c, curve: Curves.easeInOut)),
@@ -43,7 +44,7 @@ class _LoadingStateState extends State<LoadingState> with SingleTickerProviderSt
               Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(12)),
                 child: Row(
                   children: [
                     Container(width: 42, height: 42, decoration: const BoxDecoration(color: AppColors.scorifySurface2, shape: BoxShape.circle)),
@@ -107,7 +108,12 @@ class ErrorStateView extends StatelessWidget {
         children: [
           const Icon(Icons.error_outline_rounded, color: AppColors.scorifyNegative, size: 26),
           const SizedBox(height: 10),
-          Text(message, textAlign: TextAlign.center, style: AppTypography.bodyMuted),
+          // Cada línea por separado: "No pudimos cargar X.\n<error crudo>".
+          Text(
+            message.split("\n").where((l) => l.trim().isNotEmpty).map(friendlyError).join("\n"),
+            textAlign: TextAlign.center,
+            style: AppTypography.bodyMuted,
+          ),
           const SizedBox(height: 14),
           OutlinePillButton(label: "Reintentar", onTap: onRetry),
         ],

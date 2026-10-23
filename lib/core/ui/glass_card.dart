@@ -40,7 +40,7 @@ class GlassCard extends StatelessWidget {
     this.backgroundAlignment = Alignment.center,
   });
 
-  static const _radius = 2.0;
+  static const _radius = 14.0;
 
   @override
   Widget build(BuildContext context) {
@@ -88,13 +88,12 @@ class GlassCard extends StatelessWidget {
     return CardBorder(radius: _radius, child: Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(_radius),
-        border: Border.all(color: borderColor ?? AppColors.scorifyCardBorder),
+        border: borderColor == null ? null : Border.all(color: borderColor!), // el filete lo pinta CardBorder
         color: fillColor,
         gradient: (fillColor == null && backgroundImage == null)
             ? AppColors.cardGradient
             : null,
         // Sin sombra: plano, como las tarjetas del landing.
-        boxShadow: const [BoxShadow(color: Color(0x4D000000), blurRadius: 16, offset: Offset(0, 6))],
       ),
       clipBehavior: Clip.antiAlias,
       child: Material(

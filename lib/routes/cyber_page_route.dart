@@ -88,35 +88,26 @@ class CyberPageRoute<T> extends PageRouteBuilder<T> {
   /// Esperar a que la pantalla traiga sus datos antes de mostrarla.
   final bool waitForData;
 
-  CyberPageRoute({required WidgetBuilder builder, super.settings, this.waitForData = true})
+  // waitForData arranca en false: la pantalla entra al instante con su
+  // esqueleto (LoadingState) y los datos aparecen al llegar. Esperarlos
+  // antes de animar (hasta ~0,35 s, ver ApiActivity.settle) se sentía como
+  // un retraso en cada toque.
+  CyberPageRoute({required WidgetBuilder builder, super.settings, this.waitForData = false})
       : super(
-          transitionDuration: const Duration(milliseconds: 300),
-          reverseTransitionDuration: const Duration(milliseconds: 240),
+          transitionDuration: const Duration(milliseconds: 220),
+          reverseTransitionDuration: const Duration(milliseconds: 180),
           pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+          // Liviana: solo fundido + un leve desplazamiento de la que entra. La
+          // de atrás queda quieta (antes se escalaba y se le aplicaba un
+          // Opacity a toda la pantalla, que obliga a pintarla en una capa
+          // aparte en cada cuadro — lo más caro de la transición).
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             final enter = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
-            final fade = CurvedAnimation(
-              parent: animation,
-              curve: const Interval(0, 0.7, curve: Curves.easeOut),
-              reverseCurve: const Interval(0.3, 1, curve: Curves.easeIn),
-            );
-            final behind = CurvedAnimation(parent: secondaryAnimation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
-            return AnimatedBuilder(
-              animation: behind,
-              // La de atrás: se aleja (0.96) y se oscurece mientras entra la nueva.
-              builder: (context, inner) => Transform.scale(
-                scale: 1 - 0.04 * behind.value,
-                child: Opacity(opacity: 1 - 0.6 * behind.value, child: inner),
-              ),
-              child: FadeTransition(
-                opacity: fade,
-                child: SlideTransition(
-                  position: Tween(begin: const Offset(0, 0.035), end: Offset.zero).animate(enter),
-                  child: ScaleTransition(
-                    scale: Tween(begin: 0.98, end: 1.0).animate(enter),
-                    child: child,
-                  ),
-                ),
+            return FadeTransition(
+              opacity: enter,
+              child: SlideTransition(
+                position: Tween(begin: const Offset(0, 0.03), end: Offset.zero).animate(enter),
+                child: child,
               ),
             );
           },

@@ -11,6 +11,7 @@ import "package:myttmi/core/ui/confirm_dialog.dart";
 import "package:myttmi/core/ui/glass_card.dart";
 import "package:myttmi/core/ui/identicon.dart";
 import "package:myttmi/core/ui/prism_background.dart";
+import "package:myttmi/core/ui/list_states.dart";
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/player/api/player_api.dart";
 import "package:myttmi/features/player/models/player_category_view_model.dart";
@@ -60,6 +61,12 @@ String _money(int v) {
   }
   return "\$$b";
 }
+
+String _levelLabel(String l) => switch (l) {
+      "regional" => "regional",
+      "nacional" => "nacional",
+      _ => "local",
+    };
 
 String _genderLabel(String g) => switch (g) {
       "male" => "Masculino",
@@ -204,7 +211,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
             child: Column(
               children: [
                 TopHeader(
-                  title: "Campeonato",
+                  title: t.isLeague ? "Liga" : "Campeonato",
                   actions: [
                     // Los campeonatos son privados: se suman jugadores
                     // compartiendo este link (abre la app si la tienen).
@@ -221,7 +228,11 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                 ),
                 const SizedBox(height: 14),
                 Expanded(
-                  child: RefreshIndicator(
+                  // Primera carga: esqueleto en vez de los datos de la lista (cupos
+                  // e inscritos viejos que después saltan).
+                  child: !_participantsLoaded
+                      ? const LoadingState()
+                      : RefreshIndicator(
                     color: AppColors.scorifyMint,
                     onRefresh: _refresh,
                     child: ListView(
@@ -230,6 +241,18 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                       children: [
                         _HeroCard(tournament: t, started: _started),
                         const SizedBox(height: 14),
+                        // Liga: la tabla y las fechas viven en su página (igual que en la web).
+                        if (t.isLeague) ...[
+                          _QuickLink(
+                            icon: Icons.leaderboard_rounded,
+                            label: "Ver tabla de la liga",
+                            onTap: () => launchUrl(
+                              Uri.parse("${AppConfig.webBaseUrl}/ligas/${t.idTournament}"),
+                              mode: LaunchMode.externalApplication,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                        ],
                         if (_started) ...[
                           Row(
                             children: [
@@ -310,7 +333,19 @@ class _HeroCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _Pill(label: chipLabel, bg: chipBg, fg: chipFg),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _Pill(label: chipLabel, bg: chipBg, fg: chipFg),
+              // Si suma puntos y de qué nivel (lo define el organizador).
+              _Pill(
+                label: t.isRanked ? "Puntúa · nivel ${_levelLabel(t.rankingLevel)}" : "No puntúa para el ranking",
+                bg: AppColors.scorifySurface2,
+                fg: t.isRanked ? AppColors.scorifyText : AppColors.scorifyTextMuted,
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           Text(
             t.tournamentName,
@@ -335,7 +370,7 @@ class _HeroCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
               color: AppColors.scorifySurface2,
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
@@ -455,7 +490,7 @@ class _CategoryCardState extends State<_CategoryCard> {
           if (c.quotas != null && c.quotas! > 0) ...[
             const SizedBox(height: 12),
             ClipRRect(
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(12),
               child: LinearProgressIndicator(
                 value: (enrolledCount / c.quotas!).clamp(0.0, 1.0),
                 minHeight: 6,
@@ -495,7 +530,7 @@ class _CategoryCardState extends State<_CategoryCard> {
       children: [
         InkWell(
           onTap: () => setState(() => _expanded = !_expanded),
-          borderRadius: BorderRadius.circular(2),
+          borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
@@ -543,7 +578,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                           padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
                           decoration: BoxDecoration(
                             color: AppColors.scorifySurface2,
-                            borderRadius: BorderRadius.circular(2),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
                             children: [
@@ -608,7 +643,7 @@ class _CategoryCardState extends State<_CategoryCard> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              const _Pill(label: "Estás inscrito ✓", bg: Color(0x33A6D32D), fg: AppColors.scorifyButterfly),
+              const _Pill(label: "Estás inscrito ✓", bg: Color(0x332FD67B), fg: AppColors.scorifyButterfly),
               // Pago de la inscripción (lo marca el organizador en la mesa de control).
               c.isPaid
                   ? const _Pill(label: "Inscripción pagada ✓", bg: AppColors.scorifyButterfly, fg: AppColors.scorifyOnButterfly)
@@ -789,7 +824,7 @@ class _Pill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(2)),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
       child: Text(
         label,
         style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: fg),
@@ -806,12 +841,12 @@ class _QuickLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CardBorder(child: DecoratedBox(decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(2)), child: Material(
+    return CardBorder(child: DecoratedBox(decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(12)), child: Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(2),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 14),
           child: Column(
@@ -845,7 +880,7 @@ class _NoticeBanner extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.scorifyMint.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

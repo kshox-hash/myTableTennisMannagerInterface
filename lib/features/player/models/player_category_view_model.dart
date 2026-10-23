@@ -72,6 +72,8 @@ class PlayerMatch {
   final int setsPlayer1;
   final int setsPlayer2;
   final String? winnerId;
+  /// Motivo de un W.O. — ver walkoverText.
+  final String? resultReason;
   final List<SetScore>? setScores;
   final int? tableNumber;
   final int? playedTableNumber;
@@ -91,6 +93,7 @@ class PlayerMatch {
     required this.setsPlayer1,
     required this.setsPlayer2,
     this.winnerId,
+    this.resultReason,
     this.setScores,
     this.tableNumber,
     this.playedTableNumber,
@@ -114,6 +117,7 @@ class PlayerMatch {
       setsPlayer1: intOrDefault(json["sets_player1"]),
       setsPlayer2: intOrDefault(json["sets_player2"]),
       winnerId: json["winner_id"] as String?,
+      resultReason: json["result_reason"] as String?,
       setScores: setScoresFromJson(json["set_scores"]),
       tableNumber: intOrNull(json["table_number"]),
       playedTableNumber: intOrNull(json["played_table_number"]),
@@ -135,6 +139,10 @@ class PlayerCategoryView {
   final List<PlayerMatch> myGroupMatches;
   final List<PlayerMatch> myBracketMatches;
   final int? bracketTotalRounds;
+  /// Grupo único todos contra todos, sin llave (competition_format = round_robin).
+  final bool isRoundRobin;
+  /// El organizador cerró la categoría antes de tiempo: sin podio ni puntos.
+  final bool finishedEarly;
 
   PlayerCategoryView({
     required this.phase,
@@ -144,6 +152,8 @@ class PlayerCategoryView {
     required this.myGroupMatches,
     required this.myBracketMatches,
     this.bracketTotalRounds,
+    this.isRoundRobin = false,
+    this.finishedEarly = false,
   });
 
   factory PlayerCategoryView.fromJson(Map<String, dynamic> json) {
@@ -162,6 +172,8 @@ class PlayerCategoryView {
           .map((e) => PlayerMatch.fromJson(e as Map<String, dynamic>))
           .toList(),
       bracketTotalRounds: intOrNull(json["bracket_total_rounds"]),
+      isRoundRobin: json["competition_format"] == "round_robin",
+      finishedEarly: json["finished_early"] == true,
     );
   }
 }

@@ -18,6 +18,10 @@ class AppConfig {
   /// esos links acá (App Links, ver AndroidManifest + deep_links.dart).
   static const String webBaseUrl = "https://www.myttm.cl";
 
+  /// Política de privacidad (la exigen Google Play y el login con Google).
+  /// El ancla #eliminar-cuenta explica cómo borrar la cuenta.
+  static const String privacyUrl = "$webBaseUrl/privacidad";
+
   /// ID de cliente WEB de Google (el mismo del login con Google de la web):
   /// la app pide el token para ese cliente, que es el que valida el servidor
   /// (GOOGLE_CLIENT_ID).

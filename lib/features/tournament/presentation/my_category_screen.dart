@@ -223,18 +223,19 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                                 view.phase == "finished") ...[
                               const SizedBox(height: 22),
                               GlassCard(
-                                onTap: () => _goViewMore(view.phase),
+                                // Todos contra todos: no hay llave, se ve la tabla del grupo único.
+                                onTap: () => _goViewMore(view.isRoundRobin ? "groups" : view.phase),
                                 child: Row(
                                   children: [
-                                    const Icon(
-                                      Icons.account_tree_rounded,
+                                    Icon(
+                                      view.isRoundRobin ? Icons.table_rows_rounded : Icons.account_tree_rounded,
                                       color: AppColors.scorifyMint,
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Text(
-                                        view.phase == "groups"
-                                            ? "Ver todos los grupos"
+                                        view.phase == "groups" || view.isRoundRobin
+                                            ? (view.isRoundRobin ? "Ver tabla del grupo" : "Ver todos los grupos")
                                             : "Ver llave completa",
                                         style: AppTypography.h2,
                                       ),
@@ -337,7 +338,7 @@ class _GeneralStandingsList extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
             decoration: BoxDecoration(
               color: isMe ? AppColors.scorifyMint.withOpacity(0.10) : null,
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
@@ -574,7 +575,7 @@ class _Pill extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
     decoration: BoxDecoration(
       color: bg,
-      borderRadius: BorderRadius.circular(2),
+      borderRadius: BorderRadius.circular(12),
     ),
     child: Text(
       label,
@@ -641,7 +642,7 @@ class _CategoryHero extends StatelessWidget {
     final phaseText = switch (view.phase) {
       "groups" => "Fase de grupos",
       "bracket" => "Llave",
-      "finished" => "Finalizada",
+      "finished" => view.finishedEarly ? "Finalizada antes de tiempo" : "Finalizada",
       _ => "Inscripciones",
     };
     final s = me;
@@ -681,13 +682,20 @@ class _CategoryHero extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(tournamentName, style: _muted.copyWith(fontSize: 13.5)),
+          if (view.phase == "finished" && view.finishedEarly) ...[
+            const SizedBox(height: 10),
+            Text(
+              "El organizador terminó esta categoría antes de completarla: no hay podio ni puntos de ranking.",
+              style: _muted.copyWith(fontSize: 12.5),
+            ),
+          ],
           if (s != null) ...[
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 color: AppColors.scorifySurface2,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
@@ -811,9 +819,9 @@ class _GroupTable extends StatelessWidget {
               color: s.idUser == myUserId
                   ? AppColors.scorifyMint.withValues(alpha: 0.12)
                   : Colors.transparent,
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(12),
               child: InkWell(
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(12),
                 onTap: s.idUser == myUserId
                     ? null
                     : () => _openProfile(context, s.idUser, s.playerName),
@@ -912,7 +920,7 @@ class _MatchCard extends StatelessWidget {
             AppColors.scorifyOnMint,
           )
         : (
-            matchStatusLabel[m.status] ?? m.status,
+            matchStatusText(m.status, m.resultReason),
             AppColors.scorifySurface2,
             AppColors.scorifyTextMuted,
           );
@@ -1048,7 +1056,7 @@ class _Side extends StatelessWidget {
     if (onTap == null) return content;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(2),
+      borderRadius: BorderRadius.circular(12),
       child: Padding(padding: const EdgeInsets.all(2), child: content),
     );
   }

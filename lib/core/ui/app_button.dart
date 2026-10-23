@@ -4,7 +4,7 @@ import "package:myttmi/core/constants/app_typography.dart";
 
 /// Botones de la app, estilo "premium": bajos y alargados, texto en
 /// mayúsculas. Planos: sin resplandor ni brillo.
-///  - primary: relleno en degradado verde → celeste, para LA acción principal
+///  - primary: relleno en degradado azul → cyan, para LA acción principal
 ///    de la pantalla (Entrar, Inscribirme, Guardar, Confirmar…).
 ///  - outline: borde en degradado sobre fondo oscuro, para las secundarias
 ///    (Cancelar, Ver torneos, Ver grupos…).
@@ -12,9 +12,9 @@ import "package:myttmi/core/constants/app_typography.dart";
 enum AppButtonVariant { primary, outline, danger }
 
 const appButtonGradient = LinearGradient(
-  colors: [AppColors.scorifyButterfly, AppColors.scorifyMint],
-  begin: Alignment.topLeft,
-  end: Alignment.bottomRight,
+  colors: [AppColors.scorifyMint, AppColors.scorifyCyan],
+  begin: Alignment.centerLeft,
+  end: Alignment.centerRight,
 );
 
 class AppButton extends StatefulWidget {
@@ -66,7 +66,7 @@ class _AppButtonState extends State<AppButton> {
   @override
   Widget build(BuildContext context) {
     final v = widget.variant;
-    final radius = BorderRadius.circular(widget.height / 2); // botones redondeados (píldora)
+    final radius = BorderRadius.circular(12); // esquinas redondeadas (rediseño 2026-10)
     final disabled = widget.onPressed == null;
     final small = widget.height < 40;
 
@@ -74,7 +74,7 @@ class _AppButtonState extends State<AppButton> {
         ? AppColors.scorifyTextMuted
         : switch (v) {
             AppButtonVariant.primary => AppColors.scorifyOnMint,
-            AppButtonVariant.outline => const Color(0xFFB9C1C9), // gris claro, no blanco
+            AppButtonVariant.outline => const Color(0xFFC9D6F2), // gris azulado claro, no blanco
             AppButtonVariant.danger => Colors.white,
           };
 
@@ -128,7 +128,7 @@ class _AppButtonState extends State<AppButton> {
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: radius,
-              border: disabled ? null : Border.all(color: Colors.white.withValues(alpha: 0.35), width: 1),
+              border: disabled ? null : Border.all(color: Colors.white.withValues(alpha: 0.18), width: 1),
             ),
             child: inner,
           ),
@@ -142,12 +142,12 @@ class _AppButtonState extends State<AppButton> {
             gradient: disabled
                 ? null
                 : LinearGradient(
-                    // Celeste arriba → verde abajo, apagado.
+                    // Azul → cyan, apagado.
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
                       AppColors.scorifyMint.withValues(alpha: 0.9),
-                      AppColors.scorifyButterfly.withValues(alpha: 0.9),
+                      AppColors.scorifyCyan.withValues(alpha: 0.7),
                     ],
                   ),
             color: disabled ? AppColors.scorifySurface2 : null,
@@ -156,9 +156,9 @@ class _AppButtonState extends State<AppButton> {
             padding: const EdgeInsets.all(1.5),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(widget.height / 2 - 1.5),
+                borderRadius: BorderRadius.circular(10.5),
                 // Más claro que las tarjetas: se lee como botón encima de ellas.
-                color: const Color(0xFF1A313C),
+                color: AppColors.scorifySurface2,
               ),
               child: inner,
             ),

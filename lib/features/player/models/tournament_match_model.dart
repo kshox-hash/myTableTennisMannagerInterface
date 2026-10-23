@@ -22,6 +22,8 @@ class TournamentMatch {
   final int setsPlayer1;
   final int setsPlayer2;
   final String? winnerId;
+  /// Motivo de un W.O. (no_show | injury | retired | disqualified) — ver walkoverText.
+  final String? resultReason;
   final String? playedAt;
   final int? tableNumber;
   final int? playedTableNumber;
@@ -49,6 +51,7 @@ class TournamentMatch {
     required this.setsPlayer1,
     required this.setsPlayer2,
     this.winnerId,
+    this.resultReason,
     this.playedAt,
     this.tableNumber,
     this.playedTableNumber,
@@ -83,6 +86,7 @@ class TournamentMatch {
       setsPlayer1: intOrDefault(json["sets_player1"]),
       setsPlayer2: intOrDefault(json["sets_player2"]),
       winnerId: json["winner_id"] as String?,
+      resultReason: json["result_reason"] as String?,
       playedAt: json["played_at"] as String?,
       tableNumber: intOrNull(json["table_number"]),
       playedTableNumber: intOrNull(json["played_table_number"]),
@@ -111,6 +115,8 @@ class MatchDetail {
   final String player2Name;
   final String? player2Club;
   final String? winnerId;
+  /// Motivo de un W.O. (no_show | injury | retired | disqualified) — ver walkoverText.
+  final String? resultReason;
   final int setsPlayer1;
   final int setsPlayer2;
   final List<SetScore>? setScores;
@@ -140,6 +146,7 @@ class MatchDetail {
     required this.player2Name,
     this.player2Club,
     this.winnerId,
+    this.resultReason,
     required this.setsPlayer1,
     required this.setsPlayer2,
     this.setScores,
@@ -176,6 +183,7 @@ class MatchDetail {
       player2Name: (json["player2_name"] ?? "Vacante").toString(),
       player2Club: json["player2_club"] as String?,
       winnerId: json["winner_id"] as String?,
+      resultReason: json["result_reason"] as String?,
       setsPlayer1: intOrDefault(json["sets_player1"]),
       setsPlayer2: intOrDefault(json["sets_player2"]),
       setScores: setScoresFromJson(json["set_scores"]),
@@ -208,6 +216,8 @@ class PlayerMatchHistoryItem {
   final int setsPlayer1;
   final int setsPlayer2;
   final String? winnerId;
+  /// Motivo de un W.O. (no_show | injury | retired | disqualified) — ver walkoverText.
+  final String? resultReason;
   final String? playedAt;
 
   PlayerMatchHistoryItem({
@@ -228,6 +238,7 @@ class PlayerMatchHistoryItem {
     required this.setsPlayer1,
     required this.setsPlayer2,
     this.winnerId,
+    this.resultReason,
     this.playedAt,
   });
 
@@ -255,6 +266,7 @@ class PlayerMatchHistoryItem {
       setsPlayer1: intOrDefault(json["sets_player1"]),
       setsPlayer2: intOrDefault(json["sets_player2"]),
       winnerId: json["winner_id"] as String?,
+      resultReason: json["result_reason"] as String?,
       playedAt: json["played_at"] as String?,
     );
   }

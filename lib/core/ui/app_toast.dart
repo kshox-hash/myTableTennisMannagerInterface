@@ -1,3 +1,4 @@
+import "package:myttmi/core/helpers/friendly_error.dart";
 import "dart:async";
 
 import "package:flutter/material.dart";
@@ -104,7 +105,7 @@ class PopupStack {
 void showToast(BuildContext context, String message, {bool error = false}) {
   PopupStack.show(
     context: context,
-    title: message.replaceFirst("Exception: ", ""),
+    title: error ? friendlyError(message) : message,
     icon: error ? Icons.close_rounded : Icons.check_rounded,
     tone: error ? PopupTone.bad : PopupTone.good,
     lifetime: Duration(milliseconds: error ? 4500 : 2800),
@@ -206,7 +207,7 @@ class _PopupState extends State<_Popup> with SingleTickerProviderStateMixin {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: n.emoji != null ? AppColors.scorifyDeep : fg.withValues(alpha: 0.16),
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: n.emoji != null
               ? Text(n.emoji!, style: const TextStyle(fontSize: 17))
@@ -229,7 +230,7 @@ class _PopupState extends State<_Popup> with SingleTickerProviderStateMixin {
               elevation: 12,
               shadowColor: Colors.black,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(12),
                 side: n.highlight ? BorderSide(color: fg, width: 1.5) : const BorderSide(color: Color(0x26FFFFFF)),
               ),
               clipBehavior: Clip.antiAlias,

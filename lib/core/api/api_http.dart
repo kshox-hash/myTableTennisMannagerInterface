@@ -18,11 +18,17 @@ class _CountingClient extends http.BaseClient {
   final http.Client _inner;
   _CountingClient(this._inner);
 
+  // Tope para que llegue la respuesta. Antes solo 4 de las 11 APIs tenían
+  // .timeout(): con mala señal (un gimnasio lleno) el resto quedaba en el
+  // esqueleto para siempre, sin error ni "Reintentar". 30 s deja margen
+  // si el servidor de Render está despertando.
+  static const _timeout = Duration(seconds: 30);
+
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     ApiActivity._started();
     try {
-      return await _inner.send(request);
+      return await _inner.send(request).timeout(_timeout);
     } finally {
       ApiActivity._finished();
     }

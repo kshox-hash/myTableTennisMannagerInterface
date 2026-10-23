@@ -1,4 +1,6 @@
 import "package:myttmi/features/shell/splash_gate.dart";
+import "package:url_launcher/url_launcher.dart";
+import "package:myttmi/core/constants/app_config.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/app_toast.dart";
@@ -180,7 +182,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(height: 14),
 
                           InkWell(
-                            borderRadius: BorderRadius.circular(2),
+                            borderRadius: BorderRadius.circular(12),
                             onTap: _pickBirthDate,
                             child: InputDecorator(
                               decoration: InputDecoration(
@@ -190,11 +192,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 filled: true,
                                 fillColor: AppColors.scorifyInput,
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(2),
+                                  borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide.none,
                                 ),
                                 enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(2),
+                                  borderRadius: BorderRadius.circular(12),
                                   borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
                                 ),
                               ),
@@ -218,11 +220,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               filled: true,
                               fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(2),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide.none,
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(2),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
                               ),
                             ),
@@ -246,11 +248,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               filled: true,
                               fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(2),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide.none,
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(2),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
                               ),
                             ),
@@ -280,11 +282,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               filled: true,
                               fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(2),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide.none,
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(2),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
                               ),
                             ),
@@ -313,11 +315,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               filled: true,
                               fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(2),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide.none,
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(2),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
                               ),
                             ),
@@ -368,6 +370,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ),
                                 )
                               : AppButton(label: "Crear cuenta", onPressed: _register),
+                          const SizedBox(height: 12),
+                          // Aviso de privacidad al registrarse (Google Play).
+                          GestureDetector(
+                            onTap: () => launchUrl(Uri.parse(AppConfig.privacyUrl), mode: LaunchMode.externalApplication),
+                            child: Text.rich(
+                              TextSpan(
+                                text: "Al crear tu cuenta aceptas nuestra ",
+                                children: [
+                                  TextSpan(
+                                    text: "Política de privacidad",
+                                    style: TextStyle(color: AppColors.scorifyMint, fontWeight: FontWeight.w600),
+                                  ),
+                                  const TextSpan(text: "."),
+                                ],
+                              ),
+                              textAlign: TextAlign.center,
+                              style: AppTypography.bodyMuted.copyWith(fontSize: 12),
+                            ),
+                          ),
                         ],
                       ),
                     ),

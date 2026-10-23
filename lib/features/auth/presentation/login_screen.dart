@@ -15,6 +15,7 @@ import "package:myttmi/core/ui/glass_card.dart";
 import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/features/auth/api/auth_api.dart";
 import "package:myttmi/features/auth/presentation/register_screen.dart";
+import "package:myttmi/features/auth/presentation/forgot_password_screen.dart";
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -113,24 +114,25 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const BrandLogo(markSize: 52, showWordmark: false),
-                  const SizedBox(height: 12),
-                  const Text(
-                    "MYTTM",
-                    style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 26,
-                      letterSpacing: 1,
-                      color: AppColors.scorifyText,
+                  const BrandLogo(markSize: 72, showWordmark: false),
+                  const SizedBox(height: 14),
+                  // Wordmark como en el mockup: "My" blanco + "TTM" azul.
+                  const Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(text: "My", style: TextStyle(color: AppColors.scorifyText)),
+                        TextSpan(text: "TTM", style: TextStyle(color: AppColors.scorifyMint)),
+                      ],
                     ),
+                    style: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w800, fontSize: 34, letterSpacing: 0.5),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
-                    "Campeonatos de tenis de mesa",
+                    "Tu tenis de mesa, en un solo lugar.",
+                    textAlign: TextAlign.center,
                     style: AppTypography.bodyMuted,
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 36),
                   GlassCard(
                     variant: GlassCardVariant.elevated,
                     padding: const EdgeInsets.all(22),
@@ -149,7 +151,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           icon: Icons.lock_outline_rounded,
                           obscureText: true,
                         ),
-                        const SizedBox(height: 22),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              CyberPageRoute(waitForData: false, builder: (_) => ForgotPasswordScreen(initialEmail: _email.text.trim())),
+                            ),
+                            child: Text(
+                              "¿Olvidaste tu contraseña?",
+                              style: AppTypography.bodyMuted.copyWith(fontSize: 12.5, color: AppColors.scorifyMint),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
                         loading
                             ? const SizedBox(
                                 width: 22,
@@ -175,10 +190,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: OutlinedButton(
                             onPressed: loading ? null : _loginGoogle,
                             style: OutlinedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF1F1F1F),
-                              side: BorderSide.none,
-                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2))),
+                              backgroundColor: AppColors.scorifySurface2,
+                              foregroundColor: AppColors.scorifyText,
+                              side: const BorderSide(color: AppColors.scorifyCardBorder),
+                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                             ),
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
