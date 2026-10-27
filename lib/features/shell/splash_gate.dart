@@ -1,3 +1,4 @@
+import "package:myttmi/core/app_update.dart";
 import "package:flutter/foundation.dart";
 import "package:myttmi/features/auth/api/auth_api.dart";
 import "package:myttmi/core/monitoring.dart";
@@ -129,7 +130,18 @@ class _SplashGateState extends State<SplashGate> {
     Navigator.pushReplacement(context, CyberPageRoute(waitForData: false, builder: (_) => const LoginScreen()));
   }
 
+  // Versión de la app frente a la mínima del servidor: se consulta en
+  // paralelo con la intro y, si ya no es compatible, la app no sigue.
+  final Future<void> _updateCheck = AppUpdate.check();
+
   Future<void> _route() async {
+    await _updateCheck;
+    if (AppUpdate.mustUpdate) {
+      await _waitMinShown();
+      if (!mounted) return;
+      Navigator.pushReplacement(context, CyberPageRoute(waitForData: false, builder: (_) => const ForceUpdateScreen()));
+      return;
+    }
     final storage = SessionStorage();
     if (!widget.afterLogin) {
       _step(0.15, "PREPARANDO LA MESA…");

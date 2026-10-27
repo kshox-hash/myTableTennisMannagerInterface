@@ -1,3 +1,4 @@
+import "package:myttmi/core/monitoring.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/helpers/image_url.dart";
 import "package:myttmi/core/ui/card_border.dart";
@@ -166,6 +167,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
       if (!mounted) return;
       await _refresh();
       if (!mounted) return;
+      Monitoring.log("inscripcion", {"categoria": c.categoryLabel});
       showToast(context, "Quedaste inscrito en ${c.categoryLabel}");
     } catch (e) {
       if (!mounted) return;

@@ -22,6 +22,9 @@ class AppConfig {
   /// El ancla #eliminar-cuenta explica cómo borrar la cuenta.
   static const String privacyUrl = "$webBaseUrl/privacidad";
 
+  /// Soporte: el mismo correo de contacto de la política de privacidad.
+  static const String supportEmail = "myttmadmin@gmail.com";
+
   /// ID de cliente WEB de Google (el mismo del login con Google de la web):
   /// la app pide el token para ese cliente, que es el que valida el servidor
   /// (GOOGLE_CLIENT_ID).

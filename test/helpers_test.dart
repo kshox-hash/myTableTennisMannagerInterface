@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter_test/flutter_test.dart";
 import "package:myttmi/core/helpers/friendly_error.dart";
+import "package:myttmi/core/helpers/image_url.dart";
 import "package:myttmi/core/helpers/json_parse.dart";
 import "package:myttmi/core/helpers/text_format.dart";
 
@@ -41,6 +42,22 @@ void main() {
       expect(intOrDefault("7"), 7);
       expect(intOrDefault(null, 5), 5);
       expect(intOrNull("abc"), isNull);
+    });
+  });
+
+  group("safeImageUrl", () {
+    test("pasa http a https (Android bloquea http en producción)", () {
+      expect(safeImageUrl("http://pub-x.r2.dev/a.webp"), "https://pub-x.r2.dev/a.webp");
+    });
+
+    test("agrega el esquema que falta y deja las https tal cual", () {
+      expect(safeImageUrl("pub-x.r2.dev/a.webp"), "https://pub-x.r2.dev/a.webp");
+      expect(safeImageUrl("https://lh3.googleusercontent.com/x"), "https://lh3.googleusercontent.com/x");
+    });
+
+    test("sin foto: null", () {
+      expect(safeImageUrl(null), isNull);
+      expect(safeImageUrl("  "), isNull);
     });
   });
 

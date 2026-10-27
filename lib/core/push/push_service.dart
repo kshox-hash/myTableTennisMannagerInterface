@@ -1,9 +1,11 @@
+import "package:myttmi/core/constants/app_colors.dart";
 import "dart:async";
 import "dart:convert";
 
 import "package:firebase_core/firebase_core.dart";
 import "package:firebase_messaging/firebase_messaging.dart";
 import "package:flutter/foundation.dart";
+import "package:flutter/material.dart";
 import "package:myttmi/core/api/api_http.dart";
 import "package:myttmi/core/constants/app_config.dart";
 import "package:myttmi/core/helpers/endpoints.dart";
@@ -47,8 +49,16 @@ class PushService {
     if (!_ready) return;
     try {
       final fm = FirebaseMessaging.instance;
-      final settings = await fm.requestPermission();
-      if (settings.authorizationStatus == AuthorizationStatus.denied) return;
+      // Antes de la ventana del sistema, una explicación propia: pedido en
+      // frío, mucha gente lo rechaza por reflejo y después Android ya no deja
+      // volver a preguntar. "Ahora no" no llama al sistema (se pregunta en
+      // una próxima sesión).
+      var status = (await fm.getNotificationSettings()).authorizationStatus;
+      if (status == AuthorizationStatus.notDetermined) {
+        if (!await _explainPermission()) return;
+        status = (await fm.requestPermission()).authorizationStatus;
+      }
+      if (status == AuthorizationStatus.denied) return;
 
       final token = await fm.getToken();
       if (token != null) await _sendToken(token);
@@ -65,6 +75,30 @@ class PushService {
     } catch (e) {
       debugPrint("[push] registro falló: $e");
     }
+  }
+
+  /// "¿Te avisamos cuando te toque jugar?" — true si quiere los avisos.
+  static Future<bool> _explainPermission() async {
+    final context = DeepLinks.navigatorKey.currentState?.overlay?.context;
+    if (context == null) return false;
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.scorifyDeep,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text("¿Te avisamos cuando te toque jugar?",
+            style: TextStyle(color: AppColors.scorifyText, fontWeight: FontWeight.w700)),
+        content: const Text(
+          "Te llega un aviso con tu mesa y tu rival, tus resultados y cuándo empieza tu campeonato. Solo lo importante.",
+          style: TextStyle(color: AppColors.scorifyTextMuted, height: 1.4),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Ahora no")),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text("Sí, avísame")),
+        ],
+      ),
+    );
+    return yes == true;
   }
 
   /// Al cerrar sesión (antes de borrar el token de sesión): ese celular deja

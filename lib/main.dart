@@ -59,6 +59,15 @@ class MyApp extends StatelessWidget {
         ),
       ),
       navigatorKey: DeepLinks.navigatorKey,
+      // Letra grande de accesibilidad: se respeta hasta 1,25× (más allá las
+      // tarjetas del Inicio y las tablas se cortaban o se encimaban).
+      builder: (context, child) {
+        final mq = MediaQuery.of(context);
+        return MediaQuery(
+          data: mq.copyWith(textScaler: mq.textScaler.clamp(minScaleFactor: 0.9, maxScaleFactor: 1.25)),
+          child: child!,
+        );
+      },
       navigatorObservers: Monitoring.observers,
       onGenerateRoute: AppRoutes.onGenerateRoute,
       // "home" en vez de "initialRoute": un initialRoute con barras (ej.

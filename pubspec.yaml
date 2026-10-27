@@ -47,6 +47,7 @@ dependencies:
   firebase_crashlytics: ^5.4.0
   firebase_analytics: ^12.6.0
   flutter_secure_storage: ^11.2.0
+  package_info_plus: ^10.2.2
 
 dev_dependencies:
   flutter_test:

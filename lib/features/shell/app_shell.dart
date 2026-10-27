@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:myttmi/core/app_update.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:myttmi/core/constants/app_config.dart';
@@ -98,6 +100,15 @@ class _AppShellState extends State<AppShell>
                 launchUrl(Uri.parse(AppConfig.privacyUrl), mode: LaunchMode.externalApplication);
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.help_outline_rounded, color: AppColors.scorifyText),
+              title: const Text("Ayuda y contacto", style: TextStyle(color: AppColors.scorifyText)),
+              subtitle: const Text("Reportar un problema o hacer una consulta", style: TextStyle(color: AppColors.scorifyTextMuted)),
+              onTap: () {
+                Navigator.pop(sheet);
+                _contactSupport();
+              },
+            ),
             const Divider(height: 1, color: AppColors.scorifySurface2),
             ListTile(
               leading: const Icon(Icons.delete_forever_rounded, color: AppColors.scorifyNegative),
@@ -107,11 +118,32 @@ class _AppShellState extends State<AppShell>
                 _deleteAccount();
               },
             ),
+            if (AppUpdate.label.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Text("MyTTM ${AppUpdate.label}",
+                    textAlign: TextAlign.center, style: const TextStyle(color: AppColors.scorifyTextFaint, fontSize: 12)),
+              ),
             const SizedBox(height: 8),
           ],
         ),
       ),
     );
+  }
+
+  // Correo a soporte con la versión y el celular ya escritos (lo primero que
+  // hay que saber para revisar un problema).
+  Future<void> _contactSupport() async {
+    final body = "\n\n—\nVersión de la app: ${AppUpdate.label}\nCelular: ${defaultTargetPlatform.name}";
+    final uri = Uri(
+      scheme: "mailto",
+      path: AppConfig.supportEmail,
+      query: "subject=${Uri.encodeComponent("Ayuda MyTTM")}&body=${Uri.encodeComponent(body)}",
+    );
+    final opened = await launchUrl(uri);
+    if (!opened && mounted) {
+      showToast(context, "Escríbenos a ${AppConfig.supportEmail}");
+    }
   }
 
   // Exigido por Google Play: la cuenta se puede borrar desde la app. Doble
@@ -183,8 +215,13 @@ class _AppShellState extends State<AppShell>
     // Link de campeonato que llegó antes de tener sesión (o con la app
     // cerrada): se abre ahora, encima de las pestañas.
     WidgetsBinding.instance.addPostFrameCallback((_) => DeepLinks.shellReady());
-    // Con sesión: permiso de notificaciones y registro del celular.
-    PushService.register();
+    // Con sesión: permiso de notificaciones y registro del celular. Después
+    // (para no encimar ventanas), si hay una versión nueva publicada se
+    // sugiere una vez.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await PushService.register();
+      if (mounted) await AppUpdate.suggest(context);
+    });
     // Avisos tipo Facebook de las notificaciones nuevas (abajo a la izquierda).
     NotificationPopups.start();
     // Posición final de un campeonato recién terminado (aparece sola).

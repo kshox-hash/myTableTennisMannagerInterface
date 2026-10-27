@@ -1,3 +1,4 @@
+import "package:myttmi/core/monitoring.dart";
 import "package:myttmi/features/shell/splash_gate.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
@@ -41,6 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // La app es la parte de jugador: una cuenta con rol de administrador
       // (organiza un club/torneos en la web y además juega) entra igual y se
       // usa como jugador — el servidor acepta su sesión en las rutas de jugador.
+      Monitoring.log("inicio_sesion", {"metodo": "email"});
       await storage.saveSession(
         token: resp.token,
         role: "player",
@@ -74,6 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (idToken == null) throw Exception("Google no entregó el token. Intenta de nuevo.");
 
       final r = await api.loginWithGoogle(idToken);
+      Monitoring.log("inicio_sesion", {"metodo": "google"});
       await storage.saveSession(
         token: r.auth.token,
         role: "player",

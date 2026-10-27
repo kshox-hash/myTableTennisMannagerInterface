@@ -1,3 +1,4 @@
+import "package:myttmi/core/monitoring.dart";
 import "package:myttmi/features/shell/splash_gate.dart";
 import "package:url_launcher/url_launcher.dart";
 import "package:myttmi/core/constants/app_config.dart";
@@ -109,6 +110,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 "${_birthDate!.day.toString().padLeft(2, '0')}",
         country: _country,
       );
+
+      Monitoring.log("registro", {"metodo": "email"});
 
       await storage.saveSession(
         token: resp.token,
