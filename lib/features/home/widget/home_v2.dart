@@ -284,7 +284,8 @@ class HomeMatchCard extends StatelessWidget {
     Widget player(String? id, String? url, String name, String? club, {VoidCallback? onTap}) => InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
-      child: Row(
+      // Foto arriba y nombre debajo, todo centrado a su lado del "VS".
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
@@ -293,46 +294,39 @@ class HomeMatchCard extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: _mint.withValues(alpha: 0.7), width: 1.5),
             ),
-            child: UserAvatar(userId: id, url: url, size: 40),
+            child: UserAvatar(userId: id, url: url, size: 52),
           ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: _t(13.5, w: FontWeight.w600),
-                ),
-                if ((club ?? "").trim().isNotEmpty)
-                  Text(
-                    club!.trim(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: _t(11, c: AppColors.scorifyTextMuted),
-                  ),
-              ],
+          const SizedBox(height: 8),
+          Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: _t(14, w: FontWeight.w600),
+          ),
+          if ((club ?? "").trim().isNotEmpty)
+            Text(
+              club!.trim(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: _t(11, c: AppColors.scorifyTextMuted),
             ),
-          ),
         ],
       ),
     );
     Widget info(IconData icon, String text, {int flex = 2}) => Expanded(
       flex: flex,
-      child: Row(
+      child: Column(
         children: [
           Icon(icon, size: 17, color: _mint),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(text, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(11.5, h: 1.3)),
-          ),
+          const SizedBox(height: 4),
+          Text(text, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: _t(11.5, h: 1.3)),
         ],
       ),
     );
     Widget sep() =>
-        Container(width: 1, height: 26, margin: const EdgeInsets.symmetric(horizontal: 8), color: Colors.white.withValues(alpha: 0.10));
+        Container(width: 1, height: 34, margin: const EdgeInsets.symmetric(horizontal: 8), color: Colors.white.withValues(alpha: 0.10));
 
     return HomeCard(
       gradient: _glassFeatured,
@@ -342,7 +336,6 @@ class HomeMatchCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
@@ -352,11 +345,12 @@ class HomeMatchCard extends StatelessWidget {
                     _LiveStatus(startsAt: startsAt, tableNumber: tableNumber),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 10),
                 Text(
                   tournamentName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                   style: _t(13, c: AppColors.scorifyText.withValues(alpha: 0.85)),
                 ),
                 const SizedBox(height: 16),
@@ -376,10 +370,11 @@ class HomeMatchCard extends StatelessWidget {
                 if (h2h != null) ...[
                   const SizedBox(height: 10),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Icon(Icons.compare_arrows_rounded, size: 16, color: _mint),
                       const SizedBox(width: 6),
-                      Expanded(
+                      Flexible(
                         child: Text(
                           h2h!,
                           maxLines: 1,
