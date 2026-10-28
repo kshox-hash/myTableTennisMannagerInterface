@@ -24,7 +24,6 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   static const _pageSize = 30;
   final _api = PlayerApi();
-  final _scroll = ScrollController();
   final List<PlayerMatchHistoryItem> _items = [];
   String? _myId;
   bool _loading = false;
@@ -36,19 +35,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
-    _scroll.addListener(() {
-      if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 400) _loadMore();
-    });
     _refresh();
     ProfileApi().getStats().then((s) {
       if (mounted) setState(() => _stats = s);
     }).catchError((_) {});
   }
 
-  @override
-  void dispose() {
-    _scroll.dispose();
-    super.dispose();
+  // La lista usa el scroll del NestedScrollView (el título sube con ella):
+  // el "cerca del final" se detecta con la notificación de scroll.
+  bool _onScroll(ScrollNotification n) {
+    if (n.depth == 0 && n.metrics.axis == Axis.vertical && n.metrics.pixels >= n.metrics.maxScrollExtent - 400) _loadMore();
+    return false;
   }
 
   Future<void> _refresh() async {
@@ -92,13 +89,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
       body: PrismBackground(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                const TopHeader(title: "Historial"),
-                const SizedBox(height: 14),
-                Expanded(child: _body()),
-              ],
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ScrollingHeaderPage(
+              header: const [SizedBox(height: 16), TopHeader(title: "Historial"), SizedBox(height: 14)],
+              body: _body(),
             ),
           ),
         ),
@@ -135,8 +129,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return RefreshIndicator(
       color: AppColors.scorifyMint,
       onRefresh: _refresh,
-      child: ListView(
-        controller: _scroll,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _onScroll,
+        child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.only(bottom: 16),
         children: [
@@ -162,6 +157,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           else if (_error != null)
             TextButton(onPressed: _loadMore, child: const Text("No se pudieron cargar más. Reintentar")),
         ],
+        ),
       ),
     );
   }

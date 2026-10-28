@@ -117,13 +117,14 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
       body: PrismBackground(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ScrollingHeaderPage(
+              header: [
+                const SizedBox(height: 16),
                 TopHeader(title: widget.tournamentName, subtitle: "Inscritos"),
                 const SizedBox(height: 14),
-                Expanded(
-                  child: FutureBuilder<_PlayersData>(
+              ],
+              body: FutureBuilder<_PlayersData>(
                     future: _future,
                     builder: (context, snap) {
                       if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
@@ -245,8 +246,6 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
                       );
                     },
                   ),
-                ),
-              ],
             ),
           ),
         ),

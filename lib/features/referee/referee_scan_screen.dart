@@ -59,10 +59,10 @@ class _RefereeScanScreenState extends State<RefereeScanScreen> {
       backgroundColor: Colors.black,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: ScrollingHeaderPage(
+            header: [
+              const SizedBox(height: 16),
               const TopHeader(title: "Arbitrar con QR"),
               const SizedBox(height: 12),
               Text(
@@ -70,8 +70,9 @@ class _RefereeScanScreenState extends State<RefereeScanScreen> {
                 style: AppTypography.bodyMuted.copyWith(fontSize: 13),
               ),
               const SizedBox(height: 16),
-              Expanded(
-                child: ClipRRect(
+            ],
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            body: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Stack(
                     fit: StackFit.expand,
@@ -110,8 +111,6 @@ class _RefereeScanScreenState extends State<RefereeScanScreen> {
                     ],
                   ),
                 ),
-              ),
-            ],
           ),
         ),
       ),

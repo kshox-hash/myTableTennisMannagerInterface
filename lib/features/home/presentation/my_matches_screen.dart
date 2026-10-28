@@ -49,13 +49,14 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
       body: PrismBackground(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Column(
-              children: [
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ScrollingHeaderPage(
+              header: [
+                const SizedBox(height: 16),
                 const TopHeader(title: "Mis partidos"),
                 const SizedBox(height: 14),
-                Expanded(
-                  child: FutureBuilder<List<TournamentMatch>>(
+              ],
+              body: FutureBuilder<List<TournamentMatch>>(
                     future: _future,
                     builder: (context, snap) {
                       if (snap.connectionState == ConnectionState.waiting && !snap.hasData) return const LoadingState();
@@ -84,8 +85,6 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                       );
                     },
                   ),
-                ),
-              ],
             ),
           ),
         ),

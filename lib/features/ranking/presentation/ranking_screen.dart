@@ -31,8 +31,11 @@ class RankingScreen extends StatefulWidget {
   // false cuando vive embebido dentro de una sub-pestaña (p.ej. "Mi
   // rendimiento") que ya muestra su propio encabezado.
   final bool showHeader;
+  /// Encabezado de quien lo embebe (título + selector de "Mi rendimiento"):
+  /// va dentro del scroll, así sube junto con el contenido.
+  final Widget? header;
 
-  const RankingScreen({super.key, this.showHeader = true});
+  const RankingScreen({super.key, this.showHeader = true, this.header});
 
   @override
   State<RankingScreen> createState() => _RankingScreenState();
@@ -100,13 +103,15 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
     final me = _entries.where((p) => p.idUser == _myUserId).firstOrNull;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Column(
-        children: [
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: ScrollingHeaderPage(
+        header: [
+          const SizedBox(height: 16),
           if (widget.showHeader) ...[
             const TopHeader(title: "Ranking", showBack: false),
             const SizedBox(height: 14),
           ],
+          if (widget.header != null) ...[widget.header!, const SizedBox(height: 14)],
           TextField(
             controller: _search,
             onChanged: (_) => setState(() {}),
@@ -127,8 +132,8 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
             ),
           ),
           const SizedBox(height: 14),
-          Expanded(
-            child: _loading
+        ],
+        body: _loading
                 ? const LoadingState()
                 : _error != null
                     ? ErrorStateView(message: "No pudimos cargar el ranking.\n$_error", onRetry: _load)
@@ -175,8 +180,6 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
                           ],
                         ),
                       ),
-          ),
-        ],
       ),
     );
   }

@@ -58,13 +58,14 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
       body: PrismBackground(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ScrollingHeaderPage(
+              header: [
+                const SizedBox(height: 16),
                 TopHeader(title: widget.playerName ?? "Jugador"),
                 const SizedBox(height: 14),
-                Expanded(
-                  child: FutureBuilder<PublicPlayerProfile>(
+              ],
+              body: FutureBuilder<PublicPlayerProfile>(
                     future: _profileFuture,
                     builder: (context, snap) {
                       if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
@@ -156,8 +157,6 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                       );
                     },
                   ),
-                ),
-              ],
             ),
           ),
         ),

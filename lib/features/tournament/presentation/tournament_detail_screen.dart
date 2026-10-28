@@ -211,9 +211,10 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
       body: PrismBackground(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Column(
-              children: [
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ScrollingHeaderPage(
+              header: [
+                const SizedBox(height: 16),
                 TopHeader(
                   title: t.isLeague ? "Liga" : "Campeonato",
                   actions: [
@@ -231,10 +232,10 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                   ],
                 ),
                 const SizedBox(height: 14),
-                Expanded(
-                  // Primera carga: esqueleto en vez de los datos de la lista (cupos
-                  // e inscritos viejos que después saltan).
-                  child: !_participantsLoaded
+              ],
+              // Primera carga: esqueleto en vez de los datos de la lista (cupos
+              // e inscritos viejos que después saltan).
+              body: !_participantsLoaded
                       ? const LoadingState()
                       : RefreshIndicator(
                     color: AppColors.scorifyMint,
@@ -293,8 +294,6 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                       ],
                     ),
                   ),
-                ),
-              ],
             ),
           ),
         ),

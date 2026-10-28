@@ -206,9 +206,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: PrismBackground(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ScrollingHeaderPage(
+              header: [
+                const SizedBox(height: 16),
                 TopHeader(
                   title: "Perfil",
                   actions: [
@@ -219,8 +220,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: 14),
-                Expanded(
-                  child: FutureBuilder<UserProfile>(
+              ],
+              body: FutureBuilder<UserProfile>(
                     future: future,
                     builder: (context, snap) {
                       if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
@@ -376,8 +377,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       );
                     },
                   ),
-                ),
-              ],
             ),
           ),
         ),

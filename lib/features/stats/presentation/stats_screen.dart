@@ -26,11 +26,14 @@ class StatsScreen extends StatefulWidget {
   // false cuando vive embebido dentro de una sub-pestaña (p.ej. "Mi
   // rendimiento") que ya muestra su propio encabezado.
   final bool showHeader;
+  /// Encabezado de quien lo embebe (título + selector de "Mi rendimiento"):
+  /// va dentro del scroll, así sube junto con el contenido.
+  final Widget? header;
   /// Avisa cuando terminó la primera carga ("Mi rendimiento" muestra el
   /// esqueleto de pestaña completa hasta entonces).
   final VoidCallback? onLoaded;
 
-  const StatsScreen({super.key, this.showHeader = true, this.onLoaded});
+  const StatsScreen({super.key, this.showHeader = true, this.header, this.onLoaded});
 
   @override
   State<StatsScreen> createState() => _StatsScreenState();
@@ -114,15 +117,17 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
     final form = _recent.take(5).toList().reversed.toList();
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Column(
-        children: [
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: ScrollingHeaderPage(
+        header: [
+          const SizedBox(height: 16),
           if (widget.showHeader) ...[
             const TopHeader(title: "Estadísticas", showBack: false),
             const SizedBox(height: 16),
           ],
-          Expanded(
-            child: _loading
+          if (widget.header != null) ...[widget.header!, const SizedBox(height: 16)],
+        ],
+        body: _loading
                 ? const LoadingState()
                 : _error != null
                     ? ErrorStateView(message: "No pudimos cargar tus estadísticas.\n$_error", onRetry: _load)
@@ -288,8 +293,6 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                           ]),
                         ),
                       ),
-          ),
-        ],
       ),
     );
   }

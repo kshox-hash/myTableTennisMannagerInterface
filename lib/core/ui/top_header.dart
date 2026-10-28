@@ -98,6 +98,43 @@ class TopHeader extends StatelessWidget {
   }
 }
 
+/// Página cuyo encabezado (título, pestañas, filtros) sube junto con el
+/// contenido al hacer scroll, en vez de quedarse fijo y que la lista pase
+/// por debajo con un corte en el aire. `body` es la lista de la página: debe
+/// ser un scroll vertical SIN controlador propio (usa el del NestedScrollView);
+/// para "cargar más al final" escuchar ScrollNotification, no un controller.
+class ScrollingHeaderPage extends StatelessWidget {
+  final List<Widget> header;
+  final Widget body;
+  final CrossAxisAlignment crossAxisAlignment;
+  const ScrollingHeaderPage({
+    super.key,
+    required this.header,
+    required this.body,
+    this.crossAxisAlignment = CrossAxisAlignment.start,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return NestedScrollView(
+      headerSliverBuilder: (context, _) => [
+        SliverToBoxAdapter(
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: crossAxisAlignment, children: header),
+        ),
+      ],
+      // Las listas de adentro solo heredan el scroll del NestedScrollView en
+      // Android/iOS por defecto; así también en web/escritorio (Chrome).
+      body: Builder(
+        builder: (context) => PrimaryScrollController(
+          controller: PrimaryScrollController.of(context),
+          automaticallyInheritForPlatforms: TargetPlatform.values.toSet(),
+          child: body,
+        ),
+      ),
+    );
+  }
+}
+
 class HeaderIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;

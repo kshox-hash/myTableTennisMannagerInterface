@@ -430,9 +430,12 @@ class _HomeScreenState extends State<HomeScreen>
     return Stack(
       children: [
         Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      // El encabezado sube junto con el contenido al hacer scroll.
+      child: ScrollingHeaderPage(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        header: [
+          const SizedBox(height: 16),
           ValueListenableBuilder<int>(
             valueListenable: NotificationPopups.unread,
             builder: (context, unread, _) => SpinHeader(
@@ -447,12 +450,11 @@ class _HomeScreenState extends State<HomeScreen>
           ),
 
           const SizedBox(height: 16),
-
+        ],
           // Los bloques se reparten a lo alto de la pantalla (spaceBetween sobre
           // un alto mínimo = pantalla): sin hueco abajo en celulares altos, y en
           // pantallas chicas se desplaza igual que antes.
-          Expanded(
-            child: LayoutBuilder(
+          body: LayoutBuilder(
               // Deslizar hacia abajo recarga el inicio.
               builder: (context, box) => RefreshIndicator(
                 color: AppColors.scorifyMint,
@@ -461,7 +463,9 @@ class _HomeScreenState extends State<HomeScreen>
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.only(bottom: 12),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: box.maxHeight - 12),
+                  // Menos el encabezado (16 + 42 + 16), que ahora va dentro
+                  // del mismo scroll: así no sobra scroll con poco contenido.
+                  constraints: BoxConstraints(minHeight: box.maxHeight - 12 - 74),
                   // Separación pareja de 12 px entre bloques (antes se
                   // repartían para llenar la pantalla y quedaban huecos
                   // grandes); sin partido, el alto que sobra lo toma la
@@ -630,8 +634,6 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               ),
             ),
-          ),
-        ],
       ),
     ),
       ],

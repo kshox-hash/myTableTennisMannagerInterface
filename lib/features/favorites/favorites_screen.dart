@@ -96,10 +96,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       body: PrismBackground(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ScrollingHeaderPage(
+              header: [
+                const SizedBox(height: 16),
                 const TopHeader(title: "Partidos guardados"),
                 const SizedBox(height: 12),
                 Row(
@@ -115,8 +115,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                Expanded(
-                  child: favs.isEmpty
+              ],
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              body: favs.isEmpty
                       ? const _Empty()
                       : LayoutBuilder(
                           builder: (context, box) {
@@ -160,8 +161,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             );
                           },
                         ),
-                ),
-              ],
             ),
           ),
         ),

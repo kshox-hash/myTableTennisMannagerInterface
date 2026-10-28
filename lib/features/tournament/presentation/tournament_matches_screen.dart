@@ -149,10 +149,10 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
       body: PrismBackground(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ScrollingHeaderPage(
+              header: [
+                const SizedBox(height: 16),
                 TopHeader(title: widget.tournamentName, subtitle: "Partidos"),
                 const SizedBox(height: 14),
                 _Segmented(
@@ -191,20 +191,17 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
                   ),
                 ],
                 const SizedBox(height: 14),
-                if (_mode == _ViewMode.list && !_catsLoaded)
-                  const Expanded(child: LoadingState())
-                else if (_mode == _ViewMode.list)
-                  Expanded(
-                    child: _PagedMatchList(
+              ],
+              body: _mode == _ViewMode.list && !_catsLoaded
+                  ? const LoadingState()
+                  : _mode == _ViewMode.list
+                  ? _PagedMatchList(
                       key: ValueKey("$_statusFilter|$_cat"),
                       tournamentId: widget.tournamentId,
                       status: _statusFilter == "all" ? null : _statusFilter,
                       categoryId: _cat,
-                    ),
-                  )
-                else
-                Expanded(
-                  child: RefreshIndicator(
+                    )
+                  : RefreshIndicator(
                     color: AppColors.scorifyMint,
                     onRefresh: () async {
                       _load();
@@ -241,8 +238,6 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
                       },
                     ),
                   ),
-                ),
-              ],
             ),
           ),
         ),
@@ -614,7 +609,6 @@ class _PagedMatchList extends StatefulWidget {
 class _PagedMatchListState extends State<_PagedMatchList> {
   static const _pageSize = 20;
   final _api = PlayerApi();
-  final _scroll = ScrollController();
   final List<TournamentMatch> _items = [];
   int _total = 0;
   bool _loading = false;
@@ -624,16 +618,15 @@ class _PagedMatchListState extends State<_PagedMatchList> {
   @override
   void initState() {
     super.initState();
-    _scroll.addListener(() {
-      if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 400) _loadMore();
-    });
     _loadMore();
   }
 
-  @override
-  void dispose() {
-    _scroll.dispose();
-    super.dispose();
+  // Sin ScrollController propio: la lista usa el del NestedScrollView de la
+  // página (el encabezado sube con ella), así que el "cerca del final" se
+  // detecta con la notificación de scroll.
+  bool _onScroll(ScrollNotification n) {
+    if (n.depth == 0 && n.metrics.axis == Axis.vertical && n.metrics.pixels >= n.metrics.maxScrollExtent - 400) _loadMore();
+    return false;
   }
 
   bool get _hasMore => _firstLoad || _items.length < _total;
@@ -717,8 +710,9 @@ class _PagedMatchListState extends State<_PagedMatchList> {
     return RefreshIndicator(
       color: AppColors.scorifyMint,
       onRefresh: _refresh,
-      child: ListView.builder(
-        controller: _scroll,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _onScroll,
+        child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.only(bottom: 24),
         itemCount: rows.length + 1,
@@ -766,6 +760,7 @@ class _PagedMatchListState extends State<_PagedMatchList> {
             child: _MatchCard(match: row as TournamentMatch),
           );
         },
+        ),
       ),
     );
   }

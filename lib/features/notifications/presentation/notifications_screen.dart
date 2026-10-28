@@ -98,10 +98,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       backgroundColor: AppColors.scorifyBg,
       body: PrismBackground(
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Column(
-              children: [
+          child: ScrollingHeaderPage(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              header: [
+                const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TopHeader(
@@ -128,8 +128,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Expanded(
-                  child: RefreshIndicator(
+              ],
+              body: RefreshIndicator(
                     color: AppColors.scorifyMint,
                     onRefresh: () async {
                       _load();
@@ -289,9 +289,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       },
                     ),
                   ),
-                ),
-              ],
-            ),
           ),
         ),
       ),

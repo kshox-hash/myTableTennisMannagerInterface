@@ -88,9 +88,10 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
       body: PrismBackground(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ScrollingHeaderPage(
+              header: [
+                const SizedBox(height: 16),
                 TopHeader(
                   title: "Detalle del partido",
                   actions: [
@@ -101,8 +102,8 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                   ],
                 ),
                 const SizedBox(height: 14),
-                Expanded(
-                  child: FutureBuilder<MatchDetail>(
+              ],
+              body: FutureBuilder<MatchDetail>(
                     future: _future,
                     builder: (context, snap) {
                       if (snap.connectionState == ConnectionState.waiting &&
@@ -356,8 +357,6 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                       );
                     },
                   ),
-                ),
-              ],
             ),
           ),
         ),

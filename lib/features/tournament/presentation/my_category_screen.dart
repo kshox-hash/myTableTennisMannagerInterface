@@ -105,13 +105,14 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
       body: PrismBackground(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ScrollingHeaderPage(
+              header: [
+                const SizedBox(height: 16),
                 TopHeader(title: widget.categoryLabel),
                 const SizedBox(height: 14),
-                Expanded(
-                  child: RefreshIndicator(
+              ],
+              body: RefreshIndicator(
                     color: AppColors.scorifyMint,
                     onRefresh: () async {
                       _load();
@@ -330,8 +331,6 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                       },
                     ),
                   ),
-                ),
-              ],
             ),
           ),
         ),

@@ -27,40 +27,31 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Solo el header y el switcher llevan el padding estándar de 16 — el
-    // contenido de cada sub-pestaña ya trae el suyo (RankingScreen y
-    // StatsScreen se usaban antes como pestañas completas del shell), así
-    // que envolverlo de nuevo acá duplicaría el margen.
+    // El título y el selector van DENTRO del scroll de cada sub-pestaña (que
+    // ya trae el padding de 16): suben junto con el contenido en vez de
+    // quedarse fijos con la lista pasando por debajo.
+    final header = Column(
+      children: [
+        const TopHeader(title: "Mi rendimiento", showBack: false),
+        const SizedBox(height: 14),
+        _SubTabSwitch(index: _sub, onChanged: (i) => setState(() => _sub = i)),
+      ],
+    );
     return Stack(
       children: [
-        Column(
+        IndexedStack(
+          index: _sub,
+          // Estadísticas primero: el ranking global espera la tabla oficial
+          // de puntos por nivel, y mientras tanto suele estar vacío.
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Column(
-                children: [
-                  const TopHeader(title: "Mi rendimiento", showBack: false),
-                  const SizedBox(height: 14),
-                  _SubTabSwitch(index: _sub, onChanged: (i) => setState(() => _sub = i)),
-                ],
-              ),
+            StatsScreen(
+              showHeader: false,
+              header: header,
+              onLoaded: () {
+                if (!_ready && mounted) setState(() => _ready = true);
+              },
             ),
-            Expanded(
-              child: IndexedStack(
-                index: _sub,
-                // Estadísticas primero: el ranking global espera la tabla oficial
-                // de puntos por nivel, y mientras tanto suele estar vacío.
-                children: [
-                  StatsScreen(
-                    showHeader: false,
-                    onLoaded: () {
-                      if (!_ready && mounted) setState(() => _ready = true);
-                    },
-                  ),
-                  const RankingScreen(showHeader: false),
-                ],
-              ),
-            ),
+            RankingScreen(showHeader: false, header: header),
           ],
         ),
         if (!_ready) const Positioned.fill(child: PageSkeleton()),

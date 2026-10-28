@@ -214,21 +214,20 @@ class _TournamentsScreenState extends State<TournamentsScreen>
   Widget build(BuildContext context) {
     if (!_loadedOnce) return const PageSkeleton();
     final visible = _visible;
+    // El título va dentro de la lista: sube con el contenido al hacer scroll.
     return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const TopHeader(title: "Campeonatos", showBack: false),
-          const SizedBox(height: 14),
-          Expanded(
-            child: RefreshIndicator(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: RefreshIndicator(
               color: AppColors.scorifyMint,
               onRefresh: _reload,
               child: ListView(
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: staggerChildren([
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                children: [
+                  const TopHeader(title: "Campeonatos", showBack: false),
+                  const SizedBox(height: 14),
+                  ...staggerChildren([
                   Text(
                     "Descubre tu próximo campeonato de tenis de mesa.",
                     style: AppTypography.bodyMuted,
@@ -279,11 +278,9 @@ class _TournamentsScreenState extends State<TournamentsScreen>
                         ),
                       ),
                     ),
-                ]),
+                  ]),
+                ],
               ),
-            ),
-          ),
-        ],
       ),
     );
   }
