@@ -474,28 +474,8 @@ class _HomeScreenState extends State<HomeScreen>
                     child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: staggerChildren([
-                      // Portada: toma el alto que sobra (las tarjetas quedan
-                      // abajo, sin hueco); texto a la derecha de la foto.
-                      Expanded(
-                        child: ConstrainedBox(
-                        // Alto mínimo; crece si el texto no cabe (sin desborde).
-                        constraints: BoxConstraints(minHeight: MediaQuery.sizeOf(context).height * 0.27),
-                        // A la izquierda, a la altura de la copa del video
-                        // (que va a la derecha): encabezado en dos columnas.
-                        child: Align(
-                          alignment: const Alignment(-1, -0.3),
-                          child: SizedBox(
-                            width: MediaQuery.sizeOf(context).width * 0.50,
-                            child: HomeHeroText(
-                              greeting: _greeting() ?? "Hola",
-                              contextLine: _contextLine(),
-                              onGreeting: () => Navigator.pushNamed(context, AppRoutes.profile),
-                            ),
-                          ),
-                        ),
-                      ),
-                      ),
-                      const SizedBox(height: 8),
+                      // Sin saludo grande arriba ("Buenas noches, Ignacio"): ocupaba
+                      // un tercio de la pantalla y empujaba los partidos hacia abajo.
                       // Mientras juego en una mesa no se ofrece arbitrar: primero
                       // mi partido (el servidor tampoco deja estar en dos mesas).
                       if (_refMatches.isNotEmpty && !_playingNow) ...[

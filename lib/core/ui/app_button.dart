@@ -14,7 +14,7 @@ enum AppButtonVariant { primary, outline, danger }
 // Sobrio: azul de marca → azul profundo (antes terminaba en cyan
 // brillante y se veía chillón). Vertical, como un botón con algo de volumen.
 // Por ahora color liso (prioridad a la fluidez; el diseño se retoma después).
-const appButtonGradient = LinearGradient(colors: [Color(0xFF2457D6), Color(0xFF2457D6)]);
+const appButtonGradient = LinearGradient(colors: [AppColors.scorifyMint, AppColors.scorifyMint]);
 
 class AppButton extends StatefulWidget {
   final String label;
@@ -146,7 +146,7 @@ class _AppButtonState extends State<AppButton> {
                     end: Alignment.bottomCenter,
                     colors: [
                       AppColors.scorifyMint.withValues(alpha: 0.9),
-                      const Color(0xFF1E4BC4),
+                      AppColors.scorifyMintDark,
                     ],
                   ),
             color: disabled ? AppColors.scorifySurface2 : null,
