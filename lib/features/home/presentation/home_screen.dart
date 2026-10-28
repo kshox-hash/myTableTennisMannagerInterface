@@ -1,3 +1,4 @@
+import 'package:myttmi/core/storage/session_storage.dart';
 import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:myttmi/features/home/presentation/my_matches_screen.dart";
@@ -90,6 +91,15 @@ class _HomeScreenState extends State<HomeScreen>
 
   Future<void> _load({bool silent = false}) async {
     try {
+      // Lo que no depende del perfil arranca YA, en paralelo con él (antes
+      // esperaba a que llegaran perfil + dashboard: dos vueltas al servidor
+      // una detrás de otra). El id sale de la sesión guardada en el teléfono.
+      final myId = await SessionStorage().getUserId();
+      final side = Future.wait([
+        _loadForm(myId),
+        _loadReferee(),
+        _loadUpcoming(),
+      ]);
       final results = await Future.wait([
         _profileApi.getMe(),
         _playerApi.getDashboard(),
@@ -103,14 +113,9 @@ class _HomeScreenState extends State<HomeScreen>
         NotificationPopups.unread.value = _unreadCount;
       });
       if (_firstLoad) ShellPreload.report(0.6);
-      // Racha, grupo y partidos por arbitrar: en paralelo, y se esperan para
-      // que el Inicio se muestre completo de una vez.
-      await Future.wait([
-        _loadForm(_profile?.idUser),
-        _loadGroups(),
-        _loadReferee(),
-        _loadUpcoming(),
-      ]);
+      // El grupo necesita el dashboard; el resto ya venía corriendo. Se
+      // espera todo para que el Inicio se muestre completo de una vez.
+      await Future.wait([_loadGroups(), side]);
     } catch (_) {
       // Silencioso: la pantalla igual se puede usar sin estos datos.
     } finally {
@@ -129,8 +134,14 @@ class _HomeScreenState extends State<HomeScreen>
     var week = <CalendarEvent>[];
     var mineList = <CalendarEvent>[];
     final mine = <String>{};
+    // Calendario y campeonatos a la vez (antes uno detrás del otro).
+    final eventsF = CalendarApi().myEvents(from: day.subtract(const Duration(days: 30)), to: day.add(const Duration(days: 180)));
+    final pageF = TournamentApi().fetchTournaments(limit: 50);
+    // Que un error en uno no deje al otro sin esperar (y sin error suelto).
+    eventsF.ignore();
+    pageF.ignore();
     try {
-      final events = await CalendarApi().myEvents(from: day.subtract(const Duration(days: 30)), to: day.add(const Duration(days: 180)));
+      final events = await eventsF;
       for (final e in events) {
         mine.add(e.tournamentId);
       }
@@ -145,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen>
     } catch (_) {}
     Tournament? challenge;
     try {
-      final page = await TournamentApi().fetchTournaments(limit: 50);
+      final page = await pageF;
       final upcoming = page.items.where((t) {
         if (t.isCancelled) return false;
         final d = DateTime.tryParse(t.eventDate ?? "");

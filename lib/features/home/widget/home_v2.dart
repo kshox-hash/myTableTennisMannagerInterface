@@ -1603,77 +1603,64 @@ class HomeChallengeCard extends StatelessWidget {
     required this.onTap,
   });
 
+  // Estilo panel, igual que "Próximo partido": franja de título con la
+  // línea encendida, nombre centrado, filas etiqueta | dato en caja oscura y
+  // el botón a todo el ancho (antes: kicker lima, nombre grande a la
+  // izquierda y datos sueltos, que rompía el diseño).
   @override
   Widget build(BuildContext context) {
-    Widget info(IconData icon, String text) => Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: panelBox(),
+    Widget field(String label, String value) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 7),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 15, color: _mint),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12.5)),
+          Expanded(flex: 4, child: Text(label, style: _t(13, w: FontWeight.w700, ls: 0.8))),
+          const SizedBox(width: 10),
+          Expanded(
+            flex: 6,
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 34),
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: panelBox(),
+              child: Text(value, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(12.5, w: FontWeight.w500, h: 1.25)),
+            ),
           ),
         ],
       ),
     );
-    return HomeCard(
-      gradient: homeGradientMain,
-      padding: EdgeInsets.zero,
-      child: Stack(
+    Widget divider() => Container(height: 1, color: AppColors.scorifyCardBorder.withValues(alpha: 0.7));
+    final rows = <Widget>[
+      if (date != null) field("FECHA", date!),
+      if ((place ?? "").trim().isNotEmpty) field("LUGAR", place!.trim()),
+      if (players != null) field("JUGADORES", "$players ${players == 1 ? "inscrito" : "inscritos"}"),
+    ];
+    return SectionCard(
+      title: kicker,
+      icon: Icons.emoji_events_rounded,
+      onTap: onTap,
+      trailing: chip == null ? null : PanelChip(label: chip!, color: _lime, fontSize: 11.5),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 16, 16, 18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        kicker,
-                        style: _t(12.5, w: FontWeight.w600, c: _lime, ls: 1.2),
-                      ),
-                    ),
-                    if (chip != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: panelBox(color: _lime),
-                        child: Text(
-                          chip!,
-                          style: _t(11.5, w: FontWeight.w600, c: _lime),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: _t(21, w: FontWeight.w700, h: 1.2),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 6),
-                  Text(subtitle!, style: _t(13, c: AppColors.scorifyTextMuted, h: 1.35)),
-                ],
-                const SizedBox(height: 14),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    if (date != null) info(Icons.calendar_month_rounded, date!),
-                    if ((place ?? "").trim().isNotEmpty) info(Icons.place_rounded, place!.trim()),
-                    if (players != null) info(Icons.people_outline_rounded, "$players ${players == 1 ? "jugador" : "jugadores"}"),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                AppButton(label: button, trailingIcon: Icons.arrow_forward_rounded, onPressed: onTap, height: 38, expand: false),
-              ],
-            ),
+          Text(
+            name,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: _t(17, w: FontWeight.w700, h: 1.25),
           ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 4),
+            Text(subtitle!, textAlign: TextAlign.center, style: _t(12.5, c: AppColors.scorifyTextMuted, h: 1.35)),
+          ],
+          if (rows.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            divider(),
+            for (final r in rows) ...[r, divider()],
+          ],
+          const SizedBox(height: 12),
+          AppButton(label: button, trailingIcon: Icons.chevron_right_rounded, onPressed: onTap, height: 40),
         ],
       ),
     );

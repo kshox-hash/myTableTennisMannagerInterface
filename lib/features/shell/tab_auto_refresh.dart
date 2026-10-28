@@ -15,6 +15,7 @@ mixin TabAutoRefreshMixin<T extends StatefulWidget> on State<T> {
   void onTabActivated();
 
   int? _lastIndex;
+  bool _mounted = false;
   // Al volver a la app (desde WhatsApp, la cámara, etc.) la pestaña que se
   // está viendo se recarga: lo que cargó el organizador aparece sin tener
   // que deslizar. No hay recarga cada X segundos.
@@ -38,6 +39,14 @@ mixin TabAutoRefreshMixin<T extends StatefulWidget> on State<T> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final current = AppShellScope.of(context)?.currentIndex;
+    // Primera vez: la pestaña se arma recién al visitarla (carga perezosa
+    // del shell) y su initState ya pide los datos; recargar acá los pediría
+    // dos veces.
+    if (!_mounted) {
+      _mounted = true;
+      _lastIndex = current;
+      return;
+    }
     if (current == tabIndex && _lastIndex != tabIndex) {
       onTabActivated();
     }

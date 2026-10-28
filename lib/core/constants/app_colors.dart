@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 /// usan en toda la app) — solo cambian los valores. `scorifyMint` es el
 /// celeste de marca.
 class AppColors {
-  static const Color scorifyBg = Color(0xFF060E12); // web --color-app-dark (fondo base)
+  static const Color scorifyBg = Color(0xFF111315); // fondo base: gris oscuro liso (sin imagen)
   static const Color scorifyDeep = Color(0xFF11232B); // web --color-app-surface (hojas, diálogos)
   static const Color scorifyNavbar = Color(0xFF020304); // web --color-app-primary
   static const Color scorifySurface2 = Color(0xFF193139); // web --color-app-surface2 (bloques internos)

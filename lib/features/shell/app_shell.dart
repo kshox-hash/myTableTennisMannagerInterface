@@ -44,6 +44,11 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell>
     with SingleTickerProviderStateMixin {
   int _index = 0;
+  // Pestañas ya abiertas al menos una vez. Antes las 5 se armaban al abrir
+  // la app y todas pedían sus datos a la vez (~10 consultas extra que
+  // competían con las del Inicio y lo hacían tardar). Ahora cada una carga
+  // recién la primera vez que se visita y después queda viva (IndexedStack).
+  final Set<int> _opened = {0};
 
   static const _tabs = [
     HomeScreen(),
@@ -209,7 +214,12 @@ class _AppShellState extends State<AppShell>
           (_pulseDuration.inMilliseconds * CyberTransition.crossoverAt).round(),
     );
     Future.delayed(delay, () {
-      if (mounted) setState(() => _index = index);
+      if (mounted) {
+        setState(() {
+          _opened.add(index);
+          _index = index;
+        });
+      }
     });
   }
 
@@ -315,7 +325,12 @@ class _AppShellState extends State<AppShell>
                     currentIndex: _index,
                     returnTab: _returnTab,
                     openMenu: () => _scaffoldKey.currentState?.openDrawer(),
-                    child: IndexedStack(index: _index, children: _tabs),
+                    child: IndexedStack(
+                      index: _index,
+                      children: [
+                        for (var i = 0; i < _tabs.length; i++) _opened.contains(i) ? _tabs[i] : const SizedBox.shrink(),
+                      ],
+                    ),
                   ),
                   CyberTransition.glowOverlay(glow),
                 ],
