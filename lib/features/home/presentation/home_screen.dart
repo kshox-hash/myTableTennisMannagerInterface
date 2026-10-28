@@ -471,7 +471,19 @@ class _HomeScreenState extends State<HomeScreen>
                       // un tercio de la pantalla y empujaba los partidos hacia abajo.
                       // Mientras juego en una mesa no se ofrece arbitrar: primero
                       // mi partido (el servidor tampoco deja estar en dos mesas).
-                      if (_refMatches.isNotEmpty && !_playingNow) ...[
+                      // Estructura fija del Inicio: arbitraje → próximo partido →
+                      // tus grupos → campeonato → accesos. Cada sección está
+                      // siempre; sin datos muestra "No se registran…" (antes se
+                      // escondía y el Inicio de alguien nuevo quedaba vacío).
+                      if (!_playingNow) ...[
+                        if (_refMatches.isEmpty)
+                          const HomeEmptyCard(
+                            title: "Arbitraje",
+                            icon: Icons.scoreboard_rounded,
+                            message: "No se registran partidos para arbitrar",
+                            hint: "Cuando un organizador te asigne un partido como árbitro, aparecerá aquí.",
+                          )
+                        else
                         HomeRefereeCard(
                           title: "${_refMatches.first.player1Name} vs ${_refMatches.first.player2Name}",
                           subtitle: [
@@ -493,7 +505,18 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                         const SizedBox(height: 12),
                       ],
-                      if (nm != null) ...[
+                      if (nm == null) ...[
+                        HomeEmptyCard(
+                          title: "Próximo partido",
+                          icon: Icons.calendar_month_rounded,
+                          message: "No se registran partidos programados",
+                          hint: _live != null
+                              ? "Tu campeonato está en curso: tu próximo partido aparecerá apenas lo programen."
+                              : "Inscríbete en un campeonato y aquí verás tu próximo partido, la mesa y tu rival.",
+                          action: _live == null ? "Buscar campeonatos" : null,
+                          onAction: () => AppShellScope.of(context)?.switchTab(3, link: true),
+                        ),
+                      ] else ...[
                         matches,
                         // Más de un partido por jugar: acceso a la lista completa.
                         if ((_dashboard?.otherNextMatches.length ?? 0) > 0) ...[
@@ -512,9 +535,19 @@ class _HomeScreenState extends State<HomeScreen>
                             },
                           ),
                         ],
-                        // Una categoría: la tarjeta grande de siempre. Varias: una
-                        // fila por categoría.
-                        if (_myGroups.length == 1) ...[
+                      ],
+                      // Una categoría: la tarjeta grande de siempre. Varias: una
+                      // fila por categoría. Ninguna: el panel vacío.
+                      ...[
+                        if (_myGroups.isEmpty) ...[
+                          const SizedBox(height: 12),
+                          const HomeEmptyCard(
+                            title: "Tus grupos",
+                            icon: Icons.groups_rounded,
+                            message: "No se registran grupos",
+                            hint: "Cuando empiece la fase de grupos de tu campeonato verás aquí tu posición y tus resultados.",
+                          ),
+                        ] else if (_myGroups.length == 1) ...[
                           const SizedBox(height: 12),
                           HomeGroupCard(
                             groupName: _myGroups.first.match.groupName ?? "",
@@ -555,16 +588,6 @@ class _HomeScreenState extends State<HomeScreen>
                             });
                             if (mounted) _load(silent: true);
                           },
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-                      if (nm == null && _live == null && _challenge == null) ...[
-                        HomeChallengeCard(
-                          kicker: "PRÓXIMO PARTIDO",
-                          name: "Sin partidos programados",
-                          subtitle: "Aún no tienes partidos asignados.",
-                          button: "Buscar campeonatos",
-                          onTap: () => AppShellScope.of(context)?.switchTab(3, link: true),
                         ),
                         const SizedBox(height: 12),
                       ],

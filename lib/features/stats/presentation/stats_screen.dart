@@ -1,4 +1,5 @@
 import 'package:myttmi/core/ui/panel_style.dart';
+import 'package:myttmi/core/ui/page_skeleton.dart';
 import 'package:myttmi/core/ui/stagger_in.dart';
 import 'package:myttmi/core/ui/stat_gauge.dart';
 import 'package:myttmi/core/ui/glass_card.dart';
@@ -27,14 +28,11 @@ class StatsScreen extends StatefulWidget {
   // false cuando vive embebido dentro de una sub-pestaña (p.ej. "Mi
   // rendimiento") que ya muestra su propio encabezado.
   final bool showHeader;
-  /// Encabezado de quien lo embebe (título + selector de "Mi rendimiento"):
-  /// va dentro del scroll, así sube junto con el contenido.
-  final Widget? header;
   /// Avisa cuando terminó la primera carga ("Mi rendimiento" muestra el
   /// esqueleto de pestaña completa hasta entonces).
   final VoidCallback? onLoaded;
 
-  const StatsScreen({super.key, this.showHeader = true, this.header, this.onLoaded});
+  const StatsScreen({super.key, this.showHeader = true, this.onLoaded});
 
   @override
   State<StatsScreen> createState() => _StatsScreenState();
@@ -56,6 +54,8 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
   // Partidos terminados, del más reciente al más antiguo.
   List<PlayerMatchHistoryItem> _recent = [];
   bool _loading = true;
+  // Primera carga: esqueleto de la página entera (después, recargas en silencio).
+  bool _loadedOnce = false;
   String? _error;
 
   @override
@@ -86,7 +86,12 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
       if (!mounted) return;
       setState(() => _error = e.toString());
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadedOnce = true;
+        });
+      }
       widget.onLoaded?.call();
     }
   }
@@ -107,6 +112,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
 
   @override
   Widget build(BuildContext context) {
+    if (!_loadedOnce) return const PageSkeleton();
     final s = _stats;
     final played = s?.matchesPlayed ?? 0;
     final won = s?.matchesWon ?? 0;
@@ -123,10 +129,9 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
         header: [
           const SizedBox(height: 16),
           if (widget.showHeader) ...[
-            const TopHeader(title: "Estadísticas", showBack: false),
+            const TopHeader(title: "Mi rendimiento", showBack: false),
             const SizedBox(height: 16),
           ],
-          if (widget.header != null) ...[widget.header!, const SizedBox(height: 16)],
         ],
         body: _loading
                 ? const LoadingState()

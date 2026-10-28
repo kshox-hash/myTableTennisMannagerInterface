@@ -21,7 +21,8 @@ import 'package:myttmi/core/ui/app_toast.dart';
 import 'package:myttmi/core/ui/prism_background.dart';
 import 'package:myttmi/features/calendar/presentation/calendar_screen.dart';
 import 'package:myttmi/features/home/presentation/home_screen.dart';
-import 'package:myttmi/features/performance/presentation/performance_screen.dart';
+import 'package:myttmi/features/stats/presentation/stats_screen.dart';
+import 'package:myttmi/features/ranking/presentation/ranking_screen.dart';
 import 'package:myttmi/features/tournament/presentation/tournaments_screen.dart';
 import "package:myttmi/features/player/presentation/celebration_dialog.dart";
 import 'package:myttmi/routes/cyber_page_route.dart';
@@ -30,8 +31,9 @@ import 'package:myttmi/routes/cyber_page_route.dart';
 /// Campeonatos viven como pestañas de un mismo IndexedStack en vez de pushes
 /// independientes — así la barra flotante no desaparece al cambiar de sección
 /// y cada pestaña conserva su estado (scroll, filtros, mes elegido) al volver.
-/// "Mi rendimiento" fusiona Ranking + Estadísticas (antes 2 pestañas propias)
-/// con sub-navegación interna, ver PerformanceScreen.
+/// "Mi rendimiento" (estadísticas) y "Ranking" son pestañas separadas. Ranking
+/// va al final del IndexedStack para no cambiar el índice de Campeonatos (3),
+/// al que saltan los enlaces del Inicio.
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
 
@@ -46,8 +48,9 @@ class _AppShellState extends State<AppShell>
   static const _tabs = [
     HomeScreen(),
     CalendarScreen(),
-    PerformanceScreen(),
+    StatsScreen(),
     TournamentsScreen(),
+    RankingScreen(),
   ];
 
   // Mismo lenguaje que CyberPageRoute (ver cyber_page_route.dart) pero para
@@ -269,6 +272,7 @@ class _AppShellState extends State<AppShell>
           DrawerItem(Icons.home_rounded, "Inicio", () => _switchTab(0), selected: _index == 0),
           DrawerItem(Icons.calendar_month_rounded, "Calendario", () => _switchTab(1), selected: _index == 1),
           DrawerItem(Icons.trending_up_rounded, "Mi rendimiento", () => _switchTab(2), selected: _index == 2),
+          DrawerItem(Icons.leaderboard_rounded, "Ranking", () => _switchTab(4), selected: _index == 4),
           DrawerItem(Icons.emoji_events_rounded, "Campeonatos", () => _switchTab(3), selected: _index == 3),
         ],
         more: [

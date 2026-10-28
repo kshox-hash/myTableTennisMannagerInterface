@@ -1,4 +1,5 @@
 import "package:myttmi/core/ui/panel_style.dart";
+import 'package:myttmi/core/ui/page_skeleton.dart';
 import "package:myttmi/core/ui/user_avatar.dart";
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
@@ -32,11 +33,8 @@ class RankingScreen extends StatefulWidget {
   // false cuando vive embebido dentro de una sub-pestaña (p.ej. "Mi
   // rendimiento") que ya muestra su propio encabezado.
   final bool showHeader;
-  /// Encabezado de quien lo embebe (título + selector de "Mi rendimiento"):
-  /// va dentro del scroll, así sube junto con el contenido.
-  final Widget? header;
 
-  const RankingScreen({super.key, this.showHeader = true, this.header});
+  const RankingScreen({super.key, this.showHeader = true});
 
   @override
   State<RankingScreen> createState() => _RankingScreenState();
@@ -44,7 +42,7 @@ class RankingScreen extends StatefulWidget {
 
 class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<RankingScreen> {
   @override
-  int get tabIndex => 2;
+  int get tabIndex => 4;
 
   @override
   // Al volver a la pestaña se actualiza en silencio (sin esqueleto).
@@ -56,6 +54,8 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
   List<RankingEntry> _entries = [];
   String? _myUserId;
   bool _loading = true;
+  // Primera carga: esqueleto de la página entera (después, recargas en silencio).
+  bool _loadedOnce = false;
   String? _error;
 
   @override
@@ -86,12 +86,18 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
       if (!mounted) return;
       setState(() => _error = e.toString());
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadedOnce = true;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_loadedOnce) return const PageSkeleton();
     final query = _search.text.toLowerCase();
     final filtered = _entries
         .where((p) => p.name.toLowerCase().contains(query) || (p.clubName ?? "").toLowerCase().contains(query))
@@ -112,7 +118,6 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
             const TopHeader(title: "Ranking", showBack: false),
             const SizedBox(height: 14),
           ],
-          if (widget.header != null) ...[widget.header!, const SizedBox(height: 14)],
           TextField(
             controller: _search,
             onChanged: (_) => setState(() {}),

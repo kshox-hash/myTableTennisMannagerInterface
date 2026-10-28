@@ -50,7 +50,9 @@ abstract final class Panel {
     stops: [0, 0.45, 0.85, 1],
     colors: [Color(0xFF151A1C), Color(0xFF16242A), Color(0xFF0E3B47), Color(0xFF0F5263)],
   );
-  static const primaryButtonBorder = Color(0xA600B3D6);
+  // Mismo filete gris azulado que el secundario (el celeste se veía como
+  // "borde azul" y no calzaba con la referencia): lo distingue el fondo.
+  static const primaryButtonBorder = buttonBorder;
 
   /// Botón de peligro: igual, el fondo tira a rojo.
   static const dangerButtonGradient = LinearGradient(

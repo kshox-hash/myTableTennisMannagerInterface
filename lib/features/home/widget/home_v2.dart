@@ -9,6 +9,7 @@ import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:myttmi/core/ui/card_border.dart";
 import "package:myttmi/core/ui/panel_style.dart";
+import "package:myttmi/core/ui/section_card.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/features/home/widget/home_layout.dart";
 
@@ -373,7 +374,7 @@ class HomeMatchCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(3),
-          border: Border.all(color: primary ? _mint.withValues(alpha: 0.65) : const Color(0xFF4F6166)),
+          border: Border.all(color: Panel.buttonBorder),
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -1751,6 +1752,61 @@ class HomeTile extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Sección del Inicio sin datos todavía: el mismo panel con su título (así
+/// la estructura del Inicio es siempre la misma) y un "No se registran…"
+/// con la explicación de cuándo va a aparecer algo, en vez de esconderla.
+class HomeEmptyCard extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final String message;
+  final String? hint;
+  final String? action;
+  final VoidCallback? onAction;
+  const HomeEmptyCard({super.key, required this.title, required this.icon, required this.message, this.hint, this.action, this.onAction});
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionCard(
+      title: title,
+      icon: icon,
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                alignment: Alignment.center,
+                decoration: panelBox(),
+                child: Icon(icon, size: 19, color: AppColors.scorifyTextFaint),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(message, style: _t(14, w: FontWeight.w600, c: AppColors.scorifyTextMuted)),
+                    if (hint != null) ...[
+                      const SizedBox(height: 3),
+                      Text(hint!, style: _t(12, c: AppColors.scorifyTextFaint, h: 1.35)),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (action != null) ...[
+            const SizedBox(height: 12),
+            AppButton.outline(label: action!, onPressed: onAction, height: 38),
+          ],
         ],
       ),
     );
