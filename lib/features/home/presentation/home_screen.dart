@@ -1,3 +1,5 @@
+import "package:myttmi/core/ui/app_button.dart";
+import "package:myttmi/features/home/presentation/my_matches_screen.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/shell/shell_preload.dart";
@@ -60,7 +62,9 @@ class _HomeScreenState extends State<HomeScreen>
   int _unreadCount = 0;
   // Modo día de torneo: mi fila en la tabla de mi grupo (del próximo
   // partido de grupo) y cuántos son en el grupo.
-  PlayerStanding? _myStanding;
+  // Mi fila en la tabla de CADA categoría donde estoy jugando grupos (antes
+  // solo la del próximo partido destacado: con 3 categorías se veía una).
+  List<({PlayerNextMatch match, PlayerStanding standing, int size})> _myGroups = const [];
   // Partidos que me toca arbitrar (asignados por el organizador o por QR).
   List<RefereeMatch> _refMatches = const [];
   // Sin partido asignado: el próximo campeonato en que estás inscrito, o
@@ -72,7 +76,6 @@ class _HomeScreenState extends State<HomeScreen>
   Tournament? _challenge;
   // Partidos jugados, del más reciente al más antiguo.
   List<PlayerMatchHistoryItem> _history = const [];
-  int _groupSize = 0;
 
   @override
   void initState() {
@@ -103,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen>
       // que el Inicio se muestre completo de una vez.
       await Future.wait([
         _loadForm(_profile?.idUser),
-        _loadGroup(_dashboard?.nextMatch),
+        _loadGroups(),
         _loadReferee(),
         _loadUpcoming(),
       ]);
@@ -211,6 +214,48 @@ class _HomeScreenState extends State<HomeScreen>
     return "Se han enfrentado ${games.length} ${games.length == 1 ? "vez" : "veces"} · ${w == 1 ? "1 ganado" : "$w ganados"}, ${l == 1 ? "1 perdido" : "$l perdidos"}";
   }
 
+  /// Estoy jugando ahora: alguno de mis próximos partidos ya tiene mesa.
+  bool get _playingNow {
+    final d = _dashboard;
+    if (d == null) return false;
+    return [if (d.nextMatch != null) d.nextMatch!, ...d.otherNextMatches].any((m) => m.tableNumber != null);
+  }
+
+  /// Lista de los partidos que me toca arbitrar, para elegir uno.
+  Future<RefereeMatch?> _pickRefereeMatch() {
+    return showModalBottomSheet<RefereeMatch>(
+      context: context,
+      backgroundColor: AppColors.scorifyDeep,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (sheet) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 18, 20, 8),
+              child: Text("Partidos para arbitrar",
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
+            ),
+            for (final r in _refMatches)
+              ListTile(
+                leading: Icon(Icons.sports_rounded, color: r.tableNumber != null ? AppColors.scorifyLive : AppColors.scorifyMint),
+                title: Text("${r.player1Name} vs ${r.player2Name}",
+                    style: const TextStyle(color: AppColors.scorifyText, fontWeight: FontWeight.w600)),
+                subtitle: Text(
+                  [r.tableNumber != null ? "Mesa ${r.tableNumber}" : "Esperando mesa", r.categoryDisplay].join(" · "),
+                  style: const TextStyle(color: AppColors.scorifyTextMuted),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint),
+                onTap: () => Navigator.pop(sheet, r),
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// Mi campeonato en curso (grupos o llave), si hay — aunque ya no me
   /// quede partido por jugar.
   CalendarEvent? get _live {
@@ -286,22 +331,36 @@ class _HomeScreenState extends State<HomeScreen>
 
   // Aparte del Future.wait principal (como la racha): si falla, el Inicio se
   // muestra igual, solo sin la tarjeta del grupo.
-  Future<void> _loadGroup(PlayerNextMatch? m) async {
+  Future<void> _loadGroups() async {
     final me = _profile?.idUser;
-    if (m == null || m.matchType != "group" || me == null) {
-      if (mounted) setState(() => _myStanding = null);
-      return;
-    }
+    final d = _dashboard;
+    if (me == null || d == null) return;
+    // Un partido de grupo por categoría (próximo + los de las otras).
+    final seen = <String>{};
+    final groupMatches = [if (d.nextMatch != null) d.nextMatch!, ...d.otherNextMatches]
+        .where((m) => m.matchType == "group" && seen.add(m.idCategory))
+        .toList();
     try {
-      final view = await _playerApi.getCategoryView(m.idTournament, m.idCategory);
-      final mine = view.standings.where((r) => r.idUser == me).toList();
-      if (!mounted) return;
-      setState(() {
-        _myStanding = mine.isEmpty ? null : mine.first;
-        _groupSize = view.standings.length;
-      });
+      final views = await Future.wait(groupMatches.map((m) => _playerApi.getCategoryView(m.idTournament, m.idCategory)));
+      final out = <({PlayerNextMatch match, PlayerStanding standing, int size})>[];
+      for (var i = 0; i < groupMatches.length; i++) {
+        final mine = views[i].standings.where((r) => r.idUser == me);
+        if (mine.isNotEmpty) out.add((match: groupMatches[i], standing: mine.first, size: views[i].standings.length));
+      }
+      if (mounted) setState(() => _myGroups = out);
     } catch (_) {}
   }
+
+  void _openCategory(PlayerNextMatch m) => Navigator.pushNamed(
+        context,
+        AppRoutes.myCategory,
+        arguments: {
+          "tournamentId": m.idTournament,
+          "tournamentName": m.tournamentName,
+          "categoryId": m.idCategory,
+          "categoryLabel": m.categoryDisplay,
+        },
+      );
 
   Widget _panelFor(PlayerNextMatch? m) {
     final stage = m == null
@@ -327,7 +386,15 @@ class _HomeScreenState extends State<HomeScreen>
       opponentAvatarUrl: m.opponentAvatarUrl,
       opponentClub: m.opponentClub,
       when: when,
-      table: m.tableNumber != null ? "Mesa ${m.tableNumber}" : "En cola",
+      // "¿Cuánto me falta?": el servidor ya manda la posición en la cola y
+      // la mesa que bloquea al rival — antes se mostraba solo "En cola".
+      table: m.tableNumber != null
+          ? "Mesa ${m.tableNumber}"
+          : m.blockingTableNumber != null
+              ? "Tras mesa ${m.blockingTableNumber}"
+              : m.queuePosition != null
+                  ? (m.queuePosition! <= 1 ? "Eres el próximo" : "Faltan ${m.queuePosition! - 1}")
+                  : "En cola",
       place: m.address,
       h2h: _h2h(m.opponentId),
       startsAt: m.scheduledStartAt,
@@ -429,16 +496,21 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                       ),
                       const SizedBox(height: 8),
-                      if (_refMatches.isNotEmpty) ...[
+                      // Mientras juego en una mesa no se ofrece arbitrar: primero
+                      // mi partido (el servidor tampoco deja estar en dos mesas).
+                      if (_refMatches.isNotEmpty && !_playingNow) ...[
                         HomeRefereeCard(
                           title: "${_refMatches.first.player1Name} vs ${_refMatches.first.player2Name}",
                           subtitle: [
-                            if (_refMatches.first.tableNumber != null) "Mesa ${_refMatches.first.tableNumber}",
+                            _refMatches.first.tableNumber != null ? "Mesa ${_refMatches.first.tableNumber}" : "Esperando mesa",
                             _refMatches.first.categoryDisplay,
                             if (_refMatches.length > 1) "+${_refMatches.length - 1} más",
                           ].join(" · "),
+                          // Con varios partidos por arbitrar se elige cuál (antes
+                          // abría siempre el primero y "+N más" no se podía tocar).
                           onTap: () async {
-                            final r = _refMatches.first;
+                            final r = _refMatches.length == 1 ? _refMatches.first : await _pickRefereeMatch();
+                            if (r == null || !context.mounted) return;
                             await Navigator.push(
                               context,
                               CyberPageRoute(builder: (_) => RefereeScreen(matchType: r.matchType, matchId: r.idMatch)),
@@ -450,27 +522,40 @@ class _HomeScreenState extends State<HomeScreen>
                       ],
                       if (nm != null) ...[
                         matches,
-                        if (_myStanding != null && nm.matchType == "group") ...[
+                        // Más de un partido por jugar: acceso a la lista completa.
+                        if ((_dashboard?.otherNextMatches.length ?? 0) > 0) ...[
+                          const SizedBox(height: 8),
+                          AppButton.outline(
+                            label: "Ver todos mis partidos",
+                            icon: Icons.format_list_bulleted_rounded,
+                            onPressed: () async {
+                              final d = _dashboard!;
+                              final ids = {d.nextMatch!.idTournament, ...d.otherNextMatches.map((m) => m.idTournament)}.toList();
+                              await Navigator.push(
+                                context,
+                                CyberPageRoute(builder: (_) => MyMatchesScreen(myUserId: _profile?.idUser ?? "", tournamentIds: ids)),
+                              );
+                              if (mounted) _load(silent: true);
+                            },
+                          ),
+                        ],
+                        // Una categoría: la tarjeta grande de siempre. Varias: una
+                        // fila por categoría.
+                        if (_myGroups.length == 1) ...[
                           const SizedBox(height: 12),
                           HomeGroupCard(
-                            groupName: nm.groupName ?? "",
-                            position: _myStanding!.played == 0 ? null : _myStanding!.position,
-                            total: _groupSize,
-                            won: _myStanding!.won,
-                            lost: _myStanding!.lost,
-                            setsFor: _myStanding!.setsFor,
-                            setsAgainst: _myStanding!.setsAgainst,
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              AppRoutes.myCategory,
-                              arguments: {
-                                "tournamentId": nm.idTournament,
-                                "tournamentName": nm.tournamentName,
-                                "categoryId": nm.idCategory,
-                                "categoryLabel": nm.categoryDisplay,
-                              },
-                            ),
+                            groupName: _myGroups.first.match.groupName ?? "",
+                            position: _myGroups.first.standing.played == 0 ? null : _myGroups.first.standing.position,
+                            total: _myGroups.first.size,
+                            won: _myGroups.first.standing.won,
+                            lost: _myGroups.first.standing.lost,
+                            setsFor: _myGroups.first.standing.setsFor,
+                            setsAgainst: _myGroups.first.standing.setsAgainst,
+                            onTap: () => _openCategory(_myGroups.first.match),
                           ),
+                        ] else if (_myGroups.length > 1) ...[
+                          const SizedBox(height: 12),
+                          _MyGroupsCard(groups: _myGroups, onOpen: _openCategory),
                         ],
                         const SizedBox(height: 12),
                       ],
@@ -669,6 +754,69 @@ class _MatchesCarouselState extends State<_MatchesCarousel> {
           ],
         );
       },
+    );
+  }
+}
+
+/// "Tus grupos": una fila por categoría en la que juego grupos — grupo,
+/// posición y partidos ganados/perdidos. Tocando la fila se abre esa categoría.
+class _MyGroupsCard extends StatelessWidget {
+  final List<({PlayerNextMatch match, PlayerStanding standing, int size})> groups;
+  final ValueChanged<PlayerNextMatch> onOpen;
+  const _MyGroupsCard({required this.groups, required this.onOpen});
+
+  @override
+  Widget build(BuildContext context) {
+    return HomeCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const HomeCardTitle(icon: Icons.groups_rounded, title: "Tus grupos"),
+          const SizedBox(height: 10),
+          for (final g in groups)
+            InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => onOpen(g.match),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 9),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(10)),
+                      child: Text(
+                        g.standing.played == 0 || g.standing.position == null ? "–" : "${g.standing.position}°",
+                        style: const TextStyle(fontFamily: AppTypography.display, fontSize: 22, fontWeight: FontWeight.w600, color: AppColors.scorifyText, height: 1),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(g.match.categoryDisplay,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.bodyText.copyWith(fontWeight: FontWeight.w700)),
+                          Text(
+                            "${(g.match.groupName ?? "Grupo").replaceFirst(RegExp(r"^GR-?", caseSensitive: false), "Grupo ")} · de ${g.size}",
+                            style: AppTypography.bodyMuted,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text("${g.standing.won}G · ${g.standing.lost}P",
+                        style: AppTypography.bodyText.copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(width: 6),
+                    const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

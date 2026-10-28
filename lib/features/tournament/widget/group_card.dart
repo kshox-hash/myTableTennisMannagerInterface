@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/player_actions.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/ui/section_card.dart";
 import "package:flutter/material.dart";
@@ -80,7 +81,7 @@ class GroupCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.scorifyTextFaint),
+                      PlayerActions(playerId: members[i].idUser, playerName: members[i].displayName),
                     ],
                   ),
                 ),

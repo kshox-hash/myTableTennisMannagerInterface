@@ -146,6 +146,8 @@ class PlayerCategoryView {
   final bool isRoundRobin;
   /// El organizador cerró la categoría antes de tiempo: sin podio ni puntos.
   final bool finishedEarly;
+  /// Cuántos de cada grupo pasan a la llave (null = el servidor no lo manda).
+  final int? qualifiersPerGroup;
 
   PlayerCategoryView({
     required this.phase,
@@ -157,6 +159,7 @@ class PlayerCategoryView {
     this.bracketTotalRounds,
     this.isRoundRobin = false,
     this.finishedEarly = false,
+    this.qualifiersPerGroup,
   });
 
   factory PlayerCategoryView.fromJson(Map<String, dynamic> json) {
@@ -177,6 +180,7 @@ class PlayerCategoryView {
       bracketTotalRounds: intOrNull(json["bracket_total_rounds"]),
       isRoundRobin: json["competition_format"] == "round_robin",
       finishedEarly: json["finished_early"] == true,
+      qualifiersPerGroup: intOrNull(json["qualifiers_per_group"]),
     );
   }
 }

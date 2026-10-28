@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/player_actions.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/features/tournament/api/tournament_api.dart";
 import "package:myttmi/core/ui/category_filter.dart";
@@ -68,10 +69,14 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
   final _api = PlayerApi();
   Future<List<TournamentMatch>> _future = Future.value(const []);
   String _statusFilter = "all";
+  static const _statusLabels = {"all": "Todos", "scheduled": "Por jugar", "finished": "Jugados"};
   late _ViewMode _mode;
   // Llaves queda bloqueada hasta que exista algún partido de llave (mientras
   // se juegan los grupos no hay nada que mostrar ahí).
   bool _hasBracket = false;
+  // Todos los partidos del torneo: con ellos la 🏆 de cada jugador arma su
+  // recorrido sin pedir nada más (ver TournamentMatchesScope).
+  List<TournamentMatch> _allMatches = const [];
   // Una categoría a la vez (arranca en la mía). null = todas.
   List<CategoryOption> _cats = const [];
   String? _cat;
@@ -102,7 +107,10 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
     _api.getTournamentMatches(widget.tournamentId).then((all) {
       if (!mounted) return;
       final has = all.any((m) => m.matchType == "bracket");
-      setState(() => _hasBracket = has);
+      setState(() {
+        _hasBracket = has;
+        _allMatches = all;
+      });
       if (!has && _mode == _ViewMode.bracket) _setMode(_ViewMode.groups);
     }).catchError((_) {});
   }
@@ -118,6 +126,9 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
     setState(() {
       _future = _api.getTournamentMatches(widget.tournamentId);
     });
+    _future.then((all) {
+      if (mounted) setState(() => _allMatches = all);
+    }).catchError((_) {});
   }
 
   void _setMode(_ViewMode mode) {
@@ -131,7 +142,9 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return TournamentMatchesScope(
+      matches: _allMatches,
+      child: Scaffold(
       backgroundColor: AppColors.scorifyBg,
       body: PrismBackground(
         child: SafeArea(
@@ -149,26 +162,32 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
                     (label: "Llaves", selected: _mode == _ViewMode.bracket, locked: !_hasBracket, onTap: () => _setMode(_ViewMode.bracket)),
                   ],
                 ),
-                if (_cats.length > 1) ...[
-                  const SizedBox(height: 10),
-                  CategoryFilterBar(options: _cats, selected: _cat, onChanged: (id) => setState(() => _cat = id)),
-                ],
-                if (_mode == _ViewMode.list) ...[
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      for (final f in const [("all", "Todos"), ("scheduled", "Por jugar"), ("finished", "Jugados")]) ...[
-                        _FilterChip(
-                          label: f.$2,
-                          selected: _statusFilter == f.$1,
-                          onTap: () {
-                            setState(() => _statusFilter = f.$1);
-                            _load();
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                    ],
+                // Una sola línea de filtros: categoría a la izquierda y, en la
+                // lista de partidos, el estado a la derecha (antes eran dos
+                // filas de chips y se veía amontonado).
+                if (_cats.length > 1 || _mode == _ViewMode.list) ...[
+                  const SizedBox(height: 12),
+                  CategoryFilterBar(
+                    options: _cats,
+                    selected: _cat,
+                    onChanged: (id) => setState(() => _cat = id),
+                    trailing: _mode != _ViewMode.list
+                        ? null
+                        : FilterDropdown(
+                            icon: Icons.filter_list_rounded,
+                            label: _statusLabels[_statusFilter]!,
+                            onTap: () async {
+                              final picked = await showOptionsSheet<String>(
+                                context,
+                                title: "Mostrar",
+                                options: [for (final e in _statusLabels.entries) (value: e.key, label: e.value)],
+                                selected: _statusFilter,
+                              );
+                              if (picked == null) return;
+                              setState(() => _statusFilter = picked.value);
+                              _load();
+                            },
+                          ),
                   ),
                 ],
                 const SizedBox(height: 14),
@@ -227,6 +246,7 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
@@ -351,6 +371,8 @@ class _Player extends StatelessWidget {
                 color: AppColors.scorifyText,
               ),
             ),
+            const SizedBox(height: 2),
+            PlayerActions(playerId: id, playerName: name),
           ],
         ),
       ),
@@ -575,37 +597,6 @@ class _Segmented extends StatelessWidget {
   }
 }
 
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _FilterChip({required this.label, required this.selected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: selected ? AppColors.scorifyText : AppColors.scorifySurface2,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-      child: InkWell(
-        onTap: onTap,
-        customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontFamily: AppTypography.body,
-              fontSize: 12.5,
-              fontWeight: FontWeight.w600,
-              color: selected ? AppColors.scorifyBg : AppColors.scorifyTextMuted,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// Lista "Partidos" con scroll infinito: pide de a 20 y trae los siguientes
 /// al acercarse al final, y solo dibuja las tarjetas visibles

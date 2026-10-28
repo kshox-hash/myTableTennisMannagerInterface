@@ -45,6 +45,23 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
   // Una categoría a la vez (arranca en la mía). null = todas.
   String? _cat;
   bool _catChosen = false;
+  // Buscador por nombre o club ("¿cuándo juega Matías?").
+  String _q = "";
+  final _search = TextEditingController();
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  static String _norm(String v) => v
+      .toLowerCase()
+      .replaceAll(RegExp("[áà]"), "a")
+      .replaceAll(RegExp("[éè]"), "e")
+      .replaceAll(RegExp("[íì]"), "i")
+      .replaceAll(RegExp("[óò]"), "o")
+      .replaceAll(RegExp("[úùü]"), "u");
 
   @override
   void initState() {
@@ -122,13 +139,36 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
 
                       final all = snap.data?.participants ?? [];
                       final options = snap.data?.categories ?? const <CategoryOption>[];
-                      final players = _cat == null ? all : all.where((p) => p.idCategory == _cat).toList();
-                      final bar = options.length > 1
-                          ? Padding(
-                              padding: const EdgeInsets.only(bottom: 14),
-                              child: CategoryFilterBar(options: options, selected: _cat, onChanged: (id) => setState(() => _cat = id)),
-                            )
-                          : const SizedBox.shrink();
+                      final q = _norm(_q.trim());
+                      final players = all
+                          .where((p) => _cat == null || p.idCategory == _cat)
+                          .where((p) => q.isEmpty || _norm("${p.playerName} ${p.clubName ?? ""}").contains(q))
+                          .toList();
+                      final bar = Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: Column(
+                          children: [
+                            if (options.length > 1) ...[
+                              CategoryFilterBar(options: options, selected: _cat, onChanged: (id) => setState(() => _cat = id)),
+                              const SizedBox(height: 10),
+                            ],
+                            TextField(
+                              controller: _search,
+                              onChanged: (v) => setState(() => _q = v),
+                              style: AppTypography.bodyText,
+                              decoration: InputDecoration(
+                                hintText: "Buscar jugador o club",
+                                hintStyle: AppTypography.bodyMuted,
+                                prefixIcon: const Icon(Icons.search_rounded, color: AppColors.scorifyTextMuted, size: 20),
+                                filled: true,
+                                fillColor: AppColors.scorifyInput,
+                                isDense: true,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
                       final groupsGenerated =
                           snap.data?.groupsGenerated ?? false;
                       if (players.isEmpty) {

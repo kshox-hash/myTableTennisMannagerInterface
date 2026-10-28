@@ -364,7 +364,21 @@ class _HeroCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           if (when != null) _InfoRow(icon: Icons.calendar_today_rounded, text: when),
-          if ((t.address ?? "").trim().isNotEmpty) _InfoRow(icon: Icons.place_rounded, text: t.address!),
+          // La dirección abre Google Maps (cómo llegar al gimnasio).
+          if ((t.address ?? "").trim().isNotEmpty)
+            InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () => launchUrl(
+                Uri.parse("https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent([t.address, t.region].whereType<String>().join(", "))}"),
+                mode: LaunchMode.externalApplication,
+              ),
+              child: Row(
+                children: [
+                  Expanded(child: _InfoRow(icon: Icons.place_rounded, text: t.address!)),
+                  Text("Cómo llegar", style: AppTypography.bodyMuted.copyWith(color: AppColors.scorifyMint, fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ),
           if ((t.region ?? "").trim().isNotEmpty) _InfoRow(icon: Icons.map_rounded, text: t.region!),
           if ((t.description ?? "").trim().isNotEmpty) ...[
             const SizedBox(height: 6),
@@ -436,9 +450,14 @@ class _CategoryCardState extends State<_CategoryCard> {
     final c = widget.category;
     final players = widget.participants;
     final enrolledCount = widget.participantsLoaded ? players.length : c.enrolledCount;
-    final inEnrollment = c.phase == "enrollment";
+    // Inscripción online: solo con la categoría sin empezar Y abierta. El
+    // organizador puede cerrarla antes de empezar (para armar la siembra):
+    // antes la app seguía ofreciendo "Inscribirme" y el servidor lo rechazaba.
+    final closedByOrganizer = c.phase == "enrollment" && c.status != "active";
+    final inEnrollment = c.phase == "enrollment" && !closedByOrganizer;
     final full = c.quotas != null && enrolledCount >= c.quotas!;
     final (phaseLabel, phaseColor) = switch (c.phase) {
+      "enrollment" when closedByOrganizer => ("Inscripciones cerradas", AppColors.scorifyPending),
       "enrollment" => ("Inscripciones", AppColors.scorifyMint),
       "groups" => ("Fase de grupos", AppColors.scorifyButterfly),
       "bracket" => ("Llave", AppColors.scorifyPending),

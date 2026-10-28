@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/player_actions.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
@@ -493,6 +494,8 @@ class _PlayerRow extends StatelessWidget {
                 ),
               ),
             ),
+            if (idUser.isNotEmpty)
+              PlayerActions(playerId: idUser, playerName: name, color: highlighted ? AppColors.scorifyOnMint : null),
             const SizedBox(width: 6),
             Container(
               width: 26,

@@ -204,6 +204,26 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                                 standings: view.standings,
                                 myUserId: data.myUserId,
                               ),
+                              // Qué necesito: cuántos clasifican y cuántos partidos me quedan.
+                              Builder(builder: (context) {
+                                final left = view.myGroupMatches.where((m) => m.winnerId == null).length;
+                                final q = view.qualifiersPerGroup;
+                                final parts = [
+                                  if (!view.isRoundRobin && q != null) "Clasifican ${q == 1 ? "el 1.º" : "los $q primeros"} a la llave",
+                                  if (isEnrolled) left == 0 ? "Ya jugaste todos tus partidos" : "Te ${left == 1 ? "queda 1 partido" : "quedan $left partidos"}",
+                                ];
+                                if (parts.isEmpty) return const SizedBox.shrink();
+                                return Padding(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.info_outline_rounded, size: 16, color: AppColors.scorifyMint),
+                                      const SizedBox(width: 8),
+                                      Expanded(child: Text(parts.join(" · "), style: AppTypography.bodyMuted)),
+                                    ],
+                                  ),
+                                );
+                              }),
                             ],
 
                             if (generalStandings.isNotEmpty) ...[
