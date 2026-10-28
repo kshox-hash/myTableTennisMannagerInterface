@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/section_card.dart";
 import "package:myttmi/core/ui/share_card.dart";
 import "package:flutter/material.dart";
@@ -216,7 +217,7 @@ class _Count extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(12)),
+      decoration: panelBox(),
       child: Column(
         children: [
           Opacity(opacity: count == 0 ? 0.35 : 1, child: Medal(position: position, size: 34)),

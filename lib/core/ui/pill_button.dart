@@ -1,7 +1,7 @@
 import 'package:myttmi/core/ui/app_button.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
-import 'package:myttmi/core/constants/app_typography.dart';
+import 'package:myttmi/core/ui/panel_style.dart';
 
 /// Animación de entrada "pop" (escala con rebote + fade-in) — se dispara una
 /// sola vez cuando el botón aparece en pantalla (al cargar la pantalla, o al
@@ -66,48 +66,16 @@ class InfoChip extends StatelessWidget {
 
   const InfoChip({super.key, required this.label, this.tone = ChipTone.neutral});
 
+  // Estilo panel: etiqueta con filete del color (antes píldora teñida).
   @override
-  Widget build(BuildContext context) {
-    late final Color fg;
-    late final Color bg;
-
-    switch (tone) {
-      case ChipTone.neutral:
-        fg = AppColors.scorifyTextMuted;
-        bg = Colors.white.withOpacity(0.06);
-        break;
-      case ChipTone.positive:
-        fg = AppColors.scorifyMint;
-        bg = AppColors.scorifyMint.withOpacity(0.14);
-        break;
-      case ChipTone.negative:
-        fg = AppColors.scorifyNegative;
-        bg = AppColors.scorifyNegative.withOpacity(0.14);
-        break;
-      case ChipTone.pending:
-        fg = AppColors.scorifyPending;
-        bg = AppColors.scorifyPending.withOpacity(0.14);
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: bg,
-
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontFamily: AppTypography.body,
-          fontWeight: FontWeight.w600,
-          fontSize: 11,
-          color: fg,
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => PanelChip(
+        label: label,
+        fontSize: 11,
+        color: switch (tone) {
+          ChipTone.neutral => null,
+          ChipTone.positive => AppColors.scorifyMint,
+          ChipTone.negative => AppColors.scorifyNegative,
+          ChipTone.pending => AppColors.scorifyPending,
+        },
+      );
 }

@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -74,9 +75,9 @@ class FilterDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.scorifySurface2,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Panel.radius),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Panel.radius),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
@@ -115,18 +116,15 @@ Future<({T value})?> showOptionsSheet<T>(
 }) {
   return showModalBottomSheet<({T value})>(
     context: context,
-    backgroundColor: AppColors.scorifyDeep,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+    backgroundColor: Panel.sheetColor,
+    shape: Panel.sheetShape,
     builder: (sheet) => SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
-            child: Text(title,
-                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
-          ),
+          PanelTitleBar(title: title),
+          const SizedBox(height: 6),
           for (final o in options)
             ListTile(
               title: Text(o.label,

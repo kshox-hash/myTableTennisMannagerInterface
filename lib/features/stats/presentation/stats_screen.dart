@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:myttmi/core/ui/stagger_in.dart';
 import 'package:myttmi/core/ui/stat_gauge.dart';
 import 'package:myttmi/core/ui/glass_card.dart';
@@ -248,7 +249,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                   ),
                                   const SizedBox(height: 14),
                                   ClipRRect(
-                                    borderRadius: BorderRadius.circular(99),
+                                    borderRadius: BorderRadius.circular(Panel.buttonRadius),
                                     child: SizedBox(
                                       height: 5,
                                       child: setsWon + setsLost == 0
@@ -351,7 +352,7 @@ class _RecentRow extends StatelessWidget {
     final cat = range.isEmpty || range == "General" ? m.categoryType : "${m.categoryType} $range";
 
     return InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Panel.radius),
       onTap: () => Navigator.pushNamed(context, AppRoutes.matchDetail, arguments: {"matchType": m.matchType, "matchId": m.idMatch}),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),

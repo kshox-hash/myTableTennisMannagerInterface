@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -16,17 +17,12 @@ Future<bool> confirmAction(
   final ok = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      backgroundColor: AppColors.scorifyDeep,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontFamily: AppTypography.body,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: AppColors.scorifyText,
-        ),
-      ),
+      backgroundColor: Panel.sheetColor,
+      shape: Panel.dialogShape,
+      // Estilo panel: franja de título con la línea encendida debajo.
+      titlePadding: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      title: PanelTitleBar(title: title),
       content: Text(message, style: AppTypography.bodyMuted.copyWith(height: 1.45)),
       actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       actions: [

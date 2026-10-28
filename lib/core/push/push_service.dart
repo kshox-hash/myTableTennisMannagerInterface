@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "dart:async";
 import "dart:convert";
@@ -84,10 +85,11 @@ class PushService {
     final yes = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.scorifyDeep,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("¿Te avisamos cuando te toque jugar?",
-            style: TextStyle(color: AppColors.scorifyText, fontWeight: FontWeight.w700)),
+        backgroundColor: Panel.sheetColor,
+        shape: Panel.dialogShape,
+        titlePadding: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        title: const PanelTitleBar(title: "¿Te avisamos cuando te toque jugar?"),
         content: const Text(
           "Te llega un aviso con tu mesa y tu rival, tus resultados y cuándo empieza tu campeonato. Solo lo importante.",
           style: TextStyle(color: AppColors.scorifyTextMuted, height: 1.4),

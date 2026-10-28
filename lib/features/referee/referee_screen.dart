@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/helpers/friendly_error.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
@@ -319,7 +320,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
         if (!_done)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(color: hintColor.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(12)),
+            decoration: panelBox(color: hintColor),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -358,11 +359,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
     );
   }
 
-  Widget _chip(String text, Color c) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(color: c.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(99)),
-        child: Text(text, style: TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 0.4, color: c)),
-      );
+  Widget _chip(String text, Color c) => PanelChip(label: text, color: c, fontSize: 11.5);
 
   /// Jugador en el marcador: foto y nombre; el que va ganando en verde.
   Widget _player(String? id, String name, bool leading) => Column(
@@ -438,13 +435,13 @@ class _RefereeScreenState extends State<RefereeScreen> {
           // Set ganado: fondo verde suave; el que se juega: borde turquesa.
           fillColor: won ? AppColors.scorifyButterfly.withValues(alpha: 0.12) : AppColors.scorifyInput,
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Panel.radius),
             borderSide: current ? BorderSide(color: AppColors.scorifyMint.withValues(alpha: 0.6), width: 1.2) : BorderSide.none,
           ),
-          disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+          disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(Panel.radius), borderSide: BorderSide.none),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(Panel.radius), borderSide: BorderSide.none),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Panel.radius),
             borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.8),
           ),
         ),

@@ -2,6 +2,7 @@ import "package:myttmi/core/monitoring.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/helpers/image_url.dart";
 import "package:myttmi/core/ui/card_border.dart";
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:url_launcher/url_launcher.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
@@ -366,7 +367,7 @@ class _HeroCard extends StatelessWidget {
           // La dirección abre Google Maps (cómo llegar al gimnasio).
           if ((t.address ?? "").trim().isNotEmpty)
             InkWell(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(Panel.radius),
               onTap: () => launchUrl(
                 Uri.parse("https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent([t.address, t.region].whereType<String>().join(", "))}"),
                 mode: LaunchMode.externalApplication,
@@ -386,10 +387,7 @@ class _HeroCard extends StatelessWidget {
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.scorifySurface2,
-              borderRadius: BorderRadius.circular(12),
-            ),
+            decoration: panelBox(),
             child: Row(
               children: [
                 _Kpi(value: "${t.categories.length}", label: t.categories.length == 1 ? "Categoría" : "Categorías"),
@@ -522,7 +520,7 @@ class _CategoryCardState extends State<_CategoryCard> {
           if (c.quotas != null && c.quotas! > 0) ...[
             const SizedBox(height: 12),
             ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Panel.radius),
               child: LinearProgressIndicator(
                 value: (enrolledCount / c.quotas!).clamp(0.0, 1.0),
                 minHeight: 6,
@@ -562,7 +560,7 @@ class _CategoryCardState extends State<_CategoryCard> {
       children: [
         InkWell(
           onTap: () => setState(() => _expanded = !_expanded),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(Panel.radius),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
@@ -608,10 +606,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                         Container(
                           margin: const EdgeInsets.only(bottom: 6),
                           padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.scorifySurface2,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          decoration: panelBox(),
                           child: Row(
                             children: [
                               SizedBox(
@@ -865,17 +860,9 @@ class _Pill extends StatelessWidget {
   final Color fg;
   const _Pill({required this.label, required this.bg, required this.fg});
 
+  // Estilo panel: etiqueta con filete del color (antes píldora teñida).
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
-      child: Text(
-        label,
-        style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: fg),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => PanelChip.fromColors(label: label, bg: bg, fg: fg);
 }
 
 class _QuickLink extends StatelessWidget {
@@ -886,12 +873,12 @@ class _QuickLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CardBorder(child: DecoratedBox(decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(12)), child: Material(
+    return CardBorder(child: DecoratedBox(decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(Panel.radius)), child: Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Panel.radius),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Panel.radius),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 14),
           child: Column(
@@ -925,7 +912,7 @@ class _NoticeBanner extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.scorifyMint.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Panel.radius),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

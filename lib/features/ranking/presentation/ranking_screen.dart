@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
@@ -124,9 +125,9 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
               fillColor: AppColors.scorifyInput,
               contentPadding: const EdgeInsets.symmetric(vertical: 13),
               prefixIcon: const Icon(Icons.search_rounded, color: AppColors.scorifyTextMuted),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(Panel.radius), borderSide: BorderSide.none),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Panel.radius),
                 borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.4),
               ),
             ),
@@ -212,14 +213,7 @@ class _MyRankCard extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(color: AppColors.scorifyButterfly, borderRadius: BorderRadius.circular(12)),
-            child: Text(
-              "${me.rankingPoints} pts",
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyOnButterfly),
-            ),
-          ),
+          PanelChip(label: "${me.rankingPoints} pts", color: AppColors.scorifyButterfly, fontSize: 13),
         ],
       ),
     );
@@ -265,7 +259,7 @@ class _PodiumStep extends StatelessWidget {
 
     return InkWell(
       onTap: () => _openProfile(context, e),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Panel.radius),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -290,7 +284,7 @@ class _PodiumStep extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: AppColors.scorifyCardFill,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(Panel.radius)),
               border: Border(top: BorderSide(color: color, width: 3)),
             ),
             child: Text(
@@ -314,10 +308,10 @@ class _RankRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: isMe ? AppColors.scorifyMint.withValues(alpha: 0.12) : Colors.transparent,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Panel.radius),
       child: InkWell(
         onTap: () => _openProfile(context, player),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Panel.radius),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           child: Row(

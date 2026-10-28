@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/ui/identicon.dart';
@@ -24,14 +25,14 @@ class SpinPlayerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Panel.radius),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Panel.radius),
             border: Border.all(color: AppColors.scorifyCardBorder),
             gradient: AppColors.cardGradient,
           ),

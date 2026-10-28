@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/monitoring.dart";
 import "package:myttmi/features/shell/splash_gate.dart";
 import "package:myttmi/core/ui/app_button.dart";
@@ -196,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               backgroundColor: AppColors.scorifySurface2,
                               foregroundColor: AppColors.scorifyText,
                               side: const BorderSide(color: AppColors.scorifyCardBorder),
-                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.radius))),
                             ),
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,

@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:flutter/foundation.dart';
 import 'package:myttmi/core/app_update.dart';
 import 'package:flutter/material.dart';
@@ -76,8 +77,8 @@ class _AppShellState extends State<AppShell>
   Future<void> _openSettings() async {
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: AppColors.scorifyDeep,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(12))),
+      backgroundColor: Panel.sheetColor,
+      shape: Panel.sheetShape,
       builder: (sheet) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,

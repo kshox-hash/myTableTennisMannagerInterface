@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:myttmi/core/ui/section_card.dart';
 import 'package:myttmi/core/ui/app_button.dart';
 import 'package:flutter/material.dart';
@@ -218,7 +219,7 @@ class _Side extends StatelessWidget {
             : Container(
                 width: 52,
                 height: 52,
-                decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(12)),
+                decoration: panelBox(),
                 child: const Icon(Icons.person_rounded, color: AppColors.scorifyTextMuted),
               ),
         const SizedBox(height: 8),
@@ -246,7 +247,7 @@ class _Chip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Panel.radius),
       ),
       child: Text(text, maxLines: 1, softWrap: false, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
     );

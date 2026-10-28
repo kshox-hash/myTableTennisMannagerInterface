@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 
@@ -24,7 +25,7 @@ class SpinStatsRow extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
                 gradient: AppColors.cardGradient,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Panel.radius),
                 border: Border.all(color: AppColors.scorifyCardBorder),
               ),
               child: Column(

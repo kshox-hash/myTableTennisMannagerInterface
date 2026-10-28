@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:flutter/material.dart";
 import "package:mobile_scanner/mobile_scanner.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -73,7 +74,7 @@ class _RefereeScanScreenState extends State<RefereeScanScreen> {
             ],
             crossAxisAlignment: CrossAxisAlignment.stretch,
             body: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Panel.radius),
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
@@ -98,7 +99,7 @@ class _RefereeScanScreenState extends State<RefereeScanScreen> {
                           height: 230,
                           decoration: BoxDecoration(
                             border: Border.all(color: AppColors.scorifyButterfly, width: 3),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(Panel.radius),
                           ),
                         ),
                       ),

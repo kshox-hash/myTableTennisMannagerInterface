@@ -1,4 +1,5 @@
 import 'package:myttmi/core/ui/card_border.dart';
+import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 
@@ -40,7 +41,7 @@ class GlassCard extends StatelessWidget {
     this.backgroundAlignment = Alignment.center,
   });
 
-  static const _radius = 14.0;
+  static const _radius = Panel.radius;
 
   @override
   Widget build(BuildContext context) {

@@ -1,15 +1,15 @@
 import "package:flutter/material.dart";
-import "package:myttmi/core/constants/app_colors.dart";
+import "package:myttmi/core/ui/panel_style.dart";
 
-/// Filete de las tarjetas: una línea fina azul de un solo color, pintada
-/// encima del borde (no cambia el tamaño de la tarjeta). Sin degradado ni
-/// sombra — antes era un CustomPaint con un shader por tarjeta.
+/// Filete de las tarjetas (estilo panel): línea fina verde azulado oscuro
+/// alrededor y una línea encendida de 1 px en el borde superior, pintadas
+/// encima del borde (no cambian el tamaño de la tarjeta).
 class CardBorder extends StatelessWidget {
   final Widget child;
   final double radius;
-  /// Tarjeta destacada (la principal de la pantalla): filete azul brillante.
+  /// Tarjeta destacada (la principal de la pantalla): filete más claro.
   final bool highlight;
-  const CardBorder({super.key, required this.child, this.radius = 14, this.highlight = false});
+  const CardBorder({super.key, required this.child, this.radius = Panel.radius, this.highlight = false});
 
   @override
   Widget build(BuildContext context) {
@@ -17,12 +17,24 @@ class CardBorder extends StatelessWidget {
       position: DecorationPosition.foreground,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(
-          color: highlight ? AppColors.scorifyCardBorderStrong : AppColors.scorifyCardBorder,
-          width: highlight ? 1.3 : 1,
-        ),
+        border: Border.all(color: highlight ? Panel.edgeStrong : Panel.edge),
       ),
-      child: child,
+      // passthrough: la tarjeta recibe las mismas medidas que tendría sin el
+      // Stack (con el "loose" por defecto se encogía al ancho de su
+      // contenido y el relleno no llegaba al borde).
+      child: Stack(
+        fit: StackFit.passthrough,
+        children: [
+          child,
+          // Línea encendida arriba (dentro del filete, sin pisar las esquinas).
+          Positioned(
+            top: 0,
+            left: radius / 2,
+            right: radius / 2,
+            child: IgnorePointer(child: Container(height: 1, color: Panel.topLine)),
+          ),
+        ],
+      ),
     );
   }
 }

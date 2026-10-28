@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 
 class EFNavItem {
@@ -32,13 +33,19 @@ class EFBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Negro de la barra de la web (--color-app-primary #020304).
-    final bg = backgroundColor ?? AppColors.scorifyNavbar;
-
+    // Estilo panel: fondo del panel (casi negro verdoso) con la línea
+    // encendida verde azulado arriba, como el borde superior de las tarjetas.
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: bg,
-        border: const Border(top: BorderSide(color: Color(0xFF1A1A1A))),
+        color: backgroundColor,
+        gradient: backgroundColor == null
+            ? const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF0E1D20), Color(0xFF080D0F)],
+              )
+            : null,
+        border: const Border(top: BorderSide(color: Panel.topLine)),
       ),
       child: SafeArea(
         top: false,

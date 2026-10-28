@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/monitoring.dart";
 import "package:myttmi/features/shell/splash_gate.dart";
 import "package:url_launcher/url_launcher.dart";
@@ -186,7 +187,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(height: 14),
 
                           InkWell(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(Panel.radius),
                             onTap: _pickBirthDate,
                             child: InputDecorator(
                               decoration: InputDecoration(
@@ -196,11 +197,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 filled: true,
                                 fillColor: AppColors.scorifyInput,
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(Panel.radius),
                                   borderSide: BorderSide.none,
                                 ),
                                 enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(Panel.radius),
                                   borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
                                 ),
                               ),
@@ -224,11 +225,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               filled: true,
                               fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(Panel.radius),
                                 borderSide: BorderSide.none,
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(Panel.radius),
                                 borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
                               ),
                             ),
@@ -252,11 +253,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               filled: true,
                               fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(Panel.radius),
                                 borderSide: BorderSide.none,
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(Panel.radius),
                                 borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
                               ),
                             ),
@@ -286,11 +287,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               filled: true,
                               fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(Panel.radius),
                                 borderSide: BorderSide.none,
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(Panel.radius),
                                 borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
                               ),
                             ),
@@ -319,11 +320,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               filled: true,
                               fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(Panel.radius),
                                 borderSide: BorderSide.none,
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(Panel.radius),
                                 borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
                               ),
                             ),

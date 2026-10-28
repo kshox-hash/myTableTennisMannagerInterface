@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/player_actions.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/features/tournament/api/tournament_api.dart";
@@ -281,7 +282,7 @@ class _MatchCard extends StatelessWidget {
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: pillBg, borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: pillBg, borderRadius: BorderRadius.circular(Panel.radius)),
                 child: Text(pillText,
                     style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: pillFg)),
               ),
@@ -339,7 +340,7 @@ class _Player extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => _openProfile(context, id, name),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Panel.radius),
       child: Padding(
         padding: const EdgeInsets.all(2),
         child: Column(
@@ -545,19 +546,19 @@ class _Segmented extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(99)),
+      decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(Panel.buttonRadius)),
       child: Row(
         children: [
           for (final it in items)
             Expanded(
               child: DecoratedBox(decoration: selectedPillDecoration(it.selected), child: Material(
                 color: Colors.transparent,
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.buttonRadius))),
                 child: InkWell(
                   onTap: () {
                     it.onTap();
                   },
-                  customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
+                  customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.buttonRadius))),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: Row(
@@ -574,7 +575,7 @@ class _Segmented extends StatelessWidget {
                             fontSize: 13.5,
                             fontWeight: FontWeight.w600,
                             color: it.selected
-                                ? AppColors.scorifyOnMint
+                                ? AppColors.scorifyText
                                 : it.locked
                                     ? AppColors.scorifyTextFaint
                                     : AppColors.scorifyText,
@@ -744,7 +745,7 @@ class _PagedMatchListState extends State<_PagedMatchList> {
               padding: const EdgeInsets.only(top: 6, bottom: 10),
               child: Row(
                 children: [
-                  Container(width: 4, height: 18, decoration: BoxDecoration(color: AppColors.scorifyMint, borderRadius: BorderRadius.circular(12))),
+                  Container(width: 4, height: 18, decoration: BoxDecoration(color: AppColors.scorifyMint, borderRadius: BorderRadius.circular(Panel.radius))),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(parts.last,

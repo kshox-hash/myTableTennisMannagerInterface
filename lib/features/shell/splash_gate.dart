@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/app_update.dart";
 import "package:flutter/foundation.dart";
 import "package:myttmi/features/auth/api/auth_api.dart";
@@ -278,7 +279,7 @@ class _SplashGateState extends State<SplashGate> {
                         height: 6,
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(99),
+                          borderRadius: BorderRadius.circular(Panel.buttonRadius),
                         ),
                         alignment: Alignment.centerLeft,
                         child: FractionallySizedBox(
@@ -286,7 +287,7 @@ class _SplashGateState extends State<SplashGate> {
                           child: Container(
                             decoration: BoxDecoration(
                               gradient: appButtonGradient,
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(Panel.radius),
                             ),
                           ),
                         ),

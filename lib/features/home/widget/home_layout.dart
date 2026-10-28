@@ -1,5 +1,6 @@
 import "package:myttmi/core/ui/section_card.dart";
 import "package:myttmi/core/ui/card_border.dart";
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
@@ -48,7 +49,7 @@ class HomePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(12);
+    final radius = BorderRadius.circular(Panel.radius);
     return CardBorder(child: Material(
       color: Colors.transparent,
       borderRadius: radius,
@@ -98,7 +99,7 @@ class HomeHero extends StatelessWidget {
     final since = memberSince?.toLocal();
     Widget chip(IconData icon, String text) => Container(
           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-          decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(12)),
+          decoration: panelBox(),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -286,13 +287,9 @@ class HomeStreakCard extends StatelessWidget {
               width: 21,
               height: 21,
               margin: const EdgeInsets.symmetric(horizontal: 2),
-              decoration: BoxDecoration(
-                // Ganado: el mismo degradado del botón principal.
-                gradient: won ? appButtonGradient : null,
-                color: won ? null : AppColors.scorifyNegative,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(won ? Icons.check_rounded : Icons.close_rounded, color: won ? AppColors.scorifyOnButterfly : Colors.white, size: 14),
+              // Estilo panel: caja oscura con filete del color (antes bloque sólido).
+              decoration: panelBox(color: won ? AppColors.scorifyButterfly : AppColors.scorifyNegative),
+              child: Icon(won ? Icons.check_rounded : Icons.close_rounded, color: won ? AppColors.scorifyButterfly : AppColors.scorifyNegative, size: 14),
             ),
         ],
       ),
@@ -471,7 +468,7 @@ class HomeGroupCard extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: leading ? AppColors.scorifyButterfly : AppColors.scorifySurface2,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Panel.radius),
             ),
             child: Text(
               position == null ? "–" : "${position}°",
@@ -519,7 +516,7 @@ class HomeRefereeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return SectionCard(
       title: "Te toca arbitrar",
-      icon: Icons.sports_rounded,
+      icon: Icons.scoreboard_rounded,
       titleColor: AppColors.scorifyButterfly,
       onTap: onTap,
       padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
@@ -529,8 +526,8 @@ class HomeRefereeCard extends StatelessWidget {
             width: 44,
             height: 44,
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: AppColors.scorifyButterfly, borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.sports_rounded, color: AppColors.scorifyOnButterfly),
+            decoration: panelBox(color: AppColors.scorifyButterfly),
+            child: const Icon(Icons.scoreboard_rounded, color: AppColors.scorifyButterfly),
           ),
           const SizedBox(width: 12),
           Expanded(

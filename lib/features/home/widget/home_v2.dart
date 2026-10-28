@@ -8,6 +8,7 @@ import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:myttmi/core/ui/card_border.dart";
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/features/home/widget/home_layout.dart";
 
@@ -58,7 +59,7 @@ class _HomeCardState extends State<HomeCard> {
 
   @override
   Widget build(BuildContext context) {
-    const radius = 14.0; // esquinas redondeadas (rediseño 2026-10)
+    const radius = Panel.radius; // esquinas casi rectas (estilo panel)
     final r = BorderRadius.circular(radius);
     return AnimatedScale(
       scale: _down ? 0.98 : 1,
@@ -99,29 +100,41 @@ class HomeCardTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    // Estilo panel: mayúsculas espaciadas y, debajo, la línea encendida al
+    // centro (la misma de la franja de título de las tarjetas con título).
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Icon(icon, size: 18, color: color),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            // Título en blanco; el color de la sección va solo en el ícono.
-            title,
-            style: _t(15, w: FontWeight.w700),
-          ),
-        ),
-        if (action != null)
-          InkWell(
-            onTap: onAction,
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        Row(
+          children: [
+            Icon(icon, size: 17, color: color),
+            const SizedBox(width: 8),
+            Expanded(
               child: Text(
-                "$action ›",
-                style: _t(12, w: FontWeight.w500, c: _mint),
+                // Título en blanco; el color de la sección va solo en el ícono.
+                title.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: _t(13, w: FontWeight.w700, ls: 1.3),
               ),
             ),
-          ),
+            if (action != null)
+              InkWell(
+                onTap: onAction,
+                borderRadius: BorderRadius.circular(Panel.buttonRadius),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                  child: Text(
+                    "$action ›",
+                    style: _t(12, w: FontWeight.w500, c: _mint),
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        const PanelGlowLine(),
       ],
     );
   }
@@ -175,7 +188,7 @@ class HomeProfileRow extends StatelessWidget {
     );
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Panel.radius),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
@@ -283,7 +296,7 @@ class HomeMatchCard extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget player(String? id, String? url, String name, String? club, {VoidCallback? onTap}) => InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Panel.radius),
       // Foto arriba y nombre debajo, todo centrado a su lado del "VS".
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -315,45 +328,126 @@ class HomeMatchCard extends StatelessWidget {
         ],
       ),
     );
-    Widget info(IconData icon, String text, {int flex = 2}) => Expanded(
-      flex: flex,
-      child: Column(
+    // Panel tipo "ficha": etiqueta en mayúsculas con su bajada a la
+    // izquierda y el dato en una caja oscura con filete a la derecha.
+    Widget field(String label, String hint, String value) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 7),
+      child: Row(
         children: [
-          Icon(icon, size: 17, color: _mint),
-          const SizedBox(height: 4),
-          Text(text, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: _t(11.5, h: 1.3)),
+          Expanded(
+            flex: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: _t(13, w: FontWeight.w700, ls: 0.8)),
+                const SizedBox(height: 1),
+                Text(hint, style: _t(9.5, c: AppColors.scorifyTextMuted, ls: 0.6)),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            flex: 6,
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 34),
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              // Caja de dato: gris casi negro neutro y liso, filete gris.
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A1D1D),
+                borderRadius: BorderRadius.circular(3),
+                border: Border.all(color: const Color(0xFF3E4A4E)),
+              ),
+              child: Text(value, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(12.5, w: FontWeight.w500, h: 1.25)),
+            ),
+          ),
         ],
       ),
     );
-    Widget sep() =>
-        Container(width: 1, height: 34, margin: const EdgeInsets.symmetric(horizontal: 8), color: Colors.white.withValues(alpha: 0.10));
+    Widget divider() => Container(height: 1, color: AppColors.scorifyCardBorder.withValues(alpha: 0.7));
+    // Botón de panel: degradado vertical de casi negro arriba a verde
+    // azulado abajo, con la última franja un poco más clara, y filete gris
+    // (medido de la referencia). El principal, igual pero el verde azulado
+    // tira al celeste de la marca.
+    Widget panelButton(String label, VoidCallback? onTap, {bool primary = false}) => Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(3),
+          border: Border.all(color: primary ? _mint.withValues(alpha: 0.65) : const Color(0xFF4F6166)),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            stops: const [0, 0.45, 0.85, 1],
+            colors: primary
+                ? const [Color(0xFF151A1C), Color(0xFF16242A), Color(0xFF0E3B47), Color(0xFF0F5263)]
+                : const [Color(0xFF171A1A), Color(0xFF1B2121), Color(0xFF173332), Color(0xFF1A4442)],
+          ),
+        ),
+        child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(3),
+          child: SizedBox(
+            height: 40,
+            child: Center(
+              child: Text(
+                label,
+                style: _t(12.5, w: FontWeight.w700, ls: 1.0, c: onTap == null ? AppColors.scorifyTextFaint : AppColors.scorifyText),
+              ),
+            ),
+          ),
+        ),
+        ),
+      ),
+    );
+    final hasPlace = (place ?? "").trim().isNotEmpty;
 
-    return HomeCard(
-      gradient: _glassFeatured,
-      padding: EdgeInsets.zero,
-      child: Stack(
+    // Panel medido de la referencia: filete verde azulado oscuro alrededor,
+    // línea encendida de 1 px en el borde superior, franja de título gris
+    // neutra y, debajo de ella, una línea que pasa de gris en las puntas a
+    // verde azulado brillante al centro (con un halo de 2 px). El cuerpo
+    // baja de verde azulado muy oscuro a uno apenas más claro.
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: const Color(0xFF125450)),
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xF20E1D20), Color(0xF2102E33)],
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Container(height: 1, color: const Color(0xFF31817D)),
+          // Franja de título: gris neutro, mayúsculas espaciadas.
+          Container(
+            padding: const EdgeInsets.fromLTRB(14, 9, 10, 9),
+            color: const Color(0xFF212628),
+            child: Row(
+              children: [
+                Expanded(child: Text("PRÓXIMO PARTIDO", style: _t(13.5, w: FontWeight.w700, ls: 1.4))),
+                _LiveStatus(startsAt: startsAt, tableNumber: tableNumber),
+              ],
+            ),
+          ),
+          // Línea bajo el título: gris en las puntas, encendida al centro.
+          const PanelGlowLine(),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
             child: Column(
               children: [
-                Row(
-                  children: [
-                    const Expanded(
-                      child: HomeCardTitle(icon: Icons.calendar_month_rounded, title: "Próximo partido"),
-                    ),
-                    _LiveStatus(startsAt: startsAt, tableNumber: tableNumber),
-                  ],
-                ),
-                const SizedBox(height: 10),
                 Text(
-                  tournamentName,
+                  tournamentName.toUpperCase(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: _t(13, c: AppColors.scorifyText.withValues(alpha: 0.85)),
+                  style: _t(11, w: FontWeight.w600, c: AppColors.scorifyTextMuted, ls: 1.0),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 Row(
                   children: [
                     Expanded(child: player(myId, myAvatarUrl, "Tú", myClub)),
@@ -385,22 +479,23 @@ class HomeMatchCard extends StatelessWidget {
                     ],
                   ),
                 ],
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
+                divider(),
+                field("FECHA", "CUÁNDO SE JUEGA", when.replaceAll("\n", " · ")),
+                divider(),
+                field("MESA", "DÓNDE TE TOCA", table),
+                if (hasPlace) ...[
+                  divider(),
+                  field("LUGAR", "DIRECCIÓN", place!.trim()),
+                ],
+                divider(),
+                const SizedBox(height: 12),
                 Row(
                   children: [
-                    info(Icons.event_rounded, when),
-                    sep(),
-                    info(Icons.table_restaurant_rounded, table),
-                    if ((place ?? "").trim().isNotEmpty) ...[sep(), info(Icons.place_rounded, place!.trim(), flex: 3)],
+                    panelButton("VER RIVAL", onOpponent),
+                    const SizedBox(width: 8),
+                    panelButton("VER DETALLE", onDetail, primary: true),
                   ],
-                ),
-                const SizedBox(height: 16),
-                AppButton(
-                  label: "Ver detalle del partido",
-                  trailingIcon: Icons.chevron_right_rounded,
-                  onPressed: onDetail,
-                  height: 40,
-                  expand: false,
                 ),
               ],
             ),
@@ -558,14 +653,11 @@ class HomeStreakCardV2 extends StatelessWidget {
                         height: 28,
                         margin: const EdgeInsets.symmetric(horizontal: 2),
                         alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: w ? appButtonGradient : null,
-                          color: w ? null : AppColors.scorifyNegative,
-                        ),
+                        // Estilo panel: caja oscura con filete del color (antes círculo sólido).
+                        decoration: panelBox(color: w ? _lime : AppColors.scorifyNegative),
                         child: Text(
                           w ? "G" : "P",
-                          style: _t(12, w: FontWeight.w700, c: w ? AppColors.scorifyOnButterfly : Colors.white),
+                          style: _t(12, w: FontWeight.w700, c: w ? _lime : AppColors.scorifyNegative),
                         ),
                       ),
                   ],
@@ -644,7 +736,7 @@ class _HomeResultsCardState extends State<HomeResultsCard> {
                           height: 6,
                           decoration: BoxDecoration(
                             color: i == page ? AppColors.scorifyMint : AppColors.scorifySurface2,
-                            borderRadius: BorderRadius.circular(99),
+                            borderRadius: BorderRadius.circular(Panel.buttonRadius),
                           ),
                         ),
                     ],
@@ -668,10 +760,10 @@ class _ResultTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white.withValues(alpha: 0.04),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Panel.radius),
       child: InkWell(
         onTap: r.onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Panel.radius),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(8, 8, 6, 8),
           child: Column(
@@ -683,14 +775,10 @@ class _ResultTile extends StatelessWidget {
                     width: 20,
                     height: 20,
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: r.won ? appButtonGradient : null,
-                      color: r.won ? null : AppColors.scorifyNegative,
-                    ),
+                    decoration: panelBox(color: r.won ? _lime : AppColors.scorifyNegative),
                     child: Text(
                       r.won ? "G" : "P",
-                      style: _t(10, w: FontWeight.w700, c: r.won ? AppColors.scorifyOnButterfly : Colors.white),
+                      style: _t(10, w: FontWeight.w700, c: r.won ? _lime : AppColors.scorifyNegative),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -759,10 +847,10 @@ class HomeOpenTournamentsCard extends StatelessWidget {
                   width: items.length == 1 ? MediaQuery.sizeOf(context).width - 60 : 230,
                   child: Material(
                     color: Colors.white.withValues(alpha: 0.04),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(Panel.radius),
                     child: InkWell(
                       onTap: it.onTap,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(Panel.radius),
                       child: Padding(
                         padding: const EdgeInsets.all(12),
                         child: Column(
@@ -846,7 +934,7 @@ class HomeWeekCard extends StatelessWidget {
             if (i > 0) Divider(height: 1, color: Colors.white.withValues(alpha: 0.08)),
             InkWell(
               onTap: items[i].onTap,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Panel.radius),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 9),
                 child: Row(
@@ -854,7 +942,7 @@ class HomeWeekCard extends StatelessWidget {
                     Container(
                       width: 42,
                       padding: const EdgeInsets.symmetric(vertical: 5),
-                      decoration: BoxDecoration(color: _mint.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(12)),
+                      decoration: panelBox(color: _mint),
                       child: Column(
                         children: [
                           Text(
@@ -914,7 +1002,7 @@ class HomeHighlightCard extends StatelessWidget {
           Container(
             width: 44,
             height: 44,
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.14), shape: BoxShape.circle),
+            decoration: panelBox(color: color, circle: true),
             child: Icon(icon, color: color, size: 24),
           ),
           const SizedBox(width: 12),
@@ -972,7 +1060,7 @@ class HomeOnboardingCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           ClipRRect(
-            borderRadius: BorderRadius.circular(99),
+            borderRadius: BorderRadius.circular(Panel.buttonRadius),
             child: LinearProgressIndicator(
               value: steps.isEmpty ? 0 : done / steps.length,
               minHeight: 5,
@@ -984,7 +1072,7 @@ class HomeOnboardingCard extends StatelessWidget {
           for (final s in steps)
             InkWell(
               onTap: s.done ? null : s.onTap,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Panel.radius),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 9),
                 child: Row(
@@ -992,12 +1080,10 @@ class HomeOnboardingCard extends StatelessWidget {
                     Container(
                       width: 24,
                       height: 24,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: s.done ? appButtonGradient : null,
-                        border: s.done ? null : Border.all(color: AppColors.scorifyTextMuted, width: 1.5),
-                      ),
-                      child: s.done ? const Icon(Icons.check_rounded, size: 16, color: AppColors.scorifyOnButterfly) : null,
+                      decoration: s.done
+                          ? panelBox(color: _mint, circle: true)
+                          : BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.scorifyTextMuted, width: 1.5)),
+                      child: s.done ? const Icon(Icons.check_rounded, size: 16, color: _mint) : null,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -1116,7 +1202,7 @@ class HomeBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return CardBorder(
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(99),
+        borderRadius: BorderRadius.circular(Panel.buttonRadius),
         child: SizedBox(
           height: 170,
           child: Stack(
@@ -1216,7 +1302,7 @@ class HomeMyTournamentsCard extends StatelessWidget {
               if (i > 0) Divider(height: 1, color: Colors.white.withValues(alpha: 0.08)),
               InkWell(
                 onTap: items[i].onTap,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Panel.radius),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Row(
@@ -1245,7 +1331,7 @@ class HomeMyTournamentsCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                         decoration: BoxDecoration(
                           color: (items[i].live ? _lime : _mint).withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(Panel.radius),
                         ),
                         child: Text(
                           items[i].status,
@@ -1391,7 +1477,7 @@ class HomeMyTournamentsCarousel extends StatelessWidget {
                             height: 42,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(Panel.radius),
                               color: color,
                             ),
                             child: Text(
@@ -1404,7 +1490,7 @@ class HomeMyTournamentsCarousel extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                             decoration: BoxDecoration(
                               color: (it.live ? _lime : _mint).withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(Panel.radius),
                             ),
                             child: Text(
                               it.status,
@@ -1475,7 +1561,7 @@ class HomeHeroText extends StatelessWidget {
           Container(
             width: 32,
             height: 3,
-            decoration: BoxDecoration(gradient: appButtonGradient, borderRadius: BorderRadius.circular(99)),
+            decoration: BoxDecoration(gradient: appButtonGradient, borderRadius: BorderRadius.circular(Panel.buttonRadius)),
           ),
           if (contextLine != null) ...[
             const SizedBox(height: 10),
@@ -1520,7 +1606,7 @@ class HomeChallengeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget info(IconData icon, String text) => Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(12)),
+      decoration: panelBox(),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1553,7 +1639,7 @@ class HomeChallengeCard extends StatelessWidget {
                     if (chip != null)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(color: _lime.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(12)),
+                        decoration: panelBox(color: _lime),
                         child: Text(
                           chip!,
                           style: _t(11.5, w: FontWeight.w600, c: _lime),

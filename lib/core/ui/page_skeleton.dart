@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/api/api_http.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -88,7 +89,7 @@ class _PageSkeletonState extends State<PageSkeleton> with SingleTickerProviderSt
   Widget _row() => Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(14)),
+        decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(Panel.radius)),
         child: Row(
           children: [
             Container(

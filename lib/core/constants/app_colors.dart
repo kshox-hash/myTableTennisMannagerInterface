@@ -46,15 +46,23 @@ class AppColors {
   static const Color scorifyNegative = Color(0xFFFF5C5C); // web --color-app-danger
   static const Color scorifyPending = Color(0xFFEAB308); // web --color-app-warning
   static const Color scorifyBadge = Color(0xFFFF4D5E); // contador de notifs
-  static const Color scorifyCardFill = Color(0xEB11232B); // tarjeta: surface de la web al 92%
-  static const Color scorifyInput = Color(0xFF193139); // campos de texto (web surface2)
+  static const Color scorifyCardFill = Color(0xF20F2529); // tarjeta lisa: el medio del degradado de panel
+  static const Color scorifyInput = Color(0xFF1A1D1D); // campos de texto: gris casi negro (estilo panel)
 
-  // Fondo de las tarjetas — compartido por todas. Liso: se mantiene como
-  // "gradiente" solo para no tocar a quien lo usa. Casi opaco (92%) para que
-  // los componentes no se pierdan sobre el fondo de imagen.
-  static const LinearGradient cardGradient = LinearGradient(colors: [Color(0xEB11232B), Color(0xEB11232B)]);
+  // Fondo de las tarjetas (estilo panel, ver core/ui/panel_style.dart):
+  // verde azulado casi negro arriba, apenas más claro abajo. Casi opaco
+  // (95%) para que los componentes no se pierdan sobre el fondo de imagen.
+  static const LinearGradient cardGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xF20E1D20), Color(0xF2102E33)],
+  );
 
   /// Tarjeta principal (próximo partido, el campeonato en su detalle): un
-  /// paso más clara (web surface2) + el borde celeste.
-  static const LinearGradient featuredGradient = LinearGradient(colors: [Color(0xF0193139), Color(0xF0193139)]);
+  /// paso más clara + filete más claro.
+  static const LinearGradient featuredGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xF2132A2F), Color(0xF2163A40)],
+  );
 }

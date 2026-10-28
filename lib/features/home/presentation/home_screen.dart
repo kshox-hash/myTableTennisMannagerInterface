@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:myttmi/features/home/presentation/my_matches_screen.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -225,21 +226,18 @@ class _HomeScreenState extends State<HomeScreen>
   Future<RefereeMatch?> _pickRefereeMatch() {
     return showModalBottomSheet<RefereeMatch>(
       context: context,
-      backgroundColor: AppColors.scorifyDeep,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      backgroundColor: Panel.sheetColor,
+      shape: Panel.sheetShape,
       builder: (sheet) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 18, 20, 8),
-              child: Text("Partidos para arbitrar",
-                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
-            ),
+            const PanelTitleBar(title: "Partidos para arbitrar"),
+            const SizedBox(height: 6),
             for (final r in _refMatches)
               ListTile(
-                leading: Icon(Icons.sports_rounded, color: r.tableNumber != null ? AppColors.scorifyLive : AppColors.scorifyMint),
+                leading: Icon(Icons.scoreboard_rounded, color: r.tableNumber != null ? AppColors.scorifyLive : AppColors.scorifyMint),
                 title: Text("${r.player1Name} vs ${r.player2Name}",
                     style: const TextStyle(color: AppColors.scorifyText, fontWeight: FontWeight.w600)),
                 subtitle: Text(
@@ -270,18 +268,15 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _pickTournament() async {
     final id = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: AppColors.scorifyDeep,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      backgroundColor: Panel.sheetColor,
+      shape: Panel.sheetShape,
       builder: (sheet) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 18, 20, 8),
-              child: Text("Mis campeonatos",
-                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
-            ),
+            const PanelTitleBar(title: "Mis campeonatos"),
+            const SizedBox(height: 6),
             for (final e in _mine)
               ListTile(
                 leading: Icon(
@@ -431,41 +426,21 @@ class _HomeScreenState extends State<HomeScreen>
       children: [
         Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      // El encabezado sube junto con el contenido al hacer scroll.
-      child: ScrollingHeaderPage(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        header: [
-          const SizedBox(height: 16),
-          ValueListenableBuilder<int>(
-            valueListenable: NotificationPopups.unread,
-            builder: (context, unread, _) => SpinHeader(
-            notificationsCount: unread,
-            // Panel lateral en vez de página completa; al cerrarlo se
-            // refresca el contador de no leídas.
-            onNotifications: () => Navigator.push(
-              context,
-              SidePanelRoute(child: const NotificationsScreen()),
-            ).then((_) => _load()),
-          ),
-          ),
-
-          const SizedBox(height: 16),
-        ],
-          // Los bloques se reparten a lo alto de la pantalla (spaceBetween sobre
-          // un alto mínimo = pantalla): sin hueco abajo en celulares altos, y en
-          // pantallas chicas se desplaza igual que antes.
-          body: LayoutBuilder(
+          // Un solo scroll con el encabezado adentro (sube con el contenido).
+          // El contenido llena exactamente la pantalla (alto mínimo =
+          // pantalla), así que solo se desplaza si de verdad no cabe; antes,
+          // con el encabezado en un scroll aparte, siempre se podía subir
+          // la pantalla aunque sobrara espacio.
+          child: LayoutBuilder(
               // Deslizar hacia abajo recarga el inicio.
               builder: (context, box) => RefreshIndicator(
                 color: AppColors.scorifyMint,
                 onRefresh: _load,
                 child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(top: 16, bottom: 12),
                 child: ConstrainedBox(
-                  // Menos el encabezado (16 + 42 + 16), que ahora va dentro
-                  // del mismo scroll: así no sobra scroll con poco contenido.
-                  constraints: BoxConstraints(minHeight: box.maxHeight - 12 - 74),
+                  constraints: BoxConstraints(minHeight: box.maxHeight - 28),
                   // Separación pareja de 12 px entre bloques (antes se
                   // repartían para llenar la pantalla y quedaban huecos
                   // grandes); sin partido, el alto que sobra lo toma la
@@ -477,7 +452,21 @@ class _HomeScreenState extends State<HomeScreen>
                   child: IntrinsicHeight(
                     child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: staggerChildren([
+                    children: [
+                      ValueListenableBuilder<int>(
+                        valueListenable: NotificationPopups.unread,
+                        builder: (context, unread, _) => SpinHeader(
+                          notificationsCount: unread,
+                          // Panel lateral en vez de página completa; al cerrarlo se
+                          // refresca el contador de no leídas.
+                          onNotifications: () => Navigator.push(
+                            context,
+                            SidePanelRoute(child: const NotificationsScreen()),
+                          ).then((_) => _load()),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ...staggerChildren([
                       // Sin saludo grande arriba ("Buenas noches, Ignacio"): ocupaba
                       // un tercio de la pantalla y empujaba los partidos hacia abajo.
                       // Mientras juego en una mesa no se ofrece arbitrar: primero
@@ -628,13 +617,13 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ),
                     ]),
+                    ],
                   ),
                   ),
                 ),
               ),
               ),
             ),
-      ),
     ),
       ],
     );
@@ -724,7 +713,7 @@ class _MatchesCarouselState extends State<_MatchesCarousel> {
                                 height: 6,
                                 decoration: BoxDecoration(
                                   color: i == _page ? AppColors.scorifyMint : AppColors.scorifySurface2,
-                                  borderRadius: BorderRadius.circular(99),
+                                  borderRadius: BorderRadius.circular(Panel.buttonRadius),
                                 ),
                               ),
                           ],
@@ -757,7 +746,7 @@ class _MyGroupsCard extends StatelessWidget {
           const SizedBox(height: 10),
           for (final g in groups)
             InkWell(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Panel.radius),
               onTap: () => onOpen(g.match),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 9),
@@ -767,7 +756,7 @@ class _MyGroupsCard extends StatelessWidget {
                       width: 40,
                       alignment: Alignment.center,
                       padding: const EdgeInsets.symmetric(vertical: 6),
-                      decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(10)),
+                      decoration: panelBox(),
                       child: Text(
                         g.standing.played == 0 || g.standing.position == null ? "–" : "${g.standing.position}°",
                         style: const TextStyle(fontFamily: AppTypography.display, fontSize: 22, fontWeight: FontWeight.w600, color: AppColors.scorifyText, height: 1),

@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/helpers/image_url.dart";
 import "package:myttmi/core/ui/page_skeleton.dart";
 import "package:myttmi/core/ui/stagger_in.dart";
@@ -306,7 +307,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
                   initialValue: _region ?? "",
                   isExpanded: true,
                   dropdownColor: AppColors.scorifySurface2,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Panel.radius),
                   icon: const Icon(
                     Icons.keyboard_arrow_down_rounded,
                     color: AppColors.scorifyTextMuted,
@@ -364,7 +365,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
 
   InputDecoration _inputDeco({String? hint}) {
     final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Panel.radius),
       borderSide: BorderSide.none,
     );
     return InputDecoration(
@@ -377,7 +378,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
       border: border,
       enabledBorder: border,
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Panel.radius),
         borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.4),
       ),
     );
@@ -399,12 +400,12 @@ class _FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(decoration: selectedPillDecoration(selected), child: Material(
       color: selected ? Colors.transparent : AppColors.scorifySurface2,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.buttonRadius))),
       child: InkWell(
         onTap: () {
           onTap();
         },
-        customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
+        customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.buttonRadius))),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 9),
           child: FittedBox(
@@ -416,7 +417,7 @@ class _FilterChip extends StatelessWidget {
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: selected
-                    ? AppColors.scorifyOnMint
+                    ? AppColors.scorifyText
                     : AppColors.scorifyTextMuted,
               ),
             ),
@@ -567,22 +568,7 @@ class _StatusChip extends StatelessWidget {
         AppColors.scorifyTextMuted,
       ),
     };
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontFamily: AppTypography.body,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: fg,
-        ),
-      ),
-    );
+    return PanelChip.fromColors(label: label, bg: bg, fg: fg);
   }
 }
 

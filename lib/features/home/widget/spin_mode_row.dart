@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 
@@ -23,7 +24,7 @@ class SpinModeRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Panel.radius),
       child: Container(
         decoration: BoxDecoration(
           gradient: AppColors.cardGradient,
@@ -45,7 +46,7 @@ class SpinModeRow extends StatelessWidget {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: accent.withOpacity(0.14),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Panel.radius),
                       ),
                       child: Icon(icon, color: accent, size: 20),
                     ),

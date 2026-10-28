@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -70,8 +71,8 @@ void showPlayerJourney(BuildContext context, String playerId, String playerName,
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.scorifyDeep,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+    backgroundColor: Panel.sheetColor,
+    shape: Panel.sheetShape,
     builder: (sheet) => DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.6,
@@ -153,7 +154,7 @@ class _JourneyCategory extends StatelessWidget {
               Expanded(child: Text(category, style: AppTypography.h2)),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(99)),
+                decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(Panel.buttonRadius)),
                 child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: fg)),
               ),
             ],
@@ -166,7 +167,7 @@ class _JourneyCategory extends StatelessWidget {
             Container(
               margin: const EdgeInsets.only(bottom: 6),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(12)),
+              decoration: panelBox(),
               child: Row(
                 children: [
                   Container(

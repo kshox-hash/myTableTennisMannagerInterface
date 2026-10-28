@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "dart:async";
 import "package:myttmi/core/storage/session_storage.dart";
@@ -182,7 +183,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: AppColors.scorifyNegative,
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(Panel.radius),
                                     ),
                                     child: const Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -269,7 +270,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                               const SizedBox(height: 16),
                               Container(
                                 padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(color: AppColors.scorifyPending.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(12)),
+                                decoration: panelBox(color: AppColors.scorifyPending),
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -431,7 +432,7 @@ class _PlayerRow extends StatelessWidget {
               color: _closed(sp.mine, sp.theirs)
                   ? Colors.transparent
                   : AppColors.scorifyNegative.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Panel.radius),
             ),
             child: Text(
               "${sp.mine}",
@@ -456,7 +457,7 @@ class _PlayerRow extends StatelessWidget {
             color: isWinner
                 ? AppColors.scorifyButterfly
                 : AppColors.scorifySurface2,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Panel.radius),
           ),
           child: Text(
             "$sets",

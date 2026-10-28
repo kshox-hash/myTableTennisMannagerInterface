@@ -1,5 +1,6 @@
 import "package:myttmi/core/ui/app_button.dart";
 import "package:myttmi/core/ui/card_border.dart";
+import "package:myttmi/core/ui/panel_style.dart";
 import "dart:async";
 
 import "package:flutter/material.dart";
@@ -178,7 +179,7 @@ class _ViewSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(99)),
+      decoration: panelBox(),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -196,7 +197,7 @@ class _ViewSelector extends StatelessWidget {
                     fontFamily: AppTypography.body,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: v == value ? AppColors.scorifyOnMint : AppColors.scorifyTextMuted,
+                    color: v == value ? AppColors.scorifyText : AppColors.scorifyTextMuted,
                   ),
                 ),
               ),
@@ -260,9 +261,9 @@ class _LiveCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final d = detail;
-    return CardBorder(child: DecoratedBox(decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(12)), child: Material(
+    return CardBorder(child: DecoratedBox(decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(Panel.radius)), child: Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Panel.radius),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: d == null ? null : onOpen,
@@ -341,7 +342,7 @@ class _LiveCard extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(color: pillBg, borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: pillBg, borderRadius: BorderRadius.circular(Panel.radius)),
                 child: Text(
                   pill,
                   maxLines: 1,

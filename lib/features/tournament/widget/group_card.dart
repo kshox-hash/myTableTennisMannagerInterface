@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/player_actions.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/ui/section_card.dart";
@@ -44,9 +45,9 @@ class GroupCard extends StatelessWidget {
           for (var i = 0; i < members.length; i++)
             Material(
               color: members[i].idUser == myUserId ? AppColors.scorifyMint.withValues(alpha: 0.10) : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Panel.radius),
               child: InkWell(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Panel.radius),
                 onTap: () => Navigator.pushNamed(
                   context,
                   AppRoutes.playerProfile,

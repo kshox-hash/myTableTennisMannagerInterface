@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/player_actions.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import 'package:flutter/material.dart';
@@ -360,7 +361,7 @@ class _MatchBox extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Panel.radius),
             child: ColoredBox(
               color: const Color(0xEB13213B),
               child: Column(
@@ -502,7 +503,7 @@ class _PlayerRow extends StatelessWidget {
               height: 26,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Panel.radius),
                 color: highlighted
                     ? Colors.white
                     : isWinner
@@ -539,23 +540,14 @@ class _ChampionCard extends StatelessWidget {
     return Container(
       width: 130,
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-      decoration: BoxDecoration(
-        color: AppColors.scorifyButterfly,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.scorifyButterfly.withValues(alpha: 0.35),
-            blurRadius: 16,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
+      // Campeón (estilo panel): caja oscura con filete lima, sin bloque sólido.
+      decoration: panelBox(color: AppColors.scorifyButterfly),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const Icon(
             Icons.emoji_events_rounded,
-            color: AppColors.scorifyOnButterfly,
+            color: AppColors.scorifyButterfly,
             size: 26,
           ),
           const SizedBox(height: 6),
@@ -565,7 +557,7 @@ class _ChampionCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: AppColors.scorifyOnButterfly,
+              color: AppColors.scorifyText,
               fontWeight: FontWeight.w700,
               fontSize: 13,
             ),

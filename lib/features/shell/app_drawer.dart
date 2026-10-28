@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -43,22 +44,24 @@ class AppDrawer extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
           child: Material(
             color: Colors.transparent,
-            borderRadius: BorderRadius.circular(99),
+            borderRadius: BorderRadius.circular(Panel.buttonRadius),
             child: InkWell(
               onTap: () {
                 Navigator.pop(context);
                 it.onTap();
               },
-              borderRadius: BorderRadius.circular(99),
+              borderRadius: BorderRadius.circular(Panel.buttonRadius),
               child: Ink(
+                // Estilo panel: el elegido con el degradado del botón principal.
                 decoration: BoxDecoration(
-                  gradient: it.selected ? appButtonGradient : null,
-                  borderRadius: BorderRadius.circular(99),
+                  gradient: it.selected ? Panel.primaryButtonGradient : null,
+                  borderRadius: BorderRadius.circular(Panel.buttonRadius),
+                  border: it.selected ? Border.all(color: Panel.primaryButtonBorder) : null,
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
                 child: Row(
                   children: [
-                    Icon(it.icon, size: 22, color: it.selected ? AppColors.scorifyOnMint : AppColors.scorifyText),
+                    Icon(it.icon, size: 22, color: it.selected ? AppColors.scorifyMint : AppColors.scorifyText),
                     const SizedBox(width: 14),
                     Text(
                       it.label,
@@ -66,7 +69,7 @@ class AppDrawer extends StatelessWidget {
                         fontFamily: AppTypography.body,
                         fontSize: 15,
                         fontWeight: it.selected ? FontWeight.w700 : FontWeight.w500,
-                        color: it.selected ? AppColors.scorifyOnMint : AppColors.scorifyText,
+                        color: AppColors.scorifyText,
                       ),
                     ),
                   ],
@@ -76,9 +79,12 @@ class AppDrawer extends StatelessWidget {
           ),
         );
     return Drawer(
-      backgroundColor: AppColors.scorifyDeep,
+      backgroundColor: Panel.sheetColor,
       width: 290,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(right: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.horizontal(right: Radius.circular(Panel.radius)),
+        side: BorderSide(color: Panel.edge),
+      ),
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -91,10 +97,13 @@ class AppDrawer extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               child: Material(
-                color: Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(16),
+                color: Panel.field,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(Panel.radius),
+                  side: const BorderSide(color: Panel.fieldBorder),
+                ),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(Panel.radius),
                   onTap: () {
                     Navigator.pop(context);
                     onProfile();

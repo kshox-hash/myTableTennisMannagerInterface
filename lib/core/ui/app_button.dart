@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
+import "package:myttmi/core/ui/panel_style.dart";
 
 /// Botones de la app, estilo "premium": bajos y alargados, texto en
 /// mayúsculas. Planos: sin resplandor ni brillo.
@@ -65,17 +66,12 @@ class _AppButtonState extends State<AppButton> {
   @override
   Widget build(BuildContext context) {
     final v = widget.variant;
-    final radius = BorderRadius.circular(12); // esquinas redondeadas (rediseño 2026-10)
+    final radius = BorderRadius.circular(Panel.buttonRadius); // esquinas casi rectas (estilo panel)
     final disabled = widget.onPressed == null;
     final small = widget.height < 40;
 
-    final Color fg = disabled
-        ? AppColors.scorifyTextMuted
-        : switch (v) {
-            AppButtonVariant.primary => AppColors.scorifyOnMint,
-            AppButtonVariant.outline => const Color(0xFFC9D6F2), // gris azulado claro, no blanco
-            AppButtonVariant.danger => Colors.white,
-          };
+    // Texto claro en todos: el fondo es un degradado oscuro (estilo panel).
+    final Color fg = disabled ? AppColors.scorifyTextFaint : AppColors.scorifyText;
 
     final content = widget.loading
         ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: fg))
@@ -94,9 +90,9 @@ class _AppButtonState extends State<AppButton> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: AppTypography.body,
-                    fontSize: small ? 12 : 13.5,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.2,
+                    fontSize: small ? 12 : 13,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.0,
                     color: fg,
                   ),
                 ),
@@ -113,57 +109,32 @@ class _AppButtonState extends State<AppButton> {
       child: Center(widthFactor: 1, child: content),
     );
 
-    Widget body;
-    switch (v) {
-      case AppButtonVariant.primary:
-      case AppButtonVariant.danger:
-        body = DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            color: disabled ? AppColors.scorifySurface2 : (v == AppButtonVariant.danger ? AppColors.scorifyNegative : null),
-            gradient: !disabled && v == AppButtonVariant.primary ? appButtonGradient : null,
-          ),
-          // Filete fino y claro en el borde (sin resplandor ni brillo).
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: radius,
-              border: disabled ? null : Border.all(color: Colors.white.withValues(alpha: 0.10), width: 1),
-            ),
-            child: inner,
-          ),
-        );
-      case AppButtonVariant.outline:
-        // Borde en degradado: el degradado de fondo asoma 1.3 px alrededor
-        // del relleno oscuro.
-        body = DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            gradient: disabled
-                ? null
-                : LinearGradient(
-                    // Azul → azul profundo, apagado (sin cyan, como el principal).
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      AppColors.scorifyMint.withValues(alpha: 0.9),
-                      AppColors.scorifyMintDark,
-                    ],
-                  ),
-            color: disabled ? AppColors.scorifySurface2 : null,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(1.5),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.5),
-                // Más claro que las tarjetas: se lee como botón encima de ellas.
-                color: AppColors.scorifySurface2,
-              ),
-              child: inner,
-            ),
-          ),
-        );
-    }
+    // Estilo panel: degradado vertical de casi negro arriba a un color
+    // abajo (verde azulado en el secundario, celeste de marca en el
+    // principal, rojo en el de peligro) con filete fino del mismo tono.
+    final body = DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        color: disabled ? Panel.field : null,
+        gradient: disabled
+            ? null
+            : switch (v) {
+                AppButtonVariant.primary => Panel.primaryButtonGradient,
+                AppButtonVariant.outline => Panel.buttonGradient,
+                AppButtonVariant.danger => Panel.dangerButtonGradient,
+              },
+        border: Border.all(
+          color: disabled
+              ? Panel.fieldBorder
+              : switch (v) {
+                  AppButtonVariant.primary => Panel.primaryButtonBorder,
+                  AppButtonVariant.outline => Panel.buttonBorder,
+                  AppButtonVariant.danger => Panel.dangerButtonBorder,
+                },
+        ),
+      ),
+      child: inner,
+    );
 
     return Semantics(
       button: true,
@@ -192,9 +163,9 @@ class _AppButtonState extends State<AppButton> {
 }
 
 /// Fondo de la opción elegida en los selectores tipo píldora (pestañas,
-/// filtros): el mismo degradado y filete claro del botón principal.
+/// filtros): el mismo degradado y filete del botón principal.
 BoxDecoration selectedPillDecoration(bool selected) => BoxDecoration(
-      gradient: selected ? appButtonGradient : null,
-      borderRadius: BorderRadius.circular(99),
-      border: selected ? Border.all(color: Colors.white.withValues(alpha: 0.12)) : null,
+      gradient: selected ? Panel.primaryButtonGradient : null,
+      borderRadius: BorderRadius.circular(Panel.buttonRadius),
+      border: selected ? Border.all(color: Panel.primaryButtonBorder) : null,
     );

@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -358,7 +359,7 @@ class _GeneralStandingsList extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
             decoration: BoxDecoration(
               color: isMe ? AppColors.scorifyMint.withOpacity(0.10) : null,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Panel.radius),
             ),
             child: Row(
               children: [
@@ -592,23 +593,9 @@ class _Pill extends StatelessWidget {
   final Color fg;
   const _Pill(this.label, {required this.bg, required this.fg});
 
+  // Estilo panel: etiqueta con filete del color (antes píldora teñida).
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-    decoration: BoxDecoration(
-      color: bg,
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Text(
-      label,
-      style: TextStyle(
-        fontFamily: AppTypography.body,
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: fg,
-      ),
-    ),
-  );
+  Widget build(BuildContext context) => PanelChip.fromColors(label: label, bg: bg, fg: fg);
 }
 
 class _Section extends StatelessWidget {
@@ -715,10 +702,7 @@ class _CategoryHero extends StatelessWidget {
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: AppColors.scorifySurface2,
-                borderRadius: BorderRadius.circular(12),
-              ),
+              decoration: panelBox(),
               child: Row(
                 children: [
                   _Kpi(
@@ -842,9 +826,9 @@ class _GroupTable extends StatelessWidget {
               color: s.idUser == myUserId
                   ? AppColors.scorifyMint.withValues(alpha: 0.12)
                   : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Panel.radius),
               child: InkWell(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Panel.radius),
                 onTap: s.idUser == myUserId
                     ? null
                     : () => _openProfile(context, s.idUser, s.playerName),
@@ -1079,7 +1063,7 @@ class _Side extends StatelessWidget {
     if (onTap == null) return content;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Panel.radius),
       child: Padding(padding: const EdgeInsets.all(2), child: content),
     );
   }

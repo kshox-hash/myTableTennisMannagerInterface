@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:myttmi/core/ui/app_button.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
 import 'package:myttmi/core/ui/top_header.dart';
+import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:myttmi/core/ui/page_skeleton.dart';
 import 'package:myttmi/features/ranking/presentation/ranking_screen.dart';
 import 'package:myttmi/features/stats/presentation/stats_screen.dart';
@@ -73,25 +73,25 @@ class _SubTabSwitch extends StatelessWidget {
     // Mismo selector tipo píldora que Partidos/Campeonatos.
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(99)),
+      decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(Panel.buttonRadius)),
       child: Row(
         children: List.generate(_labels.length, (i) {
           final selected = i == index;
           return Expanded(
             child: Container(
               decoration: BoxDecoration(
-                gradient: selected ? appButtonGradient : null,
-                borderRadius: BorderRadius.circular(99),
-                border: selected ? Border.all(color: Colors.white.withValues(alpha: 0.35)) : null,
+                gradient: selected ? Panel.primaryButtonGradient : null,
+                borderRadius: BorderRadius.circular(Panel.buttonRadius),
+                border: selected ? Border.all(color: Panel.primaryButtonBorder) : null,
               ),
               child: Material(
                 color: Colors.transparent,
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.buttonRadius))),
                 child: InkWell(
                   onTap: () {
                     onChanged(i);
                   },
-                  customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(99))),
+                  customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.buttonRadius))),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: Center(
@@ -104,7 +104,7 @@ class _SubTabSwitch extends StatelessWidget {
                           letterSpacing: 0.6,
                           height: 1.0,
                           fontWeight: FontWeight.w600,
-                          color: selected ? AppColors.scorifyOnMint : AppColors.scorifyText,
+                          color: selected ? AppColors.scorifyText : AppColors.scorifyTextMuted,
                         ),
                       ),
                     ),

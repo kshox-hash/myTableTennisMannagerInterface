@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "dart:convert";
 
 import "package:flutter/material.dart";
@@ -490,7 +491,7 @@ class _ResultPage extends StatelessWidget {
                   height: 13,
                   decoration: BoxDecoration(
                     color: AppColors.scorifyMint,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(Panel.radius),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -598,7 +599,7 @@ class _SummaryPage extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: AppColors.scorifySurface2.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Panel.radius),
               ),
               child: ListView.separated(
                 padding: EdgeInsets.zero,

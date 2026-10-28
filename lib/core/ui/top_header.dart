@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/features/notifications/presentation/notifications_screen.dart';
 import 'package:myttmi/core/ui/side_panel_route.dart';
@@ -198,16 +199,16 @@ class PagerButton extends StatelessWidget {
     final enabled = onTap != null;
     return Material(
       color: Colors.white.withValues(alpha: 0.06),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Panel.radius),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Panel.radius),
         child: Container(
           width: 32,
           height: 28,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Panel.radius),
             border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
           ),
           child: Icon(next ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,

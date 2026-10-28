@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/category_filter.dart";
 import "package:myttmi/core/ui/section_card.dart";
 import "package:flutter/material.dart";
@@ -197,7 +198,7 @@ class _TableCard extends StatelessWidget {
                   color: occupied
                       ? AppColors.scorifyMint.withOpacity(0.16)
                       : Colors.white.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Panel.radius),
                 ),
                 child: Text(
                   occupied ? (m.calledOutOfOrder ? "Adelantado" : "En juego") : "Libre",
@@ -335,7 +336,7 @@ class _MyTurnCard extends StatelessWidget {
             Container(
               width: 72,
               height: 72,
-              decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(Panel.radius)),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/page_skeleton.dart";
 import "package:myttmi/core/ui/stagger_in.dart";
 import "package:flutter/material.dart";
@@ -333,7 +334,7 @@ class _EventCard extends StatelessWidget {
             child: Container(
               width: 58,
               padding: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(12)),
+              decoration: panelBox(),
               child: Column(
                 children: [
                   Text(_monthsShort[e.date.month - 1],
@@ -374,7 +375,7 @@ class _EventCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: !e.finished && (e.inProgress || days <= 1) ? AppColors.scorifyButterfly : AppColors.scorifySurface2,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Panel.radius),
               ),
               child: Text(
                 when,

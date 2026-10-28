@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "dart:async";
 import "dart:convert";
 
@@ -67,9 +68,11 @@ class AppUpdate {
     final go = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.scorifyDeep,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Hay una versión nueva", style: TextStyle(color: AppColors.scorifyText, fontWeight: FontWeight.w700)),
+        backgroundColor: Panel.sheetColor,
+        shape: Panel.dialogShape,
+        titlePadding: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        title: const PanelTitleBar(title: "Hay una versión nueva"),
         content: Text("Actualiza MyTTM para tener las últimas mejoras.", style: AppTypography.bodyMuted),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Ahora no")),

@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/ui/card_border.dart";
+import "package:myttmi/core/ui/panel_style.dart";
 
 /// Tarjeta con título: ícono y nombre de la sección en mayúsculas de color ("SETS", "ÚLTIMOS PARTIDOS"),
 /// opcionalmente con un ícono y una acción a la derecha ("Ver historial").
@@ -34,39 +35,14 @@ class SectionCard extends StatelessWidget {
     this.fill = false,
   });
 
-  static const _radius = 14.0;
+  static const _radius = Panel.radius;
 
   @override
   Widget build(BuildContext context) {
-    // Mismo estilo de título que el Inicio: ícono + mayúsculas de color,
-    // dentro de la tarjeta (sin franja), y la acción a la derecha.
+    // Estilo panel: franja de título gris en mayúsculas espaciadas, con la
+    // línea encendida debajo; ícono de color y acción a la derecha.
     final color = titleColor ?? AppColors.scorifyMint;
-    final header = Padding(
-      padding: EdgeInsets.fromLTRB(16, trailing == null ? 14 : 8, trailing == null ? 16 : 6, 0),
-      child: Row(
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 18, color: color),
-            const SizedBox(width: 8),
-          ],
-          // Título en blanco (jerarquía: el azul queda para lo que se toca).
-          Expanded(
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontFamily: AppTypography.body,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: AppColors.scorifyText,
-              ),
-            ),
-          ),
-          if (trailing != null) trailing!,
-        ],
-      ),
-    );
+    final header = PanelTitleBar(title: title, icon: icon, iconColor: color, trailing: trailing);
     final body = Padding(padding: padding, child: child);
     return CardBorder(
       radius: _radius,

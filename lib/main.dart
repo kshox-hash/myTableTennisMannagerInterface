@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/navigation/deep_links.dart";
@@ -46,7 +47,7 @@ class MyApp extends StatelessWidget {
             backgroundColor: AppColors.scorifyMint,
             foregroundColor: AppColors.scorifyOnMint,
             textStyle: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w600, fontSize: 14),
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.radius))),
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
@@ -54,7 +55,7 @@ class MyApp extends StatelessWidget {
             backgroundColor: AppColors.scorifyMint,
             foregroundColor: AppColors.scorifyOnMint,
             textStyle: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w600, fontSize: 14),
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.radius))),
           ),
         ),
       ),

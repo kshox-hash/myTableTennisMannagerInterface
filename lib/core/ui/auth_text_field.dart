@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
@@ -35,15 +36,15 @@ class AuthTextField extends StatelessWidget {
         filled: true,
         fillColor: AppColors.scorifyInput,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(Panel.radius),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(Panel.radius),
           borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(Panel.radius),
           borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.4),
         ),
       ),

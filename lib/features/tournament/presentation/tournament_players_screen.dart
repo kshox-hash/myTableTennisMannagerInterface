@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/features/tournament/models/tournament_model.dart";
@@ -164,7 +165,7 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
                                 filled: true,
                                 fillColor: AppColors.scorifyInput,
                                 isDense: true,
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(Panel.radius), borderSide: BorderSide.none),
                               ),
                             ),
                           ],
@@ -200,10 +201,10 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
                           if (groupsGenerated) ...[
                             Material(
                               color: AppColors.scorifyMint.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(Panel.radius),
                               child: InkWell(
                                 onTap: _goGroups,
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(Panel.radius),
                                 child: Padding(
                                   padding: const EdgeInsets.all(16),
                                   child: Row(
@@ -277,7 +278,7 @@ class _CategoryPlayersState extends State<_CategoryPlayers> {
         children: [
           InkWell(
             onTap: () => setState(() => _open = !_open),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Panel.radius),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 8, 6, 8),
               child: Row(
@@ -288,7 +289,7 @@ class _CategoryPlayersState extends State<_CategoryPlayers> {
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(12)),
+                    decoration: panelBox(),
                     child: Text("${players.length} inscritos",
                         style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                   ),
@@ -302,7 +303,7 @@ class _CategoryPlayersState extends State<_CategoryPlayers> {
             const SizedBox(height: 4),
             for (var i = 0; i < players.length; i++)
               InkWell(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Panel.radius),
                 onTap: () => Navigator.pushNamed(
                   context,
                   AppRoutes.playerProfile,
