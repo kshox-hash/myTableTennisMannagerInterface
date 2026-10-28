@@ -452,12 +452,16 @@ class _CategoryCardState extends State<_CategoryCard> {
     // Inscripción online: solo con la categoría sin empezar Y abierta. El
     // organizador puede cerrarla antes de empezar (para armar la siembra):
     // antes la app seguía ofreciendo "Inscribirme" y el servidor lo rechazaba.
+    // En fase de grupos se cierra sola al empezar, pero el organizador puede
+    // reabrirla (hasta armar la llave): entonces también se ofrece.
     final closedByOrganizer = c.phase == "enrollment" && c.status != "active";
-    final inEnrollment = c.phase == "enrollment" && !closedByOrganizer;
+    final lateOpen = c.phase == "groups" && c.status == "active";
+    final inEnrollment = (c.phase == "enrollment" && !closedByOrganizer) || lateOpen;
     final full = c.quotas != null && enrolledCount >= c.quotas!;
     final (phaseLabel, phaseColor) = switch (c.phase) {
       "enrollment" when closedByOrganizer => ("Inscripciones cerradas", AppColors.scorifyPending),
       "enrollment" => ("Inscripciones", AppColors.scorifyMint),
+      "groups" when lateOpen => ("Grupos · inscripciones abiertas", AppColors.scorifyMint),
       "groups" => ("Fase de grupos", AppColors.scorifyButterfly),
       "bracket" => ("Llave", AppColors.scorifyPending),
       "finished" => ("Finalizada", AppColors.scorifyTextMuted),
