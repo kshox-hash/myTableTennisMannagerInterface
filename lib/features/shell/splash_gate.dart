@@ -11,8 +11,6 @@ import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/app_button.dart";
-import "package:myttmi/core/ui/brand_logo.dart";
-import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/features/auth/presentation/login_screen.dart";
 import "package:myttmi/features/shell/app_shell.dart";
 import "package:myttmi/features/shell/shell_preload.dart";
@@ -219,42 +217,54 @@ class _SplashGateState extends State<SplashGate> {
     );
   }
 
-  /// Fase 1: logo al medio sobre el fondo degradado (aquí irá la animación del logo).
-  Widget _logoIntro() => const PrismBackground(
-        key: ValueKey("intro"),
-        child: Center(child: BrandLogo(markSize: 96, showWordmark: false)),
+  // Azules del borde de arriba y de abajo de la imagen de carga: rellenan
+  // lo que queda libre arriba y abajo.
+  static const _splashFill = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF0057B7), Color(0xFF096EA7)],
+  );
+
+  /// Imagen de carga (logo y "My Table Tennis Manager" ya vienen en ella).
+  /// Va al ancho de la pantalla para que el texto no se corte; arriba y abajo
+  /// queda el mismo azul, y los bordes de la imagen se funden en él.
+  Widget _splashImage(MediaQueryData mq) => DecoratedBox(
+        decoration: const BoxDecoration(gradient: _splashFill),
+        child: Center(
+          child: ShaderMask(
+            blendMode: BlendMode.dstIn,
+            shaderCallback: (r) => const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.transparent, Colors.black, Colors.black, Colors.transparent],
+              stops: [0, 0.12, 0.88, 1],
+            ).createShader(r),
+            child: Image(
+              image: ResizeImage(
+                const AssetImage("assets/images/loading_bg.jpg"),
+                width: (mq.size.width * mq.devicePixelRatio).round().clamp(360, 1024),
+              ),
+              width: mq.size.width,
+              fit: BoxFit.fitWidth,
+              gaplessPlayback: true,
+            ),
+          ),
+        ),
       );
 
-  /// Fase 2: el fondo degradado con el logo arriba y la barra de carga abajo
-  /// (antes una foto del jugador — se simplificó a solo degradado).
+  /// Fase 1: la imagen de carga sola.
+  Widget _logoIntro() => KeyedSubtree(
+        key: const ValueKey("intro"),
+        child: _splashImage(MediaQuery.of(context)),
+      );
+
+  /// Fase 2: la misma imagen con la barra de carga abajo.
   Widget _loading(MediaQueryData mq) {
     return Stack(
         key: const ValueKey("loading"),
         fit: StackFit.expand,
         children: [
-          const PrismBackground(child: SizedBox.expand()),
-          Positioned(
-            left: 28,
-            right: 28,
-            top: mq.padding.top + mq.size.height * 0.08,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const BrandLogo(markSize: 46, wordmarkSize: 34),
-                const SizedBox(height: 6),
-                Text(
-                  "CAMPEONATOS DE TENIS DE MESA",
-                  style: TextStyle(
-                    fontFamily: AppTypography.body,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 3,
-                    color: AppColors.scorifyTextMuted,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _splashImage(mq),
           // Barra de carga abajo.
           Positioned(
             left: 28,

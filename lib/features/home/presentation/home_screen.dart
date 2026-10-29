@@ -80,6 +80,38 @@ class _HomeScreenState extends State<HomeScreen>
   // Partidos jugados, del más reciente al más antiguo.
   List<PlayerMatchHistoryItem> _history = const [];
 
+  // Centrado del bloque del Inicio en la PANTALLA (ahí se centra el hexágono
+  // del fondo). Se mide dónde quedó entre los dos Spacer y se corrige el
+  // relleno de abajo: un alto fijo no sirve porque la barra de estado y el
+  // área segura cambian según el celular.
+  final _gapTop = GlobalKey();
+  final _gapBottom = GlobalKey();
+  double _bottomPad = 58;
+  int _centerTries = 0;
+  double _centerForHeight = 0;
+
+  void _recenter() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final top = _gapTop.currentContext?.findRenderObject() as RenderBox?;
+      final bottom = _gapBottom.currentContext?.findRenderObject() as RenderBox?;
+      if (top == null || bottom == null || !top.hasSize || !bottom.hasSize) return;
+      final screenH = MediaQuery.sizeOf(context).height;
+      if (screenH != _centerForHeight) {
+        _centerForHeight = screenH;
+        _centerTries = 0;
+      }
+      // Sin espacio libre (contenido largo) no hay nada que centrar.
+      if (_centerTries >= 3 || top.size.height + bottom.size.height < 1) return;
+      final blockTop = top.localToGlobal(Offset(0, top.size.height)).dy;
+      final blockBottom = bottom.localToGlobal(Offset.zero).dy;
+      final delta = (blockTop + blockBottom) / 2 - screenH / 2;
+      if (delta.abs() < 1) return;
+      _centerTries++;
+      setState(() => _bottomPad = (_bottomPad + 2 * delta).clamp(0.0, 300.0));
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -428,6 +460,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final nm = _dashboard?.nextMatch;
+    _recenter();
 
 
     final matches = nm == null
@@ -485,7 +518,7 @@ class _HomeScreenState extends State<HomeScreen>
                       // El espacio que sobra se reparte arriba y abajo: los
                       // paneles y los accesos quedan juntos, centrados en la
                       // pantalla (antes todo arriba con un hueco al final).
-                      const Spacer(),
+                      Spacer(key: _gapTop),
                       ...staggerChildren([
                       // Sin saludo grande arriba ("Buenas noches, Ignacio"): ocupaba
                       // un tercio de la pantalla y empujaba los partidos hacia abajo.
@@ -620,11 +653,10 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ),
                     ]),
-                    const Spacer(),
-                    // Mismo alto que el encabezado de arriba: así el bloque queda
-                    // centrado en la PANTALLA (donde se centra el fondo, con su
-                    // hexágono al medio) y no solo en el espacio bajo el encabezado.
-                    const SizedBox(height: 58),
+                    Spacer(key: _gapBottom),
+                    // Relleno medido en _recenter: deja el bloque centrado en la
+                    // pantalla, con el hexágono del fondo.
+                    SizedBox(height: _bottomPad),
                     ],
                   ),
                   ),
