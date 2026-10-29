@@ -8,6 +8,7 @@ import "package:myttmi/features/player/models/player_category_view_model.dart";
 import "package:myttmi/features/player/models/bracket_view_model.dart";
 import "package:myttmi/features/player/models/tournament_match_model.dart";
 import "package:myttmi/features/player/models/achievement_model.dart";
+import "package:myttmi/features/player/models/live_summary_model.dart";
 
 class PlayerApi {
   final String baseUrl;
@@ -50,6 +51,12 @@ class PlayerApi {
   Future<PlayerDashboard> getDashboard() async {
     final data = await _get(Endpoints.playerDashboard) as Map<String, dynamic>;
     return PlayerDashboard.fromJson(data);
+  }
+
+  /// "En vivo" del Inicio: cómo va cada categoría que estoy jugando.
+  Future<List<LiveSummary>> getLiveSummary() async {
+    final data = await _get(Endpoints.playerLiveSummary) as List;
+    return data.map((e) => LiveSummary.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<List<PlayerEnrollment>> getMyEnrollments() async {

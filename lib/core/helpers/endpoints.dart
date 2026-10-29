@@ -50,6 +50,7 @@ class Endpoints {
   // DASHBOARD / ENROLLMENTS PROPIAS
   static const playerDashboard = "$base/player/dashboard";
   static const playerCelebrations = "$base/player/me/celebrations";
+  static const playerLiveSummary = "$base/player/me/live-summary";
   static String playerCelebrationDismiss(String id) => "$base/player/me/celebrations/$id/dismiss";
   static const myEnrollments = "$base/player/my-enrollments";
 

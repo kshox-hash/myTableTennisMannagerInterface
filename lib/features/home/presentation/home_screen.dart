@@ -1,4 +1,6 @@
 import "dart:async";
+import "package:myttmi/features/home/widget/home_live_card.dart";
+import "package:myttmi/features/player/models/live_summary_model.dart";
 import "package:myttmi/core/api/api_http.dart";
 import "package:myttmi/features/player/presentation/celebration_dialog.dart";
 import 'package:myttmi/core/storage/session_storage.dart';
@@ -72,6 +74,9 @@ class _HomeScreenState extends State<HomeScreen>
   List<({PlayerNextMatch match, PlayerStanding standing, int size})> _myGroups = const [];
   // Partidos que me toca arbitrar (asignados por el organizador o por QR).
   List<RefereeMatch> _refMatches = const [];
+  // "En vivo": cómo va cada categoría que estoy jugando (líderes,
+  // clasificados, eliminados, ronda de la llave).
+  List<LiveSummary> _liveSummaries = const [];
   // Sin partido asignado: el próximo campeonato en que estás inscrito, o
   // cuántos campeonatos tienen la inscripción abierta.
   // Inicio "hacia adelante": campeonatos con inscripción abierta, tus
@@ -118,6 +123,23 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     _load();
+    // "En vivo" se actualiza solo cada 30 s mientras miras el Inicio con un
+    // campeonato en juego (cada resultado que carga el organizador aparece
+    // sin tener que volver a entrar). Con la app de fondo u otra pestaña, no.
+    _liveTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (!mounted || _liveSummaries.isEmpty) return;
+      if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) return;
+      if ((AppShellScope.of(context)?.currentIndex ?? 0) != 0) return;
+      ResponseCache.store(_loadLiveSummary);
+    });
+  }
+
+  Timer? _liveTimer;
+
+  @override
+  void dispose() {
+    _liveTimer?.cancel();
+    super.dispose();
   }
 
   // La primera carga avisa a la pantalla de carga (ShellPreload): esta se
@@ -144,6 +166,7 @@ class _HomeScreenState extends State<HomeScreen>
         _loadForm(myId),
         _loadReferee(),
         _loadUpcoming(),
+        _loadLiveSummary(),
       ]);
       final results = await Future.wait([
         _profileApi.getMe(),
@@ -339,6 +362,13 @@ class _HomeScreenState extends State<HomeScreen>
       if (!mounted) return;
       await Navigator.pushNamed(context, AppRoutes.tournamentDetail, arguments: t);
       if (mounted) _load(silent: true);
+    } catch (_) {}
+  }
+
+  Future<void> _loadLiveSummary() async {
+    try {
+      final r = await _playerApi.getLiveSummary();
+      if (mounted) setState(() => _liveSummaries = r);
     } catch (_) {}
   }
 
@@ -603,6 +633,10 @@ class _HomeScreenState extends State<HomeScreen>
                           const SizedBox(height: 12),
                           _MyGroupsCard(groups: _myGroups, onOpen: _openCategory),
                         ],
+                        const SizedBox(height: 12),
+                      ],
+                      if (_liveSummaries.isNotEmpty) ...[
+                        HomeLiveCard(summaries: _liveSummaries),
                         const SizedBox(height: 12),
                       ],
                     ]),
