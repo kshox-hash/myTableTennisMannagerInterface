@@ -3,16 +3,16 @@ import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/section_card.dart";
+import "package:myttmi/features/home/presentation/live_players_screen.dart";
 import "package:myttmi/features/player/models/live_summary_model.dart";
+import "package:myttmi/routes/cyber_page_route.dart";
 
-/// "En vivo" del Inicio: cómo va el campeonato que estás jugando (tu
-/// categoría), para todos y no solo para ti. Una fila por ronda de la llave
-/// y por grupo, la del último resultado arriba: quiénes pasan y quiénes
-/// quedan fuera; en un grupo en juego, quiénes van pasando (cambia con cada
-/// resultado); en una ronda en juego, quiénes faltan por jugar. Abajo de
-/// cada fila, el último resultado. Se actualiza solo (ver HomeScreen). En el
-/// Inicio van las últimas filas; "Ver todo" abre el resto. Si juegas varias
-/// categorías, las flechas del título cambian.
+/// "En vivo" del Inicio: en el campeonato que estás jugando (tu categoría),
+/// quiénes siguen (clasificados a la llave, o en carrera si ya se juega la
+/// llave) y quiénes quedaron eliminados. Aquí van unos pocos nombres, cada
+/// uno en su cajita; "Ver todos los jugadores" abre la lista completa. Se
+/// actualiza con cada resultado (ver HomeScreen). Si juegas varias
+/// categorías, las flechas del título cambian entre ellas.
 class HomeLiveCard extends StatefulWidget {
   final List<LiveSummary> summaries;
   const HomeLiveCard({super.key, required this.summaries});
@@ -24,14 +24,13 @@ class HomeLiveCard extends StatefulWidget {
 class _HomeLiveCardState extends State<HomeLiveCard> {
   int _i = 0;
 
-  // Filas que caben en el Inicio; el resto, en "Ver todo".
-  static const _maxBlocks = 3;
+  // Nombres por lista en el Inicio; el resto, en "Ver todos los jugadores".
+  static const _preview = 4;
 
   @override
   Widget build(BuildContext context) {
     final all = widget.summaries;
     final s = all[_i.clamp(0, all.length - 1)];
-    final shown = s.blocks.take(_maxBlocks).toList();
 
     return SectionCard(
       title: "En vivo · ${s.tournamentName}",
@@ -47,72 +46,36 @@ class _HomeLiveCardState extends State<HomeLiveCard> {
                 _Arrow(icon: Icons.chevron_right_rounded, onTap: _i == all.length - 1 ? null : () => setState(() => _i++)),
               ],
             ),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(s.categoryLabel, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.bodyMuted.copyWith(fontSize: 12.5, fontWeight: FontWeight.w600)),
-              ),
-              PanelChip(
-                label: s.inBracket ? "Llave" : "Fase de grupos",
-                color: s.inBracket ? AppColors.scorifyButterfly : AppColors.scorifyMint,
-                fontSize: 11,
-              ),
+              Expanded(child: Text(s.categoryLabel, style: AppTypography.bodyMuted.copyWith(fontSize: 12.5, fontWeight: FontWeight.w600))),
+              if (s.currentRound != null) PanelChip(label: s.currentRound!, color: AppColors.scorifyButterfly, fontSize: 11),
             ],
           ),
-          if (shown.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Text("Todavía no se juega ningún partido.", style: AppTypography.bodyMuted.copyWith(fontSize: 12.5)),
-            ),
-          for (var k = 0; k < shown.length; k++) ...[
-            if (k > 0) const Divider(height: 1, color: Panel.fieldBorder),
-            _BlockRow(block: shown[k], compact: true),
-          ],
-          if (s.blocks.length > _maxBlocks)
+          const SizedBox(height: 12),
+          if (s.classified.isEmpty && s.eliminated.isEmpty)
+            Text("Todavía no termina ningún grupo.", style: AppTypography.bodyMuted.copyWith(fontSize: 12.5))
+          else ...[
+            _Names(title: s.aliveTitle, color: AppColors.scorifyButterfly, people: s.classified, max: _preview),
+            const SizedBox(height: 14),
+            _Names(title: "Eliminados", color: AppColors.scorifyNegative, people: s.eliminated, max: _preview, faint: true),
+            const SizedBox(height: 6),
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                onPressed: () => _showAll(context, s),
-                child: const Text("Ver todo ›", style: TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.scorifyMint)),
-              ),
-            )
-          else
-            const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
-
-  void _showAll(BuildContext context, LiveSummary s) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Panel.sheetColor,
-      shape: Panel.sheetShape,
-      isScrollControlled: true,
-      builder: (_) => SafeArea(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.85),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              PanelTitleBar(title: "${s.categoryLabel} · ${s.tournamentName}", icon: Icons.sensors_rounded, iconColor: AppColors.scorifyNegative),
-              Flexible(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                  itemCount: s.blocks.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1, color: Panel.fieldBorder),
-                  itemBuilder: (_, k) => _BlockRow(block: s.blocks[k], compact: false),
+                onPressed: () => Navigator.push(context, CyberPageRoute(waitForData: false, builder: (_) => LivePlayersScreen(summary: s))),
+                child: const Text(
+                  "Ver todos los jugadores ›",
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyMint),
                 ),
               ),
-            ],
-          ),
-        ),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -134,125 +97,56 @@ class _Arrow extends StatelessWidget {
       );
 }
 
-/// Una ronda o un grupo: nombre y estado arriba; abajo "Pasan", "Eliminados"
-/// / "Fuera", "Van pasando" o "Juegan", y el último resultado. En [compact]
-/// (Inicio) cada lista ocupa como mucho dos renglones.
-class _BlockRow extends StatelessWidget {
-  final LiveBlock block;
-  final bool compact;
-  const _BlockRow({required this.block, required this.compact});
-
-  @override
-  Widget build(BuildContext context) {
-    final b = block;
-    final status = b.finished
-        ? "Terminado"
-        : b.played == 0 && b.isRound
-            ? "Por jugarse"
-            : "${b.played} de ${b.total} jugados";
-    final statusColor = b.finished ? AppColors.scorifyTextMuted : AppColors.scorifyMint;
-
-    // Partidos que faltan de la ronda: "Juan P. vs Ana R.".
-    final pairs = <String>[
-      for (var k = 0; k + 1 < b.playing.length; k += 2) "${_nm(b.playing[k])} vs ${_nm(b.playing[k + 1])}",
-    ];
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(child: Text(b.label, style: AppTypography.bodyText.copyWith(fontSize: 14, fontWeight: FontWeight.w700))),
-              Text(status, style: TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w600, color: statusColor)),
-            ],
-          ),
-          if (b.passed.isNotEmpty) _Line(label: "Pasan", color: AppColors.scorifyButterfly, people: b.passed, compact: compact),
-          if (b.out.isNotEmpty) _Line(label: b.isRound ? "Eliminados" : "Fuera", color: AppColors.scorifyNegative, people: b.out, compact: compact),
-          if (pairs.isNotEmpty) _TextLine(label: "Juegan", color: AppColors.scorifyMint, text: pairs.join("  ·  "), compact: compact),
-          if (b.passing.isNotEmpty) _Line(label: "Van pasando", color: AppColors.scorifyMint, people: b.passing, compact: compact),
-          if (b.lastResult != null)
-            _TextLine(
-              label: "Último",
-              color: AppColors.scorifyTextMuted,
-              text: "${_nm(b.lastResult!.winner)} ${b.lastResult!.setsWinner}-${b.lastResult!.setsLoser} ${_nm(b.lastResult!.loser)}",
-              compact: compact,
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-String _nm(LivePerson p) => p.isMe ? "Tú" : p.short;
-
-/// "PASAN  Juan P. (1º) · Tú (2º)": "Tú" en menta y negrita.
-class _Line extends StatelessWidget {
-  final String label;
+/// "SIGUEN EN CARRERA · 8" y debajo los primeros nombres, cada uno en su
+/// cajita con aire entre ellas ("Tú" siempre primero y en celeste); si hay
+/// más, "+5".
+class _Names extends StatelessWidget {
+  final String title;
   final Color color;
   final List<LivePerson> people;
-  final bool compact;
-  const _Line({required this.label, required this.color, required this.people, required this.compact});
+  final int max;
+  final bool faint;
+  const _Names({required this.title, required this.color, required this.people, required this.max, this.faint = false});
 
   @override
   Widget build(BuildContext context) {
-    final spans = <InlineSpan>[];
-    for (var k = 0; k < people.length; k++) {
-      final p = people[k];
-      if (k > 0) spans.add(const TextSpan(text: "  ·  ", style: TextStyle(color: AppColors.scorifyTextFaint)));
-      spans.add(TextSpan(
-        text: _nm(p) + (p.position != null ? " (${p.position}º)" : ""),
-        style: p.isMe ? const TextStyle(color: AppColors.scorifyMint, fontWeight: FontWeight.w700) : null,
-      ));
-    }
-    return _Labeled(label: label, color: color, child: Text.rich(TextSpan(children: spans), maxLines: compact ? 2 : null, overflow: compact ? TextOverflow.ellipsis : null, style: _names));
-  }
-}
-
-class _TextLine extends StatelessWidget {
-  final String label;
-  final Color color;
-  final String text;
-  final bool compact;
-  const _TextLine({required this.label, required this.color, required this.text, required this.compact});
-
-  @override
-  Widget build(BuildContext context) => _Labeled(
-        label: label,
-        color: color,
-        child: Text(text, maxLines: compact ? 2 : null, overflow: compact ? TextOverflow.ellipsis : null, style: _names),
-      );
-}
-
-const _names = TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, height: 1.35, fontWeight: FontWeight.w500, color: AppColors.scorifyText);
-
-/// Etiqueta de color a la izquierda (ancho fijo, así las listas quedan
-/// alineadas) y el contenido al lado.
-class _Labeled extends StatelessWidget {
-  final String label;
-  final Color color;
-  final Widget child;
-  const _Labeled({required this.label, required this.color, required this.child});
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: 6),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: 82,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: Text(
-                  label.toUpperCase(),
-                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.9, color: color),
-                ),
-              ),
-            ),
-            Expanded(child: child),
-          ],
+    final sorted = [...people.where((p) => p.isMe), ...people.where((p) => !p.isMe)];
+    final shown = sorted.take(max).toList();
+    final rest = sorted.length - shown.length;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "${title.toUpperCase()} · ${people.length}",
+          style: TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 1.1, color: color),
         ),
-      );
+        const SizedBox(height: 8),
+        if (people.isEmpty)
+          Text("—", style: AppTypography.bodyMuted.copyWith(fontSize: 13))
+        else
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              for (final p in shown)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: panelBox(color: p.isMe ? AppColors.scorifyMint : null),
+                  child: Text(
+                    p.short,
+                    style: TextStyle(
+                      fontFamily: AppTypography.body,
+                      fontSize: 13,
+                      fontWeight: p.isMe ? FontWeight.w700 : FontWeight.w500,
+                      color: p.isMe ? AppColors.scorifyMint : (faint ? AppColors.scorifyTextMuted : AppColors.scorifyText),
+                    ),
+                  ),
+                ),
+              if (rest > 0) Text("+$rest", style: AppTypography.bodyMuted.copyWith(fontSize: 13, fontWeight: FontWeight.w600)),
+            ],
+          ),
+      ],
+    );
+  }
 }
