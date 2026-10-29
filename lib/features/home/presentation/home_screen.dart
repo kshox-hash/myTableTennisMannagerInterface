@@ -576,32 +576,7 @@ class _HomeScreenState extends State<HomeScreen>
                         ],
                         const SizedBox(height: 12),
                       ],
-                      // La tarjeta grande siempre está: partido > campeonato en curso >
-                      // próximo campeonato > vacío. "En curso" viene de MIS inscripciones
-                      // (calendario): antes, al jugar mis partidos, el campeonato
-                      // desaparecía del Inicio porque se buscaba en la lista general
-                      // (filtrada por región y solo con torneos por empezar).
-                      if (nm == null && _live != null) ...[
-                        HomeChallengeCard(
-                          kicker: "CAMPEONATO EN CURSO",
-                          name: _live!.tournamentName,
-                          subtitle: _live!.categoryName,
-                          place: _live!.location,
-                          chip: "En juego",
-                          button: "Ver mi categoría",
-                          onTap: () async {
-                            final e = _live!;
-                            await Navigator.pushNamed(context, AppRoutes.myCategory, arguments: {
-                              "tournamentId": e.tournamentId,
-                              "tournamentName": e.tournamentName,
-                              "categoryId": e.categoryId,
-                              "categoryLabel": e.categoryName,
-                            });
-                            if (mounted) _load(silent: true);
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                      ],
+                      // Sin tarjeta "Campeonato en curso": ya está en "Mis campeonatos".
                       if (nm == null && _live == null && _challenge != null) ...[
                         HomeChallengeCard(
                           name: _challenge!.tournamentName,

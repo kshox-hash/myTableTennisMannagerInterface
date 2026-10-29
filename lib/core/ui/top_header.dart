@@ -6,6 +6,9 @@ import 'package:myttmi/features/notifications/notification_popups.dart';
 import 'package:myttmi/features/shell/app_shell.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
+import 'package:myttmi/core/ui/user_avatar.dart';
+import 'package:myttmi/features/profile/models/profile_model.dart';
+import 'package:myttmi/routes/app_routes.dart';
 
 /// Encabezado estándar para pantallas empujadas (detalle de torneo, partidos,
 /// inscritos, perfil, etc.) — reemplaza el <code>AppBar</code> Material por
@@ -93,6 +96,9 @@ class TopHeader extends StatelessWidget {
               ],
             ),
           ),
+          // Tu foto: abre tu perfil (antes estaba en el menú lateral).
+          const SizedBox(width: 8),
+          const MyAvatarButton(),
         ],
       ],
     );
@@ -213,6 +219,33 @@ class PagerButton extends StatelessWidget {
           ),
           child: Icon(next ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
               size: 20, color: AppColors.scorifyText.withValues(alpha: enabled ? 0.9 : 0.25)),
+        ),
+      ),
+    );
+  }
+}
+
+/// Tu foto al lado de la campana (secciones principales): abre tu perfil.
+/// Lee el perfil que ya cargó el shell (CurrentUser), no lo vuelve a pedir.
+class MyAvatarButton extends StatelessWidget {
+  final double size;
+  const MyAvatarButton({super.key, this.size = 40});
+
+  @override
+  Widget build(BuildContext context) {
+    final open = AppShellScope.of(context)?.openProfile;
+    return ValueListenableBuilder<UserProfile?>(
+      valueListenable: CurrentUser.me,
+      builder: (context, me, _) => Material(
+        color: AppColors.scorifyInput,
+        shape: const CircleBorder(side: BorderSide(color: Panel.buttonBorder)),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: open ?? () => Navigator.pushNamed(context, AppRoutes.profile),
+          child: Padding(
+            padding: const EdgeInsets.all(2),
+            child: UserAvatar(userId: me?.idUser, url: me?.avatarUrl, size: size - 4),
+          ),
         ),
       ),
     );

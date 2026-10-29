@@ -5,6 +5,7 @@ import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
 import 'package:myttmi/core/ui/brand_logo.dart';
 import 'package:myttmi/core/favorites/favorite_matches.dart';
+import 'package:myttmi/core/ui/top_header.dart';
 
 /// Topbar del home: logo + notificaciones + ajustes.
 class SpinHeader extends StatelessWidget {
@@ -50,8 +51,10 @@ class SpinHeader extends StatelessWidget {
             count: notificationsCount,
             onTap: onNotifications,
           ),
-          const SizedBox(width: 10),
-          if (onSettings != null) _IconButton(icon: Icons.settings_rounded, onTap: onSettings!),
+          const SizedBox(width: 8),
+          // Tu foto: abre tu perfil (antes estaba en el menú lateral).
+          const MyAvatarButton(size: 42),
+          if (onSettings != null) ...[const SizedBox(width: 8), _IconButton(icon: Icons.settings_rounded, onTap: onSettings!)],
         ],
       ),
     ));

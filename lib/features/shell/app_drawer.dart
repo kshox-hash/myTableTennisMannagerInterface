@@ -1,9 +1,7 @@
 import "package:myttmi/core/ui/panel_style.dart";
 import "package:flutter/material.dart";
-import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
-import "package:myttmi/core/ui/app_button.dart";
 import "package:myttmi/core/ui/brand_logo.dart";
 
 /// Opción del menú lateral.
@@ -21,20 +19,13 @@ class DrawerItem {
 class AppDrawer extends StatelessWidget {
   final List<DrawerItem> main;
   final List<DrawerItem> more;
-  /// Tu perfil arriba (foto, nombre, "Ver perfil").
-  final String? name;
-  final String? userId;
-  final String? avatarUrl;
-  final VoidCallback onProfile;
+  // Sin bloque de perfil arriba (con la foto ponía lento el menú): tu
+  // perfil se abre desde "Mi perfil" o desde tu avatar en el encabezado.
   final VoidCallback onLogout;
   const AppDrawer({
     super.key,
     required this.main,
     required this.more,
-    this.name,
-    this.userId,
-    this.avatarUrl,
-    required this.onProfile,
     required this.onLogout,
   });
 
@@ -81,62 +72,18 @@ class AppDrawer extends StatelessWidget {
     return Drawer(
       backgroundColor: Panel.sheetColor,
       width: 290,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.horizontal(right: Radius.circular(Panel.radius)),
-        side: BorderSide(color: Panel.edge),
-      ),
-      child: SafeArea(
+      // Sin bordes alrededor (se veía como un cuadrado): solo el filete del
+      // lado que da hacia el centro de la app, con la línea encendida.
+      shape: const RoundedRectangleBorder(),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(border: Border(right: BorderSide(color: Panel.topLine))),
+        child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Padding(
               padding: EdgeInsets.fromLTRB(22, 20, 22, 14),
               child: Align(alignment: Alignment.centerLeft, child: BrandLogo(markSize: 28, wordmarkSize: 19)),
-            ),
-            // Tu perfil.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              child: Material(
-                color: Panel.field,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(Panel.radius),
-                  side: const BorderSide(color: Panel.fieldBorder),
-                ),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(Panel.radius),
-                  onTap: () {
-                    Navigator.pop(context);
-                    onProfile();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: const BoxDecoration(shape: BoxShape.circle, gradient: appButtonGradient),
-                          child: UserAvatar(userId: userId, url: avatarUrl, size: 44),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(name ?? "Mi perfil",
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
-                              const Text("Ver perfil",
-                                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w500, color: AppColors.scorifyMint)),
-                            ],
-                          ),
-                        ),
-                        const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
             ),
             for (final it in main) tile(it),
             const Padding(
@@ -149,6 +96,7 @@ class AppDrawer extends StatelessWidget {
             const SizedBox(height: 8),
           ],
         ),
+      ),
       ),
     );
   }

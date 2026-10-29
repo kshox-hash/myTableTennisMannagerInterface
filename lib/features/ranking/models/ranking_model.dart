@@ -38,3 +38,61 @@ class RankingEntry {
     );
   }
 }
+
+/// Un ranking que el jugador puede elegir aparte del general: el de un
+/// organizador (solo sus campeonatos puntuables).
+class RankingScope {
+  final String organizerId;
+  final String name;
+  final int tournaments;
+  RankingScope({required this.organizerId, required this.name, required this.tournaments});
+
+  factory RankingScope.fromJson(Map<String, dynamic> json) => RankingScope(
+        organizerId: (json["id_organizer"] ?? "").toString(),
+        name: (json["name"] ?? "Organizador").toString(),
+        tournaments: intOrDefault(json["tournaments"]),
+      );
+}
+
+/// Campeonato que forma parte de un ranking.
+class RankingTournament {
+  final String id;
+  final String name;
+  final String? eventDate;
+  final String level;
+  RankingTournament({required this.id, required this.name, this.eventDate, required this.level});
+
+  factory RankingTournament.fromJson(Map<String, dynamic> json) => RankingTournament(
+        id: (json["id_tournament"] ?? "").toString(),
+        name: (json["tournament_name"] ?? "Campeonato").toString(),
+        eventDate: json["event_date"] as String?,
+        level: (json["ranking_level"] ?? "local").toString(),
+      );
+}
+
+/// Lo que sacó un jugador en un campeonato: ronda alcanzada y puntos.
+class RankingResult {
+  final String tournamentName;
+  final String? eventDate;
+  final String level;
+  final String category;
+  final int points;
+  final String round;
+  RankingResult({
+    required this.tournamentName,
+    this.eventDate,
+    required this.level,
+    required this.category,
+    required this.points,
+    required this.round,
+  });
+
+  factory RankingResult.fromJson(Map<String, dynamic> json) => RankingResult(
+        tournamentName: (json["tournament_name"] ?? "Campeonato").toString(),
+        eventDate: json["event_date"] as String?,
+        level: (json["ranking_level"] ?? "local").toString(),
+        category: (json["category"] ?? "").toString(),
+        points: intOrDefault(json["points"]),
+        round: (json["round"] ?? "").toString(),
+      );
+}

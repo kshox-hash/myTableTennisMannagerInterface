@@ -66,10 +66,9 @@ abstract final class Panel {
   /// Ventanas emergentes y paneles que suben desde abajo: fondo del panel
   /// (opaco) con su filete; el título va en PanelTitleBar.
   static const sheetColor = Color(0xFF0E1D20);
-  static const sheetShape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),
-    side: BorderSide(color: edge),
-  );
+  /// Paneles que suben desde abajo: sin borde alrededor (se veían como un
+  /// cuadrado); solo la línea encendida arriba, el lado que da al centro.
+  static const ShapeBorder sheetShape = _TopEdgeBorder();
   static const dialogShape = RoundedRectangleBorder(
     borderRadius: BorderRadius.all(Radius.circular(radius)),
     side: BorderSide(color: edge),
@@ -220,3 +219,28 @@ BoxDecoration panelBox({Color? color, bool selected = false, bool circle = false
         color: selected ? Panel.primaryButtonBorder : (color?.withValues(alpha: 0.6) ?? Panel.fieldBorder),
       ),
     );
+
+
+/// Forma de los paneles inferiores: rectángulo sin filete, con una sola
+/// línea encendida de 1 px en el borde de arriba.
+class _TopEdgeBorder extends ShapeBorder {
+  const _TopEdgeBorder();
+
+  @override
+  EdgeInsetsGeometry get dimensions => const EdgeInsets.only(top: 1);
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) =>
+      Path()..addRect(Rect.fromLTRB(rect.left, rect.top + 1, rect.right, rect.bottom));
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) => Path()..addRect(rect);
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    canvas.drawRect(Rect.fromLTWH(rect.left, rect.top, rect.width, 1), Paint()..color = Panel.topLine);
+  }
+
+  @override
+  ShapeBorder scale(double t) => this;
+}

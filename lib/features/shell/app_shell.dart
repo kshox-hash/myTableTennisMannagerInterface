@@ -72,13 +72,15 @@ class _AppShellState extends State<AppShell>
   // ("Ver estadísticas" en el Inicio). Tocando la barra de abajo no hay.
   int? _returnTab;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  UserProfile? _me;
-
   Future<void> _loadMe() async {
     try {
-      final me = await ProfileApi().getMe();
-      if (mounted) setState(() => _me = me);
+      CurrentUser.me.value = await ProfileApi().getMe();
     } catch (_) {}
+  }
+
+  Future<void> _openProfile() async {
+    await Navigator.pushNamed(context, AppRoutes.profile);
+    _loadMe();
   }
 
   /// Ajustes: arbitrar con QR y sonidos.
@@ -283,6 +285,7 @@ class _AppShellState extends State<AppShell>
           DrawerItem(Icons.calendar_month_rounded, "Calendario", () => _switchTab(1), selected: _index == 1),
           DrawerItem(Icons.trending_up_rounded, "Mi rendimiento", () => _switchTab(2), selected: _index == 2),
           DrawerItem(Icons.leaderboard_rounded, "Ranking", () => _switchTab(4), selected: _index == 4),
+          DrawerItem(Icons.person_rounded, "Mi perfil", _openProfile),
           DrawerItem(Icons.emoji_events_rounded, "Campeonatos", () => _switchTab(3), selected: _index == 3),
         ],
         more: [
@@ -291,13 +294,6 @@ class _AppShellState extends State<AppShell>
               () => Navigator.push(context, CyberPageRoute(builder: (_) => const FavoritesScreen()))),
           DrawerItem(Icons.settings_rounded, "Ajustes", _openSettings),
         ],
-        name: _me?.displayName,
-        userId: _me?.idUser,
-        avatarUrl: _me?.avatarUrl,
-        onProfile: () async {
-          await Navigator.pushNamed(context, AppRoutes.profile);
-          _loadMe();
-        },
         onLogout: _logout,
       ),
       body: PrismBackground(
@@ -325,6 +321,7 @@ class _AppShellState extends State<AppShell>
                     currentIndex: _index,
                     returnTab: _returnTab,
                     openMenu: () => _scaffoldKey.currentState?.openDrawer(),
+                    openProfile: _openProfile,
                     child: IndexedStack(
                       index: _index,
                       children: [
@@ -351,6 +348,14 @@ class _AppShellState extends State<AppShell>
 /// pestañas vivas (no las recrea al volver), esto es lo que le permite a
 /// cada una recargar sus datos sola cuando el usuario vuelve a ella, en vez
 /// de necesitar un botón de actualizar manual.
+/// Tu perfil, cargado una vez por el shell y compartido: el avatar del
+/// encabezado (al lado de la campana) lo lee de acá en vez de pedirlo de
+/// nuevo en cada pantalla.
+class CurrentUser {
+  CurrentUser._();
+  static final me = ValueNotifier<UserProfile?>(null);
+}
+
 class AppShellScope extends InheritedWidget {
   final void Function(int index, {bool link}) switchTab;
   final int currentIndex;
@@ -358,6 +363,8 @@ class AppShellScope extends InheritedWidget {
   final int? returnTab;
   /// Abre el menú lateral (☰).
   final VoidCallback? openMenu;
+  /// Abre tu perfil (avatar del encabezado) y al volver lo recarga.
+  final VoidCallback? openProfile;
 
   const AppShellScope({
     super.key,
@@ -365,6 +372,7 @@ class AppShellScope extends InheritedWidget {
     required this.currentIndex,
     this.returnTab,
     this.openMenu,
+    this.openProfile,
     required super.child,
   });
 
