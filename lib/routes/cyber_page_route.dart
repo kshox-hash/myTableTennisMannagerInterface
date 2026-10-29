@@ -95,8 +95,8 @@ class CyberPageRoute<T> extends PageRouteBuilder<T> {
   // de página completa y, cuando llegan los datos, la pantalla entera.
   CyberPageRoute({required WidgetBuilder builder, super.settings, this.waitForData = true})
       : super(
-          transitionDuration: const Duration(milliseconds: 220),
-          reverseTransitionDuration: const Duration(milliseconds: 180),
+          transitionDuration: const Duration(milliseconds: 170),
+          reverseTransitionDuration: const Duration(milliseconds: 140),
           pageBuilder: (context, animation, secondaryAnimation) =>
               waitForData ? LoadingCurtain(child: builder(context)) : builder(context),
           // Liviana: solo fundido + un leve desplazamiento de la que entra. La

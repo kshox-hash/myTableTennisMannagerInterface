@@ -45,7 +45,7 @@ class _LoadingCurtainState extends State<LoadingCurtain> {
               ignoring: _ready,
               child: AnimatedOpacity(
                 opacity: _ready ? 0 : 1,
-                duration: const Duration(milliseconds: 120),
+                duration: const Duration(milliseconds: 90),
                 onEnd: () {
                   if (_ready && mounted) setState(() => _gone = true);
                 },

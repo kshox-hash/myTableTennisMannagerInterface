@@ -3,16 +3,17 @@ import "package:myttmi/features/shell/shell_preload.dart";
 
 /// Entrada en cascada: cada bloque aparece subiendo un poco y
 /// desvaneciéndose, uno tras otro (el primero de inmediato, cada siguiente
-/// 40 ms después). Se anima una sola vez, al aparecer en pantalla; no en
-/// cada recarga.
+/// 25 ms después). Se anima una sola vez, al aparecer en pantalla; no en
+/// cada recarga. Corta a propósito: el último bloque queda quieto a los
+/// ~0,3 s (antes 0,62 s, y se sentía que la pantalla tardaba en llegar).
 class StaggerIn extends StatefulWidget {
   final int index;
   final Widget child;
   const StaggerIn({super.key, required this.index, required this.child});
 
-  static const _step = Duration(milliseconds: 40);
-  static const _maxDelayed = 6; // después del 6.º bloque ya no se espera más
-  static const _duration = Duration(milliseconds: 380);
+  static const _step = Duration(milliseconds: 25);
+  static const _maxDelayed = 4; // después del 4.º bloque ya no se espera más
+  static const _duration = Duration(milliseconds: 220);
 
   @override
   State<StaggerIn> createState() => _StaggerInState();
@@ -62,7 +63,7 @@ class _StaggerInState extends State<StaggerIn> with SingleTickerProviderStateMix
       child: AnimatedBuilder(
         animation: _t,
         child: widget.child,
-        builder: (_, child) => Transform.translate(offset: Offset(0, 16 * (1 - _t.value)), child: child),
+        builder: (_, child) => Transform.translate(offset: Offset(0, 10 * (1 - _t.value)), child: child),
       ),
     );
   }

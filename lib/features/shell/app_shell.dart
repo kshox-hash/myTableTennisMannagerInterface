@@ -69,7 +69,7 @@ class _AppShellState extends State<AppShell>
   // un solo widget: el IndexedStack se apaga, en el punto más bajo se
   // cambia el índice (no se ve, así que no hay salto brusco) y se vuelve
   // a encender — en vez de un cambio instantáneo sin transición.
-  static const _pulseDuration = Duration(milliseconds: 180);
+  static const _pulseDuration = Duration(milliseconds: 150);
   late final AnimationController _pulse = AnimationController(
     vsync: this,
     duration: _pulseDuration,
