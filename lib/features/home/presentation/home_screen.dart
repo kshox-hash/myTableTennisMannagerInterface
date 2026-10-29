@@ -621,6 +621,10 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                     ]),
                     const Spacer(),
+                    // Mismo alto que el encabezado de arriba: así el bloque queda
+                    // centrado en la PANTALLA (donde se centra el fondo, con su
+                    // hexágono al medio) y no solo en el espacio bajo el encabezado.
+                    const SizedBox(height: 58),
                     ],
                   ),
                   ),
