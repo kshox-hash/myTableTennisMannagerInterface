@@ -1773,17 +1773,18 @@ class HomeEmptyCard extends StatelessWidget {
                 height: 38,
                 alignment: Alignment.center,
                 decoration: panelBox(),
-                child: Icon(icon, size: 19, color: AppColors.scorifyTextFaint),
+                child: Icon(icon, size: 19, color: AppColors.scorifyMint),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(message, style: _t(14, w: FontWeight.w600, c: AppColors.scorifyTextMuted)),
+                    // Contraste alto: sobre el panel oscuro el gris tenue no se leía.
+                    Text(message, style: _t(14, w: FontWeight.w600, c: AppColors.scorifyText)),
                     if (hint != null) ...[
-                      const SizedBox(height: 3),
-                      Text(hint!, style: _t(12, c: AppColors.scorifyTextFaint, h: 1.35)),
+                      const SizedBox(height: 4),
+                      Text(hint!, style: _t(13, c: AppColors.scorifyTextMuted, h: 1.4)),
                     ],
                   ],
                 ),

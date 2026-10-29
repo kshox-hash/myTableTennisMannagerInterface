@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:myttmi/core/constants/app_colors.dart';
 
-/// Fondo de toda la app: gris oscuro liso (AppColors.scorifyBg), sin imagen.
-/// Las tarjetas (verde azulado oscuro con filete) se despegan solas encima y
-/// no hay foto que decodificar. El RepaintBoundary evita repintar el fondo
-/// al hacer scroll encima.
+/// Fondo de toda la app, sin imagen: degradado vertical de gris (arriba) que
+/// se va oscureciendo hacia abajo. El RepaintBoundary evita repintarlo al
+/// hacer scroll encima.
 class PrismBackground extends StatelessWidget {
   final Widget child;
   const PrismBackground({super.key, required this.child});
 
+  // Gris arriba que se va oscureciendo hacia abajo (sin llegar al negro ni
+  // brillo de color).
+  static const _gradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF24282C), Color(0xFF1A1D20), Color(0xFF131518)],
+    stops: [0, 0.5, 1],
+  );
+
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: AppColors.scorifyBg,
+    return DecoratedBox(
+      decoration: const BoxDecoration(gradient: _gradient),
       child: RepaintBoundary(child: child),
     );
   }
