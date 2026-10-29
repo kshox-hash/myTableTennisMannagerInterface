@@ -1,5 +1,3 @@
-import "package:myttmi/core/ui/now_playing_banner.dart";
-import "package:myttmi/core/ui/background_music.dart";
 import "package:myttmi/core/ui/panel_style.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -70,12 +68,7 @@ class MyApp extends StatelessWidget {
         final mq = MediaQuery.of(context);
         return MediaQuery(
           data: mq.copyWith(textScaler: mq.textScaler.clamp(minScaleFactor: 0.9, maxScaleFactor: 1.25)),
-          // Encima de todo: la barra "Sonando" de la música de fondo.
-          child: Listener(
-            // Cualquier toque reintenta la música si no había podido arrancar.
-            onPointerDown: (_) => BackgroundMusic.userGesture(),
-            child: Stack(fit: StackFit.expand, children: [child!, const NowPlayingBanner()]),
-          ),
+          child: child!,
         );
       },
       navigatorObservers: Monitoring.observers,
