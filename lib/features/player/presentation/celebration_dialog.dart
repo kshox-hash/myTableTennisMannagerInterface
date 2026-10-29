@@ -21,7 +21,13 @@ import "package:myttmi/core/ui/user_avatar.dart";
 /// en myttm.cl), así se cambia sin publicar una versión nueva de la app; si
 /// no existe, la ventana se muestra igual.
 class Celebrations {
-  static bool _shown = false;
+  // Antes se revisaba UNA vez por sesión (al abrir la app): si el campeonato
+  // terminaba con la app abierta —lo normal en un torneo— no avisaba nada.
+  // Ahora se revisa al abrir, al volver a la app y al refrescar el Inicio;
+  // estas guardas evitan dos ventanas a la vez o repetir la misma.
+  static bool _checking = false;
+  static bool _open = false;
+  static final Set<String> _seen = {};
 
   static Future<Map<String, String>> _headers() async {
     final token = await SessionStorage().getToken();
@@ -31,10 +37,10 @@ class Celebrations {
     };
   }
 
-  /// Revisa si hay celebraciones pendientes y las muestra (una vez por sesión).
+  /// Revisa si hay celebraciones pendientes y las muestra.
   static Future<void> check(BuildContext context) async {
-    if (_shown) return;
-    _shown = true;
+    if (_checking || _open) return;
+    _checking = true;
     try {
       final res = await apiHttp
           .get(
@@ -47,11 +53,16 @@ class Celebrations {
           ((jsonDecode(res.body) as Map<String, dynamic>)["data"] as List? ??
                   const [])
               .cast<Map<String, dynamic>>()
+              .where((c) => !_seen.contains(c["id_notification"]?.toString()))
               .toList()
             ..sort(
               (a, b) => (a["position"] as num).compareTo(b["position"] as num),
             );
       if (data.isEmpty || !context.mounted) return;
+      for (final c in data) {
+        _seen.add(c["id_notification"].toString());
+      }
+      _open = true;
       await showGeneralDialog<void>(
         context: context,
         barrierDismissible: true,
@@ -69,12 +80,16 @@ class Celebrations {
         ),
         pageBuilder: (_, __, ___) => _CelebrationDialog(items: data),
       );
+      _open = false;
       // Cerrar de cualquier forma marca todas como vistas.
       for (final c in data) {
         _dismiss(c["id_notification"].toString());
       }
     } catch (_) {
       // Sin conexión o error: no se muestra nada.
+    } finally {
+      _checking = false;
+      _open = false;
     }
   }
 

@@ -6,17 +6,6 @@ import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/features/player/models/achievement_model.dart";
 
-// Colores de medalla (oro / plata / bronce).
-const _gold = [Color(0xFFFFE08A), Color(0xFFE0A526)];
-const _silver = [Color(0xFFF1F4F6), Color(0xFFA9B4BC)];
-const _bronze = [Color(0xFFF2B98A), Color(0xFFB8733F)];
-
-List<Color> _medalColors(int position) => switch (position) {
-      1 => _gold,
-      2 => _silver,
-      _ => _bronze,
-    };
-
 String _placeLabel(int position) => switch (position) {
       1 => "Campeón",
       2 => "Subcampeón",
@@ -31,7 +20,8 @@ String? _shortDate(String? iso) {
   return "${d.day} ${_months[d.month - 1]} ${d.year}";
 }
 
-/// Medalla dibujada (disco con degradado y el puesto), sin emoji.
+/// Moneda de MyTTM (las mismas de la web, del ranking y de la celebración):
+/// oro, plata, bronce y, del 4° hacia abajo, la de participación.
 class Medal extends StatelessWidget {
   final int position;
   final double size;
@@ -39,24 +29,18 @@ class Medal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = _medalColors(position);
-    return Container(
+    final file = switch (position) {
+      1 => "gold",
+      2 => "silver",
+      3 => "bronze",
+      _ => "participation",
+    };
+    return Image.asset(
+      "assets/images/medal_$file.webp",
       width: size,
       height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(colors: c, begin: Alignment.topLeft, end: Alignment.bottomRight),
-      ),
-      child: Text(
-        "$position°",
-        style: TextStyle(
-          fontFamily: AppTypography.body,
-          fontSize: size * 0.36,
-          fontWeight: FontWeight.w700,
-          color: const Color(0xFF2A1E05),
-        ),
-      ),
+      cacheWidth: (size * 3).round(),
+      filterQuality: FilterQuality.medium,
     );
   }
 }
@@ -122,7 +106,7 @@ class AchievementRow extends StatelessWidget {
   }
 }
 
-/// "Palmarés": medallero del jugador (cuántos oros, platas y bronces) y la
+/// "Logros": medallero del jugador (cuántos oros, platas y bronces) y la
 /// lista de sus podios en categorías finalizadas. En el perfil propio se
 /// muestra aunque esté vacío (showEmpty); en el de otro jugador se oculta.
 class AchievementsCard extends StatefulWidget {
@@ -154,7 +138,7 @@ class _AchievementsCardState extends State<AchievementsCard> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: SectionCard(
-        title: "Palmarés",
+        title: "Logros",
         icon: Icons.emoji_events_rounded,
         trailing: list.isEmpty
             ? null

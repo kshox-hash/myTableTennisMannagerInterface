@@ -42,7 +42,14 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  // Al volver a la app (desde WhatsApp, etc.): ¿terminó algún campeonato
+  // mientras tanto? Se muestra la celebración sin tener que reiniciarla.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) Celebrations.check(context);
+  }
+
   int _index = 0;
   // Pestañas ya abiertas al menos una vez. Antes las 5 se armaban al abrir
   // la app y todas pedían sus datos a la vez (~10 consultas extra que
@@ -247,6 +254,7 @@ class _AppShellState extends State<AppShell>
       });
     });
     _loadMe();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -258,6 +266,7 @@ class _AppShellState extends State<AppShell>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     if (ToastLayout.shellRoute == ModalRoute.of(context)) ToastLayout.shellRoute = null;
     DeepLinks.shellGone();
     NotificationPopups.stop();

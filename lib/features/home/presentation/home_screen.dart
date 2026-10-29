@@ -1,3 +1,4 @@
+import "package:myttmi/features/player/presentation/celebration_dialog.dart";
 import 'package:myttmi/core/storage/session_storage.dart';
 import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/app_button.dart";
@@ -116,6 +117,10 @@ class _HomeScreenState extends State<HomeScreen>
       // El grupo necesita el dashboard; el resto ya venía corriendo. Se
       // espera todo para que el Inicio se muestre completo de una vez.
       await Future.wait([_loadGroups(), side]);
+      // Al refrescar el Inicio (volver a la pestaña o deslizar): si terminó
+      // un campeonato, su celebración aparece sin reiniciar la app. La
+      // primera carga la revisa el shell.
+      if (!_firstLoad && mounted) Celebrations.check(context);
     } catch (_) {
       // Silencioso: la pantalla igual se puede usar sin estos datos.
     } finally {
@@ -482,19 +487,13 @@ class _HomeScreenState extends State<HomeScreen>
                       // un tercio de la pantalla y empujaba los partidos hacia abajo.
                       // Mientras juego en una mesa no se ofrece arbitrar: primero
                       // mi partido (el servidor tampoco deja estar en dos mesas).
-                      // Estructura fija del Inicio: arbitraje → próximo partido →
-                      // tus grupos → campeonato → accesos. Cada sección está
-                      // siempre; sin datos muestra "No se registran…" (antes se
-                      // escondía y el Inicio de alguien nuevo quedaba vacío).
-                      if (!_playingNow) ...[
-                        if (_refMatches.isEmpty)
-                          const HomeEmptyCard(
-                            title: "Arbitraje",
-                            icon: Icons.scoreboard_rounded,
-                            message: "No se registran partidos para arbitrar",
-                            hint: "Cuando un organizador te asigne un partido como árbitro, aparecerá aquí.",
-                          )
-                        else
+                      // Orden del Inicio por importancia: arbitrar (solo si te
+                      // toca: es lo urgente) → tu próximo partido, o el próximo
+                      // campeonato, o UN solo panel de bienvenida → tus grupos
+                      // (si estás en fase de grupos) → accesos. Antes cada
+                      // sección estaba siempre y alguien sin torneo veía tres
+                      // paneles vacíos seguidos.
+                      if (!_playingNow && _refMatches.isNotEmpty) ...[
                         HomeRefereeCard(
                           title: "${_refMatches.first.player1Name} vs ${_refMatches.first.player2Name}",
                           subtitle: [
@@ -516,14 +515,26 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                         const SizedBox(height: 12),
                       ],
-                      if (nm == null) ...[
+                      if (nm == null && _live == null && _challenge != null) ...[
+                        HomeChallengeCard(
+                          name: _challenge!.tournamentName,
+                          date: _dateLong(_challenge!.eventDate),
+                          place: _challenge!.address ?? _challenge!.region,
+                          players: _challenge!.categories.fold<int>(0, (n, c) => n + c.enrolledCount),
+                          chip: _challenge!.categories.any((c) => c.isEnrolled) ? "Inscrito" : "En inscripción",
+                          onTap: () async {
+                            await Navigator.pushNamed(context, AppRoutes.tournamentDetail, arguments: _challenge);
+                            if (mounted) _load(silent: true);
+                          },
+                        ),
+                      ] else if (nm == null) ...[
                         HomeEmptyCard(
-                          title: "Próximo partido",
-                          icon: Icons.calendar_month_rounded,
-                          message: "No se registran partidos programados",
+                          title: _live != null ? "Próximo partido" : "Bienvenido a MyTTM",
+                          icon: _live != null ? Icons.calendar_month_rounded : Icons.emoji_events_rounded,
+                          message: _live != null ? "Todavía no tienes partido programado" : "No estás inscrito en ningún campeonato",
                           hint: _live != null
                               ? "Tu campeonato está en curso: tu próximo partido aparecerá apenas lo programen."
-                              : "Inscríbete en un campeonato y aquí verás tu próximo partido, la mesa y tu rival.",
+                              : "Inscríbete en uno y aquí verás tu próximo partido, la mesa, tu rival y tu grupo.",
                           action: _live == null ? "Buscar campeonatos" : null,
                           onAction: () => AppShellScope.of(context)?.switchTab(3, link: true),
                         ),
@@ -547,18 +558,10 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         ],
                       ],
-                      // Una categoría: la tarjeta grande de siempre. Varias: una
-                      // fila por categoría. Ninguna: el panel vacío.
+                      // Tus grupos (solo en fase de grupos): una categoría, la
+                      // tarjeta grande; varias, una fila por categoría.
                       ...[
-                        if (_myGroups.isEmpty) ...[
-                          const SizedBox(height: 12),
-                          const HomeEmptyCard(
-                            title: "Tus grupos",
-                            icon: Icons.groups_rounded,
-                            message: "No se registran grupos",
-                            hint: "Cuando empiece la fase de grupos de tu campeonato verás aquí tu posición y tus resultados.",
-                          ),
-                        ] else if (_myGroups.length == 1) ...[
+                        if (_myGroups.length == 1) ...[
                           const SizedBox(height: 12),
                           HomeGroupCard(
                             groupName: _myGroups.first.match.groupName ?? "",
@@ -574,21 +577,6 @@ class _HomeScreenState extends State<HomeScreen>
                           const SizedBox(height: 12),
                           _MyGroupsCard(groups: _myGroups, onOpen: _openCategory),
                         ],
-                        const SizedBox(height: 12),
-                      ],
-                      // Sin tarjeta "Campeonato en curso": ya está en "Mis campeonatos".
-                      if (nm == null && _live == null && _challenge != null) ...[
-                        HomeChallengeCard(
-                          name: _challenge!.tournamentName,
-                          date: _dateLong(_challenge!.eventDate),
-                          place: _challenge!.address ?? _challenge!.region,
-                          players: _challenge!.categories.fold<int>(0, (n, c) => n + c.enrolledCount),
-                          chip: _challenge!.categories.any((c) => c.isEnrolled) ? "Inscrito" : "En inscripción",
-                          onTap: () async {
-                            await Navigator.pushNamed(context, AppRoutes.tournamentDetail, arguments: _challenge);
-                            if (mounted) _load(silent: true);
-                          },
-                        ),
                         const SizedBox(height: 12),
                       ],
                       IntrinsicHeight(
