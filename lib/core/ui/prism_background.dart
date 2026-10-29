@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-/// Fondo de toda la app, sin imagen: degradado vertical de gris (arriba) que
-/// se va oscureciendo hacia abajo. El RepaintBoundary evita repintarlo al
-/// hacer scroll encima.
+/// Fondo de toda la app: hexágonos en líneas grises con semitono arriba y
+/// abajo (assets/images/app_bg.jpg, 1080 px). Se decodifica una sola vez al
+/// ancho de la pantalla y queda en caché; el RepaintBoundary evita
+/// repintarlo al hacer scroll encima. Debajo, el degradado gris por si la
+/// imagen todavía no cargó.
 class PrismBackground extends StatelessWidget {
   final Widget child;
   const PrismBackground({super.key, required this.child});
 
-  // Gris arriba que se va oscureciendo hacia abajo (sin llegar al negro ni
-  // brillo de color).
   static const _gradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -18,9 +18,23 @@ class PrismBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final dpr = MediaQuery.devicePixelRatioOf(context);
     return DecoratedBox(
       decoration: const BoxDecoration(gradient: _gradient),
-      child: RepaintBoundary(child: child),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          RepaintBoundary(
+            child: Image(
+              image: ResizeImage(const AssetImage("assets/images/app_bg.jpg"), width: (size.width * dpr).round().clamp(360, 1080)),
+              fit: BoxFit.cover,
+              gaplessPlayback: true,
+            ),
+          ),
+          RepaintBoundary(child: child),
+        ],
+      ),
     );
   }
 }
