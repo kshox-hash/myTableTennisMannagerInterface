@@ -27,7 +27,9 @@ class PlayerActions extends StatelessWidget {
   final String? playerId;
   final String playerName;
   final Color? color;
-  const PlayerActions({super.key, required this.playerId, required this.playerName, this.color});
+  /// false donde tocar al jugador ya abre su perfil (el ojo sobraba).
+  final bool showProfile;
+  const PlayerActions({super.key, required this.playerId, required this.playerName, this.color, this.showProfile = true});
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +45,9 @@ class PlayerActions extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        btn(Icons.visibility_rounded, "Ver perfil",
-            () => Navigator.pushNamed(context, AppRoutes.playerProfile, arguments: {"userId": id, "playerName": playerName})),
+        if (showProfile)
+          btn(Icons.visibility_rounded, "Ver perfil",
+              () => Navigator.pushNamed(context, AppRoutes.playerProfile, arguments: {"userId": id, "playerName": playerName})),
         if (matches != null)
           btn(Icons.emoji_events_rounded, "Ver recorrido", () => showPlayerJourney(context, id, playerName, matches)),
       ],

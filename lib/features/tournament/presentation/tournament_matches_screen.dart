@@ -71,6 +71,9 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
   Future<List<TournamentMatch>> _future = Future.value(const []);
   String _statusFilter = "all";
   static const _statusLabels = {"all": "Todos", "scheduled": "Por jugar", "finished": "Jugados"};
+  // Fase de los partidos de la lista: todos, solo grupos o solo llaves.
+  String _stageFilter = "all";
+  static const _stageLabels = {"all": "Grupos y llaves", "group": "Grupos", "bracket": "Llaves"};
   late _ViewMode _mode;
   // Llaves queda bloqueada hasta que exista algún partido de llave (mientras
   // se juegan los grupos no hay nada que mostrar ahí).
@@ -174,7 +177,25 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
                     onChanged: (id) => setState(() => _cat = id),
                     trailing: _mode != _ViewMode.list
                         ? null
-                        : FilterDropdown(
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(child: FilterDropdown(
+                                icon: Icons.account_tree_rounded,
+                                label: _stageLabels[_stageFilter]!,
+                                onTap: () async {
+                                  final picked = await showOptionsSheet<String>(
+                                    context,
+                                    title: "Fase",
+                                    options: [for (final e in _stageLabels.entries) (value: e.key, label: e.value)],
+                                    selected: _stageFilter,
+                                  );
+                                  if (picked == null) return;
+                                  setState(() => _stageFilter = picked.value);
+                                },
+                              )),
+                              const SizedBox(width: 8),
+                              Flexible(child: FilterDropdown(
                             icon: Icons.filter_list_rounded,
                             label: _statusLabels[_statusFilter]!,
                             onTap: () async {
@@ -188,6 +209,8 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
                               setState(() => _statusFilter = picked.value);
                               _load();
                             },
+                          )),
+                            ],
                           ),
                   ),
                 ],
@@ -197,9 +220,10 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
                   ? const LoadingState()
                   : _mode == _ViewMode.list
                   ? _PagedMatchList(
-                      key: ValueKey("$_statusFilter|$_cat"),
+                      key: ValueKey("$_statusFilter|$_stageFilter|$_cat"),
                       tournamentId: widget.tournamentId,
                       status: _statusFilter == "all" ? null : _statusFilter,
+                      stage: _stageFilter == "all" ? null : _stageFilter,
                       categoryId: _cat,
                     )
                   : RefreshIndicator(
@@ -368,7 +392,7 @@ class _Player extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 2),
-            PlayerActions(playerId: id, playerName: name),
+            PlayerActions(playerId: id, playerName: name, showProfile: false),
           ],
         ),
       ),
@@ -601,7 +625,8 @@ class _PagedMatchList extends StatefulWidget {
   final String tournamentId;
   final String? status;
   final String? categoryId;
-  const _PagedMatchList({super.key, required this.tournamentId, this.status, this.categoryId});
+  final String? stage;
+  const _PagedMatchList({super.key, required this.tournamentId, this.status, this.categoryId, this.stage});
 
   @override
   State<_PagedMatchList> createState() => _PagedMatchListState();
@@ -643,6 +668,7 @@ class _PagedMatchListState extends State<_PagedMatchList> {
         widget.tournamentId,
         status: widget.status,
         categoryId: widget.categoryId,
+        stage: widget.stage,
         limit: _pageSize,
         offset: _items.length,
       );

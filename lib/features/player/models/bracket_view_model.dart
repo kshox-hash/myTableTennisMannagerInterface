@@ -90,6 +90,8 @@ class GroupMatchInfo {
   final int setsPlayer2;
   final String status;
   final int? tableNumber;
+  /// Puntos de cada set (jugador 1, jugador 2), p. ej. [(11, 7), (9, 11)].
+  final List<(int, int)> setScores;
 
   GroupMatchInfo({
     required this.idMatch,
@@ -102,6 +104,7 @@ class GroupMatchInfo {
     required this.setsPlayer2,
     required this.status,
     this.tableNumber,
+    this.setScores = const [],
   });
 
   factory GroupMatchInfo.fromJson(Map<String, dynamic> json) {
@@ -117,6 +120,10 @@ class GroupMatchInfo {
       setsPlayer2: intOrDefault(json["sets_player2"]),
       status: (json["status"] ?? "scheduled").toString(),
       tableNumber: intOrNull(json["table_number"]),
+      setScores: [
+        for (final s in (json["set_scores"] as List? ?? const []))
+          if (s is Map) (intOrDefault(s["p1"]), intOrDefault(s["p2"])),
+      ],
     );
   }
 }

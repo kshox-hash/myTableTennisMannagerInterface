@@ -9,7 +9,7 @@ import "package:myttmi/features/player/models/bracket_view_model.dart";
 import "package:myttmi/routes/app_routes.dart";
 
 /// Card de UN grupo en "Partidos › Grupos": la tabla (posición, partidos
-/// jugados, ganados, perdidos y diferencia de sets; los que clasifican
+/// jugados, ganados y perdidos; los que clasifican
 /// marcados) y, debajo, los resultados de cada partido del grupo. Antes solo
 /// mostraba quiénes lo integraban y no se podían ver los resultados.
 class GroupCard extends StatelessWidget {
@@ -69,7 +69,6 @@ class GroupCard extends StatelessWidget {
                 stat("PJ", style: _head),
                 stat("G", style: _head),
                 stat("P", style: _head),
-                stat("SETS", w: 40, style: _head),
                 const SizedBox(width: 28),
               ],
             ),
@@ -105,7 +104,6 @@ class GroupCard extends StatelessWidget {
   Widget _memberRow(BuildContext context, GroupMemberInfo m, int i, GroupStandingInfo? s, bool anyPlayed,
       Widget Function(String, {double w, TextStyle style}) stat) {
     final me = m.idUser == myUserId;
-    final diff = s == null ? 0 : s.setsFor - s.setsAgainst;
     return Material(
       color: me ? AppColors.scorifyMint.withValues(alpha: 0.10) : Colors.transparent,
       borderRadius: BorderRadius.circular(Panel.radius),
@@ -152,8 +150,7 @@ class GroupCard extends StatelessWidget {
               stat(anyPlayed ? "${s?.played ?? 0}" : "–"),
               stat(anyPlayed ? "${s?.won ?? 0}" : "–"),
               stat(anyPlayed ? "${s?.lost ?? 0}" : "–"),
-              stat(anyPlayed ? (diff > 0 ? "+$diff" : "$diff") : "–", w: 40),
-              PlayerActions(playerId: m.idUser, playerName: m.displayName),
+              PlayerActions(playerId: m.idUser, playerName: m.displayName, showProfile: false),
             ],
           ),
         ),
@@ -171,9 +168,7 @@ class GroupCard extends StatelessWidget {
           fontWeight: winner ? FontWeight.w700 : FontWeight.w500,
           color: played && !winner ? AppColors.scorifyTextMuted : AppColors.scorifyText,
         );
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: Row(
+    final row = Row(
         children: [
           Expanded(child: Text(p1, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.right, style: name(played && m.winnerId == m.player1Id))),
           const SizedBox(width: 8),
@@ -194,6 +189,21 @@ class GroupCard extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Expanded(child: Text(p2, maxLines: 1, overflow: TextOverflow.ellipsis, style: name(played && m.winnerId == m.player2Id))),
+        ],
+      );
+    // Puntos de cada set bajo el marcador ("11-7 · 9-11 · 11-5").
+    final points = played && m.status != "walkover" && m.setScores.isNotEmpty
+        ? m.setScores.map((s) => "${s.$1}-${s.$2}").join("  ·  ")
+        : null;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      child: Column(
+        children: [
+          row,
+          if (points != null) ...[
+            const SizedBox(height: 4),
+            Text(points, textAlign: TextAlign.center, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, color: AppColors.scorifyTextMuted)),
+          ],
         ],
       ),
     );

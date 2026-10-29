@@ -132,6 +132,8 @@ class PlayerApi {
     String tournamentId, {
     String? status,
     String? categoryId,
+    /// "group" | "bracket": solo partidos de grupos o solo de llaves.
+    String? stage,
     int limit = 20,
     int offset = 0,
   }) async {
@@ -140,6 +142,7 @@ class PlayerApi {
       query: {
         if (status != null) "status": status,
         if (categoryId != null) "category": categoryId,
+        if (stage != null) "stage": stage,
         "limit": limit.toString(),
         "offset": offset.toString(),
       },

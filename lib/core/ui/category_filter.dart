@@ -57,8 +57,13 @@ class CategoryFilterBar extends StatelessWidget {
               },
             ),
           ),
-        const Spacer(),
-        if (trailing != null) trailing!,
+        // Con filtros a la derecha se reparten el ancho (en celulares chicos
+        // el texto se corta con "…" en vez de desbordar la fila).
+        if (trailing != null) ...[
+          const SizedBox(width: 8),
+          Flexible(child: Align(alignment: Alignment.centerRight, child: trailing!)),
+        ] else
+          const Spacer(),
       ],
     );
   }
