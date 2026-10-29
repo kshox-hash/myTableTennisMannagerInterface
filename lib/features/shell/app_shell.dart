@@ -1,4 +1,3 @@
-import 'package:myttmi/core/ui/ui_sound.dart';
 import 'package:myttmi/core/ui/background_music.dart';
 import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:flutter/foundation.dart';
@@ -103,20 +102,6 @@ class _AppShellState extends State<AppShell>
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 10),
-            // Sonido al tocar botones, pestañas y al volver atrás.
-            ValueListenableBuilder<bool>(
-              valueListenable: UiSound.enabled,
-              builder: (_, on, __) => SwitchListTile(
-                secondary: Icon(on ? Icons.volume_up_rounded : Icons.volume_off_rounded, color: AppColors.scorifyText),
-                title: const Text("Sonido al tocar", style: TextStyle(color: AppColors.scorifyText)),
-                activeThumbColor: AppColors.scorifyMint,
-                value: on,
-                onChanged: (v) async {
-                  await UiSound.setEnabled(v);
-                  if (v) UiSound.tap();
-                },
-              ),
-            ),
             ValueListenableBuilder<bool>(
               valueListenable: BackgroundMusic.enabled,
               builder: (_, on, __) => SwitchListTile(
@@ -240,7 +225,6 @@ class _AppShellState extends State<AppShell>
 
   void _switchTab(int index, {bool link = false}) {
     if (index == _index) return;
-    UiSound.tap();
     final from = _index;
     // Al Inicio no se "vuelve": es la raíz.
     setState(() => _returnTab = link && index != 0 ? from : null);

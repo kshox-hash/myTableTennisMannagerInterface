@@ -1,4 +1,3 @@
-import "package:myttmi/core/ui/ui_sound.dart";
 import "package:myttmi/core/ui/now_playing_banner.dart";
 import "package:myttmi/core/ui/background_music.dart";
 import "package:myttmi/core/ui/panel_style.dart";
@@ -18,7 +17,6 @@ Future<void> main() async {
   await Monitoring.init();
   await FavoriteMatches.load();
   await ResponseCache.init();
-  await UiSound.init();
   DeepLinks.init();
   runApp(const MyApp());
 }
@@ -80,7 +78,7 @@ class MyApp extends StatelessWidget {
           ),
         );
       },
-      navigatorObservers: [...Monitoring.observers, UiSoundNavigatorObserver()],
+      navigatorObservers: Monitoring.observers,
       onGenerateRoute: AppRoutes.onGenerateRoute,
       // "home" en vez de "initialRoute": un initialRoute con barras (ej.
       // "/splash") hace que Flutter arme el stack inicial dividiendo el

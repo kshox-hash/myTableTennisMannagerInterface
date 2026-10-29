@@ -1,4 +1,3 @@
-import "package:myttmi/core/ui/ui_sound.dart";
 import "package:myttmi/core/ui/panel_style.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -39,7 +38,6 @@ class AppDrawer extends StatelessWidget {
             borderRadius: BorderRadius.circular(Panel.buttonRadius),
             child: InkWell(
               onTap: () {
-                UiSound.tap();
                 Navigator.pop(context);
                 it.onTap();
               },
