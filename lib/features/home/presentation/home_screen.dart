@@ -198,8 +198,8 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
-  /// Tu próximo campeonato (inscrito y sin empezar), tus eventos de los
-  /// próximos 7 días y los campeonatos con la inscripción abierta.
+  /// Tu próximo campeonato (inscrito y sin empezar) y tus eventos de los
+  /// próximos 7 días.
   Future<void> _loadUpcoming() async {
     final today = DateTime.now();
     final day = DateTime(today.year, today.month, today.day);
@@ -235,9 +235,11 @@ class _HomeScreenState extends State<HomeScreen>
         return d == null || !d.isBefore(day);
       }).toList()
         ..sort((a, b) => (a.eventDate ?? "9").compareTo(b.eventDate ?? "9"));
+      // Solo un campeonato en que estés inscrito. Antes, sin ninguno, se
+      // sugería el primero con inscripción abierta, y al organizador le
+      // aparecía su propia copa como "Próximo desafío": confundía.
       final mineT = upcoming.where((t) => t.categories.any((c) => c.isEnrolled && c.phase != "finished"));
-      final openT = upcoming.where((t) => t.categories.any((c) => c.phase == "enrollment"));
-      challenge = mineT.isNotEmpty ? mineT.first : (openT.isNotEmpty ? openT.first : null);
+      challenge = mineT.isNotEmpty ? mineT.first : null;
     } catch (_) {}
     if (!mounted) return;
     setState(() {
@@ -577,7 +579,7 @@ class _HomeScreenState extends State<HomeScreen>
                           date: _dateLong(_challenge!.eventDate),
                           place: _challenge!.address ?? _challenge!.region,
                           players: _challenge!.categories.fold<int>(0, (n, c) => n + c.enrolledCount),
-                          chip: _challenge!.categories.any((c) => c.isEnrolled) ? "Inscrito" : "En inscripción",
+                          chip: "Inscrito",
                           onTap: () async {
                             await Navigator.pushNamed(context, AppRoutes.tournamentDetail, arguments: _challenge);
                             if (mounted) _load(silent: true);
