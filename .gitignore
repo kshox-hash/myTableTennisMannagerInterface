@@ -44,3 +44,5 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Compilados de Android (los genera Gradle).
+/android/build/

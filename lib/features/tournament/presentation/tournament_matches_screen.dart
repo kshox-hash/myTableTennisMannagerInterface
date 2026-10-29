@@ -12,7 +12,6 @@ import "package:myttmi/core/constants/match_status_labels.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/app_toast.dart";
 import "package:myttmi/core/ui/glass_card.dart";
-import "package:myttmi/core/ui/identicon.dart";
 import "package:myttmi/core/ui/list_states.dart";
 import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/core/ui/top_header.dart";

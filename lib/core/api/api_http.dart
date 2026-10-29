@@ -1,7 +1,9 @@
 import "dart:async";
+import "dart:convert";
 
 import "package:flutter/scheduler.dart";
 import "package:http/http.dart" as http;
+import "package:shared_preferences/shared_preferences.dart";
 
 /// Cliente HTTP compartido por todas las APIs de la app.
 ///
@@ -18,17 +20,28 @@ class _CountingClient extends http.BaseClient {
   final http.Client _inner;
   _CountingClient(this._inner);
 
-  // Tope para que llegue la respuesta. Antes solo 4 de las 11 APIs tenían
-  // .timeout(): con mala señal (un gimnasio lleno) el resto quedaba en el
-  // esqueleto para siempre, sin error ni "Reintentar". 30 s deja margen
-  // si el servidor de Render está despertando.
-  static const _timeout = Duration(seconds: 30);
+  // Tope para que llegue la respuesta: sin señal (un gimnasio lleno) la
+  // pantalla muestra "Reintentar" en vez de quedar en el esqueleto. Eran
+  // 30 s para cuando Render se dormía; con el plan pagado no se duerme.
+  static const _timeout = Duration(seconds: 15);
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    final cacheable = request.method == "GET" && ResponseCache._storing;
+    if (cacheable && ResponseCache._reading) {
+      final hit = ResponseCache._get(request);
+      if (hit != null) {
+        return http.StreamedResponse(Stream.value(hit), 200, request: request, headers: const {"content-type": "application/json; charset=utf-8"});
+      }
+    }
     ApiActivity._started();
     try {
-      return await _inner.send(request).timeout(_timeout);
+      final res = await _inner.send(request).timeout(_timeout);
+      if (!cacheable || res.statusCode != 200) return res;
+      final bytes = await res.stream.toBytes();
+      ResponseCache._put(request, bytes);
+      return http.StreamedResponse(Stream.value(bytes), res.statusCode,
+          request: request, headers: res.headers, reasonPhrase: res.reasonPhrase, contentLength: bytes.length);
     } finally {
       ApiActivity._finished();
     }
@@ -36,6 +49,68 @@ class _CountingClient extends http.BaseClient {
 
   @override
   void close() => _inner.close();
+}
+
+/// Últimas respuestas del Inicio guardadas en el teléfono. Al abrir la app
+/// el Inicio se arma al tiro con lo de la vez anterior ([read]) y después
+/// se actualiza con el servidor en silencio ([store]); antes esperaba dos
+/// vueltas seguidas a Render (~0,25 s cada una, más la conexión) detrás de
+/// la pantalla de carga. Solo se guardan los GET 200 hechos dentro de
+/// [store]/[read]; al cerrar sesión se borran (SessionStorage.clearAll
+/// limpia todas las preferencias). La clave incluye el token: otra cuenta
+/// en el mismo teléfono no ve lo de la anterior.
+class ResponseCache {
+  ResponseCache._();
+
+  static const _prefix = "http_cache:";
+  static SharedPreferences? _prefs;
+
+  static bool get _storing => Zone.current[#responseCacheStore] == true;
+  static bool get _reading => Zone.current[#responseCacheRead] == true;
+
+  /// Hay que llamarlo al arrancar (main), antes de usar [read].
+  static Future<void> init() async {
+    try {
+      _prefs = await SharedPreferences.getInstance();
+    } catch (_) {}
+  }
+
+  /// Pide al servidor y guarda las respuestas para la próxima vez.
+  static Future<T> store<T>(Future<T> Function() body) => runZoned(body, zoneValues: {#responseCacheStore: true});
+
+  /// Responde con lo guardado (sin red) lo que haya; lo que no, al servidor.
+  static Future<T> read<T>(Future<T> Function() body) => runZoned(body, zoneValues: {#responseCacheStore: true, #responseCacheRead: true});
+
+  /// Cuántas respuestas salieron de lo guardado (si sube durante [read], lo
+  /// que se mostró es de la vez anterior y hay que actualizar).
+  static int hits = 0;
+
+  static String _key(http.BaseRequest r) => "$_prefix${_fnv(r.headers["Authorization"] ?? "")}:${r.url}";
+
+  // Hash fijo (FNV-1a de 32 bits): el mismo token da la misma clave en cada
+  // arranque de la app, cosa que String.hashCode no promete.
+  static String _fnv(String s) {
+    var h = 0x811c9dc5;
+    for (final c in utf8.encode(s)) {
+      h = ((h ^ c) * 0x01000193) & 0xffffffff;
+    }
+    return h.toRadixString(16);
+  }
+
+  static List<int>? _get(http.BaseRequest r) {
+    final v = _prefs?.getString(_key(r));
+    if (v == null) return null;
+    hits++;
+    return utf8.encode(v);
+  }
+
+  static void _put(http.BaseRequest r, List<int> bytes) {
+    final p = _prefs;
+    if (p == null) return;
+    try {
+      p.setString(_key(r), utf8.decode(bytes));
+    } catch (_) {}
+  }
 }
 
 class ApiActivity {

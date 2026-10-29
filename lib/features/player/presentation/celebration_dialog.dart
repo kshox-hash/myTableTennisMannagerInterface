@@ -9,6 +9,8 @@ import "package:myttmi/core/constants/app_config.dart";
 import "package:myttmi/core/helpers/endpoints.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
+import "package:myttmi/core/ui/share_card.dart";
+import "package:myttmi/features/shell/app_shell.dart";
 
 /// Ventana de celebración: cuando terminan categorías en las que el jugador
 /// estaba inscrito, al abrir la app le aparece una sola ventana con sus
@@ -525,6 +527,27 @@ class _ResultPage extends StatelessWidget {
               fontSize: 12,
             ),
           ),
+          // Podio: compartir la imagen del logro (historias, WhatsApp), la
+          // misma que en Logros.
+          if (podiumPlace && position > 0) ...[
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: () => ShareImage.share(
+                context,
+                ShareCard(
+                  kicker: position == 1 ? "¡CAMPEÓN!" : position == 2 ? "¡SUBCAMPEÓN!" : "¡3ER LUGAR!",
+                  accent: _tone[position] ?? _gold,
+                  icon: Icons.emoji_events_rounded,
+                  headline: (data["category_label"] ?? "").toString(),
+                  tournament: (data["tournament_name"] ?? "").toString(),
+                  playerName: CurrentUser.me.value?.displayName ?? "",
+                ),
+                text: "$title en ${data["tournament_name"] ?? ""} · MyTTM",
+              ),
+              icon: const Icon(Icons.ios_share_rounded, size: 18, color: AppColors.scorifyMint),
+              label: const Text("Compartir", style: TextStyle(color: AppColors.scorifyMint, fontWeight: FontWeight.w700)),
+            ),
+          ],
           if (podium.isNotEmpty) ...[
             const SizedBox(height: 18),
             Row(

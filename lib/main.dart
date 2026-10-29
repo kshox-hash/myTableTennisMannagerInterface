@@ -1,3 +1,6 @@
+import "package:myttmi/core/ui/ui_sound.dart";
+import "package:myttmi/core/ui/now_playing_banner.dart";
+import "package:myttmi/core/ui/background_music.dart";
 import "package:myttmi/core/ui/panel_style.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -5,6 +8,7 @@ import "package:myttmi/core/navigation/deep_links.dart";
 import "package:myttmi/core/push/push_service.dart";
 import "package:myttmi/core/monitoring.dart";
 import "package:myttmi/core/favorites/favorite_matches.dart";
+import "package:myttmi/core/api/api_http.dart";
 import "package:myttmi/features/shell/splash_gate.dart";
 import "package:myttmi/routes/app_routes.dart";
 
@@ -13,6 +17,8 @@ Future<void> main() async {
   await PushService.init();
   await Monitoring.init();
   await FavoriteMatches.load();
+  await ResponseCache.init();
+  await UiSound.init();
   DeepLinks.init();
   runApp(const MyApp());
 }
@@ -66,10 +72,15 @@ class MyApp extends StatelessWidget {
         final mq = MediaQuery.of(context);
         return MediaQuery(
           data: mq.copyWith(textScaler: mq.textScaler.clamp(minScaleFactor: 0.9, maxScaleFactor: 1.25)),
-          child: child!,
+          // Encima de todo: la barra "Sonando" de la música de fondo.
+          child: Listener(
+            // Cualquier toque reintenta la música si no había podido arrancar.
+            onPointerDown: (_) => BackgroundMusic.userGesture(),
+            child: Stack(fit: StackFit.expand, children: [child!, const NowPlayingBanner()]),
+          ),
         );
       },
-      navigatorObservers: Monitoring.observers,
+      navigatorObservers: [...Monitoring.observers, UiSoundNavigatorObserver()],
       onGenerateRoute: AppRoutes.onGenerateRoute,
       // "home" en vez de "initialRoute": un initialRoute con barras (ej.
       // "/splash") hace que Flutter arme el stack inicial dividiendo el

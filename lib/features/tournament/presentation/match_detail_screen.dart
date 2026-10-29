@@ -393,10 +393,6 @@ class _PlayerRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = isWinner
-        ? AppColors.scorifyButterfly
-        : AppColors.scorifyTextFaint;
-
     return Row(
       children: [
         UserAvatar(userId: id, size: 40),

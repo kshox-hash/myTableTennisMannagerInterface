@@ -1,3 +1,5 @@
+import 'package:myttmi/core/ui/ui_sound.dart';
+import 'package:myttmi/core/ui/background_music.dart';
 import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:flutter/foundation.dart';
 import 'package:myttmi/core/app_update.dart';
@@ -101,6 +103,30 @@ class _AppShellState extends State<AppShell>
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 10),
+            // Sonido al tocar botones, pestañas y al volver atrás.
+            ValueListenableBuilder<bool>(
+              valueListenable: UiSound.enabled,
+              builder: (_, on, __) => SwitchListTile(
+                secondary: Icon(on ? Icons.volume_up_rounded : Icons.volume_off_rounded, color: AppColors.scorifyText),
+                title: const Text("Sonido al tocar", style: TextStyle(color: AppColors.scorifyText)),
+                activeThumbColor: AppColors.scorifyMint,
+                value: on,
+                onChanged: (v) async {
+                  await UiSound.setEnabled(v);
+                  if (v) UiSound.tap();
+                },
+              ),
+            ),
+            ValueListenableBuilder<bool>(
+              valueListenable: BackgroundMusic.enabled,
+              builder: (_, on, __) => SwitchListTile(
+                secondary: Icon(on ? Icons.music_note_rounded : Icons.music_off_rounded, color: AppColors.scorifyText),
+                title: const Text("Música", style: TextStyle(color: AppColors.scorifyText)),
+                activeThumbColor: AppColors.scorifyMint,
+                value: on,
+                onChanged: BackgroundMusic.setEnabled,
+              ),
+            ),
             ListTile(
               leading: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.scorifyText),
               title: const Text("Arbitrar con QR", style: TextStyle(color: AppColors.scorifyText)),
@@ -214,6 +240,7 @@ class _AppShellState extends State<AppShell>
 
   void _switchTab(int index, {bool link = false}) {
     if (index == _index) return;
+    UiSound.tap();
     final from = _index;
     // Al Inicio no se "vuelve": es la raíz.
     setState(() => _returnTab = link && index != 0 ? from : null);
@@ -247,6 +274,8 @@ class _AppShellState extends State<AppShell>
     });
     // Avisos tipo Facebook de las notificaciones nuevas (abajo a la izquierda).
     NotificationPopups.start();
+    // Música de fondo mientras hay sesión.
+    BackgroundMusic.start();
     // Posición final de un campeonato recién terminado (aparece sola).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(const Duration(milliseconds: 1200), () {
@@ -270,6 +299,7 @@ class _AppShellState extends State<AppShell>
     if (ToastLayout.shellRoute == ModalRoute.of(context)) ToastLayout.shellRoute = null;
     DeepLinks.shellGone();
     NotificationPopups.stop();
+    BackgroundMusic.stop();
     _pulse.dispose();
     super.dispose();
   }
@@ -306,6 +336,7 @@ class _AppShellState extends State<AppShell>
         onLogout: _logout,
       ),
       body: PrismBackground(
+        image: _index == 0,
         child: SafeArea(
           child: FadeTransition(
             opacity: opacity,

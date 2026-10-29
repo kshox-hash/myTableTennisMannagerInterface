@@ -1,3 +1,5 @@
+import "dart:async";
+import "package:myttmi/core/api/api_http.dart";
 import "package:myttmi/features/player/presentation/celebration_dialog.dart";
 import 'package:myttmi/core/storage/session_storage.dart';
 import "package:myttmi/core/ui/panel_style.dart";
@@ -122,7 +124,17 @@ class _HomeScreenState extends State<HomeScreen>
   // quita recién cuando el Inicio tiene TODO, para que aparezca completo.
   bool _firstLoad = true;
 
+  /// Primera carga: con lo guardado de la vez anterior (al tiro, sin
+  /// esperar al servidor) y enseguida se actualiza en silencio. Después,
+  /// siempre del servidor (y se guarda para la próxima apertura).
   Future<void> _load({bool silent = false}) async {
+    if (!_firstLoad) return ResponseCache.store(_fetch);
+    final hitsBefore = ResponseCache.hits;
+    await ResponseCache.read(_fetch);
+    if (ResponseCache.hits > hitsBefore && mounted) unawaited(ResponseCache.store(_fetch));
+  }
+
+  Future<void> _fetch() async {
     try {
       // Lo que no depende del perfil arranca YA, en paralelo con él (antes
       // esperaba a que llegaran perfil + dashboard: dos vueltas al servidor
@@ -218,29 +230,6 @@ class _HomeScreenState extends State<HomeScreen>
     const days = ["Lun.", "Mar.", "Mié.", "Jue.", "Vie.", "Sáb.", "Dom."];
     const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
     return "${days[d.weekday - 1]} ${d.day} ${months[d.month - 1]}";
-  }
-
-  /// "Buenos días / Buenas tardes / Buenas noches, Ignacio 👋".
-  String? _greeting() {
-    final p = _profile;
-    if (p == null) return null;
-    final first = ((p.firstName ?? "").trim().isNotEmpty ? p.firstName! : p.displayName).trim().split(RegExp(r"\s+")).first;
-    final h = DateTime.now().hour;
-    final hi = h < 12 ? "Buenos días" : h < 20 ? "Buenas tardes" : "Buenas noches";
-    return "$hi, $first 👋";
-  }
-
-  /// Frase del momento bajo el saludo.
-  String _contextLine() {
-    final nm = _dashboard?.nextMatch;
-    if (nm != null) {
-      if (nm.tableNumber != null) return "¡Te toca! Ve a la mesa ${nm.tableNumber}";
-      final at = nm.scheduledStartAt;
-      if (at != null && DateUtils.isSameDay(at, DateTime.now())) return "Tienes un partido hoy";
-      return "Tienes un partido por jugar";
-    }
-    if (_mine.isNotEmpty) return _mine.length == 1 ? "Estás en 1 campeonato" : "Estás en ${_mine.length} campeonatos";
-    return "Busca tu próximo campeonato";
   }
 
   /// "Domingo, 1 Jun 2025".

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
-/// Fondo de toda la app: hexágonos en líneas grises con semitono arriba y
-/// abajo (assets/images/app_bg.jpg, 1080 px). Se decodifica una sola vez al
-/// ancho de la pantalla y queda en caché; el RepaintBoundary evita
-/// repintarlo al hacer scroll encima. Debajo, el degradado gris por si la
-/// imagen todavía no cargó.
+/// Fondo de la app: degradado gris. Con [image] (solo el Inicio) encima va
+/// la imagen geométrica (assets/images/app_bg.jpg, 1080 px); en las demás
+/// páginas se veía recargada. Se decodifica una sola vez al ancho de la
+/// pantalla y queda en caché; el RepaintBoundary evita repintarla al hacer
+/// scroll encima.
 class PrismBackground extends StatelessWidget {
   final Widget child;
-  const PrismBackground({super.key, required this.child});
+  final bool image;
+  const PrismBackground({super.key, required this.child, this.image = false});
 
   static const _gradient = LinearGradient(
     begin: Alignment.topCenter,
@@ -25,13 +26,17 @@ class PrismBackground extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          RepaintBoundary(
-            child: Image(
-              image: ResizeImage(const AssetImage("assets/images/app_bg.jpg"), width: (size.width * dpr).round().clamp(360, 1080)),
-              fit: BoxFit.cover,
-              gaplessPlayback: true,
+          if (image)
+            RepaintBoundary(
+              child: Image(
+                image: ResizeImage(
+                  const AssetImage("assets/images/app_bg.jpg"),
+                  width: (size.width * dpr).round().clamp(360, 1080),
+                ),
+                fit: BoxFit.cover,
+                gaplessPlayback: true,
+              ),
             ),
-          ),
           RepaintBoundary(child: child),
         ],
       ),

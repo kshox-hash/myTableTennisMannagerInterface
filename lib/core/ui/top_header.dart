@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/ui_sound.dart';
 import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/features/notifications/presentation/notifications_screen.dart';
@@ -154,7 +155,10 @@ class HeaderIconButton extends StatelessWidget {
       color: AppColors.scorifyInput,
       shape: const CircleBorder(),
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          UiSound.tap();
+          onTap();
+        },
         customBorder: const CircleBorder(),
         child: SizedBox(width: 40, height: 40, child: Icon(icon, color: AppColors.scorifyText, size: 21)),
       ),

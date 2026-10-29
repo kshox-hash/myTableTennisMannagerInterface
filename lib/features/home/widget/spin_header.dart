@@ -1,3 +1,4 @@
+import 'package:myttmi/core/ui/ui_sound.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/features/shell/app_shell.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
@@ -78,7 +79,10 @@ class _IconButton extends StatelessWidget {
           color: AppColors.scorifyInput,
           shape: const CircleBorder(),
           child: InkWell(
-            onTap: onTap,
+            onTap: () {
+              UiSound.tap();
+              onTap();
+            },
             customBorder: const CircleBorder(),
             child: SizedBox(
               width: 42,

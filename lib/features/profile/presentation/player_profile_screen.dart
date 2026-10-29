@@ -1,4 +1,7 @@
 import 'package:myttmi/core/ui/section_card.dart';
+import "package:myttmi/core/storage/session_storage.dart";
+import "package:myttmi/core/ui/panel_style.dart";
+import "package:myttmi/routes/app_routes.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/match_list.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
@@ -31,22 +34,28 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
   late Future<PublicPlayerProfile> _profileFuture;
   late Future<List<PlayerMatchHistoryItem>> _historyFuture;
   late Future<List<PlayerAchievement>> _achievementsFuture;
+  // Yo (para el "Tú vs …"); null mientras se lee la sesión.
+  String? _myId;
+
+  // 200 partidos: alcanza para encontrar los enfrentamientos contigo; el
+  // historial de abajo sigue mostrando los últimos 15.
+  static const _historyLimit = 200;
 
   @override
   void initState() {
     super.initState();
     _profileFuture = _profileApi.getPublicProfile(widget.userId);
-    _historyFuture = _playerApi.getPlayerMatchHistory(widget.userId, limit: 15);
+    _historyFuture = _playerApi.getPlayerMatchHistory(widget.userId, limit: _historyLimit);
     _achievementsFuture = _playerApi.getPlayerAchievements(widget.userId);
+    SessionStorage().getUserId().then((id) {
+      if (mounted) setState(() => _myId = id);
+    });
   }
 
   void _reload() {
     setState(() {
       _profileFuture = _profileApi.getPublicProfile(widget.userId);
-      _historyFuture = _playerApi.getPlayerMatchHistory(
-        widget.userId,
-        limit: 15,
-      );
+      _historyFuture = _playerApi.getPlayerMatchHistory(widget.userId, limit: _historyLimit);
       _achievementsFuture = _playerApi.getPlayerAchievements(widget.userId);
     });
   }
@@ -124,6 +133,21 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                             ],
                           ),
                           const SizedBox(height: 20),
+                          // Tú vs este jugador (solo si ya se enfrentaron).
+                          if (_myId != null && _myId != widget.userId)
+                            FutureBuilder<List<PlayerMatchHistoryItem>>(
+                              future: _historyFuture,
+                              builder: (context, hSnap) {
+                                final vs = (hSnap.data ?? const <PlayerMatchHistoryItem>[])
+                                    .where((m) => (m.status == "played" || m.status == "walkover") && (m.player1Id == _myId || m.player2Id == _myId))
+                                    .toList();
+                                if (vs.isEmpty) return const SizedBox.shrink();
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 20),
+                                  child: _HeadToHead(matches: vs, myId: _myId!, rivalName: p.displayName),
+                                );
+                              },
+                            ),
                           FutureBuilder<List<PlayerAchievement>>(
                             future: _achievementsFuture,
                             builder: (context, aSnap) => AchievementsCard(
@@ -149,7 +173,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                               // Desde el punto de vista de este jugador (no "Tú").
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: matchesByMonth(context, items, widget.userId),
+                                children: matchesByMonth(context, items.take(15).toList(), widget.userId),
                               );
                             },
                           ),
@@ -180,6 +204,116 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(label, style: AppTypography.caption),
         ],
+      ),
+    );
+  }
+}
+
+/// "Tú vs Juan": cuántas le ganaste y cuántas te ganó, y los últimos
+/// enfrentamientos (del más reciente al más viejo; tocar abre el partido).
+class _HeadToHead extends StatelessWidget {
+  final List<PlayerMatchHistoryItem> matches;
+  final String myId;
+  final String rivalName;
+  const _HeadToHead({required this.matches, required this.myId, required this.rivalName});
+
+  @override
+  Widget build(BuildContext context) {
+    final mine = matches.where((m) => m.winnerId == myId).length;
+    final theirs = matches.length - mine;
+    final first = rivalName.trim().split(RegExp(r"\s+")).first;
+    final lead = mine == theirs
+        ? "Van empatados"
+        : mine > theirs
+            ? "Le llevas la delantera"
+            : "$first te lleva la delantera";
+
+    return SectionCard(
+      title: "Tú vs $first",
+      icon: Icons.compare_arrows_rounded,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              _Side(value: mine, label: "Tú", color: AppColors.scorifyButterfly),
+              Expanded(
+                child: Column(
+                  children: [
+                    Text(lead, textAlign: TextAlign.center, style: AppTypography.bodyText.copyWith(fontSize: 13.5, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 2),
+                    Text(
+                      matches.length == 1 ? "1 partido jugado" : "${matches.length} partidos jugados",
+                      style: AppTypography.bodyMuted.copyWith(fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              _Side(value: theirs, label: first, color: AppColors.scorifyNegative),
+            ],
+          ),
+          const SizedBox(height: 10),
+          const Divider(height: 1, color: Panel.fieldBorder),
+          for (final m in matches.take(3)) _VsRow(match: m, myId: myId),
+        ],
+      ),
+    );
+  }
+}
+
+class _Side extends StatelessWidget {
+  final int value;
+  final String label;
+  final Color color;
+  const _Side({required this.value, required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: 70,
+        child: Column(
+          children: [
+            Text("$value", style: TextStyle(fontFamily: AppTypography.display, fontSize: 40, height: 1, fontWeight: FontWeight.w600, color: color)),
+            Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.bodyMuted.copyWith(fontSize: 12)),
+          ],
+        ),
+      );
+}
+
+class _VsRow extends StatelessWidget {
+  final PlayerMatchHistoryItem match;
+  final String myId;
+  const _VsRow({required this.match, required this.myId});
+
+  @override
+  Widget build(BuildContext context) {
+    final m = match;
+    final iAmP1 = m.player1Id == myId;
+    final won = m.winnerId == myId;
+    final c = won ? AppColors.scorifyButterfly : AppColors.scorifyNegative;
+    return InkWell(
+      onTap: () => Navigator.pushNamed(context, AppRoutes.matchDetail, arguments: {"matchType": m.matchType, "matchId": m.idMatch}),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Container(
+              width: 26,
+              height: 26,
+              alignment: Alignment.center,
+              decoration: panelBox(color: c),
+              child: Text(won ? "G" : "P", style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w700, color: c)),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(m.tournamentName, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.bodyMuted.copyWith(fontSize: 12.5)),
+            ),
+            Text(
+              "${iAmP1 ? m.setsPlayer1 : m.setsPlayer2}-${iAmP1 ? m.setsPlayer2 : m.setsPlayer1}",
+              style: const TextStyle(fontFamily: AppTypography.display, fontSize: 20, height: 1, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+            ),
+          ],
+        ),
       ),
     );
   }

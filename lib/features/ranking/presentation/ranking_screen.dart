@@ -282,6 +282,10 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
                       "Si juegas varias categorías de un mismo campeonato, cuenta solo tu mejor resultado.",
                       style: AppTypography.bodyMuted.copyWith(fontSize: 13, height: 1.45),
                     ),
+                    if (_tournaments.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Text(_basisText, style: AppTypography.bodyMuted.copyWith(fontSize: 13, height: 1.45, color: AppColors.scorifyText)),
+                    ],
                     const SizedBox(height: 14),
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -335,71 +339,56 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
             TopHeader(title: "Ranking", subtitle: "${_organizerId == null ? "Ranking MyTTM" : "Ranking de $_scopeName"} · últimos 12 meses", showBack: false),
             const SizedBox(height: 10),
           ],
-          // Qué ranking es (antes no se explicaba en ningún lado).
-          InkWell(
-            onTap: () => _showHowItWorks(context),
-            borderRadius: BorderRadius.circular(Panel.radius),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
-              decoration: panelBox(),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline_rounded, size: 18, color: AppColors.scorifyMint),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      "Puntos de los campeonatos puntuables de toda la plataforma, según la ronda a la que llegaste en la llave.",
-                      style: AppTypography.bodyMuted.copyWith(fontSize: 12, height: 1.35),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text("¿Cómo se calcula?", style: AppTypography.bodyMuted.copyWith(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.scorifyMint)),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
+          // Cabecera compacta: qué ranking (si hay más de uno) y el buscador
+          // con "?" al lado. La explicación larga y en qué campeonatos se
+          // basa van en el panel del "?" (antes, dos bloques de texto acá
+          // rompían el diseño).
           if (_scopes.isNotEmpty) ...[
-            Row(
-              children: [
-                Expanded(
-                  child: FilterDropdown(
-                    icon: Icons.leaderboard_rounded,
-                    label: _scopeName,
-                    onTap: _pickScope,
-                  ),
-                ),
-              ],
+            FilterDropdown(
+              icon: Icons.leaderboard_rounded,
+              label: _scopeName,
+              onTap: _pickScope,
             ),
             const SizedBox(height: 8),
           ],
-          if (_tournaments.isNotEmpty) ...[
-            Text(
-              _basisText,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.bodyMuted.copyWith(fontSize: 12, height: 1.35),
-            ),
-            const SizedBox(height: 10),
-          ],
-          TextField(
-            controller: _search,
-            onChanged: (_) => setState(() {}),
-            style: AppTypography.bodyText,
-            decoration: InputDecoration(
-              hintText: "Buscar jugador o club",
-              hintStyle: AppTypography.bodyMuted,
-              isDense: true,
-              filled: true,
-              fillColor: AppColors.scorifyInput,
-              contentPadding: const EdgeInsets.symmetric(vertical: 13),
-              prefixIcon: const Icon(Icons.search_rounded, color: AppColors.scorifyTextMuted),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(Panel.radius), borderSide: BorderSide.none),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(Panel.radius),
-                borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.4),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _search,
+                  onChanged: (_) => setState(() {}),
+                  style: AppTypography.bodyText,
+                  decoration: InputDecoration(
+                    hintText: "Buscar jugador o club",
+                    hintStyle: AppTypography.bodyMuted,
+                    isDense: true,
+                    filled: true,
+                    fillColor: AppColors.scorifyInput,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 13),
+                    prefixIcon: const Icon(Icons.search_rounded, color: AppColors.scorifyTextMuted),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(Panel.radius), borderSide: BorderSide.none),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(Panel.radius),
+                      borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.4),
+                    ),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              Tooltip(
+                message: "¿Cómo se calcula?",
+                child: InkWell(
+                  onTap: () => _showHowItWorks(context),
+                  borderRadius: BorderRadius.circular(Panel.radius),
+                  child: Ink(
+                    width: 46,
+                    height: 46,
+                    decoration: panelBox(),
+                    child: const Icon(Icons.help_outline_rounded, size: 21, color: AppColors.scorifyMint),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 14),
         ],
@@ -427,7 +416,7 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
-                                        query.isEmpty ? "El ranking llega pronto. Estamos definiendo la tabla oficial de puntos por nivel; mientras tanto, tus números están en Estadísticas." : "Nadie coincide con esa búsqueda.",
+                                        query.isEmpty ? "Todavía no hay puntos en este ranking. Aparecen cuando termina un campeonato puntuable; mientras, tus números están en Mi rendimiento." : "Nadie coincide con esa búsqueda.",
                                         style: _muted,
                                       ),
                                     ),
