@@ -1,3 +1,4 @@
+import "package:myttmi/features/player/presentation/celebration_dialog.dart";
 import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/section_card.dart";
 import "package:myttmi/core/ui/share_card.dart";
@@ -56,7 +57,11 @@ class AchievementRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final a = achievement;
     final date = _shortDate(a.eventDate);
-    return Padding(
+    // Tocar un podio vuelve a abrir el resumen de ese campeonato.
+    return InkWell(
+      onTap: () => Celebrations.showForCategory(context, a.idCategory),
+      borderRadius: BorderRadius.circular(Panel.radius),
+      child: Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
@@ -102,6 +107,7 @@ class AchievementRow extends StatelessWidget {
             ),
         ],
       ),
+    ),
     );
   }
 }

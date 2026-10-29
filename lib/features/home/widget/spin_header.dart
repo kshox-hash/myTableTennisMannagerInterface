@@ -1,4 +1,3 @@
-import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/features/shell/app_shell.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
@@ -99,7 +98,7 @@ class _IconButton extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: AppColors.scorifyBadge,
-                borderRadius: BorderRadius.circular(Panel.buttonRadius),
+                borderRadius: BorderRadius.circular(99), // contador redondo, igual que en las demás pantallas
                 border: Border.all(color: AppColors.scorifyCardFill, width: 2),
               ),
               child: Text(

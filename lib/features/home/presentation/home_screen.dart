@@ -579,6 +579,12 @@ class _HomeScreenState extends State<HomeScreen>
                         ],
                         const SizedBox(height: 12),
                       ],
+                    ]),
+                    // El espacio que sobra va entre los paneles y los accesos:
+                    // estos quedan anclados abajo y la pantalla se ve llena
+                    // (antes todo quedaba arriba con un hueco al final).
+                    const Spacer(),
+                    ...staggerChildren([
                       IntrinsicHeight(
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,

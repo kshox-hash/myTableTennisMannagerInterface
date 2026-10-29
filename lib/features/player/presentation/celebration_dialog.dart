@@ -63,23 +63,7 @@ class Celebrations {
         _seen.add(c["id_notification"].toString());
       }
       _open = true;
-      await showGeneralDialog<void>(
-        context: context,
-        barrierDismissible: true,
-        barrierLabel: "Cerrar",
-        barrierColor: Colors.black.withValues(alpha: 0.7),
-        transitionDuration: const Duration(milliseconds: 320),
-        transitionBuilder: (_, anim, __, child) => FadeTransition(
-          opacity: anim,
-          child: ScaleTransition(
-            scale: Tween(begin: 0.94, end: 1.0).animate(
-              CurvedAnimation(parent: anim, curve: Curves.easeOutCubic),
-            ),
-            child: child,
-          ),
-        ),
-        pageBuilder: (_, __, ___) => _CelebrationDialog(items: data),
-      );
+      await _present(context, data);
       _open = false;
       // Cerrar de cualquier forma marca todas como vistas.
       for (final c in data) {
@@ -89,6 +73,50 @@ class Celebrations {
       // Sin conexión o error: no se muestra nada.
     } finally {
       _checking = false;
+      _open = false;
+    }
+  }
+
+  static Future<void> _present(BuildContext context, List<Map<String, dynamic>> items) {
+    return showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "Cerrar",
+      barrierColor: Colors.black.withValues(alpha: 0.7),
+      transitionDuration: const Duration(milliseconds: 320),
+      transitionBuilder: (_, anim, __, child) => FadeTransition(
+        opacity: anim,
+        child: ScaleTransition(
+          scale: Tween(begin: 0.94, end: 1.0).animate(
+            CurvedAnimation(parent: anim, curve: Curves.easeOutCubic),
+          ),
+          child: child,
+        ),
+      ),
+      pageBuilder: (_, __, ___) => _CelebrationDialog(items: items),
+    );
+  }
+
+  /// Vuelve a abrir el resumen de una categoría terminada aunque ya se haya
+  /// visto (desde "Logros" o la notificación "¡Eres campeón!"): el aviso
+  /// automático sale una sola vez por cuenta, en la web o en la app.
+  static Future<void> showForCategory(BuildContext context, String categoryId) async {
+    if (_open) return;
+    try {
+      final res = await apiHttp
+          .get(
+            Uri.parse("${AppConfig.baseUrl}${Endpoints.playerCelebrations}/category/$categoryId"),
+            headers: await _headers(),
+          )
+          .timeout(const Duration(seconds: 20));
+      if (res.statusCode != 200 || !context.mounted) return;
+      final data = (jsonDecode(res.body) as Map<String, dynamic>)["data"];
+      if (data is! Map<String, dynamic>) return;
+      _open = true;
+      await _present(context, [data]);
+    } catch (_) {
+      // Sin conexión o error: no se muestra nada.
+    } finally {
       _open = false;
     }
   }

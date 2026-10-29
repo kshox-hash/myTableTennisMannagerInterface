@@ -1,3 +1,4 @@
+import "package:myttmi/features/player/presentation/celebration_dialog.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/features/tournament/api/tournament_api.dart";
 import "package:myttmi/features/notifications/models/notification_model.dart";
@@ -8,6 +9,11 @@ import "package:myttmi/features/referee/referee_screen.dart";
 /// Al tocar una notificación (en la lista o en el aviso emergente): lleva a
 /// donde está la acción — el partido, la categoría o el perfil (club).
 void openNotification(NavigatorState nav, AppNotification n) {
+  // "¡Eres campeón!" / posición final: abre el resumen con el podio.
+  if (n.type == "final_position" && n.idCategory != null) {
+    Celebrations.showForCategory(nav.context, n.idCategory!);
+    return;
+  }
   // "Te toca arbitrar": directo a la pantalla para anotar.
   if (n.type == "referee_assigned" && n.idMatch != null && n.matchType != null) {
     nav.push(CyberPageRoute(builder: (_) => RefereeScreen(matchType: n.matchType!, matchId: n.idMatch!)));
