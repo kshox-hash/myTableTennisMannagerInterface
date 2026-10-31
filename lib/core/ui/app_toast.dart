@@ -9,8 +9,8 @@ import "package:myttmi/core/navigation/deep_links.dart";
 
 /// Aviso de confirmación (✓ verde) o error (✕ rojo) de una acción: un
 /// cuadro que entra desde la izquierda, abajo, sobre la barra de navegación,
-/// y se apila si hay varios (el más nuevo abajo). Las notificaciones no usan
-/// esto: su aviso es la push del teléfono.
+/// y se apila si hay varios (el más nuevo abajo). Las notificaciones lo usan
+/// solo con la app abierta, cuando el teléfono no muestra la push.
 
 /// Dónde está la barra de navegación de abajo: AppShell se registra acá y los
 /// avisos suben por encima de ella mientras sus pestañas estén al frente.

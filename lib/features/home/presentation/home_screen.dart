@@ -136,6 +136,22 @@ class _HomeScreenState extends State<HomeScreen>
         await _loadDashboard();
       });
     });
+    NotificationPopups.unread.addListener(_onUnreadChanged);
+  }
+
+  // Llegó un aviso nuevo (te tocó arbitrar, tu mesa): el Inicio se pone al día
+  // sin esperar a que vuelvas a la pestaña. La campana se revisa cada 20 s,
+  // así funciona también si la push no llega.
+  int _lastUnread = 0;
+  void _onUnreadChanged() {
+    final now = NotificationPopups.unread.value;
+    final grew = now > _lastUnread;
+    _lastUnread = now;
+    if (!grew || !mounted || _firstLoad) return;
+    ResponseCache.store(() async {
+      await _loadReferee();
+      await _loadDashboard();
+    });
   }
 
   Future<void> _loadDashboard() async {
@@ -152,6 +168,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void dispose() {
     _liveTimer?.cancel();
+    NotificationPopups.unread.removeListener(_onUnreadChanged);
     super.dispose();
   }
 

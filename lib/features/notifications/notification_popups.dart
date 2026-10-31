@@ -6,8 +6,8 @@ import "package:myttmi/features/notifications/api/notifications_api.dart";
 /// Número de notificaciones sin leer para la campana del Inicio, revisado
 /// cada 20 s mientras la app está abierta (y al instante si llega un push).
 ///
-/// Ya no muestra cuadros emergentes: el aviso de una notificación es la push
-/// del teléfono (arriba). Con los dos salían dos avisos por lo mismo.
+/// No muestra cuadros: el aviso es la push del teléfono o, con la app abierta,
+/// el cuadro de PushService.
 class NotificationPopups {
   NotificationPopups._();
 

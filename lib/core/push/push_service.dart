@@ -12,6 +12,7 @@ import "package:myttmi/core/constants/app_config.dart";
 import "package:myttmi/core/helpers/endpoints.dart";
 import "package:myttmi/core/navigation/deep_links.dart";
 import "package:myttmi/core/storage/session_storage.dart";
+import "package:myttmi/core/ui/app_toast.dart";
 import "package:myttmi/features/notifications/notification_popups.dart";
 
 /// Notificaciones push (Firebase Cloud Messaging).
@@ -138,9 +139,12 @@ class PushService {
   }
 
   static void _onForeground(RemoteMessage msg) {
-    // Con la app abierta solo se actualiza el número de la campana: el aviso
-    // es la push (antes además salía un cuadro abajo: dos avisos por lo mismo).
+    // Con la app abierta el teléfono no muestra la push: sin este cuadro,
+    // "Te toca arbitrar" o "Tu mesa" solo subían el número de la campana.
     NotificationPopups.checkNow();
+    final n = msg.notification;
+    if (n == null || (n.title ?? "").isEmpty) return;
+    PopupStack.show(title: n.title!, body: n.body, icon: Icons.notifications_rounded, onTap: () => _onTap(msg));
   }
 
   static void _onTap(RemoteMessage msg) {
