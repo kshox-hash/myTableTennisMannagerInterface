@@ -123,15 +123,28 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     _load();
-    // "En vivo" se actualiza solo cada 30 s mientras miras el Inicio con un
-    // campeonato en juego (cada resultado que carga el organizador aparece
-    // sin tener que volver a entrar). Con la app de fondo u otra pestaña, no.
+    // "En vivo" y tu próximo partido se actualizan solos cada 30 s mientras
+    // miras el Inicio con un campeonato (cada resultado aparece sin tener que
+    // volver a entrar, y tu rival apenas se confirman los grupos, no recién al
+    // asignar la mesa). Con la app de fondo u otra pestaña, no.
     _liveTimer = Timer.periodic(const Duration(seconds: 30), (_) {
-      if (!mounted || _liveSummaries.isEmpty) return;
+      if (!mounted || (_liveSummaries.isEmpty && _mine.isEmpty)) return;
       if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) return;
       if ((AppShellScope.of(context)?.currentIndex ?? 0) != 0) return;
-      ResponseCache.store(_loadLiveSummary);
+      ResponseCache.store(() async {
+        await _loadLiveSummary();
+        await _loadDashboard();
+      });
     });
+  }
+
+  Future<void> _loadDashboard() async {
+    try {
+      final d = await _playerApi.getDashboard();
+      if (!mounted) return;
+      setState(() => _dashboard = d);
+      await _loadGroups();
+    } catch (_) {}
   }
 
   Timer? _liveTimer;

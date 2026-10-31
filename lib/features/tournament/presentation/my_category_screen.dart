@@ -11,7 +11,9 @@ import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/core/ui/section_header.dart";
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/player/api/player_api.dart";
+import "package:myttmi/features/player/models/bracket_view_model.dart";
 import "package:myttmi/features/player/models/player_category_view_model.dart";
+import "package:myttmi/features/tournament/widget/group_card.dart";
 import "package:myttmi/routes/app_routes.dart";
 
 const _playedStatuses = {"played", "walkover"};
@@ -20,10 +22,15 @@ class _CategoryData {
   final PlayerCategoryView view;
   final CategoryStandings generalStandings;
   final String? myUserId;
+
+  /// Fase de grupos para quien no juega esta categoría: todos los grupos
+  /// (sin esto, la pantalla decía que todavía no había grupos).
+  final List<GroupFullView> allGroups;
   _CategoryData({
     required this.view,
     required this.generalStandings,
     this.myUserId,
+    this.allGroups = const [],
   });
 }
 
@@ -67,10 +74,13 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
       _api.getCategoryStandings(widget.tournamentId, widget.categoryId),
       SessionStorage().getUserId(),
     ]);
+    final view = results[0] as PlayerCategoryView;
+    final showAllGroups = view.phase == "groups" && view.standings.isEmpty;
     return _CategoryData(
-      view: results[0] as PlayerCategoryView,
+      view: view,
       generalStandings: results[1] as CategoryStandings,
       myUserId: results[2] as String?,
+      allGroups: showAllGroups ? (await _api.getAllGroups(widget.tournamentId, widget.categoryId)).groups : const [],
     );
   }
 
@@ -166,7 +176,7 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                             .toList();
 
                         final isEmpty =
-                            generalStandings.isEmpty && allMatches.isEmpty;
+                            generalStandings.isEmpty && allMatches.isEmpty && data.allGroups.isEmpty;
 
                         final me = view.standings
                             .where((x) => x.idUser == data.myUserId)
@@ -225,6 +235,15 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                                   ),
                                 );
                               }),
+                            ],
+
+                            if (data.allGroups.isNotEmpty) ...[
+                              const _Section("Grupos"),
+                              for (final g in data.allGroups)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: GroupCard(group: g, myUserId: data.myUserId),
+                                ),
                             ],
 
                             if (generalStandings.isNotEmpty) ...[
