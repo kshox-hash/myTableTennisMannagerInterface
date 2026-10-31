@@ -30,7 +30,7 @@ class RankingApi {
   Map<String, String> _scope(String? organizerId, String copa) => {if (organizerId != null) "organizer": organizerId, "copa": copa};
 
   /// Ranking general, o el de un organizador (solo sus campeonatos).
-  Future<List<RankingEntry>> getGlobal({String? organizerId, String copa = "oro"}) async {
+  Future<List<RankingEntry>> getGlobal({String? organizerId, String copa = "general"}) async {
     final data = (await _get(Endpoints.ranking, _scope(organizerId, copa)) as List? ?? []).cast<Map<String, dynamic>>();
     return data.map(RankingEntry.fromJson).toList();
   }
@@ -43,13 +43,13 @@ class RankingApi {
   }
 
   /// Campeonatos que forman ese ranking.
-  Future<List<RankingTournament>> getTournaments({String? organizerId, String copa = "oro"}) async {
+  Future<List<RankingTournament>> getTournaments({String? organizerId, String copa = "general"}) async {
     final data = (await _get("${Endpoints.ranking}/tournaments", _scope(organizerId, copa)) as List? ?? []).cast<Map<String, dynamic>>();
     return data.map(RankingTournament.fromJson).toList();
   }
 
   /// De qué campeonatos salen los puntos de un jugador.
-  Future<List<RankingResult>> getBreakdown(String userId, {String? organizerId, String copa = "oro"}) async {
+  Future<List<RankingResult>> getBreakdown(String userId, {String? organizerId, String copa = "general"}) async {
     final data = (await _get("${Endpoints.ranking}/players/$userId/breakdown", _scope(organizerId, copa)) as List? ?? [])
         .cast<Map<String, dynamic>>();
     return data.map(RankingResult.fromJson).toList();

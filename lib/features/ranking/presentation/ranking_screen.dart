@@ -56,8 +56,8 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
   List<RankingEntry> _entries = [];
   // Ranking elegido: null = general; si no, el id del organizador.
   String? _organizerId;
-  // Oro y Plata son rankings separados.
-  String _copa = "oro";
+  // Tabla elegida: general (todo junto), oro o plata.
+  String _copa = "general";
   // Rankings que puedo elegir aparte del general (uno por organizador).
   List<RankingScope> _scopes = [];
   // Campeonatos que forman el ranking elegido.
@@ -304,7 +304,7 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      "Es el ranking general de MyTTM. Oro y Plata son tablas separadas: los puntos de una no suman en la otra, y el sembrado usa solo Oro. "
+                      "Es el ranking de MyTTM. General suma todas las categorías, con Plata a un cuarto de sus puntos; Oro y Plata muestran solo las posiciones de esa copa, con sus puntos completos. El sembrado no cuenta los puntos de Plata. "
                       "Suman solo los campeonatos que su organizador marcó como puntuables, terminados en los últimos 12 meses.\n\n"
                       "Los puntos se ganan por la ronda a la que llegas en la llave (la fase de grupos no da puntos; en grupo único cuenta tu puesto final). "
                       "Si juegas varias categorías de un mismo campeonato, cuenta solo tu mejor resultado.",
@@ -367,7 +367,7 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
             TopHeader(title: "Ranking", subtitle: "${_organizerId == null ? "Ranking MyTTM" : "Ranking de $_scopeName"} · últimos 12 meses", showBack: false),
             const SizedBox(height: 10),
           ],
-          Row(children: [_copaTab("oro", "🥇 Oro"), const SizedBox(width: 8), _copaTab("plata", "🥈 Plata")]),
+          Row(children: [_copaTab("general", "General"), const SizedBox(width: 8), _copaTab("oro", "🥇 Oro"), const SizedBox(width: 8), _copaTab("plata", "🥈 Plata")]),
           const SizedBox(height: 8),
           // Cabecera compacta: qué ranking (si hay más de uno) y el buscador
           // con "?" al lado. La explicación larga y en qué campeonatos se
