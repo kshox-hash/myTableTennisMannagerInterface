@@ -47,6 +47,16 @@ class LivePlayersScreen extends StatelessWidget {
                         ? const _Empty("Todavía no hay clasificados.")
                         : Column(children: dividedRows([for (final p in s.classified) _PlayerRow(person: p)])),
                   ),
+                  if (s.movedToSilver.isNotEmpty) ...[
+                    const SizedBox(height: 14),
+                    SectionCard(
+                      title: "Pasaron a Plata · ${s.movedToSilver.length}",
+                      icon: Icons.military_tech_rounded,
+                      titleColor: AppColors.scorifyMint,
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                      child: Column(children: dividedRows([for (final p in s.movedToSilver) _PlayerRow(person: p, showStage: false)])),
+                    ),
+                  ],
                   const SizedBox(height: 14),
                   SectionCard(
                     title: "Eliminados · ${s.eliminated.length}",
@@ -82,7 +92,8 @@ class _Empty extends StatelessWidget {
 class _PlayerRow extends StatelessWidget {
   final LivePerson person;
   final bool faint;
-  const _PlayerRow({required this.person, this.faint = false});
+  final bool showStage;
+  const _PlayerRow({required this.person, this.faint = false, this.showStage = true});
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +115,7 @@ class _PlayerRow extends StatelessWidget {
               ),
             ),
           ),
-          if (p.stage != null && p.stage!.isNotEmpty)
+          if (showStage && p.stage != null && p.stage!.isNotEmpty)
             Text(p.stage!, style: AppTypography.bodyMuted.copyWith(fontSize: 12)),
         ],
       ),

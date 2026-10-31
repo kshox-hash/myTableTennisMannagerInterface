@@ -37,6 +37,9 @@ class LiveSummary {
   final String? currentRound;
   final List<LivePerson> classified;
   final List<LivePerson> eliminated;
+  // Formato Oro y Plata: el 3° de cada grupo sigue jugando en Plata, no es
+  // un eliminado.
+  final List<LivePerson> movedToSilver;
 
   const LiveSummary({
     required this.idTournament,
@@ -47,10 +50,13 @@ class LiveSummary {
     required this.currentRound,
     required this.classified,
     required this.eliminated,
+    this.movedToSilver = const [],
   });
 
   factory LiveSummary.fromJson(Map<String, dynamic> j) {
     List<LivePerson> people(String key) => ((j[key] as List?) ?? const []).cast<Map<String, dynamic>>().map(LivePerson.fromJson).toList();
+    const silverStage = "Pasó a Plata";
+    final out = people("eliminated");
     return LiveSummary(
       idTournament: (j["id_tournament"] ?? "").toString(),
       tournamentName: (j["tournament_name"] ?? "").toString(),
@@ -59,7 +65,8 @@ class LiveSummary {
       inBracket: j["phase"] == "bracket",
       currentRound: j["current_round"] as String?,
       classified: people("classified"),
-      eliminated: people("eliminated"),
+      eliminated: out.where((p) => p.stage != silverStage).toList(),
+      movedToSilver: out.where((p) => p.stage == silverStage).toList(),
     );
   }
 

@@ -467,7 +467,9 @@ class _HomeScreenState extends State<HomeScreen>
       // la mesa que bloquea al rival — antes se mostraba solo "En cola".
       table: m.tableNumber != null
           ? "Mesa ${m.tableNumber}"
-          : m.blockingTableNumber != null
+          : m.opponentId == null
+              ? "Esperando rival"
+              : m.blockingTableNumber != null
               ? "Tras mesa ${m.blockingTableNumber}"
               : m.queuePosition != null
                   ? (m.queuePosition! <= 1 ? "Eres el próximo" : "Faltan ${m.queuePosition! - 1}")

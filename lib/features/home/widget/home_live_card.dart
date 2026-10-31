@@ -57,10 +57,14 @@ class _HomeLiveCardState extends State<HomeLiveCard> {
             ],
           ),
           const SizedBox(height: 12),
-          if (s.classified.isEmpty && s.eliminated.isEmpty)
+          if (s.classified.isEmpty && s.eliminated.isEmpty && s.movedToSilver.isEmpty)
             Text("Todavía no termina ningún grupo.", style: AppTypography.bodyMuted.copyWith(fontSize: 12.5))
           else ...[
             _Names(title: s.aliveTitle, color: AppColors.scorifyButterfly, people: s.classified, max: _preview),
+            if (s.movedToSilver.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              _Names(title: "Pasaron a Plata", color: AppColors.scorifyMint, people: s.movedToSilver, max: _preview),
+            ],
             const SizedBox(height: 14),
             _Names(title: "Eliminados", color: AppColors.scorifyNegative, people: s.eliminated, max: _preview, faint: true),
             const SizedBox(height: 6),
