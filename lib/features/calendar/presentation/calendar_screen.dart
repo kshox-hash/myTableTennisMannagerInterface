@@ -68,6 +68,18 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
   void initState() {
     super.initState();
     _reloadAll();
+    // Te inscribiste / anulaste en otra pantalla: el calendario se pone al día.
+    TournamentApi.enrollmentsChanged.addListener(_onEnrollmentsChanged);
+  }
+
+  void _onEnrollmentsChanged() {
+    if (mounted) _reloadAll(silent: true);
+  }
+
+  @override
+  void dispose() {
+    TournamentApi.enrollmentsChanged.removeListener(_onEnrollmentsChanged);
+    super.dispose();
   }
 
   void _reloadAll({bool silent = false}) {
@@ -338,7 +350,7 @@ class _EventCard extends StatelessWidget {
               child: Column(
                 children: [
                   Text(_monthsShort[e.date.month - 1],
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyMint, letterSpacing: 1)),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyMint, letterSpacing: 0.3)),
                   Text("${e.date.day}",
                       style: const TextStyle(fontFamily: AppTypography.body, fontSize: 24, fontWeight: FontWeight.w600, color: AppColors.scorifyText, height: 1.15)),
                 ],

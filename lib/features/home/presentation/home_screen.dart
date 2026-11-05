@@ -1,3 +1,5 @@
+import "package:myttmi/core/ui/list_states.dart";
+import "package:myttmi/core/constants/match_status_labels.dart";
 import "dart:async";
 import "package:myttmi/features/home/widget/home_live_card.dart";
 import "package:myttmi/features/player/models/live_summary_model.dart";
@@ -137,6 +139,15 @@ class _HomeScreenState extends State<HomeScreen>
       });
     });
     NotificationPopups.unread.addListener(_onUnreadChanged);
+    TournamentApi.enrollmentsChanged.addListener(_onEnrollmentsChanged);
+  }
+
+  // Te inscribiste o anulaste una inscripción (en cualquier pantalla): el
+  // Inicio se recarga entero — "Mis campeonatos", próximo desafío, eventos.
+  // Sin esto, inscribirse desde un campeonato abierto encima del Inicio no
+  // se veía al volver (la pestaña no cambió, así que no se recargaba).
+  void _onEnrollmentsChanged() {
+    if (mounted && !_firstLoad) _load();
   }
 
   // Llegó un aviso nuevo (te tocó arbitrar, tu mesa): el Inicio se pone al día
@@ -169,12 +180,19 @@ class _HomeScreenState extends State<HomeScreen>
   void dispose() {
     _liveTimer?.cancel();
     NotificationPopups.unread.removeListener(_onUnreadChanged);
+    TournamentApi.enrollmentsChanged.removeListener(_onEnrollmentsChanged);
     super.dispose();
   }
 
   // La primera carga avisa a la pantalla de carga (ShellPreload): esta se
   // quita recién cuando el Inicio tiene TODO, para que aparezca completo.
   bool _firstLoad = true;
+
+  // La última carga no pudo traer el perfil ni el dashboard (sin red, servidor
+  // caído, sesión vencida). Sin datos guardados, el Inicio muestra el error con
+  // "Reintentar" en vez de "No estás inscrito en ningún campeonato", que
+  // confundía: parecía que se habían perdido las inscripciones.
+  bool _loadFailed = false;
 
   /// Primera carga: con lo guardado de la vez anterior (al tiro, sin
   /// esperar al servidor) y enseguida se actualiza en silencio. Después,
@@ -205,6 +223,7 @@ class _HomeScreenState extends State<HomeScreen>
       ]);
       if (!mounted) return;
       setState(() {
+        _loadFailed = false;
         _profile = results[0] as UserProfile;
         _dashboard = results[1] as PlayerDashboard;
         _unreadCount = results[2] as int;
@@ -219,7 +238,9 @@ class _HomeScreenState extends State<HomeScreen>
       // primera carga la revisa el shell.
       if (!_firstLoad && mounted) Celebrations.check(context);
     } catch (_) {
-      // Silencioso: la pantalla igual se puede usar sin estos datos.
+      // Con datos de antes (guardados o de la carga anterior) se siguen
+      // mostrando; sin nada, el Inicio avisa el error (ver _loadFailed).
+      if (mounted) setState(() => _loadFailed = true);
     } finally {
       if (_firstLoad) {
         _firstLoad = false;
@@ -462,9 +483,9 @@ class _HomeScreenState extends State<HomeScreen>
         : [
             m.categoryDisplay,
             if (m.groupName != null)
-              "Grupo ${m.groupName}"
+              groupLabel(m.groupName)
             else if (m.round != null)
-              "Ronda ${m.round}",
+              matchRoundLabel(m.round!),
           ].where((s) => s.trim().isNotEmpty).join(" · ");
     if (m == null) return const SizedBox.shrink();
     final when = m.scheduledStartAt == null
@@ -605,7 +626,12 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                         const SizedBox(height: 12),
                       ],
-                      if (nm == null && _live == null && _challenge != null) ...[
+                      if (_loadFailed && _dashboard == null) ...[
+                        ErrorStateView(
+                          message: "No pudimos cargar tu Inicio.\nRevisa tu conexión e inténtalo de nuevo.",
+                          onRetry: () => _load(),
+                        ),
+                      ] else if (nm == null && _live == null && _challenge != null) ...[
                         HomeChallengeCard(
                           name: _challenge!.tournamentName,
                           date: _dateLong(_challenge!.eventDate),
@@ -856,7 +882,7 @@ class _MyGroupsCard extends StatelessWidget {
                       decoration: panelBox(),
                       child: Text(
                         g.standing.played == 0 || g.standing.position == null ? "–" : "${g.standing.position}°",
-                        style: const TextStyle(fontFamily: AppTypography.display, fontSize: 22, fontWeight: FontWeight.w600, color: AppColors.scorifyText, height: 1),
+                        style: const TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.scorifyText, height: 1),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -869,7 +895,7 @@ class _MyGroupsCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.bodyText.copyWith(fontWeight: FontWeight.w700)),
                           Text(
-                            "${(g.match.groupName ?? "Grupo").replaceFirst(RegExp(r"^GR-?", caseSensitive: false), "Grupo ")} · de ${g.size}",
+                            "${groupLabel(g.match.groupName)} · de ${g.size}",
                             style: AppTypography.bodyMuted,
                           ),
                         ],

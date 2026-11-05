@@ -273,7 +273,7 @@ class _Side extends StatelessWidget {
         width: 70,
         child: Column(
           children: [
-            Text("$value", style: TextStyle(fontFamily: AppTypography.display, fontSize: 40, height: 1, fontWeight: FontWeight.w600, color: color)),
+            Text("$value", style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 30, height: 1, fontWeight: FontWeight.w700, color: color)),
             Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.bodyMuted.copyWith(fontSize: 12)),
           ],
         ),
@@ -310,7 +310,7 @@ class _VsRow extends StatelessWidget {
             ),
             Text(
               "${iAmP1 ? m.setsPlayer1 : m.setsPlayer2}-${iAmP1 ? m.setsPlayer2 : m.setsPlayer1}",
-              style: const TextStyle(fontFamily: AppTypography.display, fontSize: 20, height: 1, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+              style: const TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 15, height: 1, fontWeight: FontWeight.w700, color: AppColors.scorifyText),
             ),
           ],
         ),

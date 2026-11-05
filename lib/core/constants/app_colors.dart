@@ -1,30 +1,27 @@
 import 'package:flutter/material.dart';
 
-/// Paleta oficial MYTTM = la misma de la web (myttmi-web/src/index.css,
-/// tokens --color-app-*): marino verdoso casi negro, tarjetas gris azulado,
-/// celeste de marca y verde lima. Antes la app tenía su propia paleta azul
-/// y, sobre el fondo de imagen azul, los componentes se perdían; con estas
-/// tarjetas casi opacas y de otro tono se despegan del fondo.
+/// Paleta MYTTM, estilo flat (rediseño 2026-11): fondo gris neutro casi
+/// negro, tarjetas gris oscuro lisas sin filete ni brillo, y los acentos de
+/// marca (celeste, lima) solo donde algo se toca o significa algo.
 ///
 /// Los NOMBRES de los campos NO cambian (scorifyBg, scorifyMint, etc. se
 /// usan en toda la app) — solo cambian los valores. `scorifyMint` es el
 /// celeste de marca.
 class AppColors {
-  static const Color scorifyBg = Color(0xFF191919); // fondo base: gris oscuro liso, el mismo de la imagen del Inicio
-  static const Color scorifyDeep = Color(0xFF11232B); // web --color-app-surface (hojas, diálogos)
-  static const Color scorifyNavbar = Color(0xFF020304); // web --color-app-primary
-  static const Color scorifySurface2 = Color(0xFF193139); // web --color-app-surface2 (bloques internos)
+  static const Color scorifyBg = Color(0xFF0F0F11); // fondo base: gris casi negro, liso
+  static const Color scorifyDeep = Color(0xFF1C1C1F); // hojas, diálogos (= tarjeta)
+  static const Color scorifyNavbar = Color(0xFF161618); // barra inferior
+  static const Color scorifySurface2 = Color(0xFF26262A); // bloques internos de una tarjeta
 
-  // Acento principal: celeste de marca (web --color-app-electric). Botones,
-  // enlaces, pestaña activa. Texto oscuro encima (scorifyOnMint).
+  // Acento principal: celeste de marca. Botones, enlaces, pestaña activa.
+  // Texto oscuro encima (scorifyOnMint).
   static const Color scorifyMint = Color(0xFF00B3D6);
-  static const Color scorifyMintDark = Color(0xFF007A94); // web --color-app-accent
-  static const Color scorifyCyan = Color(0xFF7FE0F5); // web --color-app-advance
+  static const Color scorifyMintDark = Color(0xFF007A94);
+  static const Color scorifyCyan = Color(0xFF7FE0F5);
 
-  // Bordes de tarjeta (web --color-app-border); el de la tarjeta principal
-  // en celeste de marca.
-  static const Color scorifyCardBorder = Color(0xFF21404C);
-  static const Color scorifyCardBorderStrong = Color(0xB300B3D6);
+  // Bordes: casi invisibles, solo para separar cuando hace falta.
+  static const Color scorifyCardBorder = Color(0xFF2A2A2E);
+  static const Color scorifyCardBorderStrong = Color(0xFF3A3A40);
 
   // Jerarquía de color (cada color significa UNA cosa en toda la app):
   //   celeste (scorifyMint) = lo que se toca: botones, enlaces, pestaña activa
@@ -32,37 +29,32 @@ class AppColors {
   //   lima (scorifyButterfly) = victoria / partido ganado
   //   ámbar (scorifyPending) = pendiente / esperando
   //   rojo (scorifyNegative) = derrota / error
-  static const Color scorifyLive = Color(0xFF7FE0F5); // web --color-app-advance
-  static const Color scorifyOnLive = Color(0xFF04303B); // web --color-app-on-advance
+  static const Color scorifyLive = Color(0xFF7FE0F5);
+  static const Color scorifyOnLive = Color(0xFF04303B);
 
-  // Acento de PARTIDOS / victorias: lima de marca (web --color-app-butterfly).
+  // Acento de PARTIDOS / victorias: lima de marca.
   static const Color scorifyButterfly = Color(0xFFA6D32D);
   static const Color scorifyOnButterfly = Color(0xFF16210A);
 
-  static const Color scorifyText = Color(0xFFEEF4F7); // web --color-app-text
-  static const Color scorifyTextMuted = Color(0xFF98A4B2); // web --color-app-text-muted
-  static const Color scorifyTextFaint = Color(0xFF6B7A88); // labels, timestamps
-  static const Color scorifyOnMint = Color(0xFF041016); // web --color-app-on-accent (texto sobre celeste)
-  static const Color scorifyNegative = Color(0xFFFF5C5C); // web --color-app-danger
-  static const Color scorifyPending = Color(0xFFEAB308); // web --color-app-warning
+  static const Color scorifyText = Color(0xFFF2F2F4);
+  static const Color scorifyTextMuted = Color(0xFF9B9BA3);
+  static const Color scorifyTextFaint = Color(0xFF6C6C74); // labels, timestamps
+  static const Color scorifyOnMint = Color(0xFF041016); // texto sobre celeste
+  static const Color scorifyNegative = Color(0xFFFF5C5C);
+  static const Color scorifyPending = Color(0xFFEAB308);
   static const Color scorifyBadge = Color(0xFFFF4D5E); // contador de notifs
-  static const Color scorifyCardFill = Color(0xF20F2529); // tarjeta lisa: el medio del degradado de panel
-  static const Color scorifyInput = Color(0xFF1A1D1D); // campos de texto: gris casi negro (estilo panel)
+  static const Color scorifyCardFill = Color(0xFF1C1C1F); // tarjeta lisa
+  static const Color scorifyInput = Color(0xFF26262A); // campos de texto
 
-  // Fondo de las tarjetas (estilo panel, ver core/ui/panel_style.dart):
-  // verde azulado casi negro arriba, apenas más claro abajo. Casi opaco
-  // (95%) para que los componentes no se pierdan sobre el fondo de imagen.
+  // Fondo de las tarjetas: gris liso (se deja como "degradado" de un solo
+  // color porque muchas pantallas lo pasan donde se espera un Gradient).
   static const LinearGradient cardGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xF20E1D20), Color(0xF2102E33)],
+    colors: [Color(0xFF1C1C1F), Color(0xFF1C1C1F)],
   );
 
   /// Tarjeta principal (próximo partido, el campeonato en su detalle): un
-  /// paso más clara + filete más claro.
+  /// paso más clara, también lisa.
   static const LinearGradient featuredGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xF2132A2F), Color(0xF2163A40)],
+    colors: [Color(0xFF232327), Color(0xFF232327)],
   );
 }

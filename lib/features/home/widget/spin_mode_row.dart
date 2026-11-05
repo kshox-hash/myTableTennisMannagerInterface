@@ -57,7 +57,7 @@ class SpinModeRow extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          title.toUpperCase(),
+                          title,
                           style: const TextStyle(
                             color: AppColors.scorifyText,
                             fontSize: 14,

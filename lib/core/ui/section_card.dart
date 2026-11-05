@@ -4,7 +4,7 @@ import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/ui/card_border.dart";
 import "package:myttmi/core/ui/panel_style.dart";
 
-/// Tarjeta con título: ícono y nombre de la sección en mayúsculas de color ("SETS", "ÚLTIMOS PARTIDOS"),
+/// Tarjeta con título: ícono y nombre de la sección en mayúsculas de color ("Sets", "ÚLTIMOS PARTIDOS"),
 /// opcionalmente con un ícono y una acción a la derecha ("Ver historial").
 /// Se usa en toda la app para que las tarjetas con título se vean iguales.
 class SectionCard extends StatelessWidget {

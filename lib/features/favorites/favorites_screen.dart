@@ -1,3 +1,4 @@
+import "package:myttmi/core/constants/match_status_labels.dart";
 import "package:myttmi/core/ui/app_button.dart";
 import "package:myttmi/core/ui/card_border.dart";
 import "package:myttmi/core/ui/panel_style.dart";
@@ -292,13 +293,13 @@ class _LiveCard extends StatelessWidget {
     final sets = d.setScores ?? const [];
     final live = !done && d.tableNumber != null;
     final (pill, pillBg, pillFg) = done
-        ? ("FINAL", AppColors.scorifySurface2, AppColors.scorifyText)
+        ? ("Final", AppColors.scorifySurface2, AppColors.scorifyText)
         : live
             ? ("EN VIVO · MESA ${d.tableNumber}", AppColors.scorifyNegative, Colors.white)
-            : ("POR JUGAR", AppColors.scorifySurface2, AppColors.scorifyTextMuted);
+            : ("Por jugar", AppColors.scorifySurface2, AppColors.scorifyTextMuted);
     final stage = [
       d.categoryType,
-      if (d.groupName != null) "Grupo ${d.groupName}" else if (d.round != null) "Ronda ${d.round}",
+      if (d.groupName != null) groupLabel(d.groupName) else if (d.round != null) matchRoundLabel(d.round!, d.totalRounds),
     ].join(" · ");
     final nameSize = compact ? 13.0 : 16.0;
     final setsSize = compact ? 22.0 : 30.0;
@@ -347,7 +348,7 @@ class _LiveCard extends StatelessWidget {
                   pill,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.6, color: pillFg),
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: pillFg),
                 ),
               ),
               ),

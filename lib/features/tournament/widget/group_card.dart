@@ -25,7 +25,7 @@ class GroupCard extends StatelessWidget {
   }
 
   static const _num = TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.scorifyText);
-  static const _head = TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.6, color: AppColors.scorifyTextFaint);
+  static const _head = TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.scorifyTextFaint);
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +65,7 @@ class GroupCard extends StatelessWidget {
             child: Row(
               children: [
                 const SizedBox(width: 22),
-                const Expanded(child: Text("JUGADOR", style: _head)),
+                const Expanded(child: Text("Jugador", style: _head)),
                 stat("PJ", style: _head),
                 stat("G", style: _head),
                 stat("P", style: _head),
@@ -91,7 +91,7 @@ class GroupCard extends StatelessWidget {
             const SizedBox(height: 12),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 8),
-              child: Text("RESULTADOS", style: _head),
+              child: Text("Resultados", style: _head),
             ),
             const SizedBox(height: 4),
             ...dividedRows([for (final m in matches) _matchRow(m)]),

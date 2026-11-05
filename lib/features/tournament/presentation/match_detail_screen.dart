@@ -160,12 +160,10 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                               runSpacing: 8,
                               children: [
                                 if (m.groupName != null)
-                                  InfoChip(label: "Grupo ${m.groupName}"),
+                                  InfoChip(label: groupLabel(m.groupName)),
                                 if (m.round != null)
                                   InfoChip(
-                                    label: m.round == 0
-                                        ? matchRoundLabel(0)
-                                        : "Ronda ${m.round}${m.totalRounds != null ? " de ${m.totalRounds}" : ""}",
+                                    label: matchRoundLabel(m.round!, m.totalRounds),
                                   ),
                                 InfoChip(label: "Partido ${m.matchNumber}"),
                                 InfoChip(label: "Mejor de ${m.bestOfSets}"),
@@ -195,12 +193,12 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                         ),
                                         SizedBox(width: 6),
                                         Text(
-                                          "EN VIVO",
+                                          "En vivo",
                                           style: TextStyle(
                                             fontFamily: AppTypography.body,
                                             fontSize: 11.5,
                                             fontWeight: FontWeight.w600,
-                                            letterSpacing: 1,
+                                            letterSpacing: 0.3,
                                             color: Colors.white,
                                           ),
                                         ),
@@ -305,7 +303,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                     ShareImage.share(
                                       context,
                                       ShareCard(
-                                        kicker: "¡VICTORIA!",
+                                        kicker: "¡Victoria!",
                                         accent: AppColors.scorifyButterfly,
                                         icon: Icons.sports_tennis_rounded,
                                         headline: iAm1 ? "${m.setsPlayer1} - ${m.setsPlayer2}" : "${m.setsPlayer2} - ${m.setsPlayer1}",

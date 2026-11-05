@@ -315,6 +315,7 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                                     match: t.match,
                                     type: t.type,
                                     myUserId: data.myUserId,
+                                    totalRounds: view.bracketTotalRounds,
                                     onTap: () => _goMatchTyped(t.match, t.type),
                                   ),
                                 ),
@@ -330,6 +331,7 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                                     match: t.match,
                                     type: t.type,
                                     myUserId: data.myUserId,
+                                    totalRounds: view.bracketTotalRounds,
                                     onTap: () => _goMatchTyped(t.match, t.type),
                                   ),
                                 ),
@@ -444,21 +446,7 @@ class _JourneyCard extends StatelessWidget {
 
   String _roundLabel(int? round) {
     if (round == null) return "Llave";
-    if (round == 0) return "Pre-llave";
-    final total = totalRounds;
-    if (total == null) return "Ronda $round";
-    switch (total - round) {
-      case 0:
-        return "Final";
-      case 1:
-        return "Semifinal";
-      case 2:
-        return "Cuartos";
-      case 3:
-        return "Octavos";
-      default:
-        return "Ronda $round";
-    }
+    return matchRoundLabel(round, totalRounds);
   }
 
   @override
@@ -533,12 +521,12 @@ class _JourneyCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _roundLabel(m.round).toUpperCase(),
+                            _roundLabel(m.round),
                             style: TextStyle(
                               color: color,
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
-                              letterSpacing: 1,
+                              letterSpacing: 0.3,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -589,11 +577,7 @@ const TextStyle _muted = TextStyle(
 
 // "GR-3" → "Grupo 3"; cualquier otro nombre se muestra tal cual con "Grupo".
 String _groupLabel(String name) {
-  final m = RegExp(
-    r"^GR-?(\w+)$",
-    caseSensitive: false,
-  ).firstMatch(name.trim());
-  return "Grupo ${m != null ? m.group(1) : name}";
+  return groupLabel(name);
 }
 
 void _openProfile(BuildContext context, String? userId, String? name) {
@@ -761,9 +745,9 @@ class _Kpi extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            fontFamily: AppTypography.display,
-            fontSize: 28,
-            fontWeight: FontWeight.w600,
+            fontFamily: AppTypography.display, letterSpacing: -0.5,
+            fontSize: 21,
+            fontWeight: FontWeight.w700,
             height: 1.0,
             color: color,
           ),
@@ -916,11 +900,14 @@ class _MatchCard extends StatelessWidget {
   final String? myUserId;
   final VoidCallback onTap;
 
+  final int? totalRounds;
+
   const _MatchCard({
     required this.match,
     required this.type,
     required this.myUserId,
     required this.onTap,
+    this.totalRounds,
   });
 
   @override
@@ -951,7 +938,7 @@ class _MatchCard extends StatelessWidget {
           );
     final meta = [
       type == "bracket" ? "Llave" : "Fase de grupos",
-      if (type == "bracket" && m.round != null) matchRoundLabel(m.round!),
+      if (type == "bracket" && m.round != null) matchRoundLabel(m.round!, totalRounds),
       "Partido ${m.matchNumber}",
     ].join(" · ");
 

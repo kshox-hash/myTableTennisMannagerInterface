@@ -1,38 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:myttmi/core/constants/app_colors.dart';
 
-/// Fondo de la app: gris oscuro plano, el mismo gris de la imagen del Inicio
-/// (#191919, su hexágono del medio). Con [image] (solo el Inicio) encima va
-/// la imagen geométrica (assets/images/app_bg.jpg, 1080 px); en las demás
-/// páginas se veía recargada. Se decodifica una sola vez al ancho de la
-/// pantalla y queda en caché; el RepaintBoundary evita repintarla al hacer
-/// scroll encima.
+/// Fondo de la app: color liso del tema (estilo flat). [image] ya no hace
+/// nada: antes ponía una imagen geométrica detrás del Inicio.
 class PrismBackground extends StatelessWidget {
   final Widget child;
   final bool image;
   const PrismBackground({super.key, required this.child, this.image = false});
 
-  static const color = Color(0xFF191919);
+  static const color = AppColors.scorifyBg;
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    final dpr = MediaQuery.devicePixelRatioOf(context);
     return ColoredBox(
       color: color,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (image)
-            RepaintBoundary(
-              child: Image(
-                image: ResizeImage(
-                  const AssetImage("assets/images/app_bg.jpg"),
-                  width: (size.width * dpr).round().clamp(360, 1080),
-                ),
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-              ),
-            ),
+          // Flat: sin imagen de fondo en ninguna pantalla (image se ignora).
           RepaintBoundary(child: child),
         ],
       ),

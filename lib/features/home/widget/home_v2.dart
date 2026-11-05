@@ -30,9 +30,9 @@ const homeGradientMain = AppColors.featuredGradient;
 const homeGradientTeal = AppColors.cardGradient;
 const homeGradientEmerald = AppColors.cardGradient;
 
-/// Números grandes (marcadores, KPIs): Teko, condensada y deportiva.
+/// Números grandes (marcadores, KPIs): Manrope negrita, cifras tabulares.
 TextStyle _num(double size, {Color c = AppColors.scorifyText}) =>
-    TextStyle(fontFamily: AppTypography.display, fontSize: size, fontWeight: FontWeight.w600, color: c, height: 1.0);
+    TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: size * 0.76, fontWeight: FontWeight.w700, color: c, height: 1.0, fontFeatures: const [FontFeature.tabularFigures()]);
 
 TextStyle _t(double size, {FontWeight w = FontWeight.w400, Color c = AppColors.scorifyText, double? ls, double? h}) =>
     TextStyle(fontFamily: AppTypography.body, fontSize: size, fontWeight: w, color: c, letterSpacing: ls, height: h);
@@ -114,10 +114,10 @@ class HomeCardTitle extends StatelessWidget {
             Expanded(
               child: Text(
                 // Título en blanco; el color de la sección va solo en el ícono.
-                title.toUpperCase(),
+                title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: _t(13, w: FontWeight.w700, ls: 1.3),
+                style: _t(13.5, w: FontWeight.w600, c: AppColors.scorifyTextMuted),
               ),
             ),
             if (action != null)
@@ -134,8 +134,7 @@ class HomeCardTitle extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: 8),
-        const PanelGlowLine(),
+        const SizedBox(height: 4),
       ],
     );
   }
@@ -340,9 +339,9 @@ class HomeMatchCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: _t(13, w: FontWeight.w700, ls: 0.8)),
+                Text(label, style: _t(13, w: FontWeight.w700, ls: 0.3)),
                 const SizedBox(height: 1),
-                Text(hint, style: _t(9.5, c: AppColors.scorifyTextMuted, ls: 0.6)),
+                Text(hint, style: _t(9.5, c: AppColors.scorifyTextMuted, ls: 0.3)),
               ],
             ),
           ),
@@ -355,9 +354,8 @@ class HomeMatchCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               // Caja de dato: gris casi negro neutro y liso, filete gris.
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1D1D),
-                borderRadius: BorderRadius.circular(3),
-                border: Border.all(color: const Color(0xFF3E4A4E)),
+                color: Panel.field,
+                borderRadius: BorderRadius.circular(Panel.buttonRadius),
               ),
               child: Text(value, maxLines: 2, overflow: TextOverflow.ellipsis, style: _t(12.5, w: FontWeight.w500, h: 1.25)),
             ),
@@ -373,28 +371,21 @@ class HomeMatchCard extends StatelessWidget {
     Widget panelButton(String label, VoidCallback? onTap, {bool primary = false}) => Expanded(
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(3),
-          border: Border.all(color: Panel.buttonBorder),
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: const [0, 0.45, 0.85, 1],
-            colors: primary
-                ? const [Color(0xFF151A1C), Color(0xFF16242A), Color(0xFF0E3B47), Color(0xFF0F5263)]
-                : const [Color(0xFF171A1A), Color(0xFF1B2121), Color(0xFF173332), Color(0xFF1A4442)],
-          ),
+          // Flat: principal celeste sólido, secundario gris liso.
+          borderRadius: BorderRadius.circular(Panel.buttonRadius),
+          color: onTap == null ? Panel.field : (primary ? AppColors.scorifyMint : const Color(0xFF2A2A2E)),
         ),
         child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(3),
+          borderRadius: BorderRadius.circular(Panel.buttonRadius),
           child: SizedBox(
             height: 40,
             child: Center(
               child: Text(
                 label,
-                style: _t(12.5, w: FontWeight.w700, ls: 1.0, c: onTap == null ? AppColors.scorifyTextFaint : AppColors.scorifyText),
+                style: _t(13.5, w: FontWeight.w600, c: onTap == null ? AppColors.scorifyTextFaint : (primary ? AppColors.scorifyOnMint : AppColors.scorifyText)),
               ),
             ),
           ),
@@ -411,26 +402,20 @@ class HomeMatchCard extends StatelessWidget {
     // baja de verde azulado muy oscuro a uno apenas más claro.
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFF125450)),
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xF20E1D20), Color(0xF2102E33)],
-        ),
+        // Flat: tarjeta destacada gris lisa, sin filete.
+        borderRadius: BorderRadius.circular(Panel.radius),
+        color: const Color(0xFF232327),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(height: 1, color: const Color(0xFF31817D)),
           // Franja de título: gris neutro, mayúsculas espaciadas.
           Container(
-            padding: const EdgeInsets.fromLTRB(14, 9, 10, 9),
-            color: const Color(0xFF212628),
+            padding: const EdgeInsets.fromLTRB(16, 14, 12, 0),
             child: Row(
               children: [
-                Expanded(child: Text("PRÓXIMO PARTIDO", style: _t(13.5, w: FontWeight.w700, ls: 1.4))),
+                Expanded(child: Text("Próximo partido", style: _t(13.5, w: FontWeight.w600, c: AppColors.scorifyTextMuted))),
                 _LiveStatus(startsAt: startsAt, tableNumber: tableNumber),
               ],
             ),
@@ -438,15 +423,15 @@ class HomeMatchCard extends StatelessWidget {
           // Línea bajo el título: gris en las puntas, encendida al centro.
           const PanelGlowLine(),
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             child: Column(
               children: [
                 Text(
-                  tournamentName.toUpperCase(),
+                  tournamentName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: _t(11, w: FontWeight.w600, c: AppColors.scorifyTextMuted, ls: 1.0),
+                  style: _t(11, w: FontWeight.w600, c: AppColors.scorifyTextMuted, ls: 0.3),
                 ),
                 const SizedBox(height: 14),
                 Row(
@@ -482,20 +467,20 @@ class HomeMatchCard extends StatelessWidget {
                 ],
                 const SizedBox(height: 14),
                 divider(),
-                field("FECHA", "CUÁNDO SE JUEGA", when.replaceAll("\n", " · ")),
+                field("Fecha", "CUÁNDO SE JUEGA", when.replaceAll("\n", " · ")),
                 divider(),
-                field("MESA", "DÓNDE TE TOCA", table),
+                field("Mesa", "DÓNDE TE TOCA", table),
                 if (hasPlace) ...[
                   divider(),
-                  field("LUGAR", "DIRECCIÓN", place!.trim()),
+                  field("Lugar", "DIRECCIÓN", place!.trim()),
                 ],
                 divider(),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    panelButton("VER RIVAL", onOpponent),
+                    panelButton("Ver rival", onOpponent),
                     const SizedBox(width: 8),
-                    panelButton("VER DETALLE", onDetail, primary: true),
+                    panelButton("Ver detalle", onDetail, primary: true),
                   ],
                 ),
               ],
@@ -948,7 +933,7 @@ class HomeWeekCard extends StatelessWidget {
                         children: [
                           Text(
                             items[i].day,
-                            style: _t(11, w: FontWeight.w600, c: _mint, ls: 0.6),
+                            style: _t(11, w: FontWeight.w600, c: _mint, ls: 0.3),
                           ),
                           Text(items[i].date, style: _t(17, w: FontWeight.w600, h: 1.1)),
                         ],
@@ -1161,8 +1146,8 @@ class HomeSeasonCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(value, style: _num(32)),
           Text(
-            label.toUpperCase(),
-            style: _t(11, w: FontWeight.w500, c: AppColors.scorifyTextMuted, ls: 0.8),
+            label,
+            style: _t(11, w: FontWeight.w500, c: AppColors.scorifyTextMuted, ls: 0.3),
           ),
         ],
       ),
@@ -1217,7 +1202,7 @@ class HomeBanner extends StatelessWidget {
                     gradient: LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
-                      colors: [Color(0xFF050A14), Color(0xFF12305E)],
+                      colors: [Color(0xFF1C1C1F), Color(0xFF232327)],
                     ),
                   ),
                 ),
@@ -1227,7 +1212,7 @@ class HomeBanner extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
-                    colors: [Color(0xE6050A14), Color(0x00050A14)],
+                    colors: [Color(0xE60F0F11), Color(0x000F0F11)],
                     stops: [0.25, 0.75],
                   ),
                 ),
@@ -1402,7 +1387,7 @@ class _LiveStatusState extends State<_LiveStatus> with SingleTickerProviderState
           const SizedBox(width: 6),
           Text(
             "EN MESA ${widget.tableNumber}",
-            style: _t(12, w: FontWeight.w700, c: AppColors.scorifyLive, ls: 0.8),
+            style: _t(12, w: FontWeight.w700, c: AppColors.scorifyLive, ls: 0.3),
           ),
         ],
       );
@@ -1592,7 +1577,7 @@ class HomeChallengeCard extends StatelessWidget {
   final VoidCallback onTap;
   const HomeChallengeCard({
     super.key,
-    this.kicker = "PRÓXIMO DESAFÍO",
+    this.kicker = "Próximo desafío",
     required this.name,
     this.date,
     this.place,
@@ -1613,7 +1598,7 @@ class HomeChallengeCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 7),
       child: Row(
         children: [
-          Expanded(flex: 4, child: Text(label, style: _t(13, w: FontWeight.w700, ls: 0.8))),
+          Expanded(flex: 4, child: Text(label, style: _t(13, w: FontWeight.w700, ls: 0.3))),
           const SizedBox(width: 10),
           Expanded(
             flex: 6,
@@ -1630,9 +1615,9 @@ class HomeChallengeCard extends StatelessWidget {
     );
     Widget divider() => Container(height: 1, color: AppColors.scorifyCardBorder.withValues(alpha: 0.7));
     final rows = <Widget>[
-      if (date != null) field("FECHA", date!),
-      if ((place ?? "").trim().isNotEmpty) field("LUGAR", place!.trim()),
-      if (players != null) field("JUGADORES", "$players ${players == 1 ? "inscrito" : "inscritos"}"),
+      if (date != null) field("Fecha", date!),
+      if ((place ?? "").trim().isNotEmpty) field("Lugar", place!.trim()),
+      if (players != null) field("Jugadores", "$players ${players == 1 ? "inscrito" : "inscritos"}"),
     ];
     return SectionCard(
       title: kicker,

@@ -79,10 +79,10 @@ class TournamentMatch {
       totalRounds: intOrNull(json["total_rounds"]),
       matchNumber: intOrDefault(json["match_number"]),
       player1Id: (json["player1_id"] ?? "").toString(),
-      player1Name: (json["player1_name"] ?? "").toString(),
+      player1Name: (json["player1_name"] ?? "Por definir").toString(),
       player1Club: json["player1_club"] as String?,
       player2Id: (json["player2_id"] ?? "").toString(),
-      player2Name: (json["player2_name"] ?? "").toString(),
+      player2Name: (json["player2_name"] ?? "Por definir").toString(),
       player2Club: json["player2_club"] as String?,
       status: (json["status"] ?? "scheduled").toString(),
       setsPlayer1: intOrDefault(json["sets_player1"]),
@@ -110,6 +110,8 @@ class MatchDetail {
   final int? totalRounds;
   final int matchNumber;
   final int bestOfSets;
+  /// Puntos para ganar un set: 11, o 21 en el formato "1 set a 21" (078).
+  final int pointsPerSet;
   final String? player1Id;
   final String player1Name;
   final String? player1Club;
@@ -141,6 +143,7 @@ class MatchDetail {
     this.totalRounds,
     required this.matchNumber,
     required this.bestOfSets,
+    this.pointsPerSet = 11,
     this.player1Id,
     required this.player1Name,
     this.player1Club,
@@ -178,12 +181,13 @@ class MatchDetail {
       round: intOrNull(json["round"]),
       totalRounds: intOrNull(json["total_rounds"]),
       matchNumber: intOrDefault(json["match_number"]),
-      bestOfSets: intOrDefault(json["best_of_sets"], 5),
+      bestOfSets: intOrDefault(json["best_of_sets"], 3),
+      pointsPerSet: intOrDefault(json["points_per_set"], 11),
       player1Id: json["player1_id"] as String?,
-      player1Name: (json["player1_name"] ?? "Vacante").toString(),
+      player1Name: (json["player1_name"] ?? "Por definir").toString(),
       player1Club: json["player1_club"] as String?,
       player2Id: json["player2_id"] as String?,
-      player2Name: (json["player2_name"] ?? "Vacante").toString(),
+      player2Name: (json["player2_name"] ?? "Por definir").toString(),
       player2Club: json["player2_club"] as String?,
       winnerId: json["winner_id"] as String?,
       resultReason: json["result_reason"] as String?,

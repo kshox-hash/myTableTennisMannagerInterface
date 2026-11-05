@@ -116,7 +116,7 @@ class PlayerMatch {
       matchNumber: intOrDefault(json["match_number"]),
       round: intOrNull(json["round"]),
       status: (json["status"] ?? "scheduled").toString(),
-      bestOfSets: intOrDefault(json["best_of_sets"], 5),
+      bestOfSets: intOrDefault(json["best_of_sets"], 3),
       setsPlayer1: intOrDefault(json["sets_player1"]),
       setsPlayer2: intOrDefault(json["sets_player2"]),
       winnerId: json["winner_id"] as String?,

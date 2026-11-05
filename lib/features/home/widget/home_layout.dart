@@ -36,7 +36,7 @@ class CountryFlag extends StatelessWidget {
 }
 
 TextStyle _label([Color c = AppColors.scorifyTextMuted]) =>
-    TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1, color: c);
+    TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: c);
 
 /// Tarjeta sólida, la base de todo el Inicio.
 class HomePanel extends StatelessWidget {
@@ -205,7 +205,7 @@ class HomeStatsBar extends StatelessWidget {
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                      child: Text(label.toUpperCase(), style: _label().copyWith(letterSpacing: 0.6)),
+                      child: Text(label, style: _label().copyWith(letterSpacing: 0.3)),
                     ),
                     const SizedBox(height: 2),
                     Text(value, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
@@ -321,7 +321,7 @@ class HomeKpiCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label.toUpperCase(), style: _label()),
+                Text(label, style: _label()),
                 const SizedBox(height: 4),
                 Text(value, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 28, height: 1, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                 const SizedBox(height: 6),

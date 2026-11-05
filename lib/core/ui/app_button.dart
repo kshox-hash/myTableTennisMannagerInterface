@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/ui/panel_style.dart";
@@ -66,12 +67,18 @@ class _AppButtonState extends State<AppButton> {
   @override
   Widget build(BuildContext context) {
     final v = widget.variant;
-    final radius = BorderRadius.circular(Panel.buttonRadius); // esquinas casi rectas (estilo panel)
+    final radius = BorderRadius.circular(Panel.buttonRadius);
     final disabled = widget.onPressed == null;
     final small = widget.height < 40;
 
     // Texto claro en todos: el fondo es un degradado oscuro (estilo panel).
-    final Color fg = disabled ? AppColors.scorifyTextFaint : AppColors.scorifyText;
+    final Color fg = disabled
+        ? AppColors.scorifyTextFaint
+        : switch (v) {
+            AppButtonVariant.primary => AppColors.scorifyOnMint,
+            AppButtonVariant.outline => AppColors.scorifyText,
+            AppButtonVariant.danger => AppColors.scorifyNegative,
+          };
 
     final content = widget.loading
         ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: fg))
@@ -85,14 +92,13 @@ class _AppButtonState extends State<AppButton> {
               ],
               Flexible(
                 child: Text(
-                  widget.label.toUpperCase(),
+                  widget.label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: AppTypography.body,
-                    fontSize: small ? 12 : 13,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.0,
+                    fontSize: small ? 13 : 14,
+                    fontWeight: FontWeight.w600,
                     color: fg,
                   ),
                 ),
@@ -119,19 +125,10 @@ class _AppButtonState extends State<AppButton> {
         gradient: disabled
             ? null
             : switch (v) {
-                AppButtonVariant.primary => Panel.primaryButtonGradient,
+                AppButtonVariant.primary => appButtonGradient,
                 AppButtonVariant.outline => Panel.buttonGradient,
                 AppButtonVariant.danger => Panel.dangerButtonGradient,
               },
-        border: Border.all(
-          color: disabled
-              ? Panel.fieldBorder
-              : switch (v) {
-                  AppButtonVariant.primary => Panel.primaryButtonBorder,
-                  AppButtonVariant.outline => Panel.buttonBorder,
-                  AppButtonVariant.danger => Panel.dangerButtonBorder,
-                },
-        ),
       ),
       child: inner,
     );
@@ -143,7 +140,13 @@ class _AppButtonState extends State<AppButton> {
         onTapDown: (_) => _setPressed(true),
         onTapUp: (_) => _setPressed(false),
         onTapCancel: () => _setPressed(false),
-        onTap: _enabled ? widget.onPressed : null,
+        onTap: _enabled
+            ? () {
+                // Toque sutil al presionar, como en las apps nativas.
+                HapticFeedback.selectionClick();
+                widget.onPressed!();
+              }
+            : null,
         child: AnimatedScale(
           scale: _pressed ? 0.97 : 1,
           duration: const Duration(milliseconds: 110),
@@ -167,5 +170,4 @@ class _AppButtonState extends State<AppButton> {
 BoxDecoration selectedPillDecoration(bool selected) => BoxDecoration(
       gradient: selected ? Panel.primaryButtonGradient : null,
       borderRadius: BorderRadius.circular(Panel.buttonRadius),
-      border: selected ? Border.all(color: Panel.primaryButtonBorder) : null,
     );

@@ -43,6 +43,29 @@ String walkoverText(String? reason, {String? loserName, String? winnerName}) {
   };
 }
 
-/// Ronda 0 es la pre-llave (partido de definición para completar un cuadro
-/// que no es potencia de 2) — no un número de ronda real.
-String matchRoundLabel(int round) => round == 0 ? "Pre-llave" : "Ronda $round";
+/// Nombre de una ronda de la llave — el único lugar donde se define (antes
+/// había 7 copias y la misma final salía como "Final", "Ronda 3" o
+/// "Ronda 3 de 3" según la pantalla). Ronda 0 es la pre-llave (partido de
+/// definición para completar un cuadro que no es potencia de 2). Sin
+/// [totalRounds] no se puede saber cuál es la final: queda "Ronda N".
+String matchRoundLabel(int round, [int? totalRounds]) {
+  if (round == 0) return "Pre-llave";
+  final total = totalRounds ?? 0;
+  if (total <= 0 || round > total) return "Ronda $round";
+  return switch (total - round) {
+    0 => "Final",
+    1 => "Semifinal",
+    2 => "Cuartos de final",
+    3 => "Octavos de final",
+    _ => "Ronda $round",
+  };
+}
+
+/// "GR-3" → "Grupo 3" (los grupos se guardan como GR-N; antes algunas
+/// pantallas mostraban "Grupo GR-3").
+String groupLabel(String? name) {
+  final n = (name ?? "").trim();
+  if (n.isEmpty) return "Grupo";
+  final m = RegExp(r"^GR-?(\w+)$", caseSensitive: false).firstMatch(n);
+  return "Grupo ${m != null ? m.group(1) : n}";
+}

@@ -84,15 +84,22 @@ class RefereeApi {
     _decode(r.statusCode, r.body);
   }
 
-  /// Resultado final (igual que si lo cargara el organizador).
+  /// Resultado final (igual que si lo cargara el organizador). Con
+  /// [resultReason] (no_show | injury | retired | disqualified) es un W.O.:
+  /// no se mandan sets jugados, solo quién se lo lleva.
   Future<void> submitResult({
     required String matchType,
     required String matchId,
     required String winnerId,
     required List<(int, int)> sets,
+    String? resultReason,
+    int bestOfSets = 3,
+    bool winnerIsPlayer1 = true,
   }) async {
-    final s1 = sets.where((s) => s.$1 > s.$2).length;
-    final s2 = sets.where((s) => s.$2 > s.$1).length;
+    final wo = resultReason != null;
+    final toWin = (bestOfSets / 2).ceil();
+    final s1 = wo ? (winnerIsPlayer1 ? toWin : 0) : sets.where((s) => s.$1 > s.$2).length;
+    final s2 = wo ? (winnerIsPlayer1 ? 0 : toWin) : sets.where((s) => s.$2 > s.$1).length;
     final r = await apiHttp.post(
       Uri.parse("${AppConfig.baseUrl}${Endpoints.base}/bracket/referee/${_seg(matchType)}/$matchId/result"),
       headers: await _headers(),
@@ -100,7 +107,7 @@ class RefereeApi {
         "winner_id": winnerId,
         "sets_player1": s1,
         "sets_player2": s2,
-        "set_scores": [for (final s in sets) {"p1": s.$1, "p2": s.$2}],
+        if (wo) "result_reason": resultReason else "set_scores": [for (final s in sets) {"p1": s.$1, "p2": s.$2}],
       }),
     );
     _decode(r.statusCode, r.body);

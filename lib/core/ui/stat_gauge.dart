@@ -48,8 +48,8 @@ class StatGauge extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(value,
-                    // Número en Teko (condensada deportiva), como los demás marcadores.
-                    style: TextStyle(fontFamily: AppTypography.display, fontSize: valueSize * 1.35, height: 1.0, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                    // Número en la fuente de marcadores (Manrope negrita), como los demás.
+                    style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: valueSize * 1.05, height: 1.0, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
                 if (caption != null)
                   Text(caption!, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted)),
               ],
@@ -64,8 +64,8 @@ class StatGauge extends StatelessWidget {
       children: [
         gauge,
         const SizedBox(height: 2),
-        Text(label!.toUpperCase(),
-            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 1, color: AppColors.scorifyTextMuted)),
+        Text(label!,
+            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.3, color: AppColors.scorifyTextMuted)),
       ],
     );
   }

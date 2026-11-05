@@ -62,7 +62,7 @@ class SpinNextMatchPanel extends StatelessWidget {
     final day = DateTime(d.year, d.month, d.day);
     final diff = day.difference(today).inDays;
     if (diff == 0) return "HOY";
-    if (diff == 1) return "MAÑANA";
+    if (diff == 1) return "Mañana";
     return "${d.day.toString().padLeft(2, "0")}/${d.month.toString().padLeft(2, "0")}";
   }
 
@@ -144,8 +144,8 @@ class SpinNextMatchPanel extends StatelessWidget {
                   const SizedBox(height: 6),
                   if (ready) ...[
                     const Text(
-                      "MESA",
-                      style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.5),
+                      "Mesa",
+                      style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3),
                     ),
                     Text(
                       "$tableNumber",
@@ -154,7 +154,7 @@ class SpinNextMatchPanel extends StatelessWidget {
                   ] else if (scheduledAt != null) ...[
                     Text(
                       _dayLabel(scheduledAt!),
-                      style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                      style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3),
                     ),
                     Text(
                       _hhmm(scheduledAt!),

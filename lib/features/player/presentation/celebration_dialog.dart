@@ -535,7 +535,7 @@ class _ResultPage extends StatelessWidget {
               onPressed: () => ShareImage.share(
                 context,
                 ShareCard(
-                  kicker: position == 1 ? "¡CAMPEÓN!" : position == 2 ? "¡SUBCAMPEÓN!" : "¡3ER LUGAR!",
+                  kicker: position == 1 ? "¡Campeón!" : position == 2 ? "¡SUBCAMPEÓN!" : "¡3ER LUGAR!",
                   accent: _tone[position] ?? _gold,
                   icon: Icons.emoji_events_rounded,
                   headline: (data["category_label"] ?? "").toString(),
@@ -562,12 +562,12 @@ class _ResultPage extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 const Text(
-                  "PODIO",
+                  "Podio",
                   style: TextStyle(
                     color: AppColors.scorifyTextMuted,
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    letterSpacing: 1.2,
+                    letterSpacing: 0.3,
                   ),
                 ),
               ],

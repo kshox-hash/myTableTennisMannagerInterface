@@ -14,6 +14,7 @@ class StaggerIn extends StatefulWidget {
   static const _step = Duration(milliseconds: 25);
   static const _maxDelayed = 4; // después del 4.º bloque ya no se espera más
   static const _duration = Duration(milliseconds: 220);
+  static const animate = false;
 
   @override
   State<StaggerIn> createState() => _StaggerInState();
@@ -42,6 +43,7 @@ class _StaggerInState extends State<StaggerIn> with SingleTickerProviderStateMix
   }
 
   void _start() {
+    if (!StaggerIn.animate) return;
     final i = widget.index.clamp(0, StaggerIn._maxDelayed);
     Future.delayed(StaggerIn._step * i, () {
       if (mounted) _c.forward();
@@ -57,6 +59,9 @@ class _StaggerInState extends State<StaggerIn> with SingleTickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
+    // Estilo flat: sin animación de entrada, la pantalla aparece de una
+    // (más rápido). Para volver a animar, poner [animate] en true.
+    if (!StaggerIn.animate) return widget.child;
     // FadeTransition (no Opacity): más liviano de pintar en cada cuadro.
     return FadeTransition(
       opacity: _t,

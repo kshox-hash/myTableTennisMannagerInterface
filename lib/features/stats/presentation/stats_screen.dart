@@ -218,7 +218,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                           children: [
                                             Text(
                                               "${streak.$1}",
-                                              style: TextStyle(fontFamily: AppTypography.display, fontSize: 54, height: 0.9, fontWeight: FontWeight.w600, color: streak.$2 ? _fire : AppColors.scorifyNegative),
+                                              style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 41, height: 1, fontWeight: FontWeight.w700, color: streak.$2 ? _fire : AppColors.scorifyNegative),
                                             ),
                                             const SizedBox(width: 12),
                                             Expanded(
@@ -240,8 +240,8 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                             ],
                                             const Spacer(),
                                             Text(
-                                              form.length == 1 ? "ÚLTIMO PARTIDO" : "ÚLTIMOS ${form.length}",
-                                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 1, color: AppColors.scorifyTextFaint),
+                                              form.length == 1 ? "Último partido" : "ÚLTIMOS ${form.length}",
+                                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: AppColors.scorifyTextFaint),
                                             ),
                                           ],
                                         ),
@@ -286,10 +286,10 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                           Text(
                                             "${setsWon - setsLost >= 0 ? "+" : ""}${setsWon - setsLost}",
                                             style: TextStyle(
-                                              fontFamily: AppTypography.display,
-                                              fontSize: 30,
+                                              fontFamily: AppTypography.display, letterSpacing: -0.5,
+                                              fontSize: 23,
                                               height: 1,
-                                              fontWeight: FontWeight.w600,
+                                              fontWeight: FontWeight.w700,
                                               color: setsWon >= setsLost ? AppColors.scorifyText : AppColors.scorifyNegative,
                                             ),
                                           ),
@@ -345,7 +345,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
   }
 }
 
-/// Un total del resumen: número grande (Teko) y su nombre, en caja de panel.
+/// Un total del resumen: número grande y su nombre, en caja de panel.
 class _StatBox extends StatelessWidget {
   final String value;
   final String label;
@@ -358,13 +358,13 @@ class _StatBox extends StatelessWidget {
         decoration: panelBox(),
         child: Column(
           children: [
-            Text(value, style: TextStyle(fontFamily: AppTypography.display, fontSize: 30, height: 1, fontWeight: FontWeight.w600, color: color)),
+            Text(value, style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 23, height: 1, fontWeight: FontWeight.w700, color: color)),
             const SizedBox(height: 4),
             Text(
-              label.toUpperCase(),
+              label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 0.8, color: AppColors.scorifyTextMuted),
+              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: AppColors.scorifyTextMuted),
             ),
           ],
         ),
@@ -400,7 +400,7 @@ class _BigNumber extends StatelessWidget {
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          Text(value, style: TextStyle(fontFamily: AppTypography.display, fontSize: 36, height: 1, fontWeight: FontWeight.w600, color: color)),
+          Text(value, style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 27, height: 1, fontWeight: FontWeight.w700, color: color)),
           Text(label, style: _muted),
         ],
       );
@@ -446,7 +446,7 @@ class _RecentRow extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text("$mine-$theirs",
-                style: const TextStyle(fontFamily: AppTypography.display, fontSize: 24, height: 1, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                style: const TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 18, height: 1, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
             const SizedBox(width: 4),
             const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.scorifyTextFaint),
           ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 
@@ -37,14 +38,7 @@ class EFBottomNav extends StatelessWidget {
     // encendida verde azulado arriba, como el borde superior de las tarjetas.
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: backgroundColor,
-        gradient: backgroundColor == null
-            ? const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFF0E1D20), Color(0xFF080D0F)],
-              )
-            : null,
+        color: backgroundColor ?? AppColors.scorifyNavbar,
         border: const Border(top: BorderSide(color: Panel.topLine)),
       ),
       child: SafeArea(
@@ -58,7 +52,10 @@ class EFBottomNav extends StatelessWidget {
                 child: _NavTab(
                   item: item,
                   isActive: i == currentIndex,
-                  onTap: () => onTap(i),
+                  onTap: () {
+                    if (i != currentIndex) HapticFeedback.selectionClick();
+                    onTap(i);
+                  },
                 ),
               );
             }),
@@ -85,13 +82,15 @@ class _NavTab extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // Flat: la pestaña activa lleva el ícono sobre una píldora tenue.
           Container(
-            height: 2,
-            width: 22,
-            margin: const EdgeInsets.only(bottom: 6),
-            color: isActive ? AppColors.scorifyMint : Colors.transparent,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            decoration: BoxDecoration(
+              color: isActive ? AppColors.scorifyMint.withValues(alpha: 0.14) : Colors.transparent,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Icon(item.icon, size: 21, color: color),
           ),
-          Icon(item.icon, size: 21, color: color),
           const SizedBox(height: 4),
           Text(
             item.label,

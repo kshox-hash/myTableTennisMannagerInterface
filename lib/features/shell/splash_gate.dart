@@ -1,4 +1,3 @@
-import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/app_update.dart";
 import "package:flutter/foundation.dart";
 import "package:myttmi/features/auth/api/auth_api.dart";
@@ -10,15 +9,13 @@ import "package:myttmi/routes/cyber_page_route.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/storage/session_storage.dart";
-import "package:myttmi/core/ui/app_button.dart";
 import "package:myttmi/features/auth/presentation/login_screen.dart";
 import "package:myttmi/features/shell/app_shell.dart";
 import "package:myttmi/features/shell/shell_preload.dart";
 import "package:myttmi/features/profile/api/profile_api.dart";
 
-/// Al abrir la app: primero el logo al medio sobre negro (~1 s, aquí irá su
-/// animación) y después, con un fundido, la pantalla de carga (estilo FIFA):
-/// la foto del jugador, el logo arriba y la barra abajo.
+/// Al abrir la app: primero la marca al medio sobre el fondo liso y después,
+/// con un fundido, la misma marca con una barra fina de progreso (flat).
 ///
 /// La app (AppShell) se arma POR DEBAJO de la pantalla de carga, y esta se
 /// quita recién cuando el Inicio terminó de traer todos sus datos: así el
@@ -48,7 +45,7 @@ class _SplashGateState extends State<SplashGate> {
   bool _fading = false;
   bool _gone = false;
 
-  String _status = "PREPARANDO LA MESA…";
+  String _status = "Preparando…";
   double _base = 0.08; // avance propio (sesión); el resto lo aporta el Inicio
 
   void _step(double target, String status) {
@@ -87,11 +84,11 @@ class _SplashGateState extends State<SplashGate> {
   void _onProgress() {
     final p = ShellPreload.progress.value;
     if (p >= 1) {
-      _step(1, "¡A JUGAR!");
+      _step(1, "Listo");
     } else if (p >= 0.6) {
-      _step(0.35 + p * 0.6, "CALENTANDO…");
+      _step(0.35 + p * 0.6, "Cargando tu Inicio…");
     } else if (p > 0) {
-      _step(0.35 + p * 0.6, "AJUSTANDO LA RED…");
+      _step(0.35 + p * 0.6, "Conectando…");
     }
   }
 
@@ -123,7 +120,7 @@ class _SplashGateState extends State<SplashGate> {
 
   Future<void> _toLogin() async {
     if (await _devAutoLogin()) return;
-    _step(1, "¡A JUGAR!");
+    _step(1, "Listo");
     await _waitMinShown();
     if (!mounted) return;
     Navigator.pushReplacement(context, CyberPageRoute(waitForData: false, builder: (_) => const LoginScreen()));
@@ -143,7 +140,7 @@ class _SplashGateState extends State<SplashGate> {
     }
     final storage = SessionStorage();
     if (!widget.afterLogin) {
-      _step(0.15, "PREPARANDO LA MESA…");
+      _step(0.15, "Preparando…");
       final token = await storage.getToken();
       final role = await storage.getRole();
       Monitoring.setUser(await storage.getUserId());
@@ -164,7 +161,7 @@ class _SplashGateState extends State<SplashGate> {
       // esta respuesta y recién ahí arrancaba el Inicio: un viaje de red
       // entero sumado a la carga).
       final me = ProfileApi().getMe().then((_) => true, onError: (e) => !e.toString().contains("HTTP 401"));
-      _step(0.35, "AJUSTANDO LA RED…");
+      _step(0.35, "Conectando…");
       setState(() => _shell = true);
       if (!await me) {
         await storage.clear();
@@ -174,11 +171,11 @@ class _SplashGateState extends State<SplashGate> {
       if (!mounted) return;
     } else {
       // Se arma la app por debajo; el Inicio empieza a traer sus datos.
-      _step(0.35, "AJUSTANDO LA RED…");
+      _step(0.35, "Conectando…");
       setState(() => _shell = true);
     }
     await ShellPreload.ready.timeout(_maxWait, onTimeout: () {});
-    _step(1, "¡A JUGAR!");
+    _step(1, "Listo");
     await _waitMinShown();
     await Future.delayed(const Duration(milliseconds: 100)); // que se vea el 100 %
     if (!mounted) return;
@@ -217,104 +214,63 @@ class _SplashGateState extends State<SplashGate> {
     );
   }
 
-  // Azules del borde de arriba y de abajo de la imagen de carga: rellenan
-  // lo que queda libre arriba y abajo.
-  static const _splashFill = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xFF0057B7), Color(0xFF096EA7)],
-  );
-
-  /// Imagen de carga (logo y "My Table Tennis Manager" ya vienen en ella).
-  /// Va al ancho de la pantalla para que el texto no se corte; arriba y abajo
-  /// queda el mismo azul, y los bordes de la imagen se funden en él.
-  Widget _splashImage(MediaQueryData mq) => DecoratedBox(
-        decoration: const BoxDecoration(gradient: _splashFill),
-        child: Center(
-          child: ShaderMask(
-            blendMode: BlendMode.dstIn,
-            shaderCallback: (r) => const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.transparent, Colors.black, Colors.black, Colors.transparent],
-              stops: [0, 0.12, 0.88, 1],
-            ).createShader(r),
-            child: Image(
-              image: ResizeImage(
-                const AssetImage("assets/images/loading_bg.jpg"),
-                width: (mq.size.width * mq.devicePixelRatio).round().clamp(360, 1024),
-              ),
-              width: mq.size.width,
-              fit: BoxFit.fitWidth,
-              gaplessPlayback: true,
-            ),
+  /// Marca al centro: el isotipo, "MyTTM" y la bajada. Flat: fondo liso del
+  /// tema (antes una foto azul con trazos neón estilo videojuego).
+  Widget _brand() => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset("assets/images/logo-mark.png", width: 76, height: 76, filterQuality: FilterQuality.medium),
+          const SizedBox(height: 18),
+          const Text(
+            "MyTTM",
+            style: TextStyle(fontFamily: AppTypography.display, fontSize: 28, fontWeight: FontWeight.w700, letterSpacing: -0.5, color: AppColors.scorifyText),
           ),
-        ),
+          const SizedBox(height: 4),
+          Text("Campeonatos de tenis de mesa", style: _small.copyWith(fontSize: 13)),
+        ],
       );
 
-  /// Fase 1: la imagen de carga sola.
+  /// Fase 1: la marca sola.
   Widget _logoIntro() => KeyedSubtree(
         key: const ValueKey("intro"),
-        child: _splashImage(MediaQuery.of(context)),
+        child: Center(child: _brand()),
       );
 
-  /// Fase 2: la misma imagen con la barra de carga abajo.
+  /// Fase 2: la marca con una barra fina de progreso debajo (sin porcentaje).
   Widget _loading(MediaQueryData mq) {
-    return Stack(
-        key: const ValueKey("loading"),
-        fit: StackFit.expand,
+    return Center(
+      key: const ValueKey("loading"),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _splashImage(mq),
-          // Barra de carga abajo.
-          Positioned(
-            left: 28,
-            right: 28,
-            bottom: mq.padding.bottom + 36,
-            child: TweenAnimationBuilder<double>(
-                  tween: Tween(end: _base),
-                  duration: const Duration(milliseconds: 900),
-                  curve: Curves.easeOutCubic,
-                  builder: (_, v, __) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(child: Text(_status, style: _small)),
-                          Text("Cargando ${(v * 100).round()} %", style: _small),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      // Barra: fondo oscuro translúcido, avance en degradado.
-                      Container(
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(Panel.buttonRadius),
-                        ),
-                        alignment: Alignment.centerLeft,
-                        child: FractionallySizedBox(
-                          widthFactor: v.clamp(0.0, 1.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: appButtonGradient,
-                              borderRadius: BorderRadius.circular(Panel.radius),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+          _brand(),
+          const SizedBox(height: 36),
+          TweenAnimationBuilder<double>(
+            tween: Tween(end: _base),
+            duration: const Duration(milliseconds: 900),
+            curve: Curves.easeOutCubic,
+            builder: (_, v, __) => Container(
+              width: 140,
+              height: 3,
+              decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(99)),
+              alignment: Alignment.centerLeft,
+              child: FractionallySizedBox(
+                widthFactor: v.clamp(0.0, 1.0),
+                child: Container(decoration: BoxDecoration(color: AppColors.scorifyMint, borderRadius: BorderRadius.circular(99))),
+              ),
+            ),
           ),
+          const SizedBox(height: 12),
+          Text(_status, style: _small),
         ],
+      ),
     );
   }
-
   static const TextStyle _small = TextStyle(
     fontFamily: AppTypography.body,
     fontSize: 11.5,
     fontWeight: FontWeight.w500,
-    letterSpacing: 0.6,
+    letterSpacing: 0.3,
     color: AppColors.scorifyTextMuted,
   );
 }

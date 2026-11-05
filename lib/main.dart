@@ -49,15 +49,20 @@ class MyApp extends StatelessWidget {
             backgroundColor: AppColors.scorifyMint,
             foregroundColor: AppColors.scorifyOnMint,
             textStyle: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w600, fontSize: 14),
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.radius))),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.buttonRadius))),
           ),
         ),
+        // Flat: diálogos y hojas grises lisos, redondeados, sin sombra ni tinte.
+        dialogTheme: const DialogThemeData(backgroundColor: AppColors.scorifyDeep, surfaceTintColor: Colors.transparent, shape: Panel.dialogShape),
+        bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Panel.sheetColor, surfaceTintColor: Colors.transparent, shape: Panel.sheetShape),
+        cardTheme: const CardThemeData(color: AppColors.scorifyCardFill, surfaceTintColor: Colors.transparent, elevation: 0, margin: EdgeInsets.zero),
+        dividerColor: AppColors.scorifyCardBorder,
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.scorifyMint,
             foregroundColor: AppColors.scorifyOnMint,
             textStyle: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w600, fontSize: 14),
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.radius))),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.buttonRadius))),
           ),
         ),
       ),

@@ -109,14 +109,9 @@ class _MatchRow extends StatelessWidget {
   String get _stage {
     final m = match;
     if (m.matchType == "group") {
-      final g = (m.groupName ?? "").replaceFirst(RegExp(r"^GR-?", caseSensitive: false), "");
-      return g.isEmpty ? "Grupo" : "Grupo $g";
+      return groupLabel(m.groupName);
     }
-    final r = m.round ?? 0, total = m.totalRounds ?? 0;
-    if (total > 0 && r == total) return "Final";
-    if (total > 0 && r == total - 1) return "Semifinal";
-    if (total > 0 && r == total - 2) return "Cuartos";
-    return matchRoundLabel(r);
+    return matchRoundLabel(m.round ?? 0, m.totalRounds);
   }
 
   @override

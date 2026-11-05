@@ -46,7 +46,7 @@ class ShareImage {
 
 /// Tarjeta vertical (formato historia) con el logro.
 class ShareCard extends StatelessWidget {
-  final String kicker; // "¡CAMPEÓN!" / "¡VICTORIA!"
+  final String kicker; // "¡Campeón!" / "¡Victoria!"
   final Color accent;
   final IconData icon;
   final String headline; // "Todo Competidor" / "3 - 1"

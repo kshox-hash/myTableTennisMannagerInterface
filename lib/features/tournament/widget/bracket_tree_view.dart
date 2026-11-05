@@ -1,3 +1,4 @@
+import "package:myttmi/core/constants/match_status_labels.dart";
 import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/player_actions.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
@@ -6,22 +7,8 @@ import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
 import 'package:myttmi/features/player/models/tournament_match_model.dart';
 
-const _roundLabel = {
-  1: "Final",
-  2: "Semifinal",
-  3: "Cuartos de final",
-  4: "Octavos de final",
-};
-
-String _roundTitle(int round, int totalRounds) {
-  // La ronda 0 es la "pre-llave": el partido que juegan los últimos
-  // clasificados para completar un cuadro que no es potencia de 2 (ej. 3 o
-  // 5 clasificados) — no es una ronda del cuadro real, así que no entra en
-  // el cálculo "final/semifinal/..." de las demás.
-  if (round == 0) return "Pre-llave";
-  final fromEnd = totalRounds - round + 1;
-  return _roundLabel[fromEnd] ?? "Ronda $round";
-}
+// La ronda 0 es la "pre-llave" (ver matchRoundLabel).
+String _roundTitle(int round, int totalRounds) => matchRoundLabel(round, totalRounds);
 
 /// Un lugar del cuadro: un partido que mandó el servidor o uno que todavía
 /// no tiene jugadores (el servidor no manda esos, p. ej. la final antes de
@@ -283,9 +270,9 @@ class _BracketTreeViewState extends State<BracketTreeView> {
                             SizedBox(
                               height: headerHeight,
                               child: Text(
-                                _roundTitle(r.round, totalRounds).toUpperCase(),
+                                _roundTitle(r.round, totalRounds),
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2, color: AppColors.scorifyTextMuted),
+                                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: AppColors.scorifyTextMuted),
                               ),
                             ),
                             SizedBox(

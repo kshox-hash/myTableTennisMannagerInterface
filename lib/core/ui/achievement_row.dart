@@ -94,7 +94,7 @@ class AchievementRow extends StatelessWidget {
               onPressed: () => ShareImage.share(
                 context,
                 ShareCard(
-                  kicker: a.position == 1 ? "¡CAMPEÓN!" : a.position == 2 ? "¡SUBCAMPEÓN!" : "¡3ER LUGAR!",
+                  kicker: a.position == 1 ? "¡Campeón!" : a.position == 2 ? "¡SUBCAMPEÓN!" : "¡3ER LUGAR!",
                   accent: a.position == 1 ? const Color(0xFFE0A526) : a.position == 2 ? const Color(0xFFC0C7CF) : const Color(0xFFC07A4A),
                   icon: Icons.emoji_events_rounded,
                   headline: a.categoryLabel,

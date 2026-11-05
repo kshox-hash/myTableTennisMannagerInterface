@@ -102,9 +102,9 @@ List<Widget> matchesByMonth(BuildContext context, List<PlayerMatchHistoryItem> i
               final isP1 = m.player1Id == ownerId;
               final d = DateTime.tryParse(m.playedAt ?? "")?.toLocal();
               final phase = m.groupName != null
-                  ? "Grupo ${m.groupName}"
+                  ? groupLabel(m.groupName)
                   : m.round != null
-                      ? matchRoundLabel(m.round!)
+                      ? matchRoundLabel(m.round!, m.totalRounds)
                       : matchStatusText(m.status, m.resultReason);
               return CompactMatchRow(
                 won: m.winnerId == null ? null : m.winnerId == ownerId,

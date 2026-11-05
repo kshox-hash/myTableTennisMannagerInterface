@@ -1,3 +1,4 @@
+import "package:myttmi/core/constants/match_status_labels.dart";
 import "package:myttmi/core/ui/avatar_cache.dart";
 import "package:myttmi/core/helpers/json_parse.dart";
 
@@ -41,7 +42,7 @@ class QueueMatch {
     if (groupName != null && groupName!.isNotEmpty) {
       return "$groupName · Partido $matchNumber";
     }
-    if (round != null) return "Ronda $round · Partido $matchNumber";
+    if (round != null) return "${matchRoundLabel(round!)} · Partido $matchNumber";
     return "Partido $matchNumber";
   }
 

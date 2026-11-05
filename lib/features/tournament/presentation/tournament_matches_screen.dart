@@ -697,7 +697,7 @@ class _PagedMatchListState extends State<_PagedMatchList> {
     final stage = m.groupName != null
         ? _groupLabel(m.groupName!)
         : m.round != null
-            ? "Llave · ${matchRoundLabel(m.round!)}"
+            ? "Llave · ${matchRoundLabel(m.round!, m.totalRounds)}"
             : "Llave";
     return "${m.categoryLabel}|$stage";
   }

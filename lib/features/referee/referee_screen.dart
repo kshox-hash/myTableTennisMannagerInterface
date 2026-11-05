@@ -7,6 +7,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
+import "package:myttmi/core/constants/match_status_labels.dart";
 import "package:myttmi/core/ui/app_toast.dart";
 import "package:myttmi/core/ui/confirm_dialog.dart";
 import "package:myttmi/core/ui/list_states.dart";
@@ -89,14 +90,22 @@ class _RefereeScreenState extends State<RefereeScreen> {
 
   int get _toWin => ((_m?.bestOfSets ?? 3) / 2).ceil();
 
-  /// Set legal: se gana con 11; desde 10-10 hay que ganar por 2 (12-10, 13-11…).
-  static bool _legal(int a, int b) {
+  /// Puntos para ganar un set: 11, o 21 en el formato "1 set a 21".
+  int get _pts => _m?.pointsPerSet == 21 ? 21 : 11;
+
+  /// Set legal: se gana con 11 (o 21); desde 10-10 (20-20) hay que ganar por
+  /// 2 (12-10, 13-11…). Misma regla que el servidor (isLegalSetScore).
+  bool _legal(int a, int b) {
     if (a == b) return false;
     final w = a > b ? a : b, l = a > b ? b : a;
-    if (w < 11) return false;
-    if (w == 11) return l <= 9;
+    if (w < _pts) return false;
+    if (w == _pts) return l <= _pts - 2;
     return l == w - 2;
   }
+
+  /// Faltan jugadores (el cruce de la llave todavía no se definió): no se
+  /// puede anotar ni confirmar.
+  bool get _missingPlayers => _m?.player1Id == null || _m?.player2Id == null;
 
   (int, int)? _set(int i) {
     final x = int.tryParse(_a[i].text.trim()), y = int.tryParse(_b[i].text.trim());
@@ -132,7 +141,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
       if (i > valid.length) return "Set ${i + 1}: completa antes los sets anteriores.";
       if (i == valid.length) {
         if (s == null) return null; // a medio escribir
-        if (!_legal(s.$1, s.$2)) return "Set ${i + 1}: ${s.$1}-${s.$2} no es válido (se gana con 11 y 2 de diferencia).";
+        if (!_legal(s.$1, s.$2)) return "Set ${i + 1}: ${s.$1}-${s.$2} no es válido (se gana con $_pts y 2 de diferencia).";
       }
       if (i >= valid.length && _decided(valid)) return "El partido ya está decidido: borra el set ${i + 1}.";
     }
@@ -174,6 +183,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
         matchId: widget.matchId,
         winnerId: (w1 ? m.player1Id : m.player2Id)!,
         sets: sets,
+        bestOfSets: m.bestOfSets,
       );
       if (!mounted) return;
       setState(() {
@@ -182,6 +192,46 @@ class _RefereeScreenState extends State<RefereeScreen> {
       });
     } catch (e) {
       if (mounted) showToast(context, e.toString().replaceFirst("Exception: ", ""), error: true);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  /// Partido no jugado (no se presentó, lesión, abandono, descalificación):
+  /// el árbitro elige quién se lo lleva y el motivo; queda como W.O. oficial,
+  /// igual que si lo cerrara el organizador.
+  Future<void> _walkover() async {
+    final m = _m!;
+    final choice = await showModalBottomSheet<(bool, String)>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => _WalkoverSheet(player1: m.player1Name, player2: m.player2Name),
+    );
+    if (choice == null || !mounted) return;
+    final (p1Wins, reason) = choice;
+    final ok = await confirmAction(
+      context,
+      title: "Confirmar W.O.",
+      message: "Gana ${p1Wins ? m.player1Name : m.player2Name} por ${resultReasonLabel[reason]?.toLowerCase() ?? "W.O."} de ${p1Wins ? m.player2Name : m.player1Name}.\n\nSe guarda como resultado oficial.",
+      confirmLabel: "Confirmar",
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _saving = true);
+    try {
+      await _api.submitResult(
+        matchType: widget.matchType,
+        matchId: widget.matchId,
+        winnerId: (p1Wins ? m.player1Id : m.player2Id)!,
+        sets: const [],
+        resultReason: reason,
+        bestOfSets: m.bestOfSets,
+        winnerIsPlayer1: p1Wins,
+      );
+      if (!mounted) return;
+      await _load();
+      if (mounted) setState(() => _thanked = true);
+    } catch (e) {
+      if (mounted) showToast(context, e.toString(), error: true);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -217,8 +267,16 @@ class _RefereeScreenState extends State<RefereeScreen> {
       return ErrorStateView(message: "No se pudo abrir el partido.\n${_error ?? ""}", onRetry: _load);
     }
     final m = _m!;
+    if (_missingPlayers && !_done) {
+      return const EmptyState(
+        icon: Icons.hourglass_top_rounded,
+        message: "Faltan jugadores: este partido todavía no tiene a los dos definidos. Vuelve cuando el organizador arme el cruce.",
+      );
+    }
     final valid = _validPrefix;
-    final s1 = _wins(valid, 1), s2 = _wins(valid, 2);
+    final wo = m.status == "walkover";
+    // W.O.: no hay sets; el marcador muestra los sets que asigna el servidor.
+    final s1 = wo ? m.setsPlayer1 : _wins(valid, 1), s2 = wo ? m.setsPlayer2 : _wins(valid, 2);
     final decided = _decided(valid);
     final problem = _problem;
     final current = decided ? -1 : valid.length; // set que se está jugando
@@ -249,7 +307,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
                 spacing: 6,
                 runSpacing: 6,
                 children: [
-                  if (m.tableNumber != null) _chip("MESA ${m.tableNumber}", AppColors.scorifyMint),
+                  if (m.tableNumber != null) _chip("Mesa ${m.tableNumber}", AppColors.scorifyMint),
                   _chip(m.categoryType, AppColors.scorifyTextMuted),
                   _chip("Mejor de ${m.bestOfSets}", AppColors.scorifyTextMuted),
                 ],
@@ -269,8 +327,8 @@ class _RefereeScreenState extends State<RefereeScreen> {
                             fontWeight: FontWeight.w700,
                             color: decided ? AppColors.scorifyButterfly : AppColors.scorifyText,
                           )),
-                      const Text("SETS",
-                          style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.4, color: AppColors.scorifyTextMuted)),
+                      const Text("Sets",
+                          style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: AppColors.scorifyTextMuted)),
                     ],
                   ),
                   Expanded(child: _player(m.player2Id, m.player2Name, s2 > s1)),
@@ -302,7 +360,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
                               fontFamily: AppTypography.body,
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              letterSpacing: 0.8,
+                              letterSpacing: 0.3,
                               color: i == current ? AppColors.scorifyMint : AppColors.scorifyTextMuted,
                             )),
                       ),
@@ -342,21 +400,39 @@ class _RefereeScreenState extends State<RefereeScreen> {
             gradient: _thanked ? AppColors.featuredGradient : AppColors.cardGradient,
             child: Text(
               _thanked
-                  ? "Ganó ${s1 >= s2 ? m.player1Name : m.player2Name} ${s1 >= s2 ? s1 : s2}-${s1 >= s2 ? s2 : s1}. El resultado quedó guardado como oficial. Tu ayuda hace que el campeonato avance a tiempo."
-                  : "Ganó ${s1 >= s2 ? m.player1Name : m.player2Name} ${s1 >= s2 ? s1 : s2}-${s1 >= s2 ? s2 : s1}. El resultado ya está cargado.",
+                  ? "${_resultLine(m, s1, s2, wo)} El resultado quedó guardado como oficial. Tu ayuda hace que el campeonato avance a tiempo."
+                  : "${_resultLine(m, s1, s2, wo)} El resultado ya está cargado.",
               style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, height: 1.4, color: AppColors.scorifyText),
             ),
           )
-        else
+        else ...[
           AppButton(
             label: "Confirmar resultado",
             icon: Icons.check_rounded,
-            onPressed: decided && problem == null ? _confirm : null,
+            onPressed: decided && problem == null && !_saving ? _confirm : null,
             loading: _saving,
             height: 48,
           ),
+          const SizedBox(height: 10),
+          AppButton.outline(
+            label: "Partido no jugado (W.O.)",
+            icon: Icons.person_off_rounded,
+            onPressed: _saving ? null : _walkover,
+          ),
+        ],
       ],
     );
+  }
+
+  /// "Ganó Juan Pérez 3-1." o, si fue W.O., "Ganó Juan Pérez por W.O. (lesión)."
+  String _resultLine(MatchDetail m, int s1, int s2, bool wo) {
+    final p1 = wo ? m.winnerId == m.player1Id : s1 >= s2;
+    final name = p1 ? m.player1Name : m.player2Name;
+    if (wo) {
+      final why = resultReasonLabel[m.resultReason];
+      return "Ganó $name por W.O.${why != null ? " (${why.toLowerCase()})" : ""}.";
+    }
+    return "Ganó $name ${p1 ? s1 : s2}-${p1 ? s2 : s1}.";
   }
 
   Widget _chip(String text, Color c) => PanelChip(label: text, color: c, fontSize: 11.5);
@@ -450,7 +526,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
   }
 }
 
-/// "EN VIVO" con punto que late mientras se juega; "DECIDIDO" al final.
+/// "En vivo" con punto que late mientras se juega; "Decidido" al final.
 class _LiveBadge extends StatefulWidget {
   final bool decided;
   final bool started;
@@ -472,8 +548,8 @@ class _LiveBadgeState extends State<_LiveBadge> with SingleTickerProviderStateMi
   @override
   Widget build(BuildContext context) {
     if (widget.decided) {
-      return const Text("DECIDIDO",
-          style: TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 1, color: AppColors.scorifyButterfly));
+      return const Text("Decidido",
+          style: TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.scorifyButterfly));
     }
     if (!widget.started) return const SizedBox.shrink();
     return Row(
@@ -484,9 +560,72 @@ class _LiveBadgeState extends State<_LiveBadge> with SingleTickerProviderStateMi
           child: Container(width: 8, height: 8, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.scorifyNegative)),
         ),
         const SizedBox(width: 6),
-        const Text("EN VIVO",
-            style: TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 1, color: AppColors.scorifyNegative)),
+        const Text("En vivo",
+            style: TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.scorifyNegative)),
       ],
+    );
+  }
+}
+
+/// Elegir quién se lleva un partido no jugado y por qué.
+class _WalkoverSheet extends StatefulWidget {
+  final String player1;
+  final String player2;
+  const _WalkoverSheet({required this.player1, required this.player2});
+
+  @override
+  State<_WalkoverSheet> createState() => _WalkoverSheetState();
+}
+
+class _WalkoverSheetState extends State<_WalkoverSheet> {
+  bool? _p1Wins;
+  String _reason = "no_show";
+
+  @override
+  Widget build(BuildContext context) {
+    Widget option(String label, bool selected, VoidCallback onTap) => Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(Panel.buttonRadius),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: panelBox(selected: selected),
+              child: Row(
+                children: [
+                  Icon(selected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+                      size: 20, color: selected ? AppColors.scorifyMint : AppColors.scorifyTextMuted),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(label, style: AppTypography.bodyText)),
+                ],
+              ),
+            ),
+          ),
+        );
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text("Partido no jugado", style: AppTypography.h1.copyWith(fontSize: 18)),
+            const SizedBox(height: 14),
+            Text("¿Quién se lleva el partido?", style: AppTypography.bodyMuted),
+            const SizedBox(height: 8),
+            option(widget.player1, _p1Wins == true, () => setState(() => _p1Wins = true)),
+            option(widget.player2, _p1Wins == false, () => setState(() => _p1Wins = false)),
+            const SizedBox(height: 8),
+            Text("Motivo", style: AppTypography.bodyMuted),
+            const SizedBox(height: 8),
+            for (final e in resultReasonLabel.entries) option(e.value, _reason == e.key, () => setState(() => _reason = e.key)),
+            const SizedBox(height: 8),
+            AppButton(
+              label: "Continuar",
+              onPressed: _p1Wins == null ? null : () => Navigator.pop(context, (_p1Wins!, _reason)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

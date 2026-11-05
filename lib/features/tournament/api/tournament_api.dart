@@ -1,4 +1,5 @@
 import "dart:convert";
+import "package:flutter/foundation.dart";
 import "package:myttmi/core/api/api_http.dart";
 
 import "package:myttmi/core/constants/app_config.dart";
@@ -23,6 +24,13 @@ class TournamentsPage {
 }
 
 class TournamentApi {
+  /// Sube cada vez que el jugador se inscribe o anula una inscripción (desde
+  /// cualquier pantalla). El Inicio y el Calendario lo escuchan y se ponen
+  /// al día: antes, si te inscribías desde un campeonato abierto encima del
+  /// Inicio (próximo desafío, aviso, link compartido) y volvías atrás, la
+  /// pestaña no cambiaba y "Mis campeonatos" seguía sin el campeonato.
+  static final enrollmentsChanged = ValueNotifier<int>(0);
+
   final String baseUrl;
 
   TournamentApi({String? baseUrl}) : baseUrl = baseUrl ?? AppConfig.baseUrl;
@@ -171,6 +179,7 @@ class TournamentApi {
       } catch (_) {}
       throw Exception(msg);
     }
+    enrollmentsChanged.value++;
   }
 
   Future<void> subscribeToCategory({
@@ -210,5 +219,6 @@ class TournamentApi {
     if (decoded["ok"] != true) {
       throw Exception(decoded["message"] ?? "No se pudo suscribir");
     }
+    enrollmentsChanged.value++;
   }
 }

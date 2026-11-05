@@ -144,7 +144,7 @@ class GroupFullView {
   });
 
   String nameFor(String? userId) {
-    if (userId == null) return "Vacante";
+    if (userId == null) return "Por definir";
     final m = members.where((m) => m.idUser == userId);
     return m.isEmpty ? "Jugador" : m.first.displayName;
   }
@@ -172,7 +172,7 @@ class CategoryGroupsView {
   CategoryGroupsView({required this.groups});
 
   String nameFor(String? userId) {
-    if (userId == null) return "Vacante";
+    if (userId == null) return "Por definir";
     for (final g in groups) {
       final m = g.members.where((m) => m.idUser == userId);
       if (m.isNotEmpty) return m.first.displayName;

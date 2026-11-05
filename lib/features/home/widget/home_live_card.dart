@@ -121,8 +121,8 @@ class _Names extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "${title.toUpperCase()} · ${people.length}",
-          style: TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 1.1, color: color),
+          "$title · ${people.length}",
+          style: TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: color),
         ),
         const SizedBox(height: 8),
         if (people.isEmpty)

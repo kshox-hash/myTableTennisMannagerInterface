@@ -13,12 +13,12 @@ class SpinSectionLabel extends StatelessWidget {
         Container(width: 3, height: 13, color: AppColors.scorifyMint),
         const SizedBox(width: 8),
         Text(
-          text.toUpperCase(),
+          text,
           style: TextStyle(
             color: AppColors.scorifyTextMuted,
             fontSize: 11.5,
             fontWeight: FontWeight.w600,
-            letterSpacing: 1.5,
+            letterSpacing: 0.3,
           ),
         ),
       ],

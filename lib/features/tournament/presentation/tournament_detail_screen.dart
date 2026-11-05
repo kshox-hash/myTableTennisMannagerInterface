@@ -77,6 +77,12 @@ String _genderLabel(String g) => switch (g) {
       _ => g,
     };
 
+/// La categoría acepta inscripciones online: en inscripciones y abierta, o
+/// en grupos con la inscripción reabierta por el organizador (el servidor
+/// la acepta hasta que se arma la llave).
+bool _acceptsEnrollment(TournamentCategory c) =>
+    c.status == "active" && (c.phase == "enrollment" || c.phase == "groups");
+
 class TournamentDetailScreen extends StatefulWidget {
   final Tournament tournament;
 
@@ -123,6 +129,10 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
   // (grupos generados, llave o terminada). Antes de eso no hay partidos ni
   // mesas que mirar, así que esos accesos se esconden.
   bool get _started => _tournament.categories.any((c) => c.phase != "enrollment");
+
+  /// Alguna categoría acepta inscripciones ahora (misma regla que el botón
+  /// "Inscribirme" de cada categoría).
+  bool get _anyOpen => !_tournament.isCancelled && _tournament.categories.any(_acceptsEnrollment);
 
   Future<void> _unsubscribe(TournamentCategory c) async {
     final ok = await confirmAction(
@@ -243,7 +253,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                       physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsets.only(bottom: 24),
                       children: [
-                        _HeroCard(tournament: t, started: _started),
+                        _HeroCard(tournament: t, started: _started, anyOpen: _anyOpen),
                         const SizedBox(height: 14),
                         // Liga: la tabla y las fechas viven en su página (igual que en la web).
                         if (t.isLeague) ...[
@@ -267,9 +277,11 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                               Expanded(child: _QuickLink(icon: Icons.people_alt_rounded, label: "Jugadores", onTap: () => _go(AppRoutes.tournamentPlayers))),
                             ],
                           ),
-                        ] else
-                          const _NoticeBanner(
-                            text: "Inscripciones abiertas. Los grupos, partidos y mesas aparecen cuando el organizador cierre las inscripciones.",
+                        ] else if (!t.isCancelled)
+                          _NoticeBanner(
+                            text: _anyOpen
+                                ? "Inscripciones abiertas. Los grupos, partidos y mesas aparecen cuando el organizador cierre las inscripciones."
+                                : "Inscripciones cerradas. Los grupos, partidos y mesas aparecen cuando el organizador arme los grupos.",
                           ),
                         const SizedBox(height: 22),
                         const _SectionLabel("Categorías"),
@@ -280,6 +292,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                           for (final c in cats) ...[
                             _CategoryCard(
                               category: c,
+                              tournamentCancelled: t.isCancelled,
                               participants: _participants.where((p) => p.idCategory == c.idCategory).toList(),
                               participantsLoaded: _participantsLoaded,
                               subscribing: _subscribingId == c.idCategory,
@@ -313,7 +326,8 @@ Future<void> _whatsApp(BuildContext context, Tournament t) async {
 class _HeroCard extends StatelessWidget {
   final Tournament tournament;
   final bool started;
-  const _HeroCard({required this.tournament, required this.started});
+  final bool anyOpen;
+  const _HeroCard({required this.tournament, required this.started, required this.anyOpen});
 
   @override
   Widget build(BuildContext context) {
@@ -329,7 +343,9 @@ class _HeroCard extends StatelessWidget {
             ? ("Finalizado", AppColors.scorifySurface2, AppColors.scorifyTextMuted)
             : started
                 ? ("En juego", AppColors.scorifyButterfly, AppColors.scorifyOnButterfly)
-                : ("Inscripciones abiertas", AppColors.scorifyMint, AppColors.scorifyOnMint);
+                : anyOpen
+                    ? ("Inscripciones abiertas", AppColors.scorifyMint, AppColors.scorifyOnMint)
+                    : ("Inscripciones cerradas", AppColors.scorifyPending, AppColors.scorifyOnMint);
 
     return GlassCard(
       padding: const EdgeInsets.all(18),
@@ -411,6 +427,7 @@ class _HeroCard extends StatelessWidget {
 
 class _CategoryCard extends StatefulWidget {
   final TournamentCategory category;
+  final bool tournamentCancelled;
   final List<TournamentParticipant> participants;
   final bool participantsLoaded;
   final bool subscribing;
@@ -423,6 +440,7 @@ class _CategoryCard extends StatefulWidget {
 
   const _CategoryCard({
     required this.category,
+    this.tournamentCancelled = false,
     required this.participants,
     required this.participantsLoaded,
     required this.subscribing,
@@ -452,9 +470,11 @@ class _CategoryCardState extends State<_CategoryCard> {
     // reabrirla (hasta armar la llave): entonces también se ofrece.
     final closedByOrganizer = c.phase == "enrollment" && c.status != "active";
     final lateOpen = c.phase == "groups" && c.status == "active";
-    final inEnrollment = (c.phase == "enrollment" && !closedByOrganizer) || lateOpen;
+    // Campeonato cancelado: nadie se inscribe (el servidor lo rechaza).
+    final inEnrollment = !widget.tournamentCancelled && _acceptsEnrollment(c);
     final full = c.quotas != null && enrolledCount >= c.quotas!;
     final (phaseLabel, phaseColor) = switch (c.phase) {
+      _ when widget.tournamentCancelled => ("Cancelada", AppColors.scorifyNegative),
       "enrollment" when closedByOrganizer => ("Inscripciones cerradas", AppColors.scorifyPending),
       "enrollment" => ("Inscripciones", AppColors.scorifyMint),
       "groups" when lateOpen => ("Grupos · inscripciones abiertas", AppColors.scorifyMint),
@@ -694,14 +714,19 @@ class _CategoryCardState extends State<_CategoryCard> {
           const SizedBox(height: 6),
           Row(
             children: [
-              if (inEnrollment)
+              // Anular: solo antes de armar los grupos (con grupos el servidor
+              // lo rechaza: "habla con el organizador"), aunque la inscripción
+              // esté cerrada o reabierta.
+              if (c.phase == "enrollment" && !widget.tournamentCancelled)
                 TextButton(
                   onPressed: widget.subscribing ? null : widget.onUnsubscribe,
                   style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 36)),
                   child: Text("Anular inscripción", style: _meta.copyWith(color: AppColors.scorifyNegative, fontWeight: FontWeight.w600)),
                 ),
               const Spacer(),
-              if (!inEnrollment)
+              // Con grupos o llave hay algo que mirar (también si la
+              // inscripción se reabrió en fase de grupos).
+              if (c.phase != "enrollment")
                 TextButton(
                   onPressed: widget.onOpen,
                   child: Text("Ver mi categoría", style: _meta.copyWith(color: AppColors.scorifyMint, fontWeight: FontWeight.w600)),
@@ -743,12 +768,19 @@ class _CategoryCardState extends State<_CategoryCard> {
         ],
       );
     }
+    if (widget.tournamentCancelled) {
+      return const AppButton(label: "Campeonato cancelado", onPressed: null);
+    }
     if (inEnrollment) {
       return AppButton(
         label: full ? "Cupos completos" : "Inscribirme",
         onPressed: full ? null : widget.onSubscribe,
         loading: widget.subscribing,
       );
+    }
+    // Cerrada antes de empezar: todavía no hay grupos que mirar.
+    if (c.phase == "enrollment") {
+      return const AppButton(label: "Inscripciones cerradas", onPressed: null);
     }
     return AppButton.outline(
       label: "Ver grupos y resultados",
@@ -809,9 +841,9 @@ class _Kpi extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(
-              fontFamily: AppTypography.display,
-              fontSize: 28,
-              fontWeight: FontWeight.w600,
+              fontFamily: AppTypography.display, letterSpacing: -0.5,
+              fontSize: 21,
+              fontWeight: FontWeight.w700,
               height: 1.0,
               color: AppColors.scorifyText,
             ),
