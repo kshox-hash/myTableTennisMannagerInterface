@@ -259,7 +259,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 style: TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                                             SizedBox(height: 2),
                                             Text("Así te verán los organizadores y rivales.",
-                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
+                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
                                           ],
                                         ),
                                       ),
@@ -308,7 +308,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                   const SizedBox(height: 14),
                                   _FormField(label: "País", child: _textInput(_countryCtrl, Icons.public_rounded)),
-                                  const SizedBox(height: 22),
+                                  const SizedBox(height: 20),
                                   Row(
                                     children: [
                                       Expanded(
@@ -748,7 +748,7 @@ class _DuesCardState extends State<_DuesCard> {
               children: [
                 Text(
                   last != null ? "Último pago: ${_covers(last, d.feeFrequency)}" : "Aún no hay pagos registrados",
-                  style: const TextStyle(color: AppColors.scorifyText, fontSize: 15, fontWeight: FontWeight.w600),
+                  style: const TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -782,7 +782,7 @@ class _ProfileHero extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, size: 14, color: AppColors.scorifyMint),
-              const SizedBox(width: 5),
+              const SizedBox(width: 4),
               Text(text, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
             ],
           ),
@@ -842,12 +842,12 @@ class _InfoTile extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
+                Text(label, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
                 const SizedBox(height: 2),
                 Text(value,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
               ],
             ),
           ),
@@ -871,7 +871,7 @@ class _FormField extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 6),
             child: Text(label,
-                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted)),
+                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted)),
           ),
           child,
         ],

@@ -26,7 +26,7 @@ enum _ViewMode { list, groups, bracket }
 
 const TextStyle _muted = TextStyle(
   fontFamily: AppTypography.body,
-  fontSize: 12.5,
+  fontSize: 12,
   fontWeight: FontWeight.w400,
   color: AppColors.scorifyTextMuted,
 );
@@ -384,7 +384,7 @@ class _Player extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: AppTypography.body,
-                fontSize: 13.5,
+                fontSize: 13,
                 height: 1.25,
                 fontWeight: winner ? FontWeight.w600 : FontWeight.w600,
                 color: AppColors.scorifyText,
@@ -589,13 +589,13 @@ class _Segmented extends StatelessWidget {
                       children: [
                         if (it.locked) ...[
                           const Icon(Icons.lock_rounded, size: 14, color: AppColors.scorifyTextFaint),
-                          const SizedBox(width: 5),
+                          const SizedBox(width: 4),
                         ],
                         Text(
                           it.label,
                           style: TextStyle(
                             fontFamily: AppTypography.body,
-                            fontSize: 13.5,
+                            fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: it.selected
                                 ? AppColors.scorifyText

@@ -58,7 +58,7 @@ class AppDrawer extends StatelessWidget {
                       it.label,
                       style: TextStyle(
                         fontFamily: AppTypography.body,
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: it.selected ? FontWeight.w700 : FontWeight.w500,
                         color: AppColors.scorifyText,
                       ),

@@ -16,7 +16,7 @@ class SpinSectionLabel extends StatelessWidget {
           text,
           style: TextStyle(
             color: AppColors.scorifyTextMuted,
-            fontSize: 11.5,
+            fontSize: 11,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.3,
           ),

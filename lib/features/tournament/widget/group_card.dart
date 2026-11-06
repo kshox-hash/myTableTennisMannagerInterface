@@ -24,8 +24,8 @@ class GroupCard extends StatelessWidget {
     return "Grupo ${m != null ? m.group(1) : name}";
   }
 
-  static const _num = TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.scorifyText);
-  static const _head = TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.scorifyTextFaint);
+  static const _num = TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyText);
+  static const _head = TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.scorifyTextFaint);
 
   @override
   Widget build(BuildContext context) {
@@ -64,12 +64,12 @@ class GroupCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(8, 2, 8, 4),
             child: Row(
               children: [
-                const SizedBox(width: 22),
+                const SizedBox(width: 20),
                 const Expanded(child: Text("Jugador", style: _head)),
                 stat("PJ", style: _head),
                 stat("G", style: _head),
                 stat("P", style: _head),
-                const SizedBox(width: 28),
+                const SizedBox(width: 24),
               ],
             ),
           ),
@@ -137,13 +137,13 @@ class GroupCard extends StatelessWidget {
                       me ? "${m.displayName} (tú)" : m.displayName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                     ),
                     if ((m.clubName ?? "").trim().isNotEmpty)
                       Text(m.clubName!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, color: AppColors.scorifyTextMuted)),
+                          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted)),
                   ],
                 ),
               ),
@@ -164,7 +164,7 @@ class GroupCard extends StatelessWidget {
     final p2 = group.nameFor(m.player2Id);
     TextStyle name(bool winner) => TextStyle(
           fontFamily: AppTypography.body,
-          fontSize: 12.5,
+          fontSize: 12,
           fontWeight: winner ? FontWeight.w700 : FontWeight.w500,
           color: played && !winner ? AppColors.scorifyTextMuted : AppColors.scorifyText,
         );
@@ -181,7 +181,7 @@ class GroupCard extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: AppTypography.body,
-                      fontSize: 11.5,
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                       color: m.tableNumber != null ? AppColors.scorifyLive : AppColors.scorifyTextFaint,
                     ),
@@ -202,7 +202,7 @@ class GroupCard extends StatelessWidget {
           row,
           if (points != null) ...[
             const SizedBox(height: 4),
-            Text(points, textAlign: TextAlign.center, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, color: AppColors.scorifyTextMuted)),
+            Text(points, textAlign: TextAlign.center, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted)),
           ],
         ],
       ),

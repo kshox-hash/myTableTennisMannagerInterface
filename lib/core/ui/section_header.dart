@@ -39,7 +39,7 @@ class SectionHeader extends StatelessWidget {
               actionLabel!,
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
-                fontSize: 12.5,
+                fontSize: 12,
                 color: AppColors.scorifyMint,
               ),
             ),

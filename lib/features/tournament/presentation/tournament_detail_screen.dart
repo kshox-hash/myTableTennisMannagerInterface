@@ -283,7 +283,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                                 ? "Inscripciones abiertas. Los grupos, partidos y mesas aparecen cuando el organizador cierre las inscripciones."
                                 : "Inscripciones cerradas. Los grupos, partidos y mesas aparecen cuando el organizador arme los grupos.",
                           ),
-                        const SizedBox(height: 22),
+                        const SizedBox(height: 20),
                         const _SectionLabel("Categorías"),
                         const SizedBox(height: 12),
                         if (cats.isEmpty)
@@ -497,7 +497,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                   c.categoryLabel,
                   style: const TextStyle(
                     fontFamily: AppTypography.body,
-                    fontSize: 17,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: AppColors.scorifyText,
                   ),
@@ -792,7 +792,7 @@ class _CategoryCardState extends State<_CategoryCard> {
 
 const TextStyle _meta = TextStyle(
   fontFamily: AppTypography.body,
-  fontSize: 12.5,
+  fontSize: 12,
   fontWeight: FontWeight.w400,
   color: AppColors.scorifyTextMuted,
 );
@@ -842,7 +842,7 @@ class _Kpi extends StatelessWidget {
             value,
             style: const TextStyle(
               fontFamily: AppTypography.display, letterSpacing: -0.5,
-              fontSize: 21,
+              fontSize: 20,
               fontWeight: FontWeight.w700,
               height: 1.0,
               color: AppColors.scorifyText,
@@ -867,8 +867,8 @@ class _Fact extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: _meta.copyWith(fontSize: 11.5)),
-          const SizedBox(height: 3),
+          Text(label, style: _meta.copyWith(fontSize: 11)),
+          const SizedBox(height: 2),
           Text(
             value,
             style: const TextStyle(

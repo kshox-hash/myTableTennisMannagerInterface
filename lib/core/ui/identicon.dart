@@ -1,20 +1,29 @@
 import "package:flutter/material.dart";
-import "package:myttmi/core/constants/app_colors.dart";
 
-/// Avatar tipo identicon (grilla 5x5 simétrica: mitad izquierda al azar,
-/// reflejada a la derecha) — mismo seed siempre da el mismo patrón, sin
-/// subir ni guardar ninguna imagen. Mismo concepto que el panel admin
-/// (IdenticonAvatar.tsx) — le da personalidad real a cada jugador en vez
-/// del círculo gris con un ícono/inicial genérica que había antes.
+/// Avatar por defecto de alguien sin foto: círculo con un degradado suave y
+/// la silueta de una persona en blanco (como el avatar por defecto de las
+/// apps conocidas). Cada persona recibe uno de varios tonos sobrios de la
+/// paleta, siempre el mismo para el mismo [seed] (su id), para que no se vean
+/// todos iguales.
+///
+/// Antes era un "identicon" (grilla 5×5 de cuadritos celeste/azul): se veía
+/// como la bandera de Croacia y poco profesional. Se mantiene el nombre de la
+/// clase para no tocar los lugares donde se usa.
 class Identicon extends StatelessWidget {
   final String seed;
   final double size;
 
   const Identicon({super.key, required this.seed, this.size = 40});
 
-  static const _gridSize = 5;
-  static const _half = 3;
-  static const _palette = [AppColors.scorifyMint, Color(0xFF35A7F2)];
+  // (claro, oscuro): tonos de la paleta verde/petróleo/azul de la app.
+  static const _tones = <(Color, Color)>[
+    (Color(0xFF1FA67A), Color(0xFF0E5C47)), // esmeralda
+    (Color(0xFF1C8C9C), Color(0xFF0D4D57)), // petróleo
+    (Color(0xFF2F7BC0), Color(0xFF173F66)), // azul
+    (Color(0xFF6A5FB8), Color(0xFF362F66)), // violeta
+    (Color(0xFF2E9E8E), Color(0xFF14544B)), // verde agua
+    (Color(0xFF4A7F9E), Color(0xFF223F51)), // acero
+  ];
 
   static int _hash(String input) {
     var hash = 0;
@@ -26,44 +35,20 @@ class Identicon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final safeSeed = seed.trim().isEmpty ? "jugador" : seed;
-    final radius = size * 0.22;
-
-    final grid = List.generate(_gridSize, (row) {
-      final left = List.generate(_half, (col) {
-        final on = _hash("$safeSeed-$row-$col") % 2 == 0;
-        final color =
-            _palette[_hash("$safeSeed-$row-$col-c") % _palette.length];
-        return (on: on, color: color);
-      });
-      return [...left, left[1], left[0]];
-    });
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: Container(
-        width: size,
-        height: size,
-        color: AppColors.scorifyDeep,
-        child: Column(
-          children: [
-            for (final row in grid)
-              Expanded(
-                child: Row(
-                  children: [
-                    for (final cell in row)
-                      Expanded(
-                        child: Container(
-                          color: cell.on
-                              ? cell.color.withOpacity(0.85)
-                              : Colors.transparent,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-          ],
-        ),
+    final (light, dark) = _tones[_hash(seed) % _tones.length];
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [light, dark]),
+      ),
+      clipBehavior: Clip.antiAlias,
+      // La silueta un poco más abajo del centro, "apoyada" en el borde
+      // inferior como en los avatares por defecto habituales.
+      child: Align(
+        alignment: const Alignment(0, 0.55),
+        child: Icon(Icons.person_rounded, size: size * 0.86, color: Colors.white.withValues(alpha: 0.88)),
       ),
     );
   }

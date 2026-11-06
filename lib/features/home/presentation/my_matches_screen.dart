@@ -97,7 +97,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
         SectionLabel("$title (${matches.length})"),
         const SizedBox(height: 10),
         for (final m in matches) _MatchRow(match: m, myUserId: widget.myUserId),
-        const SizedBox(height: 18),
+        const SizedBox(height: 16),
       ];
 }
 

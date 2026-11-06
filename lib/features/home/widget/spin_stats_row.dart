@@ -34,11 +34,11 @@ class SpinStatsRow extends StatelessWidget {
                     stats[i].value,
                     style: const TextStyle(
                       color: AppColors.scorifyText,
-                      fontSize: 19,
+                      fontSize: 18,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 2),
                   Text(
                     stats[i].label,
                     style: TextStyle(

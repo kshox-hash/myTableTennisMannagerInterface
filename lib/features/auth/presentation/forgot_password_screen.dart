@@ -105,14 +105,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             padding: const EdgeInsets.all(16),
             children: [
               const TopHeader(title: "Recuperar contraseña"),
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
               Text(
                 _codeSent
                     ? "Revisa tu correo (también la carpeta de spam) y escribe el código de 6 dígitos junto a tu contraseña nueva."
                     : "Escribe el email de tu cuenta y te enviaremos un código para crear una contraseña nueva.",
                 style: AppTypography.bodyMuted,
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
               GlassCard(
                 padding: const EdgeInsets.all(22),
                 child: Column(
@@ -136,7 +136,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       const SizedBox(height: 14),
                       AuthTextField(controller: _pass2, label: "Repite la contraseña", icon: Icons.lock_outline_rounded, obscureText: true),
                     ],
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 20),
                     AppButton(
                       label: _codeSent ? "Cambiar contraseña" : "Enviar código",
                       loading: _loading,

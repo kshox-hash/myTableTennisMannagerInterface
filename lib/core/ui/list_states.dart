@@ -79,13 +79,20 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Mini ilustración: el ícono dentro de un círculo suave del celeste de
+    // marca (antes un ícono gris suelto, se veía "sin terminar").
     return GlassCard(
-      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
       child: Column(
         children: [
-          Icon(icon, color: AppColors.scorifyTextFaint, size: 26),
-          const SizedBox(height: 10),
-          Text(message, textAlign: TextAlign.center, style: AppTypography.bodyMuted),
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(color: AppColors.scorifyMint.withValues(alpha: 0.12), shape: BoxShape.circle),
+            child: Icon(icon, color: AppColors.scorifyMint, size: 28),
+          ),
+          const SizedBox(height: 14),
+          Text(message, textAlign: TextAlign.center, style: AppTypography.bodyMuted.copyWith(height: 1.4)),
         ],
       ),
     );

@@ -241,7 +241,7 @@ class _HeadToHead extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    Text(lead, textAlign: TextAlign.center, style: AppTypography.bodyText.copyWith(fontSize: 13.5, fontWeight: FontWeight.w600)),
+                    Text(lead, textAlign: TextAlign.center, style: AppTypography.bodyText.copyWith(fontSize: 13, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 2),
                     Text(
                       matches.length == 1 ? "1 partido jugado" : "${matches.length} partidos jugados",
@@ -273,7 +273,7 @@ class _Side extends StatelessWidget {
         width: 70,
         child: Column(
           children: [
-            Text("$value", style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 30, height: 1, fontWeight: FontWeight.w700, color: color)),
+            Text("$value", style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 28, height: 1, fontWeight: FontWeight.w700, color: color)),
             Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.bodyMuted.copyWith(fontSize: 12)),
           ],
         ),
@@ -306,11 +306,11 @@ class _VsRow extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(m.tournamentName, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.bodyMuted.copyWith(fontSize: 12.5)),
+              child: Text(m.tournamentName, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.bodyMuted.copyWith(fontSize: 12)),
             ),
             Text(
               "${iAmP1 ? m.setsPlayer1 : m.setsPlayer2}-${iAmP1 ? m.setsPlayer2 : m.setsPlayer1}",
-              style: const TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 15, height: 1, fontWeight: FontWeight.w700, color: AppColors.scorifyText),
+              style: const TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 14, height: 1, fontWeight: FontWeight.w700, color: AppColors.scorifyText),
             ),
           ],
         ),

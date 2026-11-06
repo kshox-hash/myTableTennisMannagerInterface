@@ -128,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         TextSpan(text: "TTM", style: TextStyle(color: AppColors.scorifyMint)),
                       ],
                     ),
-                    style: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w800, fontSize: 34, letterSpacing: 0.5),
+                    style: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w800, fontSize: 32, letterSpacing: 0.5),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -136,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     textAlign: TextAlign.center,
                     style: AppTypography.bodyMuted,
                   ),
-                  const SizedBox(height: 36),
+                  const SizedBox(height: 32),
                   GlassCard(
                     variant: GlassCardVariant.elevated,
                     padding: const EdgeInsets.all(22),
@@ -164,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             child: Text(
                               "¿Olvidaste tu contraseña?",
-                              style: AppTypography.bodyMuted.copyWith(fontSize: 12.5, color: AppColors.scorifyMint),
+                              style: AppTypography.bodyMuted.copyWith(fontSize: 12, color: AppColors.scorifyMint),
                             ),
                           ),
                         ),
@@ -176,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.scorifyMint),
                               )
                             : AppButton(label: "Entrar", onPressed: _login),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 16),
                         Row(
                           children: [
                             const Expanded(child: Divider(color: AppColors.scorifySurface2)),

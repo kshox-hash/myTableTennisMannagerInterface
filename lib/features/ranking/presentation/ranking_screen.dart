@@ -18,7 +18,7 @@ import 'package:myttmi/routes/app_routes.dart';
 
 const TextStyle _muted = TextStyle(
   fontFamily: AppTypography.body,
-  fontSize: 12.5,
+  fontSize: 12,
   fontWeight: FontWeight.w400,
   color: AppColors.scorifyTextMuted,
 );
@@ -160,7 +160,7 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
             child: Text(
               label,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
             ),
           ),
         ),
@@ -186,7 +186,7 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
               PanelTitleBar(
                 title: p.name,
                 icon: Icons.leaderboard_rounded,
-                trailing: PanelChip(label: "${p.rankingPoints} pts", color: AppColors.scorifyMint, fontSize: 11.5),
+                trailing: PanelChip(label: "${p.rankingPoints} pts", color: AppColors.scorifyMint, fontSize: 11),
               ),
               Flexible(
                 child: FutureBuilder<List<RankingResult>>(
@@ -280,7 +280,7 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
             textAlign: first ? TextAlign.left : TextAlign.center,
             style: TextStyle(
               fontFamily: AppTypography.body,
-              fontSize: 12.5,
+              fontSize: 12,
               fontWeight: head || first ? FontWeight.w700 : FontWeight.w500,
               color: head ? AppColors.scorifyTextMuted : AppColors.scorifyText,
             ),
@@ -597,11 +597,11 @@ class _PodiumStep extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, height: 1.3, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, height: 1.3, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                     ),
                   ),
                   const SizedBox(height: 6),
-                  PanelChip(label: "${e.rankingPoints} pts", color: tone, fontSize: 11.5),
+                  PanelChip(label: "${e.rankingPoints} pts", color: tone, fontSize: 11),
                 ],
               ),
             ),

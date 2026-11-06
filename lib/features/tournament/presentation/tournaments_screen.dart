@@ -462,7 +462,7 @@ class _TournamentCard extends StatelessWidget {
                   t.tournamentName,
                   style: const TextStyle(
                     fontFamily: AppTypography.body,
-                    fontSize: 17,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     height: 1.3,
                     color: AppColors.scorifyText,
@@ -584,12 +584,12 @@ class _Meta extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 14, color: color),
-        const SizedBox(width: 5),
+        const SizedBox(width: 4),
         Text(
           text,
           style: const TextStyle(
             fontFamily: AppTypography.body,
-            fontSize: 12.5,
+            fontSize: 12,
             fontWeight: FontWeight.w400,
             letterSpacing: 0,
             color: AppColors.scorifyTextMuted,

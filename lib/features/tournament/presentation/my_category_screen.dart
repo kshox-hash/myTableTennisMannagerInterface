@@ -247,7 +247,7 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                             ],
 
                             if (generalStandings.isNotEmpty) ...[
-                              const SizedBox(height: 22),
+                              const SizedBox(height: 20),
                               SectionHeader(
                                 title: data.generalStandings.source == "bracket"
                                     ? "Posiciones finales"
@@ -262,7 +262,7 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
 
                             if (view.phase == "bracket" ||
                                 view.phase == "finished") ...[
-                              const SizedBox(height: 22),
+                              const SizedBox(height: 20),
                               GlassCard(
                                 // Todos contra todos: no hay llave, se ve la tabla del grupo único.
                                 onTap: () => _goViewMore(view.isRoundRobin ? "groups" : view.phase),
@@ -294,7 +294,7 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                             // resultado de cada una (antes había que buscarlo en
                             // el cuadro completo).
                             if (view.myBracketMatches.isNotEmpty) ...[
-                              const SizedBox(height: 22),
+                              const SizedBox(height: 20),
                               const SectionHeader(
                                 title: "Mi recorrido en la llave",
                               ),
@@ -570,7 +570,7 @@ class _JourneyCard extends StatelessWidget {
 
 const TextStyle _muted = TextStyle(
   fontFamily: AppTypography.body,
-  fontSize: 12.5,
+  fontSize: 12,
   fontWeight: FontWeight.w400,
   color: AppColors.scorifyTextMuted,
 );
@@ -692,12 +692,12 @@ class _CategoryHero extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(tournamentName, style: _muted.copyWith(fontSize: 13.5)),
+          Text(tournamentName, style: _muted.copyWith(fontSize: 13)),
           if (view.phase == "finished" && view.finishedEarly) ...[
             const SizedBox(height: 10),
             Text(
               "El organizador terminó esta categoría antes de completarla: no hay podio ni puntos de ranking.",
-              style: _muted.copyWith(fontSize: 12.5),
+              style: _muted.copyWith(fontSize: 12),
             ),
           ],
           if (s != null) ...[
@@ -746,14 +746,14 @@ class _Kpi extends StatelessWidget {
           value,
           style: TextStyle(
             fontFamily: AppTypography.display, letterSpacing: -0.5,
-            fontSize: 21,
+            fontSize: 20,
             fontWeight: FontWeight.w700,
             height: 1.0,
             color: color,
           ),
         ),
         const SizedBox(height: 2),
-        Text(label, style: _muted.copyWith(fontSize: 11.5)),
+        Text(label, style: _muted.copyWith(fontSize: 11)),
       ],
     ),
   );
@@ -802,7 +802,7 @@ class _GroupTable extends StatelessWidget {
             child: Row(
               children: [
                 SizedBox(width: 24, child: Text("#", style: head)),
-                SizedBox(width: 36),
+                SizedBox(width: 32),
                 Expanded(child: Text("Jugador", style: head)),
                 SizedBox(
                   width: 30,
@@ -878,7 +878,7 @@ class _GroupTable extends StatelessWidget {
                         child: Text(
                           "${s.setsFor}-${s.setsAgainst}",
                           textAlign: TextAlign.center,
-                          style: _muted.copyWith(fontSize: 12.5),
+                          style: _muted.copyWith(fontSize: 12),
                         ),
                       ),
                     ],

@@ -191,9 +191,12 @@ class _SplashGateState extends State<SplashGate> {
     final mq = MediaQuery.of(context);
     final overlay = Material(
       color: AppColors.scorifyBg,
-      child: AnimatedSwitcher(
+      child: DecoratedBox(
+        decoration: const BoxDecoration(gradient: AppColors.appBackground),
+        child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         child: _intro ? _logoIntro() : _loading(mq),
+        ),
       ),
     );
     return Stack(
@@ -220,7 +223,7 @@ class _SplashGateState extends State<SplashGate> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Image.asset("assets/images/logo-mark.png", width: 76, height: 76, filterQuality: FilterQuality.medium),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
           const Text(
             "MyTTM",
             style: TextStyle(fontFamily: AppTypography.display, fontSize: 28, fontWeight: FontWeight.w700, letterSpacing: -0.5, color: AppColors.scorifyText),
@@ -244,7 +247,7 @@ class _SplashGateState extends State<SplashGate> {
         mainAxisSize: MainAxisSize.min,
         children: [
           _brand(),
-          const SizedBox(height: 36),
+          const SizedBox(height: 32),
           TweenAnimationBuilder<double>(
             tween: Tween(end: _base),
             duration: const Duration(milliseconds: 900),
@@ -268,7 +271,7 @@ class _SplashGateState extends State<SplashGate> {
   }
   static const TextStyle _small = TextStyle(
     fontFamily: AppTypography.body,
-    fontSize: 11.5,
+    fontSize: 11,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.3,
     color: AppColors.scorifyTextMuted,

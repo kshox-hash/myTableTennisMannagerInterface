@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/motion.dart";
 import "dart:async";
 import "dart:math" as math;
 import "package:myttmi/core/ui/top_header.dart";
@@ -182,7 +183,7 @@ class HomeProfileRow extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 15, color: _mint),
-        const SizedBox(width: 5),
+        const SizedBox(width: 4),
         Text(text, style: _t(12.5, c: AppColors.scorifyText)),
       ],
     );
@@ -270,6 +271,8 @@ class HomeMatchCard extends StatelessWidget {
   /// Para el estado en vivo: hora programada y mesa asignada.
   final DateTime? startsAt;
   final int? tableNumber;
+  /// Id del partido: activa la transición de las fotos hacia el detalle.
+  final String? matchId;
   final VoidCallback onDetail;
   final VoidCallback? onOpponent;
   const HomeMatchCard({
@@ -288,6 +291,7 @@ class HomeMatchCard extends StatelessWidget {
     this.h2h,
     this.startsAt,
     this.tableNumber,
+    this.matchId,
     required this.onDetail,
     this.onOpponent,
   });
@@ -307,7 +311,10 @@ class HomeMatchCard extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: _mint.withValues(alpha: 0.7), width: 1.5),
             ),
-            child: UserAvatar(userId: id, url: url, size: 52),
+            child: maybeHero(
+              matchId != null && id != null ? matchAvatarHeroTag(matchId!, id) : null,
+              UserAvatar(userId: id, url: url, size: 52),
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -373,7 +380,8 @@ class HomeMatchCard extends StatelessWidget {
         decoration: BoxDecoration(
           // Flat: principal celeste sólido, secundario gris liso.
           borderRadius: BorderRadius.circular(Panel.buttonRadius),
-          color: onTap == null ? Panel.field : (primary ? AppColors.scorifyMint : const Color(0xFF2A2A2E)),
+          color: onTap == null ? Panel.field : (primary ? null : const Color(0x1FFFFFFF)),
+          gradient: onTap != null && primary ? AppColors.primaryButton : null,
         ),
         child: Material(
         color: Colors.transparent,
@@ -404,7 +412,7 @@ class HomeMatchCard extends StatelessWidget {
       decoration: BoxDecoration(
         // Flat: tarjeta destacada gris lisa, sin filete.
         borderRadius: BorderRadius.circular(Panel.radius),
-        color: const Color(0xFF232327),
+        color: const Color(0xCC0E2A33),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -546,7 +554,7 @@ class HomePerformanceCard extends StatelessWidget {
                   ],
                 ),
                 // Espacio para la línea de tendencia, bajo los números.
-                const SizedBox(height: 30),
+                const SizedBox(height: 32),
               ],
             ),
           ),
@@ -852,16 +860,16 @@ class HomeOpenTournamentsCard extends StatelessWidget {
                             Row(
                               children: [
                                 const Icon(Icons.event_rounded, size: 14, color: _mint),
-                                const SizedBox(width: 5),
+                                const SizedBox(width: 4),
                                 Text(it.when, style: _t(12)),
                               ],
                             ),
                             if ((it.place ?? "").trim().isNotEmpty) ...[
-                              const SizedBox(height: 3),
+                              const SizedBox(height: 2),
                               Row(
                                 children: [
                                   const Icon(Icons.place_rounded, size: 14, color: _mint),
-                                  const SizedBox(width: 5),
+                                  const SizedBox(width: 4),
                                   Expanded(
                                     child: Text(
                                       it.place!.trim(),
@@ -1202,7 +1210,7 @@ class HomeBanner extends StatelessWidget {
                     gradient: LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
-                      colors: [Color(0xFF1C1C1F), Color(0xFF232327)],
+                      colors: [Color(0xFF0A1E26), Color(0xFF0E2A33)],
                     ),
                   ),
                 ),
@@ -1212,7 +1220,7 @@ class HomeBanner extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
-                    colors: [Color(0xE60F0F11), Color(0x000F0F11)],
+                    colors: [Color(0xE604151C), Color(0x0004151C)],
                     stops: [0.25, 0.75],
                   ),
                 ),
@@ -1623,7 +1631,7 @@ class HomeChallengeCard extends StatelessWidget {
       title: kicker,
       icon: Icons.emoji_events_rounded,
       onTap: onTap,
-      trailing: chip == null ? null : PanelChip(label: chip!, color: _lime, fontSize: 11.5),
+      trailing: chip == null ? null : PanelChip(label: chip!, color: _lime, fontSize: 11),
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1682,12 +1690,21 @@ class HomeTile extends StatelessWidget {
       gradient: gradient,
       padding: EdgeInsets.zero,
       child: Stack(
+        clipBehavior: Clip.hardEdge,
         children: [
+          // Marca de agua: el mismo ícono, gigante y casi transparente.
+          Positioned(
+            right: -10,
+            top: -6,
+            child: Icon(icon, size: 96, color: Colors.white.withValues(alpha: 0.05)),
+          ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Icon(icon, size: 26, color: _mint),
+                const SizedBox(height: 10),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
@@ -1742,43 +1759,64 @@ class HomeEmptyCard extends StatelessWidget {
   final VoidCallback? onAction;
   const HomeEmptyCard({super.key, required this.title, required this.icon, required this.message, this.hint, this.action, this.onAction});
 
+  /// "Bienvenido a MyTTM": la marca en celeste, cursiva y negrita.
+  Widget _title() {
+    final base = _t(22, w: FontWeight.w700, h: 1.2);
+    const brand = "MyTTM";
+    final i = title.indexOf(brand);
+    if (i < 0) return Text(title, style: base);
+    return Text.rich(
+      TextSpan(
+        style: base,
+        children: [
+          TextSpan(text: title.substring(0, i)),
+          TextSpan(text: brand, style: base.copyWith(color: _mint, fontStyle: FontStyle.italic, fontWeight: FontWeight.w800)),
+          TextSpan(text: title.substring(i + brand.length)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SectionCard(
-      title: title,
-      icon: icon,
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+    // Tarjeta destacada (filo iluminado con halo): ícono grande, título con
+    // la marca resaltada, el mensaje y el botón principal en degradado.
+    return HomeCard(
+      gradient: _glassFeatured,
+      padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: 38,
-                height: 38,
-                alignment: Alignment.center,
-                decoration: panelBox(),
-                child: Icon(icon, size: 19, color: AppColors.scorifyMint),
-              ),
-              const SizedBox(width: 12),
+              Icon(icon, size: 40, color: _mint),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Contraste alto: sobre el panel oscuro el gris tenue no se leía.
-                    Text(message, style: _t(14, w: FontWeight.w600, c: AppColors.scorifyText)),
-                    if (hint != null) ...[
-                      const SizedBox(height: 4),
-                      Text(hint!, style: _t(13, c: AppColors.scorifyTextMuted, h: 1.4)),
-                    ],
+                    _title(),
+                    const SizedBox(height: 6),
+                    Text(message, style: _t(14, c: AppColors.scorifyTextMuted, h: 1.35)),
                   ],
                 ),
               ),
             ],
           ),
+          if (hint != null) ...[
+            const SizedBox(height: 10),
+            Text(hint!, style: _t(13, c: AppColors.scorifyTextMuted, h: 1.4)),
+          ],
           if (action != null) ...[
-            const SizedBox(height: 12),
-            AppButton.outline(label: action!, onPressed: onAction, height: 38),
+            const SizedBox(height: 16),
+            AppButton(
+              label: action!,
+              icon: Icons.search_rounded,
+              trailingIcon: Icons.chevron_right_rounded,
+              onPressed: onAction,
+              height: 50,
+            ),
           ],
         ],
       ),

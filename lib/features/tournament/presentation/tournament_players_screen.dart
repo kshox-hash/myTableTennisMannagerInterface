@@ -220,10 +220,10 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text("Los grupos ya se armaron",
-                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                                             SizedBox(height: 2),
                                             Text("Toca para ver los grupos y la llave",
-                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
+                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
                                           ],
                                         ),
                                       ),
@@ -315,7 +315,7 @@ class _CategoryPlayersState extends State<_CategoryPlayers> {
                       SizedBox(
                         width: 24,
                         child: Text("${i + 1}",
-                            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted)),
+                            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted)),
                       ),
                       UserAvatar(userId: players[i].idUser, url: players[i].avatarUrl, size: 36),
                       const SizedBox(width: 12),

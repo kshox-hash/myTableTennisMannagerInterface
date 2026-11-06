@@ -391,7 +391,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
               ],
             ),
           ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 16),
         if (_done)
           SectionCard(
             title: _thanked ? "¡Gracias por arbitrar!" : "Partido terminado",
@@ -435,7 +435,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
     return "Ganó $name ${p1 ? s1 : s2}-${p1 ? s2 : s1}.";
   }
 
-  Widget _chip(String text, Color c) => PanelChip(label: text, color: c, fontSize: 11.5);
+  Widget _chip(String text, Color c) => PanelChip(label: text, color: c, fontSize: 11);
 
   /// Jugador en el marcador: foto y nombre; el que va ganando en verde.
   Widget _player(String? id, String name, bool leading) => Column(
@@ -549,7 +549,7 @@ class _LiveBadgeState extends State<_LiveBadge> with SingleTickerProviderStateMi
   Widget build(BuildContext context) {
     if (widget.decided) {
       return const Text("Decidido",
-          style: TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.scorifyButterfly));
+          style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.scorifyButterfly));
     }
     if (!widget.started) return const SizedBox.shrink();
     return Row(
@@ -561,7 +561,7 @@ class _LiveBadgeState extends State<_LiveBadge> with SingleTickerProviderStateMi
         ),
         const SizedBox(width: 6),
         const Text("En vivo",
-            style: TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.scorifyNegative)),
+            style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.scorifyNegative)),
       ],
     );
   }

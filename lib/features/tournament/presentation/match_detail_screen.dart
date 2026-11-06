@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/motion.dart";
 import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "dart:async";
@@ -196,7 +197,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                           "En vivo",
                                           style: TextStyle(
                                             fontFamily: AppTypography.body,
-                                            fontSize: 11.5,
+                                            fontSize: 11,
                                             fontWeight: FontWeight.w600,
                                             letterSpacing: 0.3,
                                             color: Colors.white,
@@ -222,6 +223,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                 children: [
                                   _PlayerRow(
                                     id: m.player1Id,
+                                    heroTag: m.player1Id == null ? null : matchAvatarHeroTag(widget.matchId, m.player1Id!),
                                     name: m.player1Name,
                                     club: m.player1Club,
                                     seed: m.player1Seed,
@@ -246,6 +248,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                   ),
                                   _PlayerRow(
                                     id: m.player2Id,
+                                    heroTag: m.player2Id == null ? null : matchAvatarHeroTag(widget.matchId, m.player2Id!),
                                     name: m.player2Name,
                                     club: m.player2Club,
                                     seed: m.player2Seed,
@@ -375,9 +378,12 @@ class _PlayerRow extends StatelessWidget {
   final int sets;
   final bool isWinner;
   final List<({int mine, int theirs})> setPoints;
+  /// Transición de la foto desde la tarjeta del Inicio.
+  final String? heroTag;
 
   const _PlayerRow({
     this.id,
+    this.heroTag,
     required this.name,
     this.club,
     this.seed,
@@ -393,7 +399,7 @@ class _PlayerRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        UserAvatar(userId: id, size: 40),
+        maybeHero(heroTag, UserAvatar(userId: id, size: 40)),
         const SizedBox(width: 10),
         Expanded(
           child: Column(
@@ -405,7 +411,7 @@ class _PlayerRow extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: AppTypography.body,
-                  fontSize: 14.5,
+                  fontSize: 14,
                   fontWeight: isWinner ? FontWeight.w600 : FontWeight.w600,
                   color: AppColors.scorifyText,
                 ),
@@ -432,7 +438,7 @@ class _PlayerRow extends StatelessWidget {
               "${sp.mine}",
               style: TextStyle(
                 fontFamily: AppTypography.body,
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: !_closed(sp.mine, sp.theirs)
                     ? AppColors.scorifyText
@@ -453,7 +459,8 @@ class _PlayerRow extends StatelessWidget {
                 : AppColors.scorifySurface2,
             borderRadius: BorderRadius.circular(Panel.radius),
           ),
-          child: Text(
+          // Al entrar un set nuevo, el número cambia deslizándose.
+          child: AnimatedNumber(
             "$sets",
             style: TextStyle(
               fontFamily: AppTypography.body,

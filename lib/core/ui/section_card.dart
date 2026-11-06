@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/motion.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -44,7 +45,8 @@ class SectionCard extends StatelessWidget {
     final color = titleColor ?? AppColors.scorifyMint;
     final header = PanelTitleBar(title: title, icon: icon, iconColor: color, trailing: trailing);
     final body = Padding(padding: padding, child: child);
-    return CardBorder(
+    // Tocable: se hunde apenas al presionar, como los botones.
+    return PressScale(enabled: onTap != null, child: CardBorder(
       radius: _radius,
       highlight: gradient == AppColors.featuredGradient,
       child: ClipRRect(
@@ -67,7 +69,7 @@ class SectionCard extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 

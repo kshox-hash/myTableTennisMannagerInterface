@@ -123,7 +123,7 @@ class _TournamentTablesScreenState extends State<TournamentTablesScreen> {
                                   .map((t) => _TableCard(slot: t))
                                   .toList(),
                             ),
-                            const SizedBox(height: 22),
+                            const SizedBox(height: 20),
                             const SectionLabel("Próximos partidos", icon: Icons.schedule_rounded),
                             const SizedBox(height: 4),
                             Text(
@@ -340,7 +340,7 @@ class _MyTurnCard extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(big, style: TextStyle(fontFamily: AppTypography.body, fontSize: 26, fontWeight: FontWeight.w600, color: fg, height: 1.1)),
+                  Text(big, style: TextStyle(fontFamily: AppTypography.body, fontSize: 24, fontWeight: FontWeight.w600, color: fg, height: 1.1)),
                   Text(bigLabel, style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: fg)),
                 ],
               ),
@@ -356,7 +356,7 @@ class _MyTurnCard extends StatelessWidget {
                   Text("vs $rival · ${match.matchLabel}",
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
                 ],
               ),
             ),

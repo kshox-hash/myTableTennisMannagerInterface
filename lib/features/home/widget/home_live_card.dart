@@ -42,7 +42,7 @@ class _HomeLiveCardState extends State<HomeLiveCard> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _Arrow(icon: Icons.chevron_left_rounded, onTap: _i == 0 ? null : () => setState(() => _i--)),
-                Text("${_i + 1}/${all.length}", style: AppTypography.bodyMuted.copyWith(fontSize: 11.5)),
+                Text("${_i + 1}/${all.length}", style: AppTypography.bodyMuted.copyWith(fontSize: 11)),
                 _Arrow(icon: Icons.chevron_right_rounded, onTap: _i == all.length - 1 ? null : () => setState(() => _i++)),
               ],
             ),
@@ -52,13 +52,13 @@ class _HomeLiveCardState extends State<HomeLiveCard> {
         children: [
           Row(
             children: [
-              Expanded(child: Text(s.categoryLabel, style: AppTypography.bodyMuted.copyWith(fontSize: 12.5, fontWeight: FontWeight.w600))),
+              Expanded(child: Text(s.categoryLabel, style: AppTypography.bodyMuted.copyWith(fontSize: 12, fontWeight: FontWeight.w600))),
               if (s.currentRound != null) PanelChip(label: s.currentRound!, color: AppColors.scorifyButterfly, fontSize: 11),
             ],
           ),
           const SizedBox(height: 12),
           if (s.classified.isEmpty && s.eliminated.isEmpty && s.movedToSilver.isEmpty)
-            Text("Todavía no termina ningún grupo.", style: AppTypography.bodyMuted.copyWith(fontSize: 12.5))
+            Text("Todavía no termina ningún grupo.", style: AppTypography.bodyMuted.copyWith(fontSize: 12))
           else ...[
             _Names(title: s.aliveTitle, color: AppColors.scorifyButterfly, people: s.classified, max: _preview),
             if (s.movedToSilver.isNotEmpty) ...[
@@ -122,7 +122,7 @@ class _Names extends StatelessWidget {
       children: [
         Text(
           "$title · ${people.length}",
-          style: TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: color),
+          style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: color),
         ),
         const SizedBox(height: 8),
         if (people.isEmpty)

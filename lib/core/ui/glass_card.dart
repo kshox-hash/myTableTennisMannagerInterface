@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/motion.dart";
 import 'package:myttmi/core/ui/card_border.dart';
 import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +87,8 @@ class GlassCard extends StatelessWidget {
       fill = content;
     }
 
-    return CardBorder(radius: _radius, child: Container(
+    // Tocable: se hunde apenas al presionar, como los botones.
+    return PressScale(enabled: onTap != null, child: CardBorder(radius: _radius, child: Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(_radius),
         border: borderColor == null ? null : Border.all(color: borderColor!), // el filete lo pinta CardBorder
@@ -101,6 +103,6 @@ class GlassCard extends StatelessWidget {
         color: Colors.transparent,
         child: onTap == null ? fill : InkWell(onTap: onTap, child: fill),
       ),
-    ));
+    )));
   }
 }

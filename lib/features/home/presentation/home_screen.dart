@@ -516,6 +516,7 @@ class _HomeScreenState extends State<HomeScreen>
       h2h: _h2h(m.opponentId),
       startsAt: m.scheduledStartAt,
       tableNumber: m.tableNumber,
+      matchId: m.idMatch,
       onDetail: () => Navigator.pushNamed(
         context,
         AppRoutes.matchDetail,
@@ -882,7 +883,7 @@ class _MyGroupsCard extends StatelessWidget {
                       decoration: panelBox(),
                       child: Text(
                         g.standing.played == 0 || g.standing.position == null ? "–" : "${g.standing.position}°",
-                        style: const TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.scorifyText, height: 1),
+                        style: const TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.scorifyText, height: 1),
                       ),
                     ),
                     const SizedBox(width: 12),

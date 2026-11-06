@@ -549,7 +549,7 @@ class _ResultPage extends StatelessWidget {
             ),
           ],
           if (podium.isNotEmpty) ...[
-            const SizedBox(height: 18),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Container(
@@ -660,7 +660,7 @@ class _SummaryPage extends StatelessWidget {
               fontSize: 13,
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
           Expanded(
             child: Container(
               decoration: BoxDecoration(

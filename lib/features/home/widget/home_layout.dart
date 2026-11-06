@@ -104,8 +104,8 @@ class HomeHero extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, size: 13, color: AppColors.scorifyMint),
-              const SizedBox(width: 5),
-              Text(text, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+              const SizedBox(width: 4),
+              Text(text, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
             ],
           ),
         );
@@ -148,16 +148,16 @@ class HomeHero extends StatelessWidget {
                       name,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 21, height: 1.15, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 20, height: 1.15, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 4),
                     Text(
                       [
                         if (hasCountry) country!,
                         if (since != null) "En MyTTM desde ${_months[since.month - 1]} ${since.year}",
                       ].join(" · "),
                       maxLines: 2,
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted),
                     ),
                   ],
                 ),
@@ -265,7 +265,7 @@ class HomeStreakCard extends StatelessWidget {
       trailing: const Padding(
         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         child: Text("Ver historial ›",
-            style: TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w500, color: AppColors.scorifyMint)),
+            style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyMint)),
       ),
       onTap: onTap,
       padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
@@ -278,7 +278,7 @@ class HomeStreakCard extends StatelessWidget {
                 Text(text,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
               ],
             ),
           ),
@@ -535,7 +535,7 @@ class HomeRefereeCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title, maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                 const SizedBox(height: 2),
                 Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, color: AppColors.scorifyTextMuted)),

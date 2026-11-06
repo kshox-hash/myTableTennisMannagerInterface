@@ -18,7 +18,7 @@ import 'package:myttmi/routes/app_routes.dart';
 
 const TextStyle _muted = TextStyle(
   fontFamily: AppTypography.body,
-  fontSize: 12.5,
+  fontSize: 12,
   fontWeight: FontWeight.w400,
   color: AppColors.scorifyTextMuted,
 );
@@ -176,7 +176,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                           children: [
                                             Text(
                                               played == 0 ? "Aún no juegas partidos" : "Ganas $perTenText de cada 10 partidos",
-                                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, height: 1.25, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, height: 1.25, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
@@ -218,7 +218,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                           children: [
                                             Text(
                                               "${streak.$1}",
-                                              style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 41, height: 1, fontWeight: FontWeight.w700, color: streak.$2 ? _fire : AppColors.scorifyNegative),
+                                              style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 40, height: 1, fontWeight: FontWeight.w700, color: streak.$2 ? _fire : AppColors.scorifyNegative),
                                             ),
                                             const SizedBox(width: 12),
                                             Expanded(
@@ -226,7 +226,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                                 streak.$2
                                                     ? (streak.$1 == 1 ? "victoria en tu último partido" : "victorias seguidas")
                                                     : (streak.$1 == 1 ? "derrota en tu último partido" : "derrotas seguidas"),
-                                                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, height: 1.2, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                                                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, height: 1.2, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                                               ),
                                             ),
                                           ],
@@ -241,7 +241,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                             const Spacer(),
                                             Text(
                                               form.length == 1 ? "Último partido" : "ÚLTIMOS ${form.length}",
-                                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: AppColors.scorifyTextFaint),
+                                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: AppColors.scorifyTextFaint),
                                             ),
                                           ],
                                         ),
@@ -287,7 +287,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                             "${setsWon - setsLost >= 0 ? "+" : ""}${setsWon - setsLost}",
                                             style: TextStyle(
                                               fontFamily: AppTypography.display, letterSpacing: -0.5,
-                                              fontSize: 23,
+                                              fontSize: 22,
                                               height: 1,
                                               fontWeight: FontWeight.w700,
                                               color: setsWon >= setsLost ? AppColors.scorifyText : AppColors.scorifyNegative,
@@ -309,7 +309,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                           : Row(
                                               children: [
                                                 if (setsWon > 0) Expanded(flex: setsWon, child: Container(color: AppColors.scorifyButterfly)),
-                                                if (setsWon > 0 && setsLost > 0) const SizedBox(width: 3),
+                                                if (setsWon > 0 && setsLost > 0) const SizedBox(width: 2),
                                                 if (setsLost > 0) Expanded(flex: setsLost, child: Container(color: AppColors.scorifyNegative)),
                                               ],
                                             ),
@@ -358,13 +358,13 @@ class _StatBox extends StatelessWidget {
         decoration: panelBox(),
         child: Column(
           children: [
-            Text(value, style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 23, height: 1, fontWeight: FontWeight.w700, color: color)),
+            Text(value, style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 22, height: 1, fontWeight: FontWeight.w700, color: color)),
             const SizedBox(height: 4),
             Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: AppColors.scorifyTextMuted),
+              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: AppColors.scorifyTextMuted),
             ),
           ],
         ),
@@ -400,7 +400,7 @@ class _BigNumber extends StatelessWidget {
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          Text(value, style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 27, height: 1, fontWeight: FontWeight.w700, color: color)),
+          Text(value, style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 28, height: 1, fontWeight: FontWeight.w700, color: color)),
           Text(label, style: _muted),
         ],
       );
@@ -440,7 +440,7 @@ class _RecentRow extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
-                  Text([if (_date(m.playedAt).isNotEmpty) _date(m.playedAt), m.tournamentName, cat].join(" · "), maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted.copyWith(fontSize: 11.5)),
+                  Text([if (_date(m.playedAt).isNotEmpty) _date(m.playedAt), m.tournamentName, cat].join(" · "), maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted.copyWith(fontSize: 11)),
                 ],
               ),
             ),
@@ -475,7 +475,7 @@ class _LegendDot extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(width: 8, height: 8, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
-          const SizedBox(width: 5),
+          const SizedBox(width: 4),
           Text(label, style: _muted.copyWith(fontSize: 11)),
         ],
       );

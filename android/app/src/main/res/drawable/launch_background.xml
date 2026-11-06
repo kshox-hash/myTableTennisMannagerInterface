@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Modify this file to customize your launch splash screen -->
+<!-- Arranque nativo (antes de que cargue Flutter): el mismo degradado de la
+     app (verde esmeralda arriba-izquierda → marino abajo-derecha) con el logo al
+     centro, para que el paso a la pantalla de carga de Flutter no se note.
+     El logo está en drawable-xxxhdpi (512 px → ~128 dp). -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item><color android:color="#FF0057B7" /></item>
-
-    <!-- You can insert your own image assets here -->
-    <!-- <item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:angle="315"
+                android:startColor="#FF026247"
+                android:centerColor="#FF013A3A"
+                android:endColor="#FF00161E" />
+        </shape>
+    </item>
+    <item>
         <bitmap
             android:gravity="center"
-            android:src="@mipmap/launch_image" />
-    </item> -->
+            android:src="@drawable/splash_logo" />
+    </item>
 </layer-list>

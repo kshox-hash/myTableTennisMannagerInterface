@@ -541,7 +541,7 @@ class _PlayerRow extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: AppTypography.body,
-                  fontSize: 13.5,
+                  fontSize: 13,
                   fontWeight: highlighted ? FontWeight.w600 : FontWeight.w600,
                   color: highlighted
                       ? AppColors.scorifyOnMint

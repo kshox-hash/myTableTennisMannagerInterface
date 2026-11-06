@@ -188,7 +188,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   entry,
                                   style: const TextStyle(
                                     fontFamily: AppTypography.body,
-                                    fontSize: 15,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.scorifyText,
                                   ),
@@ -232,26 +232,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                               n.title,
                                               style: TextStyle(
                                                 fontFamily: AppTypography.body,
-                                                fontSize: 14.5,
+                                                fontSize: 14,
                                                 fontWeight: n.isRead
                                                     ? FontWeight.w600
                                                     : FontWeight.w600,
                                                 color: AppColors.scorifyText,
                                               ),
                                             ),
-                                            const SizedBox(height: 3),
+                                            const SizedBox(height: 2),
                                             Text(
                                               n.message,
                                               style: const TextStyle(
                                                 fontFamily: AppTypography.body,
-                                                fontSize: 13.5,
+                                                fontSize: 13,
                                                 height: 1.35,
                                                 fontWeight: FontWeight.w400,
                                                 color:
                                                     AppColors.scorifyTextMuted,
                                               ),
                                             ),
-                                            const SizedBox(height: 5),
+                                            const SizedBox(height: 4),
                                             Text(
                                               _timeAgo(n.createdAt),
                                               style: TextStyle(

@@ -21,7 +21,7 @@ const _weekdays = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábad
 
 const TextStyle _muted = TextStyle(
   fontFamily: AppTypography.body,
-  fontSize: 12.5,
+  fontSize: 12,
   fontWeight: FontWeight.w400,
   color: AppColors.scorifyTextMuted,
 );
@@ -193,7 +193,7 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
                   Expanded(
                     child: Text(
                       "${_months[_focusedMonth.month - 1]} ${_focusedMonth.year}",
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 17, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                     ),
                   ),
                   _RoundIcon(icon: Icons.chevron_left_rounded, onTap: () => _goMonth(-1)),
@@ -213,7 +213,7 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
               Row(
                 children: [
                   for (final w in const ["L", "M", "M", "J", "V", "S", "D"])
-                    Expanded(child: Center(child: Text(w, style: _muted.copyWith(fontSize: 11.5, fontWeight: FontWeight.w600)))),
+                    Expanded(child: Center(child: Text(w, style: _muted.copyWith(fontSize: 11, fontWeight: FontWeight.w600)))),
                 ],
               ),
               const SizedBox(height: 6),
@@ -365,7 +365,7 @@ class _EventCard extends StatelessWidget {
                 Text(e.tournamentName,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.scorifyText, height: 1.25)),
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText, height: 1.25)),
                 const SizedBox(height: 4),
                 Text("${e.categoryName} · ${_genderLabel(e.gender)}", maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted),
                 if (loc.isNotEmpty) ...[
@@ -490,7 +490,7 @@ class _DayCell extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 2),
             Container(
               width: 5,
               height: 5,

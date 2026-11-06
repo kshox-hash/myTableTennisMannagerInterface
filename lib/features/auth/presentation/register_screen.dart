@@ -346,7 +346,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             style: AppTypography.bodyMuted,
                           ),
 
-                          const SizedBox(height: 22),
+                          const SizedBox(height: 20),
                           Divider(color: AppColors.scorifyCardBorder),
                           const SizedBox(height: 8),
                           Text("Cuenta", style: AppTypography.h1),
@@ -365,7 +365,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             icon: Icons.lock_outline_rounded,
                             obscureText: true,
                           ),
-                          const SizedBox(height: 22),
+                          const SizedBox(height: 20),
                           loading
                               ? const Center(
                                   child: SizedBox(

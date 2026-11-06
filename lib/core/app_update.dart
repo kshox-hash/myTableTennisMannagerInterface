@@ -102,7 +102,7 @@ class ForceUpdateScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const BrandLogo(markSize: 72, showWordmark: false),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 24),
                   const Text(
                     "Actualiza MyTTM",
                     textAlign: TextAlign.center,
@@ -114,7 +114,7 @@ class ForceUpdateScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: AppTypography.bodyMuted.copyWith(fontSize: 14),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 24),
                   AppButton(label: "Actualizar", onPressed: AppUpdate.openStore),
                   if (AppUpdate.label.isNotEmpty) ...[
                     const SizedBox(height: 16),

@@ -14,7 +14,7 @@ abstract final class Panel {
   static const edgeStrong = AppColors.scorifyCardBorderStrong;
 
   /// Antes era la línea encendida; ahora un separador apenas visible.
-  static const topLine = Color(0xFF232327);
+  static const topLine = Color(0x14FFFFFF);
 
   /// Antes la franja gris del título; ahora transparente (título suelto).
   static const titleStrip = Colors.transparent;
@@ -30,7 +30,7 @@ abstract final class Panel {
   static const buttonBorder = Colors.transparent;
 
   /// Botón secundario: gris liso.
-  static const buttonGradient = LinearGradient(colors: [Color(0xFF2A2A2E), Color(0xFF2A2A2E)]);
+  static const buttonGradient = LinearGradient(colors: [Color(0x1FFFFFFF), Color(0x1FFFFFFF)]);
 
   /// "Elegido / activo" (pestaña, filtro, opción del menú): celeste muy
   /// tenue, liso. El botón principal NO usa esto: es celeste sólido.
@@ -82,7 +82,7 @@ class PanelTitleBar extends StatelessWidget {
               _sentence(title),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted),
+              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted),
             ),
           ),
           if (trailing != null) trailing!,
@@ -139,7 +139,7 @@ class PanelChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (icon != null) ...[Icon(icon, size: fontSize + 2, color: fg), const SizedBox(width: 5)],
+          if (icon != null) ...[Icon(icon, size: fontSize + 2, color: fg), const SizedBox(width: 4)],
           Flexible(
             child: Text(
               label,

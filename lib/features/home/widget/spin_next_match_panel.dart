@@ -94,7 +94,7 @@ class SpinNextMatchPanel extends StatelessWidget {
         Text(
           emptyTitle,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.scorifyText, fontSize: 15, fontWeight: FontWeight.w600),
+          style: const TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w600),
         ),
         if (emptySubtitle.isNotEmpty) ...[
           const SizedBox(height: 4),
@@ -129,7 +129,7 @@ class SpinNextMatchPanel extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11.5, fontWeight: FontWeight.w600),
+            style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600),
           ),
         ],
         const SizedBox(height: 14),
@@ -149,7 +149,7 @@ class SpinNextMatchPanel extends StatelessWidget {
                     ),
                     Text(
                       "$tableNumber",
-                      style: const TextStyle(color: AppColors.scorifyText, fontSize: 38, height: 1.05, fontWeight: FontWeight.w700),
+                      style: const TextStyle(color: AppColors.scorifyText, fontSize: 40, height: 1.05, fontWeight: FontWeight.w700),
                     ),
                   ] else if (scheduledAt != null) ...[
                     Text(
@@ -163,7 +163,7 @@ class SpinNextMatchPanel extends StatelessWidget {
                   ] else
                     const Text(
                       "VS",
-                      style: TextStyle(color: AppColors.scorifyText, fontSize: 34, height: 1.2, fontWeight: FontWeight.w700, fontStyle: FontStyle.italic),
+                      style: TextStyle(color: AppColors.scorifyText, fontSize: 32, height: 1.2, fontWeight: FontWeight.w700, fontStyle: FontStyle.italic),
                     ),
                   const SizedBox(height: 8),
                   _Chip(
@@ -184,7 +184,7 @@ class SpinNextMatchPanel extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11.5, fontWeight: FontWeight.w600),
+            style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600),
           ),
         ],
         if (onOpponentProfile != null) ...[

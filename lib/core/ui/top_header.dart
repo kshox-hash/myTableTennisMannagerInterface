@@ -60,7 +60,7 @@ class TopHeader extends StatelessWidget {
                   subtitle!,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.bodyMuted.copyWith(fontSize: 11.5),
+                  style: AppTypography.bodyMuted.copyWith(fontSize: 11),
                 ),
               ],
             ],

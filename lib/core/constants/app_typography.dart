@@ -13,7 +13,7 @@ class AppTypography {
   static const TextStyle displayXl = TextStyle(
     fontFamily: display,
     fontWeight: FontWeight.w700,
-    fontSize: 42,
+    fontSize: 40,
     height: 1.05,
     letterSpacing: -1,
     color: AppColors.scorifyText,
@@ -50,7 +50,7 @@ class AppTypography {
   static const TextStyle h2 = TextStyle(
     fontFamily: body,
     fontWeight: FontWeight.w600,
-    fontSize: 15,
+    fontSize: 14,
     color: AppColors.scorifyText,
   );
 
@@ -64,14 +64,14 @@ class AppTypography {
   static const TextStyle bodyMuted = TextStyle(
     fontFamily: body,
     fontWeight: FontWeight.w400,
-    fontSize: 12.5,
+    fontSize: 12,
     color: AppColors.scorifyTextMuted,
   );
 
   static const TextStyle caption = TextStyle(
     fontFamily: body,
     fontWeight: FontWeight.w500,
-    fontSize: 11.5,
+    fontSize: 11,
     letterSpacing: 0.2,
     color: AppColors.scorifyTextFaint,
   );

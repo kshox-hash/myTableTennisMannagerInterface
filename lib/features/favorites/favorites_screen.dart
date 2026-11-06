@@ -109,7 +109,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     Expanded(
                       child: Text(
                         "Se actualizan solos cada 10 s. Al terminar, el partido se quita de la lista.",
-                        style: AppTypography.bodyMuted.copyWith(fontSize: 12.5),
+                        style: AppTypography.bodyMuted.copyWith(fontSize: 12),
                       ),
                     ),
                     const SizedBox(width: 10),

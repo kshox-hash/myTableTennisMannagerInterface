@@ -211,7 +211,7 @@ class _PopupState extends State<_Popup> with SingleTickerProviderStateMixin {
             borderRadius: BorderRadius.circular(Panel.radius),
           ),
           child: n.emoji != null
-              ? Text(n.emoji!, style: const TextStyle(fontSize: 17))
+              ? Text(n.emoji!, style: const TextStyle(fontSize: 16))
               : Icon(n.icon ?? Icons.notifications_rounded, color: fg, size: 20),
         );
     return SizeTransition(
@@ -258,7 +258,7 @@ class _PopupState extends State<_Popup> with SingleTickerProviderStateMixin {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontFamily: AppTypography.body,
-                                fontSize: 13.5,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: n.highlight ? fg : AppColors.scorifyText,
                               ),

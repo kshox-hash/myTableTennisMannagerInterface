@@ -92,14 +92,14 @@ void showPlayerJourney(BuildContext context, String playerId, String playerName,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(playerName, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.h2.copyWith(fontSize: 17)),
+                    Text(playerName, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.h2.copyWith(fontSize: 16)),
                     Text("Recorrido en el campeonato", style: AppTypography.bodyMuted),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
           if (byCategory.isEmpty) Text("Todavía no tiene partidos en este campeonato.", style: AppTypography.bodyMuted),
           for (final list in byCategory.values) _JourneyCategory(playerId: playerId, matches: list),
         ],
@@ -185,7 +185,7 @@ class _JourneyCategory extends StatelessWidget {
                       "vs ${m.player1Id == playerId ? m.player2Name : m.player1Name}",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.bodyText.copyWith(fontSize: 13.5),
+                      style: AppTypography.bodyText.copyWith(fontSize: 13),
                     ),
                   ),
                   Text(
@@ -194,7 +194,7 @@ class _JourneyCategory extends StatelessWidget {
                         : m.player1Id == playerId
                             ? "${m.setsPlayer1} - ${m.setsPlayer2}"
                             : "${m.setsPlayer2} - ${m.setsPlayer1}",
-                    style: AppTypography.bodyText.copyWith(fontSize: 13.5, fontWeight: FontWeight.w700),
+                    style: AppTypography.bodyText.copyWith(fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                 ],
               ),

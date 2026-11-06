@@ -1,5 +1,6 @@
 import "package:myttmi/core/ui/panel_style.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/navigation/deep_links.dart";
 import "package:myttmi/core/push/push_service.dart";
@@ -9,8 +10,23 @@ import "package:myttmi/core/api/api_http.dart";
 import "package:myttmi/features/shell/splash_gate.dart";
 import "package:myttmi/routes/app_routes.dart";
 
+/// Barras del sistema transparentes con íconos claros: la app se dibuja de
+/// borde a borde y el degradado llega hasta arriba y abajo (antes la barra de
+/// estado y la de navegación cortaban el fondo con una franja de color).
+const kSystemBars = SystemUiOverlayStyle(
+  statusBarColor: Colors.transparent,
+  statusBarIconBrightness: Brightness.light,
+  statusBarBrightness: Brightness.dark, // iOS: íconos claros
+  systemNavigationBarColor: Colors.transparent,
+  systemNavigationBarDividerColor: Colors.transparent,
+  systemNavigationBarIconBrightness: Brightness.light,
+  systemNavigationBarContrastEnforced: false,
+);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(kSystemBars);
   await PushService.init();
   await Monitoring.init();
   await FavoriteMatches.load();
@@ -71,9 +87,14 @@ class MyApp extends StatelessWidget {
       // tarjetas del Inicio y las tablas se cortaban o se encimaban).
       builder: (context, child) {
         final mq = MediaQuery.of(context);
-        return MediaQuery(
-          data: mq.copyWith(textScaler: mq.textScaler.clamp(minScaleFactor: 0.9, maxScaleFactor: 1.25)),
-          child: child!,
+        // AnnotatedRegion: mantiene las barras transparentes en todas las
+        // pantallas (algunos widgets de Material las vuelven a pintar).
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: kSystemBars,
+          child: MediaQuery(
+            data: mq.copyWith(textScaler: mq.textScaler.clamp(minScaleFactor: 0.9, maxScaleFactor: 1.25)),
+            child: child!,
+          ),
         );
       },
       navigatorObservers: Monitoring.observers,

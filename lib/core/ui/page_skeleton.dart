@@ -60,7 +60,9 @@ class _LoadingCurtainState extends State<LoadingCurtain> {
 
 /// Esqueleto genérico de una pantalla: encabezado (con el botón volver, que
 /// funciona) y bloques con la forma típica — tarjeta principal, fila de
-/// accesos y lista — que laten suave.
+/// accesos y lista — con un brillo suave que los cruza en diagonal (antes
+/// latían enteros). Sobre el mismo degradado de las pantallas, para que no
+/// haya salto de fondo al aparecer la pantalla real.
 class PageSkeleton extends StatefulWidget {
   const PageSkeleton({super.key});
 
@@ -69,8 +71,8 @@ class PageSkeleton extends StatefulWidget {
 }
 
 class _PageSkeletonState extends State<PageSkeleton> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))
-    ..repeat(reverse: true);
+  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))
+    ..repeat();
 
   @override
   void dispose() {
@@ -111,8 +113,8 @@ class _PageSkeletonState extends State<PageSkeleton> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     final canPop = Navigator.canPop(context);
-    return ColoredBox(
-      color: AppColors.scorifyBg,
+    return DecoratedBox(
+      decoration: const BoxDecoration(color: AppColors.scorifyBg, gradient: AppColors.appBackground),
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -125,14 +127,13 @@ class _PageSkeletonState extends State<PageSkeleton> with SingleTickerProviderSt
                     BackCircleButton(onTap: () => Navigator.maybePop(context)),
                     const SizedBox(width: 12),
                   ],
-                  FadeTransition(opacity: _pulse, child: _bar(160, 20)),
+                  _shimmer(_bar(160, 20)),
                 ],
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
               Expanded(
-                child: FadeTransition(
-                  opacity: _pulse,
-                  child: SingleChildScrollView(
+                child: _shimmer(
+                  SingleChildScrollView(
                     physics: const NeverScrollableScrollPhysics(),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -148,7 +149,7 @@ class _PageSkeletonState extends State<PageSkeleton> with SingleTickerProviderSt
                             Expanded(child: _block(64)),
                           ],
                         ),
-                        const SizedBox(height: 22),
+                        const SizedBox(height: 20),
                         _bar(120, 14),
                         const SizedBox(height: 12),
                         for (var i = 0; i < 4; i++) _row(),
@@ -164,6 +165,23 @@ class _PageSkeletonState extends State<PageSkeleton> with SingleTickerProviderSt
     );
   }
 
-  late final Animation<double> _pulse =
-      Tween(begin: 0.45, end: 1.0).animate(CurvedAnimation(parent: _c, curve: Curves.easeInOut));
+  /// Brillo: una franja clara y tenue que cruza los bloques en diagonal, solo
+  /// donde hay bloque (srcATop), de izquierda a derecha y vuelta a empezar.
+  Widget _shimmer(Widget child) => AnimatedBuilder(
+        animation: _c,
+        child: child,
+        builder: (_, child) {
+          final t = Curves.easeInOut.transform(_c.value);
+          final x = -1.6 + t * 3.2; // de bien a la izquierda a bien a la derecha
+          return ShaderMask(
+            blendMode: BlendMode.srcATop,
+            shaderCallback: (rect) => LinearGradient(
+              begin: Alignment(x - 0.6, -0.3),
+              end: Alignment(x + 0.6, 0.3),
+              colors: const [Color(0x00FFFFFF), Color(0x14FFFFFF), Color(0x00FFFFFF)],
+            ).createShader(rect),
+            child: child,
+          );
+        },
+      );
 }
