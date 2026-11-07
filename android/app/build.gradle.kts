@@ -25,6 +25,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        // ota_update (actualización dentro de la app) lo requiere.
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -62,4 +64,9 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Java 8+ APIs en Android viejos; lo pide ota_update.
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

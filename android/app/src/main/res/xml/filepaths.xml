@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Carpeta donde ota_update guarda el APK descargado de una versión nueva
+     (actualización dentro de la app, ver lib/core/app_update.dart). -->
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <files-path name="internal_apk_storage" path="ota_update/"/>
+</paths>

@@ -2,7 +2,9 @@ import "package:myttmi/core/ui/panel_style.dart";
 import "dart:async";
 import "dart:convert";
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import "package:ota_update/ota_update.dart";
 import "package:http/http.dart" as http;
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_config.dart";
@@ -61,6 +63,25 @@ class AppUpdate {
 
   static Future<void> openStore() => launchUrl(Uri.parse(updateUrl), mode: LaunchMode.externalApplication);
 
+  /// El enlace de descarga es un APK y estamos en Android: se descarga y se
+  /// instala desde la propia app (distribución directa, sin Play Store).
+  static bool get canSelfUpdate =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android && Uri.tryParse(updateUrl)?.path.toLowerCase().endsWith(".apk") == true;
+
+  /// "Actualizar": con APK, lo descarga dentro de la app (con progreso) y
+  /// abre el instalador de Android — la persona solo toca "Instalar" (la
+  /// primera vez Android pide permitir instalar apps de MyTTM). Si no se
+  /// puede (otro sistema, error), abre el enlace en el navegador.
+  static Future<void> update(BuildContext context) async {
+    if (!canSelfUpdate) return openStore();
+    final ok = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const _SelfUpdateDialog(),
+    );
+    if (ok == false) await openStore();
+  }
+
   /// Sugerencia (no obligatoria), una vez por sesión.
   static Future<void> suggest(BuildContext context) async {
     if (!shouldUpdate) return;
@@ -80,7 +101,107 @@ class AppUpdate {
         ],
       ),
     );
-    if (go == true) await openStore();
+    if (go == true && context.mounted) await update(context);
+  }
+}
+
+/// Descarga del APK nuevo con barra de progreso. Cierra con true cuando se
+/// abrió el instalador de Android, false si falló (y entonces se ofrece el
+/// navegador).
+class _SelfUpdateDialog extends StatefulWidget {
+  const _SelfUpdateDialog();
+
+  @override
+  State<_SelfUpdateDialog> createState() => _SelfUpdateDialogState();
+}
+
+class _SelfUpdateDialogState extends State<_SelfUpdateDialog> {
+  StreamSubscription<OtaEvent>? _sub;
+  double? _progress; // 0..1; null = preparando
+  String _status = "Preparando la descarga…";
+
+  @override
+  void initState() {
+    super.initState();
+    try {
+      _sub = OtaUpdate()
+          .execute(AppUpdate.updateUrl, destinationFilename: "myttm-update.apk")
+          .listen(_onEvent, onError: (_) => _finish(false));
+    } catch (_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _finish(false));
+    }
+  }
+
+  void _onEvent(OtaEvent e) {
+    if (!mounted) return;
+    switch (e.status) {
+      case OtaStatus.DOWNLOADING:
+        final p = double.tryParse(e.value ?? "");
+        setState(() {
+          _progress = p == null ? null : (p / 100).clamp(0.0, 1.0);
+          _status = "Descargando la versión nueva…";
+        });
+      case OtaStatus.INSTALLING:
+      case OtaStatus.INSTALLATION_DONE:
+        // Se abrió el instalador de Android: allí se toca "Instalar".
+        _finish(true);
+      case OtaStatus.CANCELED:
+        Navigator.of(context).pop(true);
+      default:
+        // PERMISSION_NOT_GRANTED_ERROR, DOWNLOAD_ERROR, INTERNAL_ERROR, …
+        _finish(false);
+    }
+  }
+
+  void _finish(bool ok) {
+    if (!mounted) return;
+    Navigator.of(context).pop(ok);
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = _progress == null ? null : (_progress! * 100).round();
+    return AlertDialog(
+      backgroundColor: Panel.sheetColor,
+      shape: Panel.dialogShape,
+      titlePadding: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      title: const PanelTitleBar(title: "Actualizando MyTTM"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(_status, style: AppTypography.bodyMuted),
+          const SizedBox(height: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: _progress,
+              minHeight: 8,
+              backgroundColor: AppColors.scorifySurface2,
+              color: AppColors.scorifyMint,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            pct == null ? "" : "$pct %",
+            textAlign: TextAlign.right,
+            style: AppTypography.bodyMuted.copyWith(fontSize: 12),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            "Al terminar se abre el instalador: toca \"Instalar\". La primera vez Android te pide permitir instalar apps de MyTTM.",
+            style: AppTypography.bodyMuted.copyWith(fontSize: 12),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -115,7 +236,7 @@ class ForceUpdateScreen extends StatelessWidget {
                     style: AppTypography.bodyMuted.copyWith(fontSize: 14),
                   ),
                   const SizedBox(height: 24),
-                  AppButton(label: "Actualizar", onPressed: AppUpdate.openStore),
+                  AppButton(label: "Actualizar", onPressed: () => AppUpdate.update(context)),
                   if (AppUpdate.label.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     Text("Versión instalada: ${AppUpdate.label}", style: AppTypography.bodyMuted.copyWith(fontSize: 12)),
