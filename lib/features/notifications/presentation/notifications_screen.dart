@@ -215,7 +215,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   decoration: const BoxDecoration(
                                     border: Border(
                                       bottom: BorderSide(
-                                        color: Color(0xFF1A2F39),
+                                        color: Color(0xFF1C3526),
                                       ),
                                     ),
                                   ),

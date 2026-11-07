@@ -351,7 +351,7 @@ class _LinesPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     for (final line in lines) {
       final paint = Paint()
-        ..color = line.decided ? const Color(0xFF7FE0F5) : const Color(0xFF1A2F39)
+        ..color = line.decided ? AppColors.scorifyMint : const Color(0xFF1C3526)
         ..strokeWidth = line.decided ? 2.25 : 1.5
         ..strokeJoin = StrokeJoin.round
         ..strokeCap = StrokeCap.round
@@ -418,7 +418,7 @@ class _MatchBox extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(Panel.radius),
             child: ColoredBox(
-              color: const Color(0xEB13213B),
+              color: const Color(0xEB12261A),
               child: Column(
                 children: [
                   byePlayer1 || match.player1Id.isEmpty
@@ -509,7 +509,7 @@ class _PlayerRow extends StatelessWidget {
         height: 38,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
-          color: highlighted ? const Color(0xFF4DD2EE) : (tinted ? Colors.black.withValues(alpha: 0.15) : null),
+          color: highlighted ? AppColors.scorifyMint : (tinted ? Colors.black.withValues(alpha: 0.15) : null),
         ),
         child: Row(
           children: [
@@ -528,7 +528,7 @@ class _PlayerRow extends StatelessWidget {
                         fontFamily: AppTypography.body,
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: highlighted ? const Color(0xFF4DD2EE) : AppColors.scorifyTextMuted,
+                        color: highlighted ? AppColors.scorifyMint : AppColors.scorifyTextMuted,
                       ),
                     ),
                   )
@@ -573,7 +573,7 @@ class _PlayerRow extends StatelessWidget {
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: highlighted
-                      ? const Color(0xFF4DD2EE)
+                      ? AppColors.scorifyMint
                       : isWinner
                           ? AppColors.scorifyOnButterfly
                           : AppColors.scorifyTextMuted,

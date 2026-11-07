@@ -227,12 +227,18 @@ class _SplashGateState extends State<SplashGate> {
         children: [
           Image.asset("assets/images/logo-mark.png", width: 76, height: 76, filterQuality: FilterQuality.medium, isAntiAlias: true),
           const SizedBox(height: 16),
-          const Text(
-            "MyTTM",
-            style: TextStyle(fontFamily: AppTypography.display, fontSize: 28, fontWeight: FontWeight.w700, letterSpacing: -0.5, color: AppColors.scorifyText),
+          // Marca como en el login: "My" blanco + "TTM" verde.
+          const Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(text: "My", style: TextStyle(color: AppColors.scorifyText)),
+                TextSpan(text: "TTM", style: TextStyle(color: AppColors.scorifyMint)),
+              ],
+            ),
+            style: TextStyle(fontFamily: "Montserrat", fontSize: 30, fontWeight: FontWeight.w800, letterSpacing: 0.3),
           ),
-          const SizedBox(height: 4),
-          Text("Campeonatos de tenis de mesa", style: _small.copyWith(fontSize: 13)),
+          const SizedBox(height: 6),
+          Text("GESTIÓN DE TORNEOS Y CLUBES", style: _small.copyWith(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.8)),
         ],
       );
 

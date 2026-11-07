@@ -50,7 +50,7 @@ class AppColors {
   static const Color scorifyNegative = Color(0xFFFF5C5C);
   static const Color scorifyPending = Color(0xFFEAB308);
   static const Color scorifyBadge = Color(0xFFFF4D5E); // contador de notifs
-  static const Color scorifyCardFill = Color(0xD9071711); // tarjeta: marino verdoso al 85 % (medido de la referencia)
+  static const Color scorifyCardFill = Color(0xF2112A1D); // tarjeta: verde grisáceo al 95 %, un paso más claro que el fondo para que se despegue
   static const Color scorifyInput = Color(0x1FFFFFFF); // campos de texto: velo blanco
 
   // Fondo de las tarjetas: gris liso (se deja como "degradado" de un solo
@@ -62,7 +62,7 @@ class AppColors {
   /// Tarjeta principal (próximo partido, el campeonato en su detalle): un
   /// paso más clara, también lisa.
   static const LinearGradient featuredGradient = LinearGradient(
-    colors: [Color(0xE60B2417), Color(0xE60B2417)],
+    colors: [Color(0xF2183826), Color(0xF2183826)],
   );
 
   /// Fondo de la app: degradado en diagonal, verde esmeralda arriba a la

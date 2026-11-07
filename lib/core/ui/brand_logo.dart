@@ -38,14 +38,19 @@ class BrandLogo extends StatelessWidget {
         ),
         if (showWordmark) ...[
           SizedBox(width: markSize * 0.32),
-          Text(
-            'MYTTM',
+          // Marca como en el logo: "My" blanco + "TTM" verde de marca.
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(text: 'My', style: TextStyle(color: wordmarkColor)),
+                const TextSpan(text: 'TTM', style: TextStyle(color: AppColors.scorifyMint)),
+              ],
+            ),
             style: TextStyle(
               fontFamily: 'Montserrat',
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w800,
               fontSize: wordmarkSize ?? markSize * 0.62,
-              letterSpacing: 0.5,
-              color: wordmarkColor,
+              letterSpacing: 0.3,
             ),
           ),
         ],

@@ -56,9 +56,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadAchievements() async {
     final userId = await SessionStorage().getUserId();
     if (userId == null || !mounted) return;
-    setState(
-      () => achievementsFuture = _playerApi.getPlayerAchievements(userId),
-    );
+    // Con llaves: la flecha devolvía el Future asignado y Flutter lo marca
+    // como error ("setState() callback argument returned a Future").
+    setState(() {
+      achievementsFuture = _playerApi.getPlayerAchievements(userId);
+    });
   }
 
   @override

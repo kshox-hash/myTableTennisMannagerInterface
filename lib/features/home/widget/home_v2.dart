@@ -425,7 +425,7 @@ class HomeMatchCard extends StatelessWidget {
       decoration: BoxDecoration(
         // Flat: tarjeta destacada gris lisa, sin filete.
         borderRadius: BorderRadius.circular(Panel.radius),
-        color: const Color(0xCC0E2A33),
+        color: const Color(0xCC0E2A18),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(

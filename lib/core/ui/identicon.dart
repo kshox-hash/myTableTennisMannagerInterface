@@ -15,14 +15,14 @@ class Identicon extends StatelessWidget {
 
   const Identicon({super.key, required this.seed, this.size = 40});
 
-  // (claro, oscuro): tonos de la paleta verde/petróleo/azul de la app.
+  // (claro, oscuro): tonos verdes de la paleta de la app (2026-11-07).
   static const _tones = <(Color, Color)>[
     (Color(0xFF1FA67A), Color(0xFF0E5C47)), // esmeralda
-    (Color(0xFF1C8C9C), Color(0xFF0D4D57)), // petróleo
-    (Color(0xFF2F7BC0), Color(0xFF173F66)), // azul
-    (Color(0xFF6A5FB8), Color(0xFF362F66)), // violeta
+    (Color(0xFF2E9E5B), Color(0xFF14522F)), // bosque
+    (Color(0xFF5FA830), Color(0xFF2F5A17)), // lima oscuro
+    (Color(0xFF3F8F6A), Color(0xFF1E4A36)), // musgo
     (Color(0xFF2E9E8E), Color(0xFF14544B)), // verde agua
-    (Color(0xFF4A7F9E), Color(0xFF223F51)), // acero
+    (Color(0xFF6A8F3A), Color(0xFF35491C)), // oliva
   ];
 
   static int _hash(String input) {

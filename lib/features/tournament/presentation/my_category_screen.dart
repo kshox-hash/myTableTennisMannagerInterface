@@ -175,8 +175,15 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                             )
                             .toList();
 
-                        final isEmpty =
-                            generalStandings.isEmpty && allMatches.isEmpty && data.allGroups.isEmpty;
+                        // En llave o terminada siempre hay algo que ver ("Ver
+                        // llave completa"): sin esto, a un espectador (sin
+                        // partidos propios) le decía "Todavía no hay grupos ni
+                        // llave" justo debajo del acceso a la llave.
+                        final isEmpty = view.phase != "bracket" &&
+                            view.phase != "finished" &&
+                            generalStandings.isEmpty &&
+                            allMatches.isEmpty &&
+                            data.allGroups.isEmpty;
 
                         final me = view.standings
                             .where((x) => x.idUser == data.myUserId)

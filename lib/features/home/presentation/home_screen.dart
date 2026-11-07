@@ -18,6 +18,7 @@ import "package:myttmi/features/player/models/tournament_match_model.dart";
 import "package:myttmi/features/calendar/api/calendar_api.dart";
 import "package:myttmi/features/calendar/models/calendar_event.dart";
 import "package:myttmi/features/tournament/api/tournament_api.dart";
+import "package:myttmi/features/tournament/presentation/following_screen.dart";
 import "package:myttmi/core/ui/stagger_in.dart";
 import 'package:flutter/material.dart';
 import "package:myttmi/features/home/widget/home_layout.dart";
@@ -85,6 +86,8 @@ class _HomeScreenState extends State<HomeScreen>
   // eventos de esta semana y un logro positivo (último podio).
   List<CalendarEvent> _week = const [];
   List<CalendarEvent> _mine = const [];
+  // Campeonatos que sigo como visita (sin jugar), aún no terminados.
+  List<FollowedTournament> _following = const [];
   Tournament? _challenge;
   // Partidos jugados, del más reciente al más antiguo.
   List<PlayerMatchHistoryItem> _history = const [];
@@ -215,6 +218,7 @@ class _HomeScreenState extends State<HomeScreen>
         _loadReferee(),
         _loadUpcoming(),
         _loadLiveSummary(),
+        _loadFollowing(),
       ]);
       final results = await Future.wait([
         _profileApi.getMe(),
@@ -251,6 +255,27 @@ class _HomeScreenState extends State<HomeScreen>
 
   /// Tu próximo campeonato (inscrito y sin empezar) y tus eventos de los
   /// próximos 7 días.
+  // Campeonatos que sigo como visita: los que no terminaron ni se cancelaron
+  // (los viejos quedan en "Campeonatos que sigo" del menú). Si falla, el
+  // Inicio sigue igual, sin la tarjeta.
+  Future<void> _loadFollowing() async {
+    try {
+      final list = await TournamentApi().getFollowing();
+      final today = DateTime.now();
+      final day = DateTime(today.year, today.month, today.day);
+      final active = list
+          .where((f) => f.status == "active" && (f.eventDate == null || !f.eventDate!.isBefore(day.subtract(const Duration(days: 3)))))
+          .toList()
+        ..sort((a, b) => (a.eventDate ?? DateTime(2100)).compareTo(b.eventDate ?? DateTime(2100)));
+      if (mounted) setState(() => _following = active);
+    } catch (_) {}
+  }
+
+  Future<void> _openFollowing() async {
+    await Navigator.push(context, CyberPageRoute(builder: (_) => const FollowingScreen()));
+    if (mounted) _load(silent: true);
+  }
+
   Future<void> _loadUpcoming() async {
     final today = DateTime.now();
     final day = DateTime(today.year, today.month, today.day);
@@ -270,7 +295,14 @@ class _HomeScreenState extends State<HomeScreen>
       }
       final pending = events.where((e) => !e.finished && !e.date.isBefore(day)).toList()
         ..sort((a, b) => a.date.compareTo(b.date));
-      week = pending.where((e) => e.date.isBefore(day.add(const Duration(days: 14)))).take(4).toList();
+      // Un evento por campeonato en los próximos 14 días, sin tope: antes
+      // tenía take(4) (con 5 campeonatos decía 4) y contaba cada categoría
+      // aparte (un campeonato con 2 categorías sumaba 2).
+      final weekSeen = <String>{};
+      week = [
+        for (final e in pending.where((e) => e.date.isBefore(day.add(const Duration(days: 14)))))
+          if (weekSeen.add(e.tournamentId)) e,
+      ];
       // Un renglón por campeonato: en curso (aunque haya empezado antes) o por jugar.
       final seen = <String>{};
       final current = events.where((e) => !e.finished && (e.inProgress || !e.date.isBefore(day))).toList()
@@ -400,6 +432,15 @@ class _HomeScreenState extends State<HomeScreen>
                 subtitle: Text(e.inProgress ? "En juego" : "Por jugar", style: const TextStyle(color: AppColors.scorifyTextMuted)),
                 trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint),
                 onTap: () => Navigator.pop(sheet, e.tournamentId),
+              ),
+            // Los que sigo de visita, después de los míos.
+            for (final f in _following)
+              ListTile(
+                leading: const Icon(Icons.notifications_active_rounded, color: AppColors.scorifyMint),
+                title: Text(f.name, style: const TextStyle(color: AppColors.scorifyText, fontWeight: FontWeight.w600)),
+                subtitle: const Text("De visita", style: TextStyle(color: AppColors.scorifyTextMuted)),
+                trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint),
+                onTap: () => Navigator.pop(sheet, f.idTournament),
               ),
             const SizedBox(height: 8),
           ],
@@ -700,6 +741,15 @@ class _HomeScreenState extends State<HomeScreen>
                         HomeLiveCard(summaries: _liveSummaries),
                         const SizedBox(height: 12),
                       ],
+                      // Campeonatos que sigo como visita (sin jugar).
+                      if (_following.isNotEmpty) ...[
+                        _FollowingCard(
+                          items: _following,
+                          onOpen: (f) => _openTournament(f.idTournament),
+                          onSeeAll: _openFollowing,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                     ]),
                     ...staggerChildren([
                       IntrinsicHeight(
@@ -710,13 +760,18 @@ class _HomeScreenState extends State<HomeScreen>
                               child: HomeTile(
                                 gradient: homeGradientTeal,
                                 icon: Icons.emoji_events_rounded,
-                                value: "${_mine.length}",
-                                caption: _mine.length == 1 ? "inscrito" : "inscritos",
+                                // Inscritos + los que sigo de visita.
+                                value: "${_mine.length + _following.length}",
+                                caption: _following.isEmpty
+                                    ? (_mine.length == 1 ? "inscrito" : "inscritos")
+                                    : _mine.isEmpty
+                                        ? "de visita"
+                                        : "${_mine.length} ${_mine.length == 1 ? "inscrito" : "inscritos"} · ${_following.length} de visita",
                                 title: "Mis campeonatos",
-                                action: _mine.isEmpty ? "Explorar" : "Ver",
+                                action: _mine.isEmpty && _following.isEmpty ? "Explorar" : "Ver",
                                 onTap: () => _mine.isEmpty
-                                    ? AppShellScope.of(context)?.switchTab(3, link: true)
-                                    : _mine.length == 1
+                                    ? (_following.isEmpty ? AppShellScope.of(context)?.switchTab(3, link: true) : _openFollowing())
+                                    : _mine.length == 1 && _following.isEmpty
                                         ? _openTournament(_mine.first.tournamentId)
                                         : _pickTournament(),
                               ),
@@ -906,6 +961,74 @@ class _MyGroupsCard extends StatelessWidget {
                         style: AppTypography.bodyText.copyWith(fontWeight: FontWeight.w600)),
                     const SizedBox(width: 6),
                     const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Campeonatos que sigo como visita (sin jugarlos): hasta 3 renglones con
+/// la fecha y "Ver todos" a la lista completa.
+class _FollowingCard extends StatelessWidget {
+  final List<FollowedTournament> items;
+  final void Function(FollowedTournament) onOpen;
+  final VoidCallback onSeeAll;
+  const _FollowingCard({required this.items, required this.onOpen, required this.onSeeAll});
+
+  static const _months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+
+  String _when(DateTime? d) {
+    if (d == null) return "Sin fecha";
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final day = DateTime(d.year, d.month, d.day);
+    final diff = day.difference(today).inDays;
+    if (diff == 0) return "Hoy";
+    if (diff == 1) return "Mañana";
+    if (diff < 0) return "En curso";
+    return "${d.day} ${_months[d.month - 1]}";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return HomeCard(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          HomeCardTitle(
+            icon: Icons.notifications_active_rounded,
+            title: items.length == 1 ? "Campeonato que sigues" : "Campeonatos que sigues",
+            action: items.length > 3 ? "Ver todos" : null,
+            onAction: onSeeAll,
+          ),
+          const SizedBox(height: 4),
+          for (final f in items.take(3))
+            InkWell(
+              onTap: () => onOpen(f),
+              borderRadius: BorderRadius.circular(Panel.buttonRadius),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        f.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      _when(f.eventDate),
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyMint),
+                    ),
+                    const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint, size: 20),
                   ],
                 ),
               ),
