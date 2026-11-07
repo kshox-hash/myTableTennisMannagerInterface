@@ -64,7 +64,7 @@ class _HomeCardState extends State<HomeCard> {
     const radius = Panel.radius; // esquinas casi rectas (estilo panel)
     final r = BorderRadius.circular(radius);
     // Tarjeta destacada (la central: bienvenida / próximo partido): borde
-    // neón verde con un halo suave solo hacia afuera. Las demás, planas.
+    // neón verde fino, sin halo. Las demás, planas.
     final featured = widget.gradient == _glassFeatured;
     return AnimatedScale(
       scale: _down ? 0.98 : 1,
@@ -75,7 +75,8 @@ class _HomeCardState extends State<HomeCard> {
             ? BoxDecoration(
                 borderRadius: r,
                 border: Border.all(color: _mint.withValues(alpha: 0.75), width: 1.2),
-                boxShadow: [BoxShadow(color: _mint.withValues(alpha: 0.35), blurRadius: 16, blurStyle: BlurStyle.outer)],
+                // Sin halo: el resplandor difuminado se cortaba de golpe al
+                // hacer scroll / en el borde de la lista ("se rompe").
               )
             : const BoxDecoration(),
         child: CardBorder(
