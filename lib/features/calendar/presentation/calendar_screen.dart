@@ -166,9 +166,8 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
       physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: staggerChildren([
-        const TopHeader(title: "Calendario", showBack: false),
-        const SizedBox(height: 6),
-        const Text("Tus campeonatos inscritos, día a día.", style: _muted),
+        const TopHeader(title: "Calendario", subtitle: "Tus campeonatos inscritos, día a día.", showBack: false),
+        const SizedBox(height: 14),
 
         if (_upcoming.isNotEmpty) ...[
           _Section(_upcoming.any((e) => e.inProgress) ? "Tus campeonatos" : "Tus próximos campeonatos"),
@@ -182,7 +181,9 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
           ],
         ],
 
-        const _Section("Calendario"),
+        // Solo separa del bloque de próximos campeonatos; sin ese bloque
+        // repetía el título del encabezado.
+        if (_upcoming.isNotEmpty) const _Section("Calendario"),
         GlassCard(
           padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
           child: Column(

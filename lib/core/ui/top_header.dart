@@ -175,18 +175,12 @@ class BackCircleButton extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         customBorder: const CircleBorder(),
-        child: Container(
-          width: 38,
-          height: 38,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.scorifyText.withValues(alpha: 0.75), width: 1.5),
-          ),
-          child: const Padding(
-            padding: EdgeInsets.only(right: 2),
-            child: Icon(Icons.chevron_left_rounded, color: AppColors.scorifyText, size: 24),
-          ),
+        // Flecha normal, sin círculo ni borde (el usuario no quiso el
+        // botón redondo); el área tocable sigue siendo de 40×40.
+        child: const SizedBox(
+          width: 40,
+          height: 40,
+          child: Icon(Icons.arrow_back_rounded, color: AppColors.scorifyText, size: 24),
         ),
       ),
     );

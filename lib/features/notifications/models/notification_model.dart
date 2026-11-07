@@ -28,6 +28,7 @@ const Map<String, String> _typeIcon = {
   "club_payment": "💳",
   "club_join_approved": "🤝",
   "club_join_rejected": "🚫",
+  "followed_update": "👀",
 };
 
 String notificationIcon(String type) => _typeIcon[type] ?? "🔔";
@@ -59,6 +60,7 @@ const Map<String, Color> _typeColor = {
   "club_payment": AppColors.scorifyMint,
   "club_join_approved": AppColors.scorifyMint,
   "club_join_rejected": AppColors.scorifyNegative,
+  "followed_update": AppColors.scorifyMint,
 };
 
 Color notificationColor(String type) =>

@@ -12,7 +12,6 @@ import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/auth_text_field.dart";
-import "package:myttmi/core/ui/brand_logo.dart";
 import "package:myttmi/core/ui/glass_card.dart";
 import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/features/auth/api/auth_api.dart";
@@ -110,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.scorifyBg,
-      body: PrismBackground(
+      body: PrismBackground.login(
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -118,27 +117,47 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const BrandLogo(markSize: 72, showWordmark: false),
-                  const SizedBox(height: 14),
-                  // Wordmark como en el mockup: "My" blanco + "TTM" azul.
-                  const Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(text: "My", style: TextStyle(color: AppColors.scorifyText)),
-                        TextSpan(text: "TTM", style: TextStyle(color: AppColors.scorifyMint)),
-                      ],
+                  // Logo 3D metálico en vertical: la M arriba y "MyTTM ·
+                  // Gestión de torneos y clubes" abajo (armado del logo
+                  // horizontal). Discreto, 190 de ancho; el asset viene en
+                  // 1x/2x/3x de ese tamaño (assets/images/2.0x, 3.0x): no se
+                  // achica en el teléfono y los bordes no se ven dentados.
+                  const SizedBox(
+                    width: 190,
+                    child: Image(
+                      image: AssetImage("assets/images/logo-stacked.png"),
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.medium,
+                      isAntiAlias: true,
+                      semanticLabel: "MyTTM",
                     ),
-                    style: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w800, fontSize: 32, letterSpacing: 0.5),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "Tu tenis de mesa, en un solo lugar.",
-                    textAlign: TextAlign.center,
-                    style: AppTypography.bodyMuted,
+                  const SizedBox(height: 10),
+                  // Bajada como texto real (dentro de la imagen quedaba
+                  // diminuta), con la línea verde a cada lado como el logo.
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(width: 22, height: 1.5, color: const Color(0xFF45D62A)),
+                      const SizedBox(width: 8),
+                      const Text(
+                        "GESTIÓN DE TORNEOS Y CLUBES",
+                        style: TextStyle(
+                          fontFamily: "Montserrat",
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.8,
+                          color: Color(0xFFE6ECEA),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(width: 22, height: 1.5, color: const Color(0xFF45D62A)),
+                    ],
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 28),
                   GlassCard(
                     variant: GlassCardVariant.elevated,
+                    fillColor: AuthTextField.cardColor, // opaca: plana sobre el fondo
                     padding: const EdgeInsets.all(22),
                     child: Column(
                       children: [
@@ -193,17 +212,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 44,
                           child: OutlinedButton(
                             onPressed: loading ? null : _loginGoogle,
+                            // Botón oficial de Google (tema claro): fondo
+                            // blanco, texto casi negro y la "G" de 4 colores.
                             style: OutlinedButton.styleFrom(
-                              backgroundColor: AppColors.scorifySurface2,
-                              foregroundColor: AppColors.scorifyText,
-                              side: const BorderSide(color: AppColors.scorifyCardBorder),
+                              backgroundColor: Colors.white,
+                              foregroundColor: const Color(0xFF1F1F1F),
+                              disabledBackgroundColor: Colors.white.withValues(alpha: 0.6),
+                              side: BorderSide.none,
                               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.radius))),
                             ),
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text("G", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF4285F4))),
-                                SizedBox(width: 10),
+                                Image(image: AssetImage("assets/images/google_g.png"), width: 20, height: 20, filterQuality: FilterQuality.medium),
+                                SizedBox(width: 12),
                                 Text("Continuar con Google", style: TextStyle(fontFamily: "Montserrat", fontSize: 14, fontWeight: FontWeight.w600)),
                               ],
                             ),

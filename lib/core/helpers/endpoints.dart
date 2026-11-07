@@ -15,6 +15,12 @@ class Endpoints {
   static String tournamentById(String tournamentId) =>
       "$base/tournament/player/tournaments/$tournamentId";
 
+  // Seguir un campeonato como visita (GET estado · POST seguir · DELETE dejar).
+  static const followingTournaments = "$base/tournament/me/following";
+
+  static String tournamentFollow(String tournamentId) =>
+      "$base/tournament/$tournamentId/follow";
+
   static String tournamentParticipants(String tournamentId) =>
       "$base/player/tournament/$tournamentId/participants";
 

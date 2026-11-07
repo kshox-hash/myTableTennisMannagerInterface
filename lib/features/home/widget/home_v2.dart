@@ -63,10 +63,22 @@ class _HomeCardState extends State<HomeCard> {
   Widget build(BuildContext context) {
     const radius = Panel.radius; // esquinas casi rectas (estilo panel)
     final r = BorderRadius.circular(radius);
+    // Tarjeta destacada (la central: bienvenida / próximo partido): borde
+    // neón verde con un halo suave solo hacia afuera. Las demás, planas.
+    final featured = widget.gradient == _glassFeatured;
     return AnimatedScale(
       scale: _down ? 0.98 : 1,
       duration: const Duration(milliseconds: 110),
-      child: CardBorder(
+      child: DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: featured
+            ? BoxDecoration(
+                borderRadius: r,
+                border: Border.all(color: _mint.withValues(alpha: 0.75), width: 1.2),
+                boxShadow: [BoxShadow(color: _mint.withValues(alpha: 0.35), blurRadius: 16, blurStyle: BlurStyle.outer)],
+              )
+            : const BoxDecoration(),
+        child: CardBorder(
         radius: radius,
         highlight: widget.gradient == _glassFeatured,
         child: ClipRRect(
@@ -85,6 +97,7 @@ class _HomeCardState extends State<HomeCard> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
@@ -1210,7 +1223,7 @@ class HomeBanner extends StatelessWidget {
                     gradient: LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
-                      colors: [Color(0xFF0A1E26), Color(0xFF0E2A33)],
+                      colors: [Color(0xFF0A1E12), Color(0xFF0E2A18)],
                     ),
                   ),
                 ),
@@ -1692,12 +1705,6 @@ class HomeTile extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.hardEdge,
         children: [
-          // Marca de agua: el mismo ícono, gigante y casi transparente.
-          Positioned(
-            right: -10,
-            top: -6,
-            child: Icon(icon, size: 96, color: Colors.white.withValues(alpha: 0.05)),
-          ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -1759,18 +1766,21 @@ class HomeEmptyCard extends StatelessWidget {
   final VoidCallback? onAction;
   const HomeEmptyCard({super.key, required this.title, required this.icon, required this.message, this.hint, this.action, this.onAction});
 
-  /// "Bienvenido a MyTTM": la marca en celeste, cursiva y negrita.
+  /// "Bienvenido a MyTTM": la marca como el logo, "My" en blanco y "TTM" en
+  /// verde, cursiva y negrita.
   Widget _title() {
     final base = _t(22, w: FontWeight.w700, h: 1.2);
     const brand = "MyTTM";
     final i = title.indexOf(brand);
     if (i < 0) return Text(title, style: base);
+    final mark = base.copyWith(fontStyle: FontStyle.italic, fontWeight: FontWeight.w800);
     return Text.rich(
       TextSpan(
         style: base,
         children: [
           TextSpan(text: title.substring(0, i)),
-          TextSpan(text: brand, style: base.copyWith(color: _mint, fontStyle: FontStyle.italic, fontWeight: FontWeight.w800)),
+          TextSpan(text: "My", style: mark.copyWith(color: AppColors.scorifyText)),
+          TextSpan(text: "TTM", style: mark.copyWith(color: _mint)),
           TextSpan(text: title.substring(i + brand.length)),
         ],
       ),

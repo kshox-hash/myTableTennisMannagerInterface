@@ -1,5 +1,6 @@
 import "package:myttmi/core/ui/panel_style.dart";
 import "package:flutter/material.dart";
+import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/core/api/api_http.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/ui/top_header.dart";
@@ -113,8 +114,7 @@ class _PageSkeletonState extends State<PageSkeleton> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     final canPop = Navigator.canPop(context);
-    return DecoratedBox(
-      decoration: const BoxDecoration(color: AppColors.scorifyBg, gradient: AppColors.appBackground),
+    return PrismBackground(
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),

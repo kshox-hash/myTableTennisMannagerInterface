@@ -255,6 +255,12 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                       children: [
                         _HeroCard(tournament: t, started: _started, anyOpen: _anyOpen),
                         const SizedBox(height: 14),
+                        // Seguir como visita: solo si no juega (el inscrito ya
+                        // recibe sus propios avisos) y el campeonato sigue en pie.
+                        if (!t.isCancelled && !cats.any((c) => c.isEnrolled)) ...[
+                          _FollowCard(tournamentId: t.idTournament),
+                          const SizedBox(height: 14),
+                        ],
                         // Liga: la tabla y las fechas viven en su página (igual que en la web).
                         if (t.isLeague) ...[
                           _QuickLink(
@@ -989,6 +995,112 @@ class _PlayerAvatar extends StatelessWidget {
       padding: const EdgeInsets.all(2),
       decoration: const BoxDecoration(color: AppColors.scorifyCardFill, shape: BoxShape.circle),
       child: UserAvatar(userId: player.idUser, url: player.avatarUrl, size: size),
+    );
+  }
+}
+
+/// "Seguir campeonato" para quien no juega (familia, compañeros de club,
+/// fans): sin inscribirse, recibe un aviso cuando empieza cada categoría,
+/// cuando sale la llave, cuando hay campeón y si cambia la fecha, el lugar o
+/// se cancela. Grupos y resultados ya se podían mirar; esto suma los avisos.
+class _FollowCard extends StatefulWidget {
+  final String tournamentId;
+  const _FollowCard({required this.tournamentId});
+
+  @override
+  State<_FollowCard> createState() => _FollowCardState();
+}
+
+class _FollowCardState extends State<_FollowCard> {
+  bool? _following;
+  int _followers = 0;
+  bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    TournamentApi().getFollow(widget.tournamentId).then((r) {
+      if (!mounted) return;
+      setState(() {
+        _following = r.following;
+        _followers = r.followers;
+      });
+    }).catchError((_) {
+      if (mounted) setState(() => _following = false);
+    });
+  }
+
+  Future<void> _toggle() async {
+    final next = !(_following ?? false);
+    setState(() => _busy = true);
+    try {
+      await TournamentApi().setFollow(widget.tournamentId, next);
+      if (!mounted) return;
+      setState(() {
+        _following = next;
+        _followers = (_followers + (next ? 1 : -1)).clamp(0, 1 << 30);
+      });
+      if (next) {
+        showToast(context, "Te avisaremos de los grupos, la llave y los campeones");
+      }
+    } catch (e) {
+      if (mounted) showToast(context, e.toString().replaceFirst("Exception: ", ""), error: true);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final following = _following ?? false;
+    return GlassCard(
+      padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+      child: Row(
+        children: [
+          Icon(
+            following ? Icons.notifications_active_rounded : Icons.notifications_none_rounded,
+            color: AppColors.scorifyMint,
+            size: 24,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  following ? "Sigues este campeonato" : "¿No juegas? Síguelo",
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.scorifyText),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  following
+                      ? "Te avisamos cuando empiece cada categoría, salga la llave y haya campeones."
+                      : "Recibe avisos de los grupos, la llave y los campeones sin inscribirte."
+                          "${_followers > 0 ? " · $_followers ${_followers == 1 ? "lo sigue" : "lo siguen"}" : ""}",
+                  style: _meta,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            height: 36,
+            child: _following == null
+                ? const SizedBox(width: 36, child: Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.scorifyMint))))
+                : TextButton(
+                    onPressed: _busy ? null : _toggle,
+                    style: TextButton.styleFrom(
+                      backgroundColor: following ? AppColors.scorifySurface2 : AppColors.scorifyMint,
+                      foregroundColor: following ? AppColors.scorifyText : AppColors.scorifyOnMint,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.buttonRadius))),
+                      textStyle: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w700),
+                    ),
+                    child: Text(following ? "Siguiendo ✓" : "Seguir"),
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }

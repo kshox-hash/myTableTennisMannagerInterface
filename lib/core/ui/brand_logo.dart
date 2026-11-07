@@ -24,14 +24,17 @@ class BrandLogo extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(markSize * 0.22),
-          child: Image.asset(
-            'assets/images/logo-mark.png',
-            width: markSize,
-            height: markSize,
-            filterQuality: FilterQuality.medium,
-          ),
+        // La M nueva tiene fondo transparente y llega casi al borde: sin
+        // recorte redondeado (le comía las puntas) y escalado en alta
+        // calidad para que no se vea serruchada al achicarla.
+        Image.asset(
+          'assets/images/logo-mark.png',
+          width: markSize,
+          height: markSize,
+          // "medium" (mipmaps) y no "high": en web "high" no promedia al
+          // achicar mucho (512 → ~30 px) y deja los bordes dentados.
+          filterQuality: FilterQuality.medium,
+          isAntiAlias: true,
         ),
         if (showWordmark) ...[
           SizedBox(width: markSize * 0.32),

@@ -5,6 +5,7 @@ import "package:myttmi/core/monitoring.dart";
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/routes/cyber_page_route.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -59,6 +60,9 @@ class _SplashGateState extends State<SplashGate> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) PrismBackground.precache(context);
+    });
     ShellPreload.reset();
     ShellPreload.progress.addListener(_onProgress);
     if (widget.afterLogin) {
@@ -191,8 +195,7 @@ class _SplashGateState extends State<SplashGate> {
     final mq = MediaQuery.of(context);
     final overlay = Material(
       color: AppColors.scorifyBg,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(gradient: AppColors.appBackground),
+      child: PrismBackground(
         child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         child: _intro ? _logoIntro() : _loading(mq),
@@ -222,7 +225,7 @@ class _SplashGateState extends State<SplashGate> {
   Widget _brand() => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset("assets/images/logo-mark.png", width: 76, height: 76, filterQuality: FilterQuality.medium),
+          Image.asset("assets/images/logo-mark.png", width: 76, height: 76, filterQuality: FilterQuality.medium, isAntiAlias: true),
           const SizedBox(height: 16),
           const Text(
             "MyTTM",

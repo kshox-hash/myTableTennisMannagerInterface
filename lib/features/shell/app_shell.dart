@@ -11,6 +11,7 @@ import 'package:myttmi/core/ui/confirm_dialog.dart';
 import 'package:myttmi/features/profile/models/profile_model.dart';
 import 'package:myttmi/features/profile/api/profile_api.dart';
 import 'package:myttmi/features/favorites/favorites_screen.dart';
+import 'package:myttmi/features/tournament/presentation/following_screen.dart';
 import 'package:myttmi/routes/app_routes.dart';
 import 'package:myttmi/features/shell/app_drawer.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
@@ -301,12 +302,17 @@ class _AppShellState extends State<AppShell>
           DrawerItem(Icons.history_rounded, "Historial", () => Navigator.pushNamed(context, AppRoutes.history)),
           DrawerItem(Icons.favorite_border_rounded, "Partidos guardados",
               () => Navigator.push(context, CyberPageRoute(builder: (_) => const FavoritesScreen()))),
+          DrawerItem(Icons.notifications_active_outlined, "Campeonatos que sigo",
+              () => Navigator.push(context, CyberPageRoute(builder: (_) => const FollowingScreen()))),
           DrawerItem(Icons.settings_rounded, "Ajustes", _openSettings),
         ],
         onLogout: _logout,
       ),
       body: PrismBackground(
-        image: _index == 0,
+        // Inicio tiene su propio fondo; el resto de las pestañas, el general.
+        asset: _index == 0 ? PrismBackground.homeAsset : null,
+        // El Inicio con el fondo "normal"; las demás pestañas, más oscuro.
+        bright: _index == 0,
         child: SafeArea(
           child: FadeTransition(
             opacity: opacity,

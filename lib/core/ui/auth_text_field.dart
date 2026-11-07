@@ -13,6 +13,11 @@ class AuthTextField extends StatelessWidget {
   final bool obscureText;
   final TextInputType? keyboardType;
 
+  /// Relleno sólido de los campos de Login/Registro (un paso más claro que
+  /// la tarjeta [cardColor] que los contiene).
+  static const fillColor = Color(0xFF15281B);
+  static const cardColor = Color(0xFF07170D);
+
   const AuthTextField({
     super.key,
     required this.controller,
@@ -34,14 +39,16 @@ class AuthTextField extends StatelessWidget {
         labelStyle: AppTypography.bodyMuted,
         prefixIcon: Icon(icon, color: AppColors.scorifyTextMuted, size: 20),
         filled: true,
-        fillColor: AppColors.scorifyInput,
+        // Plano y opaco: sin borde y sin transparencia, para que el fondo
+        // con imagen no se cuele y el campo se distinga solo por el relleno.
+        fillColor: fillColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(Panel.radius),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(Panel.radius),
-          borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(Panel.radius),

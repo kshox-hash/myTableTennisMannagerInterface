@@ -1,73 +1,99 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 
-/// Fondo de la app: degradado verde esmeralda → marino (AppColors.appBackground)
-/// con vetas de luz en diagonal, como la referencia que eligió el usuario.
-/// Todo dibujado por código (sin imagen) y estático: se pinta una vez y el
-/// RepaintBoundary lo aísla del scroll, así que no pesa. [image] ya no hace
-/// nada: antes ponía una imagen geométrica detrás del Inicio.
+/// Fondo de la app: una imagen (por defecto assets/images/app_bg.jpg) con
+/// una capa oscura encima para que tarjetas y textos mantengan contraste.
+/// El login usa su propia imagen ([loginAsset]) con una capa más densa,
+/// porque es más brillante. Estático: el RepaintBoundary lo aísla del
+/// scroll. [image] se mantiene por compatibilidad y no hace nada.
 class PrismBackground extends StatelessWidget {
   final Widget child;
   final bool image;
-  const PrismBackground({super.key, required this.child, this.image = false});
+
+  /// Imagen de fondo; null = la de toda la app.
+  final String? asset;
+
+  /// Capa oscura propia (de arriba hacia abajo); null = la de la app.
+  final List<Color>? scrim;
+
+  /// true = capa liviana (el Inicio: el fondo se ve "normal"); false = la
+  /// más oscura del resto de las pantallas, para que el contenido destaque.
+  final bool bright;
+
+  const PrismBackground({super.key, required this.child, this.image = false, this.asset, this.scrim, this.bright = false});
+
+  /// Inicio: densa solo en la franja del encabezado (contraste del título),
+  /// liviana en el medio para que se vea la imagen.
+  static const homeScrim = [Color(0xCC000000), Color(0x99000000), Color(0x26000000), Color(0x59000000)];
+
+  /// Resto de las pantallas: bastante más oscura en todo el alto.
+  static const innerScrim = [Color(0xE6000000), Color(0xCC000000), Color(0x99000000), Color(0xB3000000)];
+
+  /// Solo para el login: imagen propia y casi sin capa.
+  const PrismBackground.login({super.key, required this.child})
+      : image = false,
+        bright = false,
+        asset = loginAsset,
+        // Casi sin capa: la imagen ya trae negro arriba y abajo, y la
+        // tarjeta del formulario tiene su propio relleno para leerse.
+        scrim = const [Color(0x00000000), Color(0x0F000000), Color(0x26000000)];
 
   static const color = AppColors.scorifyBg;
+  static const appAsset = 'assets/images/app_bg.jpg';
+  static const loginAsset = 'assets/images/login_bg.jpg';
+
+  /// Solo la pestaña Inicio (AppShell la elige según la pestaña activa).
+  static const homeAsset = 'assets/images/home_bg.jpg';
+
+  /// Llamar una vez al iniciar (con un context ya montado) para que la
+  /// primera pantalla no aparezca un instante sin el fondo.
+  static Future<void> precache(BuildContext context) => Future.wait([
+        precacheImage(const AssetImage(appAsset), context),
+        precacheImage(const AssetImage(loginAsset), context),
+        precacheImage(const AssetImage(homeAsset), context),
+      ]);
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(color: color, gradient: AppColors.appBackground),
+    return ColoredBox(
+      color: const Color(0xFF000000),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const RepaintBoundary(child: CustomPaint(painter: LightStreaksPainter())),
+          RepaintBoundary(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image(
+                  image: AssetImage(asset ?? appAsset),
+                  fit: BoxFit.cover,
+                  alignment: Alignment.center,
+                  gaplessPlayback: true,
+                  filterQuality: FilterQuality.medium,
+                ),
+                // Capa oscura. La general es más densa en la franja de
+                // arriba, donde van el título y los botones del encabezado
+                // (ahí la imagen tiene puntos y franjas claras que le
+                // quitaban contraste a las letras); se aclara hacia el
+                // medio y vuelve a oscurecerse un poco abajo.
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: scrim != null
+                        ? LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: scrim!)
+                        : LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: const [0, 0.14, 0.32, 1],
+                            colors: bright ? homeScrim : innerScrim,
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           RepaintBoundary(child: child),
         ],
       ),
     );
   }
-}
-
-/// Vetas de luz esmeralda en diagonal (suben de izquierda a derecha): unas
-/// anchas y difusas, otras finas y más brillantes. Arriba a la izquierda y
-/// abajo, como en la referencia; el centro queda limpio para el contenido.
-class LightStreaksPainter extends CustomPainter {
-  const LightStreaksPainter();
-
-  static const _glow = Color(0xFF31E38B);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width, h = size.height;
-    final diag = math.sqrt(w * w + h * h);
-    canvas.save();
-    canvas.translate(w / 2, h / 2);
-    canvas.rotate(-math.pi / 3.4); // ~53°: suben de abajo-izquierda a arriba-derecha
-
-    // (posición a lo ancho de la pantalla girada, ancho de la veta, intensidad)
-    const streaks = <(double, double, double)>[
-      (-0.46, 70, 0.10), // ancha, arriba a la izquierda
-      (-0.40, 2.5, 0.45), // fina y brillante
-      (-0.33, 26, 0.08),
-      (0.40, 90, 0.08), // ancha, abajo
-      (0.47, 2, 0.40), // fina
-      (0.55, 34, 0.07),
-    ];
-    for (final (pos, width, alpha) in streaks) {
-      final x = pos * diag;
-      final r = Rect.fromLTWH(x - width / 2, -diag / 2, width, diag);
-      final paint = Paint()
-        ..shader = LinearGradient(
-          colors: [_glow.withValues(alpha: 0), _glow.withValues(alpha: alpha), _glow.withValues(alpha: 0)],
-        ).createShader(r);
-      if (width > 10) paint.maskFilter = MaskFilter.blur(BlurStyle.normal, width / 4);
-      canvas.drawRect(r, paint);
-    }
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(LightStreaksPainter oldDelegate) => false;
 }
