@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 
 /// Efectos compartidos de la app — sutiles y baratos (sin desenfoque ni
 /// animaciones en loop), para que se sienta pulida sin perder fluidez.
@@ -74,7 +75,11 @@ class _PressScaleState extends State<PressScale> {
   Widget build(BuildContext context) {
     if (!widget.enabled) return widget.child;
     return Listener(
-      onPointerDown: (_) => _set(true),
+      onPointerDown: (_) {
+        // Respuesta física al tocar (se siente nativo en el celular).
+        if (!_down) HapticFeedback.selectionClick();
+        _set(true);
+      },
       onPointerUp: (_) => _set(false),
       onPointerCancel: (_) => _set(false),
       child: AnimatedScale(

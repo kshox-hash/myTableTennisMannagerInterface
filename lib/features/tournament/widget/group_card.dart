@@ -2,6 +2,7 @@ import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/player_actions.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/ui/section_card.dart";
+import "package:myttmi/core/ui/scoreboard.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -116,10 +117,8 @@ class GroupCard extends StatelessWidget {
             const SizedBox(height: 4),
             // Todos con la misma cantidad de columnas de set (la del partido
             // más largo): uno de 2 sets no corre la columna de sets ganados.
-            ...dividedRows([
-              for (final m in matches)
-                _matchRow(m, matches.fold<int>(0, (n, x) => x.setScores.length > n ? x.setScores.length : n)),
-            ]),
+            for (final m in matches)
+              _matchRow(m, matches.fold<int>(0, (n, x) => x.setScores.length > n ? x.setScores.length : n)),
           ],
         ],
       ),
@@ -212,113 +211,37 @@ class GroupCard extends StatelessWidget {
     );
   }
 
-  // Un partido como marcador de dos renglones: cada jugador a la izquierda y
-  // sus sets a la derecha (el ganador en blanco y negrita, el otro en gris),
-  // y a la derecha el estado: "Mesa N" en vivo, "Por jugar" o "W.O.". Debajo,
-  // los puntos de cada set. Todo queda alineado en columnas, sin importar
-  // el largo de los nombres.
+  // Un partido como marcador (ver Scoreboard): cada jugador en su franja,
+  // arriba más clara y abajo más oscura, sets grandes y los puntos de cada
+  // set al lado. Sin jugar: los nombres y, a la derecha, "Mesa N" (en vivo)
+  // o "Por jugar"; W.O. con su etiqueta.
   Widget _matchRow(GroupMatchInfo m, int setColumns) {
     final played = m.status == "played" || m.status == "walkover";
     final wo = m.status == "walkover";
-    final p1 = group.nameFor(m.player1Id);
-    final p2 = group.nameFor(m.player2Id);
-
-    // Puntos de cada set al lado de los sets, como un marcador: arriba los
-    // del jugador 1, abajo los del 2, cada set en su columna (el que ganó
-    // ese set en blanco y negrita).
-    final sets = played && !wo ? m.setScores : const <(int, int)>[];
-    Widget line(String name, int? setsWon, bool winner, bool first) {
-      final dim = played && !winner;
-      return Row(
-        children: [
-          Expanded(
-            child: Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: AppTypography.body,
-                fontSize: 13,
-                fontWeight: winner ? FontWeight.w700 : FontWeight.w500,
-                color: dim ? AppColors.scorifyTextMuted : AppColors.scorifyText,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 22,
-            child: Text(
-              played && !wo ? "${setsWon ?? 0}" : "",
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontFamily: AppTypography.body,
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: winner ? AppColors.scorifyText : AppColors.scorifyTextFaint,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-          ),
-          if (sets.isNotEmpty) ...[
-            const SizedBox(width: 8),
-            Container(width: 1, height: 16, color: AppColors.scorifyCardBorder),
-            const SizedBox(width: 2),
-            for (var k = 0; k < setColumns; k++)
-              SizedBox(
-                width: 24,
-                child: k >= sets.length
-                    ? null
-                    : Text(
-                  "${first ? sets[k].$1 : sets[k].$2}",
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontFamily: AppTypography.body,
-                    fontSize: 12.5,
-                    fontWeight: (first ? sets[k].$1 > sets[k].$2 : sets[k].$2 > sets[k].$1) ? FontWeight.w700 : FontWeight.w500,
-                    color: (first ? sets[k].$1 > sets[k].$2 : sets[k].$2 > sets[k].$1) ? AppColors.scorifyText : AppColors.scorifyTextFaint,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-              ),
-          ],
-        ],
-      );
-    }
-
-    final Widget status;
+    final winner = !played ? null : (m.winnerId == m.player1Id ? 1 : (m.winnerId == m.player2Id ? 2 : null));
+    Widget? trailing;
     if (wo) {
-      status = const PanelChip(label: "W.O.", fontSize: 11);
-    } else if (played) {
-      status = const SizedBox.shrink();
-    } else if (m.tableNumber != null) {
-      status = PanelChip(label: "Mesa ${m.tableNumber}", color: AppColors.scorifyLive, fontSize: 11);
-    } else {
-      status = const Text(
+      trailing = const PanelChip(label: "W.O.", fontSize: 11);
+    } else if (!played && m.tableNumber != null) {
+      trailing = PanelChip(label: "Mesa ${m.tableNumber}", color: AppColors.scorifyLive, fontSize: 11);
+    } else if (!played) {
+      trailing = const Text(
         "Por jugar",
         style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyTextFaint),
       );
     }
-
-
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 9, 8, 9),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                line(p1, m.setsPlayer1, played && m.winnerId == m.player1Id, true),
-                const SizedBox(height: 4),
-                line(p2, m.setsPlayer2, played && m.winnerId == m.player2Id, false),
-              ],
-            ),
-          ),
-          if (!played || wo) ...[
-            const SizedBox(width: 12),
-            SizedBox(width: 64, child: Align(alignment: Alignment.centerRight, child: status)),
-          ],
-        ],
+      padding: const EdgeInsets.fromLTRB(4, 5, 4, 5),
+      child: Scoreboard(
+        player1: group.nameFor(m.player1Id),
+        player2: group.nameFor(m.player2Id),
+        sets1: played && !wo ? m.setsPlayer1 : null,
+        sets2: played && !wo ? m.setsPlayer2 : null,
+        winner: winner,
+        setScores: played && !wo ? m.setScores : const [],
+        setColumns: played && !wo ? setColumns : 0,
+        showScore: played && !wo,
+        trailing: trailing,
       ),
     );
   }

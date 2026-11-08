@@ -145,6 +145,7 @@ class _AppButtonState extends State<AppButton> {
             ? () {
                 // Toque sutil al presionar, como en las apps nativas.
                 HapticFeedback.selectionClick();
+                HapticFeedback.lightImpact();
                 widget.onPressed!();
               }
             : null,

@@ -1,4 +1,5 @@
 import "package:myttmi/core/ui/motion.dart";
+import "package:flutter/services.dart";
 import "dart:async";
 import "dart:math" as math;
 import "package:myttmi/core/ui/top_header.dart";
@@ -56,7 +57,10 @@ class _HomeCardState extends State<HomeCard> {
   bool _down = false;
 
   void _press(bool v) {
-    if (widget.onTap != null && _down != v) setState(() => _down = v);
+    if (widget.onTap != null && _down != v) {
+      if (v) HapticFeedback.selectionClick();
+      setState(() => _down = v);
+    }
   }
 
   @override

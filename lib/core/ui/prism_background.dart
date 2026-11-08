@@ -48,13 +48,17 @@ class PrismBackground extends StatelessWidget {
   /// Llamar una vez al iniciar (con un context ya montado) para que la
   /// primera pantalla no aparezca un instante sin el fondo.
   static Future<void> precache(BuildContext context) => Future.wait([
-        precacheImage(const AssetImage(appAsset), context),
         precacheImage(const AssetImage(loginAsset), context),
-        precacheImage(const AssetImage(homeAsset), context),
       ]);
 
   @override
   Widget build(BuildContext context) {
+    // 2026-11-08: la app va con fondo PLANO (color sólido, sin imagen): las
+    // tarjetas se leen como superficies y no compiten con una foto. Solo el
+    // login (la portada) conserva su imagen.
+    if (asset != loginAsset) {
+      return ColoredBox(color: color, child: RepaintBoundary(child: child));
+    }
     return ColoredBox(
       color: const Color(0xFF000000),
       child: Stack(

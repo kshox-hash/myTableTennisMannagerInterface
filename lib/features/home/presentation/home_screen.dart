@@ -121,6 +121,9 @@ class _HomeScreenState extends State<HomeScreen>
   double _centerForHeight = 0;
 
   void _recenter() {
+    // Ya no se centra (ver _gapTop): el bloque va arriba.
+    return;
+    // ignore: dead_code
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final top = _gapTop.currentContext?.findRenderObject() as RenderBox?;
@@ -649,10 +652,11 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ),
                       const SizedBox(height: 16),
-                      // El espacio que sobra se reparte arriba y abajo: los
-                      // paneles y los accesos quedan juntos, centrados en la
-                      // pantalla (antes todo arriba con un hueco al final).
-                      Spacer(key: _gapTop),
+                      // 2026-11-08: el contenido va ARRIBA (donde llega el
+                      // pulgar y mira el ojo); el espacio que sobra queda al
+                      // final. Centrado dejaba un hueco grande bajo el
+                      // encabezado, más notorio con el fondo plano.
+                      SizedBox(key: _gapTop, height: 0),
                       ...staggerChildren([
                       // Sin saludo grande arriba ("Buenas noches, Ignacio"): ocupaba
                       // un tercio de la pantalla y empujaba los partidos hacia abajo.

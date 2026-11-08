@@ -9,6 +9,7 @@ import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/favorites/favorite_matches.dart";
 import "package:myttmi/core/ui/prism_background.dart";
+import "package:myttmi/core/ui/scoreboard.dart";
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/player/api/player_api.dart";
 import "package:myttmi/features/player/models/tournament_match_model.dart";
@@ -128,7 +129,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             final rows = _view == 6 ? 3 : 2;
                             const gap = 10.0;
                             final w = (box.maxWidth - gap * (cols - 1)) / cols;
-                            final h = ((box.maxHeight - 12) - gap * (rows - 1)) / rows;
+                            // Alto propio de cada vista, con techo: antes era
+                            // "pantalla ÷ filas" y con 1 o 2 partidos guardados
+                            // las tarjetas quedaban enormes y vacías.
+                            final fill = ((box.maxHeight - 12) - gap * (rows - 1)) / rows;
+                            final h = fill.clamp(120.0, _view == 2 ? 190.0 : 160.0);
                             final compact = _view != 2;
                             return RefreshIndicator(
                               color: AppColors.scorifyMint,
@@ -301,38 +306,7 @@ class _LiveCard extends StatelessWidget {
       d.categoryType,
       if (d.groupName != null) groupLabel(d.groupName) else if (d.round != null) matchRoundLabel(d.round!, d.totalRounds),
     ].join(" · ");
-    final nameSize = compact ? 13.0 : 16.0;
-    final setsSize = compact ? 22.0 : 30.0;
-
-    Widget player(String name, int s, bool winner) => Row(
-          children: [
-            Expanded(
-              child: Text(
-                name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: AppTypography.body,
-                  fontSize: nameSize,
-                  fontWeight: winner ? FontWeight.w600 : FontWeight.w600,
-                  color: done && !winner ? AppColors.scorifyTextMuted : AppColors.scorifyText,
-                ),
-              ),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              "$s",
-              style: TextStyle(
-                fontFamily: AppTypography.body,
-                fontSize: setsSize,
-                height: 1.1,
-                fontWeight: FontWeight.w700,
-                color: winner ? AppColors.scorifyButterfly : AppColors.scorifyText,
-              ),
-            ),
-          ],
-        );
-
+    final winner = !done ? null : (d.winnerId == d.player1Id ? 1 : (d.winnerId == d.player2Id ? 2 : null));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -368,16 +342,17 @@ class _LiveCard extends StatelessWidget {
           style: AppTypography.bodyMuted.copyWith(fontSize: compact ? 11 : 12.5),
         ),
         const Spacer(),
-        player(d.player1Name, d.setsPlayer1, done && d.winnerId != null && d.winnerId == d.player1Id),
-        SizedBox(height: compact ? 2 : 6),
-        player(d.player2Name, d.setsPlayer2, done && d.winnerId != null && d.winnerId == d.player2Id),
-        const Spacer(),
-        // Puntos de cada set jugado ("11-7  9-11  11-5").
-        Text(
-          sets.isEmpty ? (done ? "" : "Sin sets cargados aún") : sets.map((s) => "${s.p1}-${s.p2}").join("   "),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppTypography.bodyMuted.copyWith(fontSize: compact ? 11 : 13, fontWeight: FontWeight.w600),
+        Scoreboard(
+          player1: d.player1Name,
+          player2: d.player2Name,
+          sets1: done || sets.isNotEmpty ? d.setsPlayer1 : null,
+          sets2: done || sets.isNotEmpty ? d.setsPlayer2 : null,
+          winner: winner,
+          // En la vista de 4 o 6 no caben los puntos de cada set.
+          setScores: compact ? const [] : [for (final x in sets) (x.p1, x.p2)],
+          showScore: done || sets.isNotEmpty,
+          nameSize: compact ? 12 : 14,
+          setsSize: compact ? 16 : 20,
         ),
         if (leaving) ...[
           const SizedBox(height: 4),
