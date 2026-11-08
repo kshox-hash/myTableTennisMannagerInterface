@@ -138,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(width: 22, height: 1.5, color: const Color(0xFF45D62A)),
+                      Container(width: 22, height: 1.5, color: AppColors.loginAccent),
                       const SizedBox(width: 8),
                       const Text(
                         "GESTIÓN DE TORNEOS Y CLUBES",
@@ -151,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Container(width: 22, height: 1.5, color: const Color(0xFF45D62A)),
+                      Container(width: 22, height: 1.5, color: AppColors.loginAccent),
                     ],
                   ),
                   const SizedBox(height: 28),

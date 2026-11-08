@@ -15,8 +15,8 @@ class AuthTextField extends StatelessWidget {
 
   /// Relleno sólido de los campos de Login/Registro (un paso más claro que
   /// la tarjeta [cardColor] que los contiene).
-  static const fillColor = Color(0xFF15281B);
-  static const cardColor = Color(0xFF07170D);
+  static const fillColor = Color(0xFF13222E);
+  static const cardColor = Color(0xFF07121A);
 
   const AuthTextField({
     super.key,

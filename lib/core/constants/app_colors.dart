@@ -80,12 +80,11 @@ class AppColors {
     colors: [Color(0xFF0B3A55), Color(0xFF06223A), Color(0xFF03101A), Color(0xFF02070B)],
   );
 
-  /// Login (portada): conserva el verde original aunque la app sea azul.
-  static const Color loginAccent = Color(0xFF3FD65A);
-  static const Color loginOnAccent = Color(0xFF04140A);
-  static const LinearGradient loginButton = LinearGradient(
-    colors: [Color(0xFF8EF06A), Color(0xFF2FCB55)],
-  );
+  /// Login (portada). 2026-11-08: pasó al azul de la app (fondo y logo
+  /// azules); se dejan aparte por si la portada vuelve a tener su color.
+  static const Color loginAccent = scorifyMint;
+  static const Color loginOnAccent = scorifyOnMint;
+  static const LinearGradient loginButton = primaryButton;
 
   /// Botón principal.
   static const LinearGradient primaryButton = LinearGradient(
