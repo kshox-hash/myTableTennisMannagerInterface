@@ -49,15 +49,33 @@ class PrismBackground extends StatelessWidget {
   /// primera pantalla no aparezca un instante sin el fondo.
   static Future<void> precache(BuildContext context) => Future.wait([
         precacheImage(const AssetImage(loginAsset), context),
+        precacheImage(const AssetImage(appAsset), context),
       ]);
 
   @override
   Widget build(BuildContext context) {
-    // 2026-11-08: la app va con fondo PLANO (color sólido, sin imagen): las
-    // tarjetas se leen como superficies y no compiten con una foto. Solo el
-    // login (la portada) conserva su imagen.
+    // 2026-11-08: fondo de la app = franjas diagonales negras/grafito
+    // (assets/images/app_bg.jpg), ya oscuro: sin capa encima. El login
+    // conserva su imagen y su capa (abajo).
     if (asset != loginAsset) {
-      return ColoredBox(color: color, child: RepaintBoundary(child: child));
+      return ColoredBox(
+        color: const Color(0xFF000000),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            const RepaintBoundary(
+              child: Image(
+                image: AssetImage(appAsset),
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
+                gaplessPlayback: true,
+                filterQuality: FilterQuality.medium,
+              ),
+            ),
+            RepaintBoundary(child: child),
+          ],
+        ),
+      );
     }
     return ColoredBox(
       color: const Color(0xFF000000),
