@@ -6,6 +6,7 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/prism_background.dart";
+import "package:myttmi/features/onboarding/onboarding_screen.dart";
 import "package:myttmi/routes/cyber_page_route.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -127,7 +128,13 @@ class _SplashGateState extends State<SplashGate> {
     _step(1, "Listo");
     await _waitMinShown();
     if (!mounted) return;
-    Navigator.pushReplacement(context, CyberPageRoute(waitForData: false, builder: (_) => const LoginScreen()));
+    // Primera vez: la presentación (carrusel) antes del login.
+    final firstTime = !await OnboardingScreen.seen();
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      CyberPageRoute(waitForData: false, builder: (_) => firstTime ? const OnboardingScreen() : const LoginScreen()),
+    );
   }
 
   // Versión de la app frente a la mínima del servidor: se consulta en
