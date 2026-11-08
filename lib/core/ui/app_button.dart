@@ -28,6 +28,9 @@ class AppButton extends StatefulWidget {
   final bool loading;
   final double height;
   final bool expand;
+  /// Degradado y texto propios (el login conserva el verde).
+  final Gradient? gradient;
+  final Color? foreground;
 
   const AppButton({
     super.key,
@@ -39,6 +42,8 @@ class AppButton extends StatefulWidget {
     this.loading = false,
     this.height = 40,
     this.expand = true,
+    this.gradient,
+    this.foreground,
   });
 
   const AppButton.outline({
@@ -50,7 +55,9 @@ class AppButton extends StatefulWidget {
     this.loading = false,
     this.height = 40,
     this.expand = true,
-  }) : variant = AppButtonVariant.outline;
+  })  : variant = AppButtonVariant.outline,
+        gradient = null,
+        foreground = null;
 
   @override
   State<AppButton> createState() => _AppButtonState();
@@ -76,7 +83,7 @@ class _AppButtonState extends State<AppButton> {
     final Color fg = disabled
         ? AppColors.scorifyTextFaint
         : switch (v) {
-            AppButtonVariant.primary => AppColors.scorifyOnMint,
+            AppButtonVariant.primary => widget.foreground ?? AppColors.scorifyOnMint,
             AppButtonVariant.outline => AppColors.scorifyText,
             AppButtonVariant.danger => AppColors.scorifyNegative,
           };
@@ -126,7 +133,7 @@ class _AppButtonState extends State<AppButton> {
         gradient: disabled
             ? null
             : switch (v) {
-                AppButtonVariant.primary => appButtonGradient,
+                AppButtonVariant.primary => widget.gradient ?? appButtonGradient,
                 AppButtonVariant.outline => Panel.buttonGradient,
                 AppButtonVariant.danger => Panel.dangerButtonGradient,
               },

@@ -351,7 +351,7 @@ class _LinesPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     for (final line in lines) {
       final paint = Paint()
-        ..color = line.decided ? AppColors.scorifyMint : const Color(0xFF1C3526)
+        ..color = line.decided ? AppColors.scorifyMint : const Color(0xFF1A2C3A)
         ..strokeWidth = line.decided ? 2.25 : 1.5
         ..strokeJoin = StrokeJoin.round
         ..strokeCap = StrokeCap.round
@@ -418,7 +418,7 @@ class _MatchBox extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(Panel.radius),
             child: ColoredBox(
-              color: const Color(0xEB12261A),
+              color: const Color(0xEB102230),
               child: Column(
                 children: [
                   byePlayer1 || match.player1Id.isEmpty

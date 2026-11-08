@@ -34,7 +34,7 @@ abstract final class Panel {
 
   /// "Elegido / activo" (pestaña, filtro, opción del menú): celeste muy
   /// tenue, liso. El botón principal NO usa esto: es celeste sólido.
-  static const primaryButtonGradient = LinearGradient(colors: [Color(0xFF14321D), Color(0xFF14321D)]);
+  static const primaryButtonGradient = LinearGradient(colors: [Color(0xFF12293A), Color(0xFF12293A)]);
   static const primaryButtonBorder = Colors.transparent;
 
   /// Botón de peligro: rojo tenue, liso.

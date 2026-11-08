@@ -183,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             child: Text(
                               "¿Olvidaste tu contraseña?",
-                              style: AppTypography.bodyMuted.copyWith(fontSize: 12, color: AppColors.scorifyMint),
+                              style: AppTypography.bodyMuted.copyWith(fontSize: 12, color: AppColors.loginAccent),
                             ),
                           ),
                         ),
@@ -192,9 +192,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             ? const SizedBox(
                                 width: 22,
                                 height: 22,
-                                child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.scorifyMint),
+                                child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.loginAccent),
                               )
-                            : AppButton(label: "Entrar", onPressed: _login),
+                            : AppButton(label: "Entrar", onPressed: _login, gradient: AppColors.loginButton, foreground: AppColors.loginOnAccent),
                         const SizedBox(height: 16),
                         Row(
                           children: [
@@ -241,7 +241,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           child: Text(
                             "Crear cuenta",
-                            style: AppTypography.bodyMuted.copyWith(color: AppColors.scorifyMint),
+                            style: AppTypography.bodyMuted.copyWith(color: AppColors.loginAccent),
                           ),
                         ),
                       ],
