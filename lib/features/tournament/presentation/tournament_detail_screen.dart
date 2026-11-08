@@ -297,6 +297,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                         else
                           for (final c in cats) ...[
                             _CategoryCard(
+                              tournamentId: t.idTournament,
                               category: c,
                               tournamentCancelled: t.isCancelled,
                               participants: _participants.where((p) => p.idCategory == c.idCategory).toList(),
@@ -432,6 +433,7 @@ class _HeroCard extends StatelessWidget {
 }
 
 class _CategoryCard extends StatefulWidget {
+  final String tournamentId;
   final TournamentCategory category;
   final bool tournamentCancelled;
   final List<TournamentParticipant> participants;
@@ -445,6 +447,7 @@ class _CategoryCard extends StatefulWidget {
   final VoidCallback onSeeAll;
 
   const _CategoryCard({
+    required this.tournamentId,
     required this.category,
     this.tournamentCancelled = false,
     required this.participants,
@@ -463,6 +466,66 @@ class _CategoryCard extends StatefulWidget {
 class _CategoryCardState extends State<_CategoryCard> {
   bool _expanded = false;
   static const _maxInline = 8;
+  // Categoría terminada: los 3 primeros, para mostrar el podio en la
+  // tarjeta (lo primero que quiere saber quien mira: quién ganó).
+  List<CategoryStandingRow>? _podium;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.category.phase == "finished") {
+      PlayerApi().getCategoryStandings(widget.tournamentId, widget.category.idCategory).then((r) {
+        if (!mounted) return;
+        final top = r.standings.where((s) => s.position <= 3).toList()..sort((a, b) => a.position.compareTo(b.position));
+        setState(() => _podium = top);
+      }).catchError((_) {});
+    }
+  }
+
+  Widget _podiumBlock() {
+    final p = _podium!;
+    const medals = ["🥇", "🥈", "🥉"];
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(Panel.radius)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final r in p)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              child: Row(
+                children: [
+                  SizedBox(width: 26, child: Text(r.position >= 1 && r.position <= 3 ? medals[r.position - 1] : "${r.position}º", style: const TextStyle(fontSize: 16))),
+                  // Nombre completo arriba y el club debajo (en una sola línea
+                  // competían por el ancho y se cortaban los dos).
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          r.playerName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: AppTypography.body,
+                            fontSize: r.position == 1 ? 15 : 13.5,
+                            fontWeight: r.position == 1 ? FontWeight.w800 : FontWeight.w600,
+                            color: r.position == 1 ? AppColors.scorifyText : AppColors.scorifyTextMuted,
+                          ),
+                        ),
+                        if ((r.clubName ?? "").isNotEmpty)
+                          Text(r.clubName!, maxLines: 1, overflow: TextOverflow.ellipsis, style: _meta.copyWith(fontSize: 11)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -554,6 +617,10 @@ class _CategoryCardState extends State<_CategoryCard> {
             ),
           ],
           const SizedBox(height: 14),
+          if (_podium != null && _podium!.isNotEmpty) ...[
+            _podiumBlock(),
+            const SizedBox(height: 12),
+          ],
           // El botón va antes de la lista: al desplegar los inscritos no se
           // corre hacia abajo.
           _actions(inEnrollment, full),

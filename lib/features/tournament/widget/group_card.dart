@@ -16,7 +16,13 @@ class GroupCard extends StatelessWidget {
   final GroupFullView group;
   final String? myUserId;
   final bool isMyGroup;
-  const GroupCard({super.key, required this.group, this.myUserId, this.isMyGroup = false});
+  /// Cuántos clasifican a la llave por grupo (null = no se sabe).
+  final int? qualifiers;
+  /// La categoría tiene Plata: el puesto siguiente va a la llave de Plata.
+  final bool hasSilver;
+  const GroupCard({super.key, required this.group, this.myUserId, this.isMyGroup = false, this.qualifiers, this.hasSilver = false});
+
+  static const _silver = Color(0xFFB8C4CC);
 
   // "GR-3" → "Grupo 3"
   static String _label(String name) {
@@ -66,6 +72,19 @@ class GroupCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // La regla, antes de jugar: cuántos pasan y a dónde.
+          if (qualifiers != null && qualifiers! > 0)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 10),
+              child: Wrap(
+                spacing: 14,
+                runSpacing: 6,
+                children: [
+                  _ruleChip(AppColors.scorifyMint, qualifiers == 1 ? "1º a la llave" : qualifiers == 2 ? "1º y 2º a la llave" : "1º al ${qualifiers}º a la llave"),
+                  if (hasSilver) _ruleChip(_silver, "${qualifiers! + 1}º a Plata"),
+                ],
+              ),
+            ),
           // Encabezado de la tabla.
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 2, 8, 4),
@@ -81,17 +100,11 @@ class GroupCard extends StatelessWidget {
             ),
           ),
           for (var i = 0; i < members.length; i++) _memberRow(context, members[i], i, standing[members[i].idUser], anyPlayed, stat, hasActions),
-          if (group.standings.any((s) => s.qualifiedToBracket)) ...[
+          if (qualifiers == null && group.standings.any((s) => s.qualifiedToBracket)) ...[
             const SizedBox(height: 6),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              child: Row(
-                children: [
-                  Icon(Icons.arrow_upward_rounded, size: 13, color: AppColors.scorifyButterfly),
-                  SizedBox(width: 4),
-                  Text("Clasifica a la llave", style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted)),
-                ],
-              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: _ruleChip(AppColors.scorifyMint, "Clasifica a la llave"),
             ),
           ],
           if (matches.isNotEmpty) ...[
@@ -110,9 +123,26 @@ class GroupCard extends StatelessWidget {
 
   static const double _actionsW = 28;
 
+  static Widget _ruleChip(Color color, String text) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(width: 3, height: 12, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
+          const SizedBox(width: 6),
+          Text(text, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted)),
+        ],
+      );
+
   Widget _memberRow(BuildContext context, GroupMemberInfo m, int i, GroupStandingInfo? s, bool anyPlayed,
       Widget Function(String, {double w, TextStyle style}) stat, bool hasActions) {
     final me = m.idUser == myUserId;
+    final pos = s?.position ?? i + 1;
+    final q = qualifiers;
+    // Zona: con resultados (o ya definido). Antes de jugar el orden es el
+    // del sorteo y marcar "clasifica" confundiría.
+    final decided = s?.qualifiedToBracket == true;
+    final inGold = decided || (anyPlayed && q != null && pos <= q);
+    final inSilver = !inGold && anyPlayed && hasSilver && q != null && pos == q + 1;
+    final zone = inGold ? AppColors.scorifyMint : (inSilver ? _silver : null);
     return Material(
       color: me ? AppColors.scorifyMint.withValues(alpha: 0.10) : Colors.transparent,
       borderRadius: BorderRadius.circular(Panel.radius),
@@ -127,14 +157,20 @@ class GroupCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
           child: Row(
             children: [
+              Container(
+                width: 3,
+                height: 28,
+                margin: const EdgeInsets.only(right: 6),
+                decoration: BoxDecoration(color: zone ?? Colors.transparent, borderRadius: BorderRadius.circular(2)),
+              ),
               SizedBox(
-                width: 22,
+                width: 13,
                 child: Text("${s?.position ?? i + 1}",
                     style: TextStyle(
                         fontFamily: AppTypography.body,
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: s?.qualifiedToBracket == true ? AppColors.scorifyButterfly : AppColors.scorifyTextMuted)),
+                        color: zone ?? AppColors.scorifyTextMuted)),
               ),
               UserAvatar(userId: m.idUser, size: 26),
               const SizedBox(width: 10),

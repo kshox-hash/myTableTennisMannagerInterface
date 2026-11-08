@@ -26,11 +26,15 @@ class _CategoryData {
   /// Fase de grupos para quien no juega esta categoría: todos los grupos
   /// (sin esto, la pantalla decía que todavía no había grupos).
   final List<GroupFullView> allGroups;
+  final int? qualifiersPerGroup;
+  final bool hasSilver;
   _CategoryData({
     required this.view,
     required this.generalStandings,
     this.myUserId,
     this.allGroups = const [],
+    this.qualifiersPerGroup,
+    this.hasSilver = false,
   });
 }
 
@@ -76,11 +80,14 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
     ]);
     final view = results[0] as PlayerCategoryView;
     final showAllGroups = view.phase == "groups" && view.standings.isEmpty;
+    final all = showAllGroups ? await _api.getAllGroups(widget.tournamentId, widget.categoryId) : null;
     return _CategoryData(
       view: view,
       generalStandings: results[1] as CategoryStandings,
       myUserId: results[2] as String?,
-      allGroups: showAllGroups ? (await _api.getAllGroups(widget.tournamentId, widget.categoryId)).groups : const [],
+      allGroups: all?.groups ?? const [],
+      qualifiersPerGroup: all?.qualifiersPerGroup ?? view.qualifiersPerGroup,
+      hasSilver: all?.hasSilver ?? false,
     );
   }
 
@@ -249,7 +256,7 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                               for (final g in data.allGroups)
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 12),
-                                  child: GroupCard(group: g, myUserId: data.myUserId),
+                                  child: GroupCard(group: g, myUserId: data.myUserId, qualifiers: data.qualifiersPerGroup, hasSilver: data.hasSilver),
                                 ),
                             ],
 

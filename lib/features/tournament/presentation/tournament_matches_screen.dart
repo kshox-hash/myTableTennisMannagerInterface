@@ -492,6 +492,8 @@ class _GroupsByCategoryState extends State<_GroupsByCategory> {
                         group: g,
                         myUserId: myUserId,
                         isMyGroup: myUserId != null && g.members.any((m) => m.idUser == myUserId),
+                        qualifiers: cat.$2.qualifiersPerGroup,
+                        hasSilver: cat.$2.hasSilver,
                       ),
                     ),
                   ],

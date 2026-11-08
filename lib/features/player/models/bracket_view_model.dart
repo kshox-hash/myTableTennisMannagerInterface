@@ -168,8 +168,12 @@ class GroupFullView {
 
 class CategoryGroupsView {
   final List<GroupFullView> groups;
+  /// Cuántos clasifican a la llave por grupo (null: servidor viejo).
+  final int? qualifiersPerGroup;
+  /// La categoría tiene Plata: el puesto siguiente va a la llave de Plata.
+  final bool hasSilver;
 
-  CategoryGroupsView({required this.groups});
+  CategoryGroupsView({required this.groups, this.qualifiersPerGroup, this.hasSilver = false});
 
   String nameFor(String? userId) {
     if (userId == null) return "Por definir";
@@ -185,6 +189,8 @@ class CategoryGroupsView {
       groups: (json["groups"] as List? ?? [])
           .map((e) => GroupFullView.fromJson(e as Map<String, dynamic>))
           .toList(),
+      qualifiersPerGroup: (json["qualifiers_per_group"] as num?)?.toInt(),
+      hasSilver: json["has_silver"] == true,
     );
   }
 }
