@@ -114,7 +114,12 @@ class GroupCard extends StatelessWidget {
               child: Text("Resultados", style: _head),
             ),
             const SizedBox(height: 4),
-            ...dividedRows([for (final m in matches) _matchRow(m)]),
+            // Todos con la misma cantidad de columnas de set (la del partido
+            // más largo): uno de 2 sets no corre la columna de sets ganados.
+            ...dividedRows([
+              for (final m in matches)
+                _matchRow(m, matches.fold<int>(0, (n, x) => x.setScores.length > n ? x.setScores.length : n)),
+            ]),
           ],
         ],
       ),
@@ -212,13 +217,17 @@ class GroupCard extends StatelessWidget {
   // y a la derecha el estado: "Mesa N" en vivo, "Por jugar" o "W.O.". Debajo,
   // los puntos de cada set. Todo queda alineado en columnas, sin importar
   // el largo de los nombres.
-  Widget _matchRow(GroupMatchInfo m) {
+  Widget _matchRow(GroupMatchInfo m, int setColumns) {
     final played = m.status == "played" || m.status == "walkover";
     final wo = m.status == "walkover";
     final p1 = group.nameFor(m.player1Id);
     final p2 = group.nameFor(m.player2Id);
 
-    Widget line(String name, int? sets, bool winner) {
+    // Puntos de cada set al lado de los sets, como un marcador: arriba los
+    // del jugador 1, abajo los del 2, cada set en su columna (el que ganó
+    // ese set en blanco y negrita).
+    final sets = played && !wo ? m.setScores : const <(int, int)>[];
+    Widget line(String name, int? setsWon, bool winner, bool first) {
       final dim = played && !winner;
       return Row(
         children: [
@@ -238,7 +247,7 @@ class GroupCard extends StatelessWidget {
           SizedBox(
             width: 22,
             child: Text(
-              played && !wo ? "${sets ?? 0}" : "",
+              played && !wo ? "${setsWon ?? 0}" : "",
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontFamily: AppTypography.body,
@@ -249,6 +258,28 @@ class GroupCard extends StatelessWidget {
               ),
             ),
           ),
+          if (sets.isNotEmpty) ...[
+            const SizedBox(width: 8),
+            Container(width: 1, height: 16, color: AppColors.scorifyCardBorder),
+            const SizedBox(width: 2),
+            for (var k = 0; k < setColumns; k++)
+              SizedBox(
+                width: 24,
+                child: k >= sets.length
+                    ? null
+                    : Text(
+                  "${first ? sets[k].$1 : sets[k].$2}",
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontFamily: AppTypography.body,
+                    fontSize: 12.5,
+                    fontWeight: (first ? sets[k].$1 > sets[k].$2 : sets[k].$2 > sets[k].$1) ? FontWeight.w700 : FontWeight.w500,
+                    color: (first ? sets[k].$1 > sets[k].$2 : sets[k].$2 > sets[k].$1) ? AppColors.scorifyText : AppColors.scorifyTextFaint,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
+          ],
         ],
       );
     }
@@ -267,7 +298,6 @@ class GroupCard extends StatelessWidget {
       );
     }
 
-    final points = played && !wo && m.setScores.isNotEmpty ? m.setScores.map((s) => "${s.$1}-${s.$2}").join("  ·  ") : null;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 9, 8, 9),
@@ -278,18 +308,16 @@ class GroupCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                line(p1, m.setsPlayer1, played && m.winnerId == m.player1Id),
+                line(p1, m.setsPlayer1, played && m.winnerId == m.player1Id, true),
                 const SizedBox(height: 4),
-                line(p2, m.setsPlayer2, played && m.winnerId == m.player2Id),
-                if (points != null) ...[
-                  const SizedBox(height: 4),
-                  Text(points, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextFaint)),
-                ],
+                line(p2, m.setsPlayer2, played && m.winnerId == m.player2Id, false),
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          SizedBox(width: 64, child: Align(alignment: Alignment.centerRight, child: status)),
+          if (!played || wo) ...[
+            const SizedBox(width: 12),
+            SizedBox(width: 64, child: Align(alignment: Alignment.centerRight, child: status)),
+          ],
         ],
       ),
     );
