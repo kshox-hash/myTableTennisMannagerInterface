@@ -125,7 +125,9 @@ class _SelfUpdateDialogState extends State<_SelfUpdateDialog> {
     super.initState();
     try {
       _sub = OtaUpdate()
-          .execute(AppUpdate.updateUrl, destinationFilename: "myttm-update.apk")
+          // Por el servidor (cuenta la descarga para el panel de superusuario
+          // y redirige al mismo APK de APP_UPDATE_URL).
+          .execute("${AppConfig.baseUrl}/api/v1/app/download?src=app", destinationFilename: "myttm-update.apk")
           .listen(_onEvent, onError: (_) => _finish(false));
     } catch (_) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _finish(false));
