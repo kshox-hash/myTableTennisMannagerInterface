@@ -12,7 +12,6 @@ import 'package:myttmi/features/profile/models/profile_model.dart';
 import 'package:myttmi/features/profile/api/profile_api.dart';
 import 'package:myttmi/features/favorites/favorites_screen.dart';
 import 'package:myttmi/features/tournament/presentation/following_screen.dart';
-import 'package:myttmi/features/onboarding/onboarding_screen.dart';
 import 'package:myttmi/routes/app_routes.dart';
 import 'package:myttmi/features/shell/app_drawer.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
@@ -127,15 +126,6 @@ class _AppShellState extends State<AppShell>
               onTap: () {
                 Navigator.pop(sheet);
                 _contactSupport();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.slideshow_rounded, color: AppColors.scorifyText),
-              title: const Text("Ver presentación", style: TextStyle(color: AppColors.scorifyText)),
-              subtitle: const Text("Lo que puedes hacer con MyTTM", style: TextStyle(color: AppColors.scorifyTextMuted)),
-              onTap: () {
-                Navigator.pop(sheet);
-                Navigator.push(context, CyberPageRoute(builder: (_) => const OnboardingScreen(fromSettings: true)));
               },
             ),
             const Divider(height: 1, color: AppColors.scorifySurface2),
