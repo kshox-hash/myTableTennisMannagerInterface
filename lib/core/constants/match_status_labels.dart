@@ -25,7 +25,13 @@ const Map<String, String> resultReasonLabel = {
 /// Estado corto para listas: "W.O. · Lesión" (o el estado normal).
 String matchStatusText(String status, [String? resultReason]) {
   final base = matchStatusLabel[status] ?? status;
-  final reason = status == "walkover" ? resultReasonLabel[resultReason] : null;
+  // "double_no_show" (backend 088) no va en resultReasonLabel: ese mapa es
+  // también la lista del árbitro, y ahí siempre hay un ganador.
+  final reason = status != "walkover"
+      ? null
+      : resultReason == "double_no_show"
+          ? "No se presentó ninguno"
+          : resultReasonLabel[resultReason];
   return reason == null ? base : "$base · $reason";
 }
 
@@ -36,6 +42,7 @@ String walkoverText(String? reason, {String? loserName, String? winnerName}) {
   final gana = winnerName != null ? " El partido se da por ganado a $winnerName." : "";
   return switch (reason) {
     "no_show" => "No se jugó: ${loserName ?? "un jugador"} no se presentó.$gana",
+    "double_no_show" => "No se jugó: no se presentó ninguno de los dos. Cuenta como derrota para ambos.",
     "injury" => "Se definió por lesión$who.$gana",
     "retired" => "Se definió por abandono$who.$gana",
     "disqualified" => "Se definió por descalificación$who.$gana",
