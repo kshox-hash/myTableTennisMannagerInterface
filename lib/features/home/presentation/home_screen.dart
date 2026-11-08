@@ -88,6 +88,24 @@ class _HomeScreenState extends State<HomeScreen>
   List<CalendarEvent> _mine = const [];
   // Campeonatos que sigo como visita (sin jugar), aún no terminados.
   List<FollowedTournament> _following = const [];
+
+  /// El que sigo y se juega hoy: va como tarjeta principal
+  /// del Inicio cuando no tengo partidos propios.
+  FollowedTournament? get _liveFollow {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    for (final f in _following) {
+      final d = f.eventDate;
+      if (d != null && DateTime(d.year, d.month, d.day) == today) return f;
+    }
+    return null;
+  }
+
+  /// Los demás que sigo (sin el que ya está arriba como principal).
+  List<FollowedTournament> get _followingRest {
+    final live = (_dashboard?.nextMatch == null && _live == null) ? _liveFollow : null;
+    return live == null ? _following : _following.where((f) => f.idTournament != live.idTournament).toList();
+  }
   Tournament? _challenge;
   // Partidos jugados, del más reciente al más antiguo.
   List<PlayerMatchHistoryItem> _history = const [];
@@ -685,6 +703,13 @@ class _HomeScreenState extends State<HomeScreen>
                             if (mounted) _load(silent: true);
                           },
                         ),
+                      ] else if (nm == null && _live == null && _liveFollow != null) ...[
+                        // Sigo (de visita) un campeonato que se juega hoy: es
+                        // lo más relevante del Inicio, no "Bienvenido".
+                        _FollowLiveHero(
+                          item: _liveFollow!,
+                          onOpen: () => _openTournament(_liveFollow!.idTournament),
+                        ),
                       ] else if (nm == null) ...[
                         HomeEmptyCard(
                           title: _live != null ? "Próximo partido" : "Bienvenido a MyTTM",
@@ -742,9 +767,9 @@ class _HomeScreenState extends State<HomeScreen>
                         const SizedBox(height: 12),
                       ],
                       // Campeonatos que sigo como visita (sin jugar).
-                      if (_following.isNotEmpty) ...[
+                      if (_followingRest.isNotEmpty) ...[
                         _FollowingCard(
-                          items: _following,
+                          items: _followingRest,
                           onOpen: (f) => _openTournament(f.idTournament),
                           onSeeAll: _openFollowing,
                         ),
@@ -1033,6 +1058,73 @@ class _FollowingCard extends StatelessWidget {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tarjeta principal del Inicio cuando sigo (de visita) un campeonato que se
+/// juega hoy y no tengo partidos propios: "EN JUEGO HOY", el nombre grande y
+/// un solo botón a los grupos y resultados. Es la destacada (borde verde).
+class _FollowLiveHero extends StatelessWidget {
+  final FollowedTournament item;
+  final VoidCallback onOpen;
+  const _FollowLiveHero({required this.item, required this.onOpen});
+
+  @override
+  Widget build(BuildContext context) {
+    return HomeCard(
+      gradient: homeGradientMain,
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(color: AppColors.scorifyLive, shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                "EN JUEGO HOY",
+                style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.4, color: AppColors.scorifyLive),
+              ),
+              const Spacer(),
+              const Text(
+                "Lo sigues",
+                style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            item.name,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 22, fontWeight: FontWeight.w800, height: 1.15, color: AppColors.scorifyText),
+          ),
+          if (item.address != null && item.address!.trim().isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(Icons.place_rounded, size: 15, color: AppColors.scorifyTextMuted),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    item.address!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.bodyMuted.copyWith(fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 16),
+          AppButton(label: "Ver grupos y resultados", icon: Icons.scoreboard_rounded, onPressed: onOpen),
         ],
       ),
     );

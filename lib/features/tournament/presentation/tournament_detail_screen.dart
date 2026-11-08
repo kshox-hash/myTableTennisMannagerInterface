@@ -815,7 +815,7 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 16, color: AppColors.scorifyMint),
+          Icon(icon, size: 16, color: AppColors.scorifyTextMuted),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -919,7 +919,7 @@ class _QuickLink extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 14),
           child: Column(
             children: [
-              Icon(icon, color: AppColors.scorifyMint, size: 22),
+              Icon(icon, color: AppColors.scorifyText, size: 22),
               const SizedBox(height: 6),
               Text(
                 label,

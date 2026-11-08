@@ -68,7 +68,7 @@ class PanelTitleBar extends StatelessWidget {
   final IconData? icon;
   final Color iconColor;
   final Widget? trailing;
-  const PanelTitleBar({super.key, required this.title, this.icon, this.iconColor = AppColors.scorifyMint, this.trailing});
+  const PanelTitleBar({super.key, required this.title, this.icon, this.iconColor = AppColors.scorifyTextMuted, this.trailing});
 
   @override
   Widget build(BuildContext context) {

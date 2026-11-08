@@ -42,7 +42,9 @@ class SectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Estilo panel: franja de título gris en mayúsculas espaciadas, con la
     // línea encendida debajo; ícono de color y acción a la derecha.
-    final color = titleColor ?? AppColors.scorifyMint;
+    // Ícono del título en gris: el verde queda para lo que se toca o
+    // importa (botones, enlaces, estados), no para decorar cada tarjeta.
+    final color = titleColor ?? AppColors.scorifyTextMuted;
     final header = PanelTitleBar(title: title, icon: icon, iconColor: color, trailing: trailing);
     final body = Padding(padding: padding, child: child);
     // Tocable: se hunde apenas al presionar, como los botones.
@@ -95,7 +97,7 @@ class SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        if (icon != null) ...[Icon(icon, size: 18, color: AppColors.scorifyMint), const SizedBox(width: 8)],
+        if (icon != null) ...[Icon(icon, size: 18, color: AppColors.scorifyTextMuted), const SizedBox(width: 8)],
         Text(text,
             style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
       ],

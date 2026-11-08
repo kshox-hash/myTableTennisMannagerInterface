@@ -25,6 +25,8 @@ class GroupCard extends StatelessWidget {
   }
 
   static const _num = TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyText);
+  static const _numMuted = TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted);
+  static const _numStrong = TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.scorifyText);
   static const _head = TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.scorifyTextFaint);
 
   @override
@@ -43,8 +45,13 @@ class GroupCard extends StatelessWidget {
         return r != 0 ? r : a.matchNumber.compareTo(b.matchNumber);
       });
 
-    Widget stat(String v, {double w = 26, TextStyle style = _num}) =>
+    Widget stat(String v, {double w = 28, TextStyle style = _num}) =>
         SizedBox(width: w, child: Text(v, textAlign: TextAlign.center, style: style));
+    // Los botones de cada jugador (ver recorrido) solo existen dentro de
+    // "Partidos": fuera de ahí la columna no se reserva. Antes el encabezado
+    // guardaba 24 px aunque los botones no estuvieran y PJ/G/P quedaban
+    // corridos respecto de los números.
+    final hasActions = TournamentMatchesScope.of(context) != null;
 
     return SectionCard(
       title: isMyGroup ? "${_label(group.groupName)} · Tu grupo" : _label(group.groupName),
@@ -64,16 +71,16 @@ class GroupCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(8, 2, 8, 4),
             child: Row(
               children: [
-                const SizedBox(width: 20),
+                const SizedBox(width: 22 + 26 + 10),
                 const Expanded(child: Text("Jugador", style: _head)),
                 stat("PJ", style: _head),
                 stat("G", style: _head),
                 stat("P", style: _head),
-                const SizedBox(width: 24),
+                if (hasActions) const SizedBox(width: _actionsW),
               ],
             ),
           ),
-          for (var i = 0; i < members.length; i++) _memberRow(context, members[i], i, standing[members[i].idUser], anyPlayed, stat),
+          for (var i = 0; i < members.length; i++) _memberRow(context, members[i], i, standing[members[i].idUser], anyPlayed, stat, hasActions),
           if (group.standings.any((s) => s.qualifiedToBracket)) ...[
             const SizedBox(height: 6),
             const Padding(
@@ -101,8 +108,10 @@ class GroupCard extends StatelessWidget {
     );
   }
 
+  static const double _actionsW = 28;
+
   Widget _memberRow(BuildContext context, GroupMemberInfo m, int i, GroupStandingInfo? s, bool anyPlayed,
-      Widget Function(String, {double w, TextStyle style}) stat) {
+      Widget Function(String, {double w, TextStyle style}) stat, bool hasActions) {
     final me = m.idUser == myUserId;
     return Material(
       color: me ? AppColors.scorifyMint.withValues(alpha: 0.10) : Colors.transparent,
@@ -128,7 +137,7 @@ class GroupCard extends StatelessWidget {
                         color: s?.qualifiedToBracket == true ? AppColors.scorifyButterfly : AppColors.scorifyTextMuted)),
               ),
               UserAvatar(userId: m.idUser, size: 26),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,10 +156,14 @@ class GroupCard extends StatelessWidget {
                   ],
                 ),
               ),
-              stat(anyPlayed ? "${s?.played ?? 0}" : "–"),
-              stat(anyPlayed ? "${s?.won ?? 0}" : "–"),
-              stat(anyPlayed ? "${s?.lost ?? 0}" : "–"),
-              PlayerActions(playerId: m.idUser, playerName: m.displayName, showProfile: false),
+              stat(anyPlayed ? "${s?.played ?? 0}" : "–", style: _numMuted),
+              stat(anyPlayed ? "${s?.won ?? 0}" : "–", style: _numStrong),
+              stat(anyPlayed ? "${s?.lost ?? 0}" : "–", style: _numMuted),
+              if (hasActions)
+                SizedBox(
+                  width: _actionsW,
+                  child: PlayerActions(playerId: m.idUser, playerName: m.displayName, showProfile: false),
+                ),
             ],
           ),
         ),
@@ -158,52 +171,89 @@ class GroupCard extends StatelessWidget {
     );
   }
 
+  // Un partido como marcador de dos renglones: cada jugador a la izquierda y
+  // sus sets a la derecha (el ganador en blanco y negrita, el otro en gris),
+  // y a la derecha el estado: "Mesa N" en vivo, "Por jugar" o "W.O.". Debajo,
+  // los puntos de cada set. Todo queda alineado en columnas, sin importar
+  // el largo de los nombres.
   Widget _matchRow(GroupMatchInfo m) {
     final played = m.status == "played" || m.status == "walkover";
+    final wo = m.status == "walkover";
     final p1 = group.nameFor(m.player1Id);
     final p2 = group.nameFor(m.player2Id);
-    TextStyle name(bool winner) => TextStyle(
-          fontFamily: AppTypography.body,
-          fontSize: 12,
-          fontWeight: winner ? FontWeight.w700 : FontWeight.w500,
-          color: played && !winner ? AppColors.scorifyTextMuted : AppColors.scorifyText,
-        );
-    final row = Row(
+
+    Widget line(String name, int? sets, bool winner) {
+      final dim = played && !winner;
+      return Row(
         children: [
-          Expanded(child: Text(p1, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.right, style: name(played && m.winnerId == m.player1Id))),
-          const SizedBox(width: 8),
-          SizedBox(
-            width: 70,
-            child: played
-                ? Center(child: PanelChip(label: m.status == "walkover" ? "W.O." : "${m.setsPlayer1} - ${m.setsPlayer2}", color: AppColors.scorifyMint, fontSize: 12))
-                : Text(
-                    m.tableNumber != null ? "Mesa ${m.tableNumber}" : "Pendiente",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: AppTypography.body,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: m.tableNumber != null ? AppColors.scorifyLive : AppColors.scorifyTextFaint,
-                    ),
-                  ),
+          Expanded(
+            child: Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: AppTypography.body,
+                fontSize: 13,
+                fontWeight: winner ? FontWeight.w700 : FontWeight.w500,
+                color: dim ? AppColors.scorifyTextMuted : AppColors.scorifyText,
+              ),
+            ),
           ),
-          const SizedBox(width: 8),
-          Expanded(child: Text(p2, maxLines: 1, overflow: TextOverflow.ellipsis, style: name(played && m.winnerId == m.player2Id))),
+          SizedBox(
+            width: 22,
+            child: Text(
+              played && !wo ? "${sets ?? 0}" : "",
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontFamily: AppTypography.body,
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: winner ? AppColors.scorifyText : AppColors.scorifyTextFaint,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ),
         ],
       );
-    // Puntos de cada set bajo el marcador ("11-7 · 9-11 · 11-5").
-    final points = played && m.status != "walkover" && m.setScores.isNotEmpty
-        ? m.setScores.map((s) => "${s.$1}-${s.$2}").join("  ·  ")
-        : null;
+    }
+
+    final Widget status;
+    if (wo) {
+      status = const PanelChip(label: "W.O.", fontSize: 11);
+    } else if (played) {
+      status = const SizedBox.shrink();
+    } else if (m.tableNumber != null) {
+      status = PanelChip(label: "Mesa ${m.tableNumber}", color: AppColors.scorifyLive, fontSize: 11);
+    } else {
+      status = const Text(
+        "Por jugar",
+        style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyTextFaint),
+      );
+    }
+
+    final points = played && !wo && m.setScores.isNotEmpty ? m.setScores.map((s) => "${s.$1}-${s.$2}").join("  ·  ") : null;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: Column(
+      padding: const EdgeInsets.fromLTRB(8, 9, 8, 9),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          row,
-          if (points != null) ...[
-            const SizedBox(height: 4),
-            Text(points, textAlign: TextAlign.center, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted)),
-          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                line(p1, m.setsPlayer1, played && m.winnerId == m.player1Id),
+                const SizedBox(height: 4),
+                line(p2, m.setsPlayer2, played && m.winnerId == m.player2Id),
+                if (points != null) ...[
+                  const SizedBox(height: 4),
+                  Text(points, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextFaint)),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(width: 64, child: Align(alignment: Alignment.centerRight, child: status)),
         ],
       ),
     );

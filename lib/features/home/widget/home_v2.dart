@@ -112,7 +112,7 @@ class HomeCardTitle extends StatelessWidget {
   final Color color;
   final String? action;
   final VoidCallback? onAction;
-  const HomeCardTitle({super.key, required this.icon, required this.title, this.color = _mint, this.action, this.onAction});
+  const HomeCardTitle({super.key, required this.icon, required this.title, this.color = AppColors.scorifyTextMuted, this.action, this.onAction});
 
   @override
   Widget build(BuildContext context) {
@@ -1711,7 +1711,7 @@ class HomeTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(icon, size: 26, color: _mint),
+                Icon(icon, size: 24, color: AppColors.scorifyTextMuted),
                 const SizedBox(height: 10),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.baseline,

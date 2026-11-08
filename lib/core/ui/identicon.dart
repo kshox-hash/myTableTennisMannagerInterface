@@ -15,14 +15,16 @@ class Identicon extends StatelessWidget {
 
   const Identicon({super.key, required this.seed, this.size = 40});
 
-  // (claro, oscuro): tonos verdes de la paleta de la app (2026-11-07).
+  // (claro, oscuro): tonos neutros apagados (2026-11-07). Antes eran todos
+  // verdes y, con la app entera en verde, cinco avatares seguidos sumaban
+  // más verde a la pantalla sin aportar nada: el verde queda para acciones.
   static const _tones = <(Color, Color)>[
-    (Color(0xFF1FA67A), Color(0xFF0E5C47)), // esmeralda
-    (Color(0xFF2E9E5B), Color(0xFF14522F)), // bosque
-    (Color(0xFF5FA830), Color(0xFF2F5A17)), // lima oscuro
-    (Color(0xFF3F8F6A), Color(0xFF1E4A36)), // musgo
-    (Color(0xFF2E9E8E), Color(0xFF14544B)), // verde agua
-    (Color(0xFF6A8F3A), Color(0xFF35491C)), // oliva
+    (Color(0xFF55705F), Color(0xFF28362E)), // salvia
+    (Color(0xFF5B6878), Color(0xFF2C333C)), // pizarra
+    (Color(0xFF6E6457), Color(0xFF36312A)), // piedra
+    (Color(0xFF4F6C74), Color(0xFF26353A)), // acero
+    (Color(0xFF6A6076), Color(0xFF342F3B)), // malva gris
+    (Color(0xFF627252), Color(0xFF303828)), // oliva gris
   ];
 
   static int _hash(String input) {
