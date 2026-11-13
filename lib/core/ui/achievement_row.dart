@@ -51,7 +51,7 @@ class Medal extends StatelessWidget {
 class LevelTrophy extends StatelessWidget {
   final String level;
   final double size;
-  const LevelTrophy({super.key, required this.level, this.size = 44});
+  const LevelTrophy({super.key, required this.level, this.size = 64});
 
   @override
   Widget build(BuildContext context) {
