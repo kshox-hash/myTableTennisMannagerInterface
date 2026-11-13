@@ -46,7 +46,35 @@ class Medal extends StatelessWidget {
   }
 }
 
-/// Fila de un podio: medalla + "Campeón · categoría" + torneo y fecha.
+/// Copa del campeonato según su nivel (las mismas de las llaves de la web):
+/// nacional, regional o local.
+class LevelTrophy extends StatelessWidget {
+  final String level;
+  final double size;
+  const LevelTrophy({super.key, required this.level, this.size = 44});
+
+  @override
+  Widget build(BuildContext context) {
+    final file = switch (level) {
+      "nacional" => "nacional",
+      "regional" => "regional",
+      _ => "local",
+    };
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Image.asset(
+        "assets/images/trophy_$file.webp",
+        fit: BoxFit.contain,
+        cacheHeight: (size * 3).round(),
+        filterQuality: FilterQuality.medium,
+      ),
+    );
+  }
+}
+
+/// Fila de un podio: medalla (o la copa del torneo si salió campeón) +
+/// "Campeón · categoría" + torneo y fecha.
 class AchievementRow extends StatelessWidget {
   final PlayerAchievement achievement;
   /// Tu nombre: si viene, aparece el botón para compartir el podio.
@@ -65,7 +93,7 @@ class AchievementRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Medal(position: a.position),
+          a.position == 1 ? LevelTrophy(level: a.rankingLevel) : Medal(position: a.position),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

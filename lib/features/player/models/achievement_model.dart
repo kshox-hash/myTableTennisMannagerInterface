@@ -10,6 +10,8 @@ class PlayerAchievement {
   final String categoryType;
   final String categoryRange;
   final int position;
+  /// Nivel del campeonato (local / regional / nacional): elige su copa.
+  final String rankingLevel;
 
   PlayerAchievement({
     required this.idTournament,
@@ -19,6 +21,7 @@ class PlayerAchievement {
     required this.categoryType,
     required this.categoryRange,
     required this.position,
+    this.rankingLevel = "local",
   });
 
   String get categoryLabel =>
@@ -57,6 +60,7 @@ class PlayerAchievement {
       categoryType: (json["category_type"] ?? "").toString(),
       categoryRange: (json["category_range"] ?? "").toString(),
       position: intOrDefault(json["position"]),
+      rankingLevel: (json["ranking_level"] ?? "local").toString(),
     );
   }
 }
