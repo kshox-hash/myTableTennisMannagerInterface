@@ -204,6 +204,10 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                           padding: const EdgeInsets.only(bottom: 24),
                           children: staggerChildren([
                             _CategoryHero(
+                              finalPosition: view.phase == "finished" && data.generalStandings.source == "bracket"
+                                  ? generalStandings.where((x) => x.idUser == data.myUserId).firstOrNull?.position
+                                  : null,
+                              totalPlayers: generalStandings.isEmpty ? null : generalStandings.length,
                               tournamentName: widget.tournamentName,
                               categoryLabel: widget.categoryLabel,
                               view: view,
@@ -386,71 +390,137 @@ class _GeneralStandingsList extends StatelessWidget {
   final String? myUserId;
   const _GeneralStandingsList({required this.standings, this.myUserId});
 
+  static const _gold = Color(0xFFE6B94C), _silver = Color(0xFFC0C7CF), _bronze = Color(0xFFCD8B55);
+
+  /// "5.º – 8.º", "9.º – 16.º"… (o "5.º" si es un solo puesto).
+  static String _tier(int from, int to) => from == to ? "${from}.º" : "${from}.º – ${to}.º";
+
   @override
   Widget build(BuildContext context) {
-    final sorted = standings.toList()
-      ..sort((a, b) => a.position.compareTo(b.position));
+    final sorted = standings.toList()..sort((a, b) => a.position.compareTo(b.position));
+    final podium = sorted.where((r) => r.position <= 3).toList();
+    final rest = sorted.where((r) => r.position > 3).toList();
+    // Tramos por puesto compartido (5.º, 9.º…): cada uno con su encabezado.
+    final tiers = <int, List<CategoryStandingRow>>{};
+    for (final r in rest) {
+      tiers.putIfAbsent(r.position, () => []).add(r);
+    }
+    final starts = tiers.keys.toList()..sort();
 
-    return GlassCard(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Column(
-        children: sorted.map((s) {
-          final isMe = s.idUser == myUserId;
-          return Container(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-            decoration: BoxDecoration(
-              color: isMe ? AppColors.scorifyMint.withOpacity(0.10) : null,
-              borderRadius: BorderRadius.circular(Panel.radius),
-            ),
-            child: Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Podio: campeón destacado; 2.º y 3.º compactos con su color de medalla.
+        if (podium.isNotEmpty)
+          Container(
+            color: AppColors.scorifyCardFill,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
-                  width: 30,
-                  height: 30,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: s.position == 1
-                        ? AppColors.scorifyMint
-                        : Colors.white.withOpacity(0.08),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    "${s.position}",
-                    style: AppTypography.mono14.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: s.position == 1
-                          ? AppColors.scorifyOnMint
-                          : AppColors.scorifyText,
+                for (final r in podium.where((r) => r.position == 1))
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    color: _gold.withValues(alpha: 0.12),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 42,
+                          height: 42,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(shape: BoxShape.circle, color: _gold.withValues(alpha: 0.18)),
+                          child: const Icon(Icons.emoji_events_rounded, color: _gold, size: 22),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(child: _who(r, champion: true)),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                UserAvatar(userId: s.idUser, size: 30),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        s.playerName,
-                        style: isMe ? AppTypography.h2 : AppTypography.bodyText,
-                      ),
-                      if (s.clubName != null)
-                        Text(s.clubName!, style: AppTypography.bodyMuted),
-                    ],
+                for (final r in podium.where((r) => r.position != 1))
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 28,
+                          height: 28,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: (r.position == 2 ? _silver : _bronze).withValues(alpha: 0.18),
+                          ),
+                          child: Text("${r.position}",
+                              style: TextStyle(
+                                fontFamily: AppTypography.body,
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w800,
+                                color: r.position == 2 ? _silver : _bronze,
+                              )),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(child: _who(r)),
+                      ],
+                    ),
                   ),
-                ),
-                if (s.position == 1)
-                  const Icon(
-                    Icons.emoji_events_rounded,
-                    color: AppColors.scorifyMint,
-                    size: 20,
-                  ),
+                const SizedBox(height: 4),
               ],
             ),
-          );
-        }).toList(),
-      ),
+          ),
+        // El resto, por tramos.
+        for (final start in starts) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(2, 16, 2, 6),
+            child: Text(
+              _tier(start, start + tiers[start]!.length - 1),
+              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.1, color: AppColors.scorifyTextFaint),
+            ),
+          ),
+          Container(
+            color: AppColors.scorifyCardFill,
+            child: Column(
+              children: [
+                for (var i = 0; i < tiers[start]!.length; i++) ...[
+                  if (i > 0) const Divider(height: 1, thickness: 1, color: Color(0x0FFFFFFF), indent: 14, endIndent: 14),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                    color: tiers[start]![i].idUser == myUserId ? AppColors.scorifyMint.withValues(alpha: 0.12) : null,
+                    child: _who(tiers[start]![i]),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _who(CategoryStandingRow r, {bool champion = false}) {
+    final isMe = r.idUser == myUserId;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (champion)
+          const Text("CAMPEÓN",
+              style: TextStyle(fontFamily: AppTypography.body, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.4, color: _gold)),
+        Text(
+          isMe ? "${r.playerName} (tú)" : r.playerName,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontFamily: AppTypography.body,
+            fontSize: champion ? 16.5 : 14,
+            fontWeight: champion || isMe ? FontWeight.w800 : FontWeight.w600,
+            color: AppColors.scorifyText,
+          ),
+        ),
+        ClubLine(
+          idUser: r.idUser,
+          club: r.clubName,
+          crestSize: 12,
+          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted),
+        ),
+      ],
     );
   }
 }
@@ -656,8 +726,13 @@ class _CategoryHero extends StatelessWidget {
   final PlayerCategoryView view;
   final bool isEnrolled;
   final PlayerStanding? me;
+  /// Categoría terminada: tu puesto final y de cuántos (null = no aplica).
+  final int? finalPosition;
+  final int? totalPlayers;
 
   const _CategoryHero({
+    this.finalPosition,
+    this.totalPlayers,
     required this.tournamentName,
     required this.categoryLabel,
     required this.view,
@@ -723,6 +798,42 @@ class _CategoryHero extends StatelessWidget {
               style: _muted.copyWith(fontSize: 12),
             ),
           ],
+          // Terminada: tu puesto final, grande (antes decía "1° Posición", que
+          // era el puesto en el GRUPO y confundía).
+          if (finalPosition != null) ...[
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Text("${finalPosition}°",
+                    style: TextStyle(
+                      fontFamily: AppTypography.display,
+                      fontSize: 52,
+                      height: 1,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -1.5,
+                      color: finalPosition == 1
+                          ? const Color(0xFFE6B94C)
+                          : finalPosition == 2
+                              ? const Color(0xFFC0C7CF)
+                              : finalPosition! <= 3
+                                  ? const Color(0xFFCD8B55)
+                                  : AppColors.scorifyText,
+                    )),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(finalPosition == 1 ? "¡CAMPEÓN!" : "PUESTO FINAL",
+                          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: Color(0xFF8EC5FF))),
+                      if (totalPlayers != null)
+                        Text("de $totalPlayers jugadores", style: _muted.copyWith(fontSize: 13)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
           if (s != null) ...[
             const SizedBox(height: 16),
             Container(
@@ -732,7 +843,7 @@ class _CategoryHero extends StatelessWidget {
                 children: [
                   _Kpi(
                     value: s.position != null ? "${s.position}°" : "–",
-                    label: "Posición",
+                    label: finalPosition != null ? "En su grupo" : "Posición",
                   ),
                   _Kpi(value: "${s.played}", label: "Jugados"),
                   _Kpi(

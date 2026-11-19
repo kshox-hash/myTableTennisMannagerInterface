@@ -20,15 +20,15 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(width: 3, height: 13, color: AppColors.scorifyMint),
-        const SizedBox(width: 8),
+        // Mismo título de sección que el resto de la app (mayúsculas azul hielo, sin barrita).
         Expanded(
           child: Text(
-            title,
+            title.toUpperCase(),
             style: const TextStyle(
-              color: AppColors.scorifyText,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
+              color: Color(0xFF8EC5FF),
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.3,
             ),
           ),
         ),
