@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:myttmi/features/auth/presentation/login_background.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/storage/session_storage.dart";
@@ -6,7 +7,6 @@ import "package:myttmi/core/ui/app_button.dart";
 import "package:myttmi/core/ui/app_toast.dart";
 import "package:myttmi/core/ui/auth_text_field.dart";
 import "package:myttmi/core/ui/glass_card.dart";
-import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/auth/api/auth_api.dart";
 import "package:myttmi/features/shell/splash_gate.dart";
@@ -99,7 +99,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.scorifyBg,
-      body: PrismBackground(
+      // Mismo fondo que el login: foto del jugador + cenizas blancas.
+      body: LoginBackground(
         child: SafeArea(
           child: ListView(
             padding: const EdgeInsets.all(16),

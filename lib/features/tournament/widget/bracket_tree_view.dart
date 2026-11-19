@@ -1,7 +1,7 @@
 import "package:myttmi/core/constants/match_status_labels.dart";
+import "package:myttmi/routes/app_routes.dart";
 import "package:myttmi/core/clubs/club_crests.dart";
 import "package:myttmi/core/ui/panel_style.dart";
-import "package:myttmi/core/ui/player_actions.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
@@ -510,6 +510,11 @@ class _PlayerRow extends StatelessWidget {
 
     return InkWell(
       onTap: idUser.isEmpty ? null : onTap,
+      // Mantener presionado: perfil del jugador (antes eran el ojo y el trofeo
+      // en la fila, que le quitaban el ancho al nombre).
+      onLongPress: idUser.isEmpty
+          ? null
+          : () => Navigator.pushNamed(context, AppRoutes.playerProfile, arguments: {"userId": idUser, "playerName": name}),
       child: Container(
         height: 46,
         padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -574,8 +579,6 @@ class _PlayerRow extends StatelessWidget {
                 ],
               ),
             ),
-            if (idUser.isNotEmpty)
-              PlayerActions(playerId: idUser, playerName: name, color: highlighted ? AppColors.scorifyOnMint : null),
             const SizedBox(width: 6),
             Container(
               width: 26,

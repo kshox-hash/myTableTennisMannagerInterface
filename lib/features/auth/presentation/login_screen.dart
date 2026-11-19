@@ -1,4 +1,3 @@
-import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/features/auth/presentation/login_background.dart";
 import "package:myttmi/core/monitoring.dart";
 import "package:myttmi/features/shell/splash_gate.dart";

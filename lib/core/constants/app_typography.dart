@@ -33,7 +33,7 @@ class AppTypography {
   static const TextStyle displayMd = TextStyle(
     fontFamily: display,
     fontWeight: FontWeight.w700,
-    fontSize: 18,
+    fontSize: 20, // escala fija: 40 · 28 · 20 · 16 · 14 · 12 · 11
     height: 1.05,
     letterSpacing: -0.3,
     color: AppColors.scorifyText,
@@ -42,15 +42,16 @@ class AppTypography {
 
   static const TextStyle h1 = TextStyle(
     fontFamily: body,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w800,
     fontSize: 22,
+    letterSpacing: -0.3,
     color: AppColors.scorifyText,
   );
 
   static const TextStyle h2 = TextStyle(
     fontFamily: body,
-    fontWeight: FontWeight.w600,
-    fontSize: 14,
+    fontWeight: FontWeight.w700,
+    fontSize: 16,
     color: AppColors.scorifyText,
   );
 

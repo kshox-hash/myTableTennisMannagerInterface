@@ -76,13 +76,14 @@ class PanelTitleBar extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(16, trailing == null ? 14 : 8, trailing == null ? 16 : 8, 0),
       child: Row(
         children: [
-          if (icon != null) ...[Icon(icon, size: 16, color: iconColor), const SizedBox(width: 8)],
+          // Título de tarjeta como el Inicio: mayúsculas chicas espaciadas en
+          // azul hielo, sin ícono genérico (rediseño premium).
           Expanded(
             child: Text(
-              _sentence(title),
+              title.toUpperCase(),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted),
+              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: Color(0xFF8EC5FF)),
             ),
           ),
           if (trailing != null) trailing!,
@@ -92,13 +93,6 @@ class PanelTitleBar extends StatelessWidget {
   }
 }
 
-/// "ÚLTIMOS PARTIDOS" → "Últimos partidos" (los títulos viejos venían en
-/// mayúsculas); si ya viene en minúsculas se deja igual.
-String _sentence(String s) {
-  if (s.isEmpty || s != s.toUpperCase()) return s;
-  final lower = s.toLowerCase();
-  return lower[0].toUpperCase() + lower.substring(1);
-}
 
 /// Etiqueta de estado: fondo teñido del color, texto del color, sin borde,
 /// esquinas redondeadas. El color sigue diciendo lo mismo (lima =

@@ -133,6 +133,19 @@ class PlayerApi {
         .toList();
   }
 
+  /// TODOS los partidos del torneo: el servidor entrega de a 100, así que se
+  /// piden todas las páginas. (Con una sola página, en torneos de más de 100
+  /// partidos la llave —y la pre-llave— quedaban afuera.)
+  Future<List<TournamentMatch>> getAllTournamentMatches(String tournamentId, {String? categoryId}) async {
+    final out = <TournamentMatch>[];
+    for (var offset = 0; offset < 5000; offset += 100) {
+      final p = await getTournamentMatchesPage(tournamentId, categoryId: categoryId, limit: 100, offset: offset);
+      out.addAll(p.items);
+      if (p.items.length < 100 || out.length >= p.total) break;
+    }
+    return out;
+  }
+
   /// Una página de partidos del torneo (para la lista con scroll infinito):
   /// los partidos de esa página y el total que hay con ese filtro.
   Future<({List<TournamentMatch> items, int total})> getTournamentMatchesPage(

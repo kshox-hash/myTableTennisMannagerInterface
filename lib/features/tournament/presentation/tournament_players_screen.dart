@@ -72,7 +72,7 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
   Future<_PlayersData> _fetchAll() async {
     final results = await Future.wait([
       _api.getTournamentParticipants(widget.tournamentId),
-      _api.getTournamentMatches(widget.tournamentId),
+      _api.getAllTournamentMatches(widget.tournamentId), // todas las páginas (antes solo 100)
       TournamentApi().getTournamentById(widget.tournamentId).then<Tournament?>((t) => t, onError: (_) => null),
       SessionStorage().getUserId(),
     ]);

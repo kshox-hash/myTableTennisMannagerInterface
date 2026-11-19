@@ -3,8 +3,10 @@ import "package:myttmi/core/ui/premium_motion.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/storage/session_storage.dart";
+import "package:myttmi/core/ui/list_states.dart";
 import "package:myttmi/features/player/api/player_api.dart";
 import "package:myttmi/features/player/models/tournament_match_model.dart";
+import "package:myttmi/features/tournament/api/tournament_api.dart";
 import "package:myttmi/routes/app_routes.dart";
 
 /// Vista "Partidos" ordenada por importancia:
@@ -27,6 +29,8 @@ class _SmartMatchListState extends State<SmartMatchList> {
   String? _myId;
   String _q = "";
   bool _showAllPlayed = false;
+  /// Turno en la cola de mesas (idMatch → 1, 2, 3…).
+  Map<String, int> _queue = const {};
 
   @override
   void initState() {
@@ -43,18 +47,20 @@ class _SmartMatchListState extends State<SmartMatchList> {
   Future<void> _load() async {
     try {
       final myId = await SessionStorage().getUserId();
-      // El servidor entrega de a 100: se piden todas las páginas.
-      final out = <TournamentMatch>[];
-      for (var offset = 0; offset < 2000; offset += 100) {
-        final p = await _api.getTournamentMatchesPage(widget.tournamentId,
-            categoryId: widget.categoryId, limit: 100, offset: offset);
-        out.addAll(p.items);
-        if (p.items.length < 100 || out.length >= p.total) break;
-      }
+      final out = await _api.getAllTournamentMatches(widget.tournamentId, categoryId: widget.categoryId);
+      // Cola real de mesas (si falla, se ordena por ronda y número como antes).
+      var queue = <String, int>{};
+      try {
+        final board = await TournamentApi().getTablesQueue(widget.tournamentId);
+        for (var i = 0; i < board.nextMatches.length; i++) {
+          queue[board.nextMatches[i].idMatch] = i + 1;
+        }
+      } catch (_) {}
       if (!mounted) return;
       setState(() {
         _myId = myId;
         _all = out;
+        _queue = queue;
         _error = null;
       });
     } catch (e) {
@@ -75,7 +81,7 @@ class _SmartMatchListState extends State<SmartMatchList> {
       ]);
     }
     final all = _all;
-    if (all == null) return const Center(child: CircularProgressIndicator(color: AppColors.scorifyMint));
+    if (all == null) return const LoadingState(); // esqueleto que late (no un círculo girando)
 
     final q = _q.trim().toLowerCase();
     final list = all
@@ -88,8 +94,11 @@ class _SmartMatchListState extends State<SmartMatchList> {
     final rest = list.where((m) => !myMatches.contains(m)).toList();
     final live = rest.where((m) => !_done(m) && m.tableNumber != null).toList()
       ..sort((a, b) => (a.tableNumber ?? 0).compareTo(b.tableNumber ?? 0));
+    // Próximos en el orden real de la cola; los que aún no entran a la cola, después.
     final upcoming = rest.where((m) => !_done(m) && m.tableNumber == null).toList()
       ..sort((a, b) {
+        final qa = _queue[a.idMatch] ?? 1 << 20, qb = _queue[b.idMatch] ?? 1 << 20;
+        if (qa != qb) return qa.compareTo(qb);
         final r = (a.round ?? 0).compareTo(b.round ?? 0);
         return r != 0 ? r : a.matchNumber.compareTo(b.matchNumber);
       });
@@ -209,7 +218,8 @@ class _SmartMatchListState extends State<SmartMatchList> {
     final done = _done(m);
     final live = !done && m.tableNumber != null;
     // A la izquierda: mesa (en juego), "Mesa N" jugada, o vacío.
-    final leftTop = live ? "${m.tableNumber}" : (done ? "" : "—");
+    final turn = _queue[m.idMatch];
+    final leftTop = live ? "${m.tableNumber}" : (done ? "" : (turn != null ? "#$turn" : "—"));
     final leftLabel = live ? "MESA" : (done ? "" : "COLA");
     Widget player(String name, String id, int sets) {
       final won = done && m.winnerId == id;

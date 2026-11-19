@@ -97,9 +97,9 @@ class SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        if (icon != null) ...[Icon(icon, size: 18, color: AppColors.scorifyTextMuted), const SizedBox(width: 8)],
-        Text(text,
-            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
+        // Igual que los títulos de sección del Inicio (mayúsculas azul hielo, sin ícono).
+        Text(text.toUpperCase(),
+            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: Color(0xFF8EC5FF))),
       ],
     );
   }

@@ -110,7 +110,7 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
       _ => _ViewMode.list,
     };
     _load();
-    _api.getTournamentMatches(widget.tournamentId).then((all) {
+    _api.getAllTournamentMatches(widget.tournamentId).then((all) {
       // Escudos de los clubes de cada categoría (grupos y llave).
       for (final c in {for (final m in all) m.idCategory}) {
         ClubCrests.load(widget.tournamentId, c);
@@ -134,7 +134,7 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
       return;
     }
     setState(() {
-      _future = _api.getTournamentMatches(widget.tournamentId);
+      _future = _api.getAllTournamentMatches(widget.tournamentId);
     });
     _future.then((all) {
       if (mounted) setState(() => _allMatches = all);
