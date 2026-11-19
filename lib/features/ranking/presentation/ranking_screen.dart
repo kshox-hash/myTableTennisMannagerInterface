@@ -86,21 +86,36 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
       _error = null;
     });
     try {
+      // No existe un ranking global: solo el de cada organizador. Primero se
+      // piden los rankings donde el jugador tiene resultados y se abre el
+      // primero (o el que ya estaba elegido).
+      final scopes = await _api.getScopes().catchError((_) => <RankingScope>[]);
+      final myId = await SessionStorage().getUserId();
+      if (!mounted) return;
+      if (scopes.isEmpty) {
+        setState(() {
+          _scopes = scopes;
+          _myUserId = myId;
+          _entries = [];
+          _tournaments = [];
+        });
+        return;
+      }
+      if (_organizerId == null || !scopes.any((x) => x.organizerId == _organizerId)) {
+        _organizerId = scopes.first.organizerId;
+      }
       final org = _organizerId;
       final copa = _copa;
       final results = await Future.wait([
         _api.getGlobal(organizerId: org, copa: copa),
-        SessionStorage().getUserId(),
-        // Si estas dos fallan el ranking igual se muestra.
-        _api.getScopes().catchError((_) => <RankingScope>[]),
         _api.getTournaments(organizerId: org, copa: copa).catchError((_) => <RankingTournament>[]),
       ]);
       if (!mounted || org != _organizerId || copa != _copa) return;
       setState(() {
+        _scopes = scopes;
+        _myUserId = myId;
         _entries = results[0] as List<RankingEntry>;
-        _myUserId = results[1] as String?;
-        _scopes = results[2] as List<RankingScope>;
-        _tournaments = results[3] as List<RankingTournament>;
+        _tournaments = results[1] as List<RankingTournament>;
       });
     } catch (e) {
       if (!mounted) return;
@@ -116,7 +131,7 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
   }
 
   String get _scopeName {
-    if (_organizerId == null) return "General";
+    if (_organizerId == null) return "Ranking";
     return _scopes.where((x) => x.organizerId == _organizerId).firstOrNull?.name ?? "Organizador";
   }
 
@@ -133,7 +148,6 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
       context,
       title: "Elegir ranking",
       options: [
-        (value: null, label: "General (toda la plataforma)"),
         for (final x in _scopes) (value: x.organizerId, label: "${x.name} · ${x.tournaments} ${x.tournaments == 1 ? "campeonato" : "campeonatos"}"),
       ],
       selected: _organizerId,
@@ -364,10 +378,10 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
         header: [
           const SizedBox(height: 16),
           if (widget.showHeader) ...[
-            TopHeader(title: "Ranking", subtitle: "${_organizerId == null ? "Ranking MyTTM" : "Ranking de $_scopeName"} · últimos 12 meses", showBack: false),
+            TopHeader(title: "Ranking", subtitle: _organizerId == null ? "Por organizador · últimos 12 meses" : "Ranking de $_scopeName · últimos 12 meses", showBack: false),
             const SizedBox(height: 10),
           ],
-          Row(children: [_copaTab("general", "General"), const SizedBox(width: 8), _copaTab("oro", "Oro"), const SizedBox(width: 8), _copaTab("plata", "Plata")]),
+          Row(children: [_copaTab("general", "Todas"), const SizedBox(width: 8), _copaTab("oro", "Oro"), const SizedBox(width: 8), _copaTab("plata", "Plata")]),
           const SizedBox(height: 8),
           // Cabecera compacta: qué ranking (si hay más de uno) y el buscador
           // con "?" al lado. La explicación larga y en qué campeonatos se
@@ -446,7 +460,7 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
-                                        query.isEmpty ? "Todavía no hay puntos en este ranking. Aparecen cuando termina un campeonato puntuable; mientras, tus números están en Mi rendimiento." : "Nadie coincide con esa búsqueda.",
+                                        query.isEmpty ? (_scopes.isEmpty ? "Todavía no tienes ranking. Cada organizador tiene el suyo: aparece aquí cuando juegas un campeonato puntuable de ese organizador y termina." : "Todavía no hay puntos en este ranking. Aparecen cuando termina un campeonato puntuable; mientras, tus números están en Mi rendimiento.") : "Nadie coincide con esa búsqueda.",
                                         style: _muted,
                                       ),
                                     ),
