@@ -381,6 +381,9 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
             TopHeader(title: "Ranking", subtitle: _organizerId == null ? "Por organizador · últimos 12 meses" : "Ranking de $_scopeName · últimos 12 meses", showBack: false),
             const SizedBox(height: 10),
           ],
+          // Sin ningún ranking (el jugador no jugó campeonatos puntuables) no hay
+          // nada que filtrar: se ocultan las pestañas y el buscador.
+          if (_scopes.isNotEmpty || !_loadedOnce)
           Row(children: [_copaTab("general", "Todas"), const SizedBox(width: 8), _copaTab("oro", "Oro"), const SizedBox(width: 8), _copaTab("plata", "Plata")]),
           const SizedBox(height: 8),
           // Cabecera compacta: qué ranking (si hay más de uno) y el buscador
@@ -395,6 +398,7 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
             ),
             const SizedBox(height: 8),
           ],
+          if (_scopes.isNotEmpty || !_loadedOnce)
           Row(
             children: [
               Expanded(

@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:myttmi/core/ui/premium_motion.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
+import "package:myttmi/core/constants/match_status_labels.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/list_states.dart";
 import "package:myttmi/features/player/api/player_api.dart";
@@ -132,7 +133,7 @@ class _SmartMatchListState extends State<SmartMatchList> {
               child: Center(child: Text(q.isEmpty ? "Todavía no hay partidos." : "Nadie coincide con \"$_q\".", style: AppTypography.bodyMuted)),
             ),
           if (myMatches.isNotEmpty) ...[
-            _title("Mis partidos", color: AppColors.scorifyMint),
+            _title("Mis partidos"),
             for (final m in myMatches) _row(m, highlight: true),
           ],
           if (live.isNotEmpty) ...[
@@ -210,7 +211,7 @@ class _SmartMatchListState extends State<SmartMatchList> {
         ? "Grupo ${m.groupName!.replaceFirst(RegExp(r"^GR-?", caseSensitive: false), "")}"
         : m.round == 0
             ? "Pre-llave"
-            : "Llave";
+            : (m.round != null ? matchRoundLabel(m.round!, m.totalRounds) : "Llave");
     return "$stage · ${m.categoryType}";
   }
 

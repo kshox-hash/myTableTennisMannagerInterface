@@ -554,9 +554,10 @@ class _CategoryTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: 10),
+        // Mismo título de sección que el resto de la app.
         child: Text(
-          text,
-          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+          text.toUpperCase(),
+          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: Color(0xFF8EC5FF)),
         ),
       );
 }

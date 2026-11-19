@@ -60,7 +60,8 @@ class GroupCard extends StatelessWidget {
     // "Partidos": fuera de ahí la columna no se reserva. Antes el encabezado
     // guardaba 24 px aunque los botones no estuvieran y PJ/G/P quedaban
     // corridos respecto de los números.
-    final hasActions = TournamentMatchesScope.of(context) != null;
+    // Sin el trofeo por fila (ensuciaba la tabla): tocar al jugador abre su perfil.
+    const hasActions = false;
 
     return SectionCard(
       title: isMyGroup ? "${_label(group.groupName)} · Tu grupo" : _label(group.groupName),

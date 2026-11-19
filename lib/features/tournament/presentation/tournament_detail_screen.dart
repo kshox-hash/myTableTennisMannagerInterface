@@ -496,7 +496,7 @@ class _CategoryCardState extends State<_CategoryCard> {
     const gold = Color(0xFFE6B94C), silver = Color(0xFFC0C7CF), bronze = Color(0xFFCD8B55);
     Color medal(int pos) => pos == 1 ? gold : pos == 2 ? silver : bronze;
     return Container(
-      decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(Panel.radius)),
+      decoration: BoxDecoration(color: const Color(0x14000000), borderRadius: BorderRadius.circular(Panel.radius)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -504,7 +504,7 @@ class _CategoryCardState extends State<_CategoryCard> {
           if (champ != null)
             Container(
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-              color: gold.withValues(alpha: 0.12),
+              color: gold.withValues(alpha: 0.10),
               child: Row(
                 children: [
                   // Ícono (no emoji): copa dorada dentro de un círculo con tinte.
@@ -1083,13 +1083,15 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Mismo título de sección que el resto de la app (mayúsculas azul hielo).
     return Text(
-      text,
+      text.toUpperCase(),
       style: const TextStyle(
         fontFamily: AppTypography.body,
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: AppColors.scorifyText,
+        fontSize: 11,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 1.3,
+        color: Color(0xFF8EC5FF),
       ),
     );
   }
