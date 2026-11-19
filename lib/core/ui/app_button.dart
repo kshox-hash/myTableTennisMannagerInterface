@@ -31,6 +31,8 @@ class AppButton extends StatefulWidget {
   /// Degradado y texto propios (el login conserva el verde).
   final Gradient? gradient;
   final Color? foreground;
+  /// Radio propio (el login lo usa recto, 0). null = el de siempre.
+  final double? radius;
 
   const AppButton({
     super.key,
@@ -44,6 +46,7 @@ class AppButton extends StatefulWidget {
     this.expand = true,
     this.gradient,
     this.foreground,
+    this.radius,
   });
 
   const AppButton.outline({
@@ -57,7 +60,8 @@ class AppButton extends StatefulWidget {
     this.expand = true,
   })  : variant = AppButtonVariant.outline,
         gradient = null,
-        foreground = null;
+        foreground = null,
+        radius = null;
 
   @override
   State<AppButton> createState() => _AppButtonState();
@@ -75,7 +79,7 @@ class _AppButtonState extends State<AppButton> {
   @override
   Widget build(BuildContext context) {
     final v = widget.variant;
-    final radius = BorderRadius.circular(Panel.buttonRadius);
+    final radius = BorderRadius.circular(widget.radius ?? Panel.buttonRadius);
     final disabled = widget.onPressed == null;
     final small = widget.height < 40;
 

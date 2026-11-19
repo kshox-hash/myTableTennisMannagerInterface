@@ -1,4 +1,6 @@
 import "package:myttmi/core/ui/panel_style.dart";
+import "package:myttmi/core/clubs/club_crests.dart";
+import "package:myttmi/core/ui/stagger_in.dart";
 import "package:myttmi/core/ui/player_actions.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/features/tournament/api/tournament_api.dart";
@@ -18,6 +20,7 @@ import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/player/api/player_api.dart";
 import "package:myttmi/features/player/models/bracket_view_model.dart";
 import "package:myttmi/features/player/models/tournament_match_model.dart";
+import "package:myttmi/features/tournament/widget/smart_match_list.dart";
 import "package:myttmi/features/tournament/widget/bracket_tree_view.dart";
 import "package:myttmi/features/tournament/widget/group_card.dart";
 import "package:myttmi/routes/app_routes.dart";
@@ -108,6 +111,10 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
     };
     _load();
     _api.getTournamentMatches(widget.tournamentId).then((all) {
+      // Escudos de los clubes de cada categoría (grupos y llave).
+      for (final c in {for (final m in all) m.idCategory}) {
+        ClubCrests.load(widget.tournamentId, c);
+      }
       if (!mounted) return;
       final has = all.any((m) => m.matchType == "bracket");
       setState(() {
@@ -168,49 +175,12 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
                 // Una sola línea de filtros: categoría a la izquierda y, en la
                 // lista de partidos, el estado a la derecha (antes eran dos
                 // filas de chips y se veía amontonado).
-                if (_cats.length > 1 || _mode == _ViewMode.list) ...[
+                if (_cats.length > 1) ...[
                   const SizedBox(height: 12),
                   CategoryFilterBar(
                     options: _cats,
                     selected: _cat,
                     onChanged: (id) => setState(() => _cat = id),
-                    trailing: _mode != _ViewMode.list
-                        ? null
-                        : Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Flexible(child: FilterDropdown(
-                                icon: Icons.account_tree_rounded,
-                                label: _stageLabels[_stageFilter]!,
-                                onTap: () async {
-                                  final picked = await showOptionsSheet<String>(
-                                    context,
-                                    title: "Fase",
-                                    options: [for (final e in _stageLabels.entries) (value: e.key, label: e.value)],
-                                    selected: _stageFilter,
-                                  );
-                                  if (picked == null) return;
-                                  setState(() => _stageFilter = picked.value);
-                                },
-                              )),
-                              const SizedBox(width: 8),
-                              Flexible(child: FilterDropdown(
-                            icon: Icons.filter_list_rounded,
-                            label: _statusLabels[_statusFilter]!,
-                            onTap: () async {
-                              final picked = await showOptionsSheet<String>(
-                                context,
-                                title: "Mostrar",
-                                options: [for (final e in _statusLabels.entries) (value: e.key, label: e.value)],
-                                selected: _statusFilter,
-                              );
-                              if (picked == null) return;
-                              setState(() => _statusFilter = picked.value);
-                              _load();
-                            },
-                          )),
-                            ],
-                          ),
                   ),
                 ],
                 const SizedBox(height: 14),
@@ -218,13 +188,8 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
               body: _mode == _ViewMode.list && !_catsLoaded
                   ? const LoadingState()
                   : _mode == _ViewMode.list
-                  ? _PagedMatchList(
-                      key: ValueKey("$_statusFilter|$_stageFilter|$_cat"),
-                      tournamentId: widget.tournamentId,
-                      status: _statusFilter == "all" ? null : _statusFilter,
-                      stage: _stageFilter == "all" ? null : _stageFilter,
-                      categoryId: _cat,
-                    )
+                  // Partidos ordenados por importancia: lo mío → en juego → próximos → jugados.
+                  ? SmartMatchList(tournamentId: widget.tournamentId, categoryId: _cat)
                   : RefreshIndicator(
                     color: AppColors.scorifyMint,
                     onRefresh: () async {
@@ -239,12 +204,12 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
                         }
                         if (snap.hasError) {
                           return ListView(
-                            children: [
+                            children: staggerChildren([
                               ErrorStateView(
                                 message: "No pudimos cargar los partidos.\n${snap.error}",
                                 onRetry: _load,
                               ),
-                            ],
+                            ]),
                           );
                         }
 
@@ -412,6 +377,9 @@ class _GroupsByCategory extends StatefulWidget {
 }
 
 class _GroupsByCategoryState extends State<_GroupsByCategory> {
+  /// Buscador: por jugador o por grupo ("3", "Grupo 3").
+  String _q = "";
+
   final _api = PlayerApi();
   late Future<List<(String label, CategoryGroupsView view)>> _future;
 
@@ -480,12 +448,44 @@ class _GroupsByCategoryState extends State<_GroupsByCategory> {
           future: SessionStorage().getUserId(),
           builder: (context, userSnap) {
             final myUserId = userSnap.data;
+            final q = _q.trim().toLowerCase().replaceFirst(RegExp(r"^grupos*"), "");
+            bool hit(GroupFullView g) =>
+                q.isEmpty ||
+                g.groupName.toLowerCase().replaceFirst(RegExp(r"^gr-?"), "") == q ||
+                g.members.any((m) => m.displayName.toLowerCase().contains(q));
+            // Mi grupo primero; después el resto en su orden.
+            List<GroupFullView> ordered(List<GroupFullView> gs) {
+              final mine = gs.where((g) => myUserId != null && g.members.any((m) => m.idUser == myUserId));
+              return [...mine, ...gs.where((g) => !mine.contains(g))].where(hit).toList();
+            }
+            final anyHit = categories.any((c) => ordered(c.$2.groups).isNotEmpty);
             return ListView(
               padding: const EdgeInsets.only(bottom: 24),
               children: [
+                // Buscador: ir directo a una persona o a un grupo.
+                TextField(
+                  onChanged: (v) => setState(() => _q = v),
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, color: AppColors.scorifyText),
+                  decoration: const InputDecoration(
+                    hintText: "Buscar jugador o grupo (ej. 3)",
+                    hintStyle: TextStyle(fontFamily: AppTypography.body, fontSize: 14, color: AppColors.scorifyTextFaint),
+                    prefixIcon: Icon(Icons.search_rounded, color: AppColors.scorifyTextMuted, size: 20),
+                    filled: true,
+                    fillColor: AppColors.scorifyCardFill,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(vertical: 12),
+                    border: OutlineInputBorder(borderSide: BorderSide.none, borderRadius: BorderRadius.zero),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                if (!anyHit)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 30),
+                    child: Center(child: Text("Ningún jugador ni grupo coincide con \"${_q.trim()}\".", style: AppTypography.bodyMuted)),
+                  ),
                 for (final cat in categories) ...[
-                  _CategoryTitle(cat.$1),
-                  for (final g in cat.$2.groups) ...[
+                  if (ordered(cat.$2.groups).isNotEmpty) _CategoryTitle(cat.$1),
+                  for (final g in ordered(cat.$2.groups)) ...[
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: GroupCard(

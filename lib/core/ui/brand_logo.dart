@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 
-/// Isotipo oficial MYTTM (assets/images/logo-mark.png, el mismo PNG que usa
-/// la web) + opcionalmente el wordmark "MYTTM" al lado. Un solo lugar para
+/// Logo oficial MYTTM (el 3D metálico del login): la M y, opcionalmente, la
+/// palabra "MyTTM" al lado. Un solo lugar para
 /// la marca: antes cada pantalla dibujaba su propio ícono (bolt, raqueta) y
 /// su propio texto ("SPINARENA", "myTTMI").
 class BrandLogo extends StatelessWidget {
@@ -11,47 +11,40 @@ class BrandLogo extends StatelessWidget {
   final double? wordmarkSize;
   final Color wordmarkColor;
 
+  /// Versión monocromo (isotipo blanco + "TTM" azul hielo) para la paleta cobalto.
+  final bool mono;
+
   const BrandLogo({
     super.key,
     this.markSize = 32,
     this.showWordmark = true,
     this.wordmarkSize,
     this.wordmarkColor = AppColors.scorifyText,
+    this.mono = false, // M oficial (celeste + verde lima)
   });
 
   @override
   Widget build(BuildContext context) {
+    // Logo oficial = el del login (3D metálico): la M y la palabra "MyTTM"
+    // recortadas de assets/images/3.0x/logo-stacked.png y puestas en línea.
+    final wordH = (wordmarkSize ?? markSize * 0.62) * 1.3;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // La M nueva tiene fondo transparente y llega casi al borde: sin
-        // recorte redondeado (le comía las puntas) y escalado en alta
-        // calidad para que no se vea serruchada al achicarla.
         Image.asset(
-          'assets/images/logo-mark.png',
-          width: markSize,
-          height: markSize,
-          // "medium" (mipmaps) y no "high": en web "high" no promedia al
-          // achicar mucho (512 → ~30 px) y deja los bordes dentados.
+          "assets/images/logo-mark-3d.png",
+          height: markSize * 1.1,
           filterQuality: FilterQuality.medium,
           isAntiAlias: true,
         ),
         if (showWordmark) ...[
-          SizedBox(width: markSize * 0.32),
-          // Marca como en el logo: "My" blanco + "TTM" verde de marca.
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(text: 'My', style: TextStyle(color: wordmarkColor)),
-                const TextSpan(text: 'TTM', style: TextStyle(color: AppColors.scorifyMint)),
-              ],
-            ),
-            style: TextStyle(
-              fontFamily: 'Montserrat',
-              fontWeight: FontWeight.w800,
-              fontSize: wordmarkSize ?? markSize * 0.62,
-              letterSpacing: 0.3,
-            ),
+          SizedBox(width: markSize * 0.28),
+          Image.asset(
+            "assets/images/logo-word-3d.png",
+            height: wordH,
+            filterQuality: FilterQuality.medium,
+            isAntiAlias: true,
+            semanticLabel: "MyTTM",
           ),
         ],
       ],

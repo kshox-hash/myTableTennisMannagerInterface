@@ -1,4 +1,5 @@
 import "package:myttmi/core/ui/panel_style.dart";
+import "package:myttmi/core/ui/stagger_in.dart";
 import "package:myttmi/core/helpers/friendly_error.dart";
 import "package:myttmi/core/ui/section_card.dart";
 import "package:myttmi/core/ui/app_button.dart";
@@ -243,7 +244,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       if (_editing) {
                         return ListView(
                           padding: const EdgeInsets.only(bottom: 24),
-                          children: [
+                          children: staggerChildren([
                             GlassCard(
                               padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
                               child: Column(
@@ -332,7 +333,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ],
                               ),
                             ),
-                          ],
+                          ]),
                         );
                       }
 

@@ -131,7 +131,7 @@ class _JourneyCategory extends StatelessWidget {
     final pending = matches.any((m) => m.winnerId == null);
     final champion = matches.any((m) => m.matchType == "bracket" && _won(m) && m.round != null && m.round == m.totalRounds);
     final (label, bg, fg) = champion
-        ? ("🏆 Campeón", AppColors.scorifyPending, AppColors.scorifyOnButterfly)
+        ? ("Campeón", AppColors.scorifyPending, AppColors.scorifyOnButterfly)
         : lostBracket
             ? ("Eliminado", AppColors.scorifySurface2, AppColors.scorifyTextMuted)
             : pending

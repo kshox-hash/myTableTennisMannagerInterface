@@ -1,4 +1,5 @@
 import "package:myttmi/core/ui/panel_style.dart";
+import "package:myttmi/features/auth/presentation/login_background.dart";
 import "package:myttmi/core/monitoring.dart";
 import "package:myttmi/features/shell/splash_gate.dart";
 import "package:myttmi/core/ui/app_button.dart";
@@ -13,7 +14,6 @@ import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/auth_text_field.dart";
 import "package:myttmi/core/ui/glass_card.dart";
-import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/features/auth/api/auth_api.dart";
 import "package:myttmi/features/auth/presentation/register_screen.dart";
 import "package:myttmi/features/auth/presentation/forgot_password_screen.dart";
@@ -109,13 +109,18 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.scorifyBg,
-      body: PrismBackground.login(
+      // Foto del jugador con cenizas blancas; logo y formulario abajo.
+      body: LoginBackground(
         child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+          child: LayoutBuilder(
+            builder: (context, box) => SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: box.maxHeight - 44),
+                // Logo arriba (no tapa la cara del jugador) y el formulario abajo.
+                child: IntrinsicHeight(
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: MainAxisSize.max,
                 children: [
                   // Logo 3D metálico en vertical: la M arriba y "MyTTM ·
                   // Gestión de torneos y clubes" abajo (armado del logo
@@ -123,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // 1x/2x/3x de ese tamaño (assets/images/2.0x, 3.0x): no se
                   // achica en el teléfono y los bordes no se ven dentados.
                   const SizedBox(
-                    width: 190,
+                    width: 150,
                     child: Image(
                       image: AssetImage("assets/images/logo-stacked.png"),
                       fit: BoxFit.contain,
@@ -154,16 +159,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       Container(width: 22, height: 1.5, color: AppColors.loginAccent),
                     ],
                   ),
-                  const SizedBox(height: 28),
+                  // Espacio libre al medio: ahí se ve el jugador.
+                  const Spacer(),
+                  const SizedBox(height: 16),
                   GlassCard(
                     variant: GlassCardVariant.elevated,
-                    fillColor: AuthTextField.cardColor, // opaca: plana sobre el fondo
-                    padding: const EdgeInsets.all(22),
+                    fillColor: Colors.transparent, // sin tarjeta: se ve el jugador detrás
+                    padding: const EdgeInsets.fromLTRB(2, 0, 2, 0),
                     child: Column(
                       children: [
                         AuthTextField(
                           controller: _email,
-                          label: "Email",
+                          label: "Correo",
                           icon: Icons.mail_outline_rounded,
                           keyboardType: TextInputType.emailAddress,
                         ),
@@ -183,7 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             child: Text(
                               "¿Olvidaste tu contraseña?",
-                              style: AppTypography.bodyMuted.copyWith(fontSize: 12, color: AppColors.loginAccent),
+                              style: AppTypography.bodyMuted.copyWith(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.loginAccent),
                             ),
                           ),
                         ),
@@ -194,7 +201,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                 height: 22,
                                 child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.loginAccent),
                               )
-                            : AppButton(label: "Entrar", onPressed: _login, gradient: AppColors.loginButton, foreground: AppColors.loginOnAccent),
+                            : AppButton(
+                                label: "Entrar",
+                                onPressed: _login,
+                                height: 46,
+                                radius: 0,
+                                // Plano, como el resto de la app (sin degradado).
+                                gradient: const LinearGradient(colors: [AppColors.scorifyMint, AppColors.scorifyMint]),
+                                foreground: AppColors.loginOnAccent,
+                              ),
                         const SizedBox(height: 16),
                         Row(
                           children: [
@@ -209,17 +224,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 14),
                         SizedBox(
                           width: double.infinity,
-                          height: 44,
+                          height: 46,
                           child: OutlinedButton(
                             onPressed: loading ? null : _loginGoogle,
                             // Botón oficial de Google (tema claro): fondo
                             // blanco, texto casi negro y la "G" de 4 colores.
+                            // Oscuro con borde fino: no le gana a "Entrar" (la acción principal).
                             style: OutlinedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF1F1F1F),
-                              disabledBackgroundColor: Colors.white.withValues(alpha: 0.6),
-                              side: BorderSide.none,
-                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.radius))),
+                              backgroundColor: const Color(0x66000000),
+                              foregroundColor: Colors.white,
+                              disabledBackgroundColor: const Color(0x33000000),
+                              side: const BorderSide(color: Color(0x40FFFFFF)),
+                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                             ),
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -239,15 +255,19 @@ class _LoginScreenState extends State<LoginScreen> {
                               CyberPageRoute(builder: (_) => const RegisterScreen()),
                             );
                           },
-                          child: Text(
-                            "Crear cuenta",
-                            style: AppTypography.bodyMuted.copyWith(color: AppColors.loginAccent),
+                          child: Text.rich(
+                            TextSpan(children: [
+                              TextSpan(text: "¿No tienes cuenta? ", style: AppTypography.bodyMuted.copyWith(fontSize: 14, color: const Color(0xCCFFFFFF))),
+                              TextSpan(text: "Crea una", style: AppTypography.bodyMuted.copyWith(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.loginAccent)),
+                            ]),
                           ),
                         ),
                       ],
                     ),
                   ),
                 ],
+              ),
+                ),
               ),
             ),
           ),

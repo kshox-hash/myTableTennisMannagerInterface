@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:myttmi/core/ui/stagger_in.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/list_states.dart";
@@ -134,7 +135,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.only(bottom: 16),
-        children: [
+        children: staggerChildren([
           // Resumen: datos neutros en blanco; verde solo ganados, rojo perdidos.
           if (st != null) ...[
             Row(
@@ -156,7 +157,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             )
           else if (_error != null)
             TextButton(onPressed: _loadMore, child: const Text("No se pudieron cargar más. Reintentar")),
-        ],
+        ]),
         ),
       ),
     );

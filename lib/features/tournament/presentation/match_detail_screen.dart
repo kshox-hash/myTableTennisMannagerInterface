@@ -1,4 +1,5 @@
 import "package:myttmi/core/ui/motion.dart";
+import "package:myttmi/core/ui/stagger_in.dart";
 import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "dart:async";
@@ -148,7 +149,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                         },
                         child: ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          children: [
+                          children: staggerChildren([
                             Text(
                               m.tournamentName,
                               style: AppTypography.bodyMuted,
@@ -354,7 +355,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                 ],
                               ),
                             ),
-                          ],
+                          ]),
                         ),
                       );
                     },

@@ -367,7 +367,7 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
             TopHeader(title: "Ranking", subtitle: "${_organizerId == null ? "Ranking MyTTM" : "Ranking de $_scopeName"} · últimos 12 meses", showBack: false),
             const SizedBox(height: 10),
           ],
-          Row(children: [_copaTab("general", "General"), const SizedBox(width: 8), _copaTab("oro", "🥇 Oro"), const SizedBox(width: 8), _copaTab("plata", "🥈 Plata")]),
+          Row(children: [_copaTab("general", "General"), const SizedBox(width: 8), _copaTab("oro", "Oro"), const SizedBox(width: 8), _copaTab("plata", "Plata")]),
           const SizedBox(height: 8),
           // Cabecera compacta: qué ranking (si hay más de uno) y el buscador
           // con "?" al lado. La explicación larga y en qué campeonatos se

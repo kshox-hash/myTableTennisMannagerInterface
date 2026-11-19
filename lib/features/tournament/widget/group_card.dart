@@ -1,4 +1,5 @@
 import "package:myttmi/core/ui/panel_style.dart";
+import "package:myttmi/core/clubs/club_crests.dart";
 import "package:myttmi/core/ui/player_actions.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/ui/section_card.dart";
@@ -23,7 +24,8 @@ class GroupCard extends StatelessWidget {
   final bool hasSilver;
   const GroupCard({super.key, required this.group, this.myUserId, this.isMyGroup = false, this.qualifiers, this.hasSilver = false});
 
-  static const _silver = Color(0xFFB8C4CC);
+  static const _silver = Color(0xFFC0C7CF); // Plata (igual que la web)
+  static const _gold = AppColors.scorifyButterfly; // clasifica: lima de la web
 
   // "GR-3" → "Grupo 3"
   static String _label(String name) {
@@ -73,25 +75,12 @@ class GroupCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // La regla, antes de jugar: cuántos pasan y a dónde.
-          if (qualifiers != null && qualifiers! > 0)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 8, 10),
-              child: Wrap(
-                spacing: 14,
-                runSpacing: 6,
-                children: [
-                  _ruleChip(AppColors.scorifyMint, qualifiers == 1 ? "1º a la llave" : qualifiers == 2 ? "1º y 2º a la llave" : "1º al ${qualifiers}º a la llave"),
-                  if (hasSilver) _ruleChip(_silver, "${qualifiers! + 1}º a Plata"),
-                ],
-              ),
-            ),
           // Encabezado de la tabla.
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 2, 8, 4),
             child: Row(
               children: [
-                const SizedBox(width: 22 + 26 + 10),
+                const SizedBox(width: 22 + 8 + 26 + 10),
                 const Expanded(child: Text("Jugador", style: _head)),
                 stat("PJ", style: _head),
                 stat("G", style: _head),
@@ -101,25 +90,34 @@ class GroupCard extends StatelessWidget {
             ),
           ),
           for (var i = 0; i < members.length; i++) _memberRow(context, members[i], i, standing[members[i].idUser], anyPlayed, stat, hasActions),
+          // Leyenda chica bajo la tabla (secundaria): lima = clasifica, plateado = Plata.
+          if (qualifiers != null && qualifiers! > 0)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 6, 8, 0),
+              child: Wrap(
+                spacing: 14,
+                runSpacing: 6,
+                children: [
+                  _ruleChip(_gold, hasSilver ? "Clasifica a Oro" : "Clasifica a la llave"),
+                  if (hasSilver) _ruleChip(_silver, "Clasifica a Plata"),
+                ],
+              ),
+            ),
           if (qualifiers == null && group.standings.any((s) => s.qualifiedToBracket)) ...[
             const SizedBox(height: 6),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: _ruleChip(AppColors.scorifyMint, "Clasifica a la llave"),
+              child: _ruleChip(_gold, "Clasifica a la llave"),
             ),
           ],
-          if (matches.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              child: Text("Resultados", style: _head),
+          // Resultados plegados: lo principal es la tabla; los partidos se abren al tocar.
+          if (matches.isNotEmpty)
+            _FoldedResults(
+              count: matches.length,
+              played: matches.where((m) => m.winnerId != null).length,
+              // Todos con la misma cantidad de columnas de set (la del partido más largo).
+              rows: [for (final m in matches) _matchRow(m, matches.fold<int>(0, (n, x) => x.setScores.length > n ? x.setScores.length : n))],
             ),
-            const SizedBox(height: 4),
-            // Todos con la misma cantidad de columnas de set (la del partido
-            // más largo): uno de 2 sets no corre la columna de sets ganados.
-            for (final m in matches)
-              _matchRow(m, matches.fold<int>(0, (n, x) => x.setScores.length > n ? x.setScores.length : n)),
-          ],
         ],
       ),
     );
@@ -130,9 +128,9 @@ class GroupCard extends StatelessWidget {
   static Widget _ruleChip(Color color, String text) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(width: 3, height: 12, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
+          Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
           const SizedBox(width: 6),
-          Text(text, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted)),
+          Text(text, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w500, color: AppColors.scorifyTextFaint)),
         ],
       );
 
@@ -146,7 +144,7 @@ class GroupCard extends StatelessWidget {
     final decided = s?.qualifiedToBracket == true;
     final inGold = decided || (anyPlayed && q != null && pos <= q);
     final inSilver = !inGold && anyPlayed && hasSilver && q != null && pos == q + 1;
-    final zone = inGold ? AppColors.scorifyMint : (inSilver ? _silver : null);
+    final zone = inGold ? _gold : (inSilver ? _silver : null);
     return Material(
       color: me ? AppColors.scorifyMint.withValues(alpha: 0.10) : Colors.transparent,
       borderRadius: BorderRadius.circular(Panel.radius),
@@ -161,22 +159,21 @@ class GroupCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
           child: Row(
             children: [
+              // Posición en círculo (como la web): lima clasifica, plateado Plata.
               Container(
-                width: 3,
-                height: 28,
-                margin: const EdgeInsets.only(right: 6),
-                decoration: BoxDecoration(color: zone ?? Colors.transparent, borderRadius: BorderRadius.circular(2)),
-              ),
-              SizedBox(
-                width: 13,
+                width: 22,
+                height: 22,
+                margin: const EdgeInsets.only(right: 8),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: zone ?? Colors.transparent, shape: BoxShape.circle),
                 child: Text("${s?.position ?? i + 1}",
                     style: TextStyle(
                         fontFamily: AppTypography.body,
-                        fontSize: 13,
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: zone ?? AppColors.scorifyTextMuted)),
+                        color: zone != null ? const Color(0xFF16210A) : AppColors.scorifyTextMuted)),
               ),
-              UserAvatar(userId: m.idUser, size: 26),
+              UserAvatar(userId: m.idUser, size: 26, name: m.displayName),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -186,13 +183,20 @@ class GroupCard extends StatelessWidget {
                       me ? "${m.displayName} (tú)" : m.displayName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                      // Jerarquía: quien clasifica (o soy yo) en blanco fuerte; el resto, apagado.
+                      style: TextStyle(
+                        fontFamily: AppTypography.body,
+                        fontSize: 13.5,
+                        fontWeight: zone != null || me ? FontWeight.w700 : FontWeight.w500,
+                        color: zone != null || me ? AppColors.scorifyText : AppColors.scorifyTextMuted,
+                      ),
                     ),
-                    if ((m.clubName ?? "").trim().isNotEmpty)
-                      Text(m.clubName!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted)),
+                    // Club con su escudo (como en la web).
+                    ClubLine(
+                      idUser: m.idUser,
+                      club: m.clubName,
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted),
+                    ),
                   ],
                 ),
               ),
@@ -243,6 +247,54 @@ class GroupCard extends StatelessWidget {
         showScore: played && !wo,
         trailing: trailing,
       ),
+    );
+  }
+}
+
+/// "Resultados · 6 de 6 jugados  Ver ▾": plegado por defecto, se abre al tocar.
+class _FoldedResults extends StatefulWidget {
+  final int count;
+  final int played;
+  final List<Widget> rows;
+  const _FoldedResults({required this.count, required this.played, required this.rows});
+
+  @override
+  State<_FoldedResults> createState() => _FoldedResultsState();
+}
+
+class _FoldedResultsState extends State<_FoldedResults> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 10),
+        InkWell(
+          onTap: () => setState(() => _open = !_open),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            color: AppColors.scorifySurface2,
+            child: Row(
+              children: [
+                const Icon(Icons.sports_tennis_rounded, size: 15, color: AppColors.scorifyTextMuted),
+                const SizedBox(width: 8),
+                Text("Resultados", style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text("${widget.played} de ${widget.count} jugados",
+                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, color: AppColors.scorifyTextMuted)),
+                ),
+                Text(_open ? "Ocultar" : "Ver",
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.scorifyMint)),
+                Icon(_open ? Icons.expand_less_rounded : Icons.expand_more_rounded, size: 18, color: AppColors.scorifyMint),
+              ],
+            ),
+          ),
+        ),
+        if (_open) ...[const SizedBox(height: 4), ...widget.rows],
+      ],
     );
   }
 }

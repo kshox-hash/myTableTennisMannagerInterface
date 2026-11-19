@@ -1,4 +1,6 @@
 import "package:myttmi/core/ui/panel_style.dart";
+import "package:myttmi/core/clubs/club_crests.dart";
+import "package:myttmi/core/ui/stagger_in.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
@@ -73,6 +75,8 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
   }
 
   Future<_CategoryData> _fetchAll() async {
+    // Escudos de los clubes aparte (no bloquea ni cambia el orden de los datos).
+    ClubCrests.load(widget.tournamentId, widget.categoryId);
     final results = await Future.wait([
       _api.getCategoryView(widget.tournamentId, widget.categoryId),
       _api.getCategoryStandings(widget.tournamentId, widget.categoryId),
@@ -198,7 +202,7 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
 
                         return ListView(
                           padding: const EdgeInsets.only(bottom: 24),
-                          children: [
+                          children: staggerChildren([
                             _CategoryHero(
                               tournamentName: widget.tournamentName,
                               categoryLabel: widget.categoryLabel,
@@ -238,13 +242,16 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                                   if (isEnrolled) left == 0 ? "Ya jugaste todos tus partidos" : "Te ${left == 1 ? "queda 1 partido" : "quedan $left partidos"}",
                                 ];
                                 if (parts.isEmpty) return const SizedBox.shrink();
-                                return Padding(
-                                  padding: const EdgeInsets.only(top: 10),
+                                // Dentro de una franja con fondo de tarjeta (no suelto en el aire).
+                                return Container(
+                                  margin: const EdgeInsets.only(top: 8),
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                  color: AppColors.scorifyCardFill,
                                   child: Row(
                                     children: [
                                       const Icon(Icons.info_outline_rounded, size: 16, color: AppColors.scorifyMint),
-                                      const SizedBox(width: 8),
-                                      Expanded(child: Text(parts.join(" · "), style: AppTypography.bodyMuted)),
+                                      const SizedBox(width: 10),
+                                      Expanded(child: Text(parts.join(" · "), style: AppTypography.bodyMuted.copyWith(color: AppColors.scorifyText))),
                                     ],
                                   ),
                                 );
@@ -361,7 +368,7 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                                       "Todavía no hay grupos ni llave para esta categoría.",
                                 ),
                               ),
-                          ],
+                          ]),
                         );
                       },
                     ),
@@ -869,19 +876,30 @@ class _GroupTable extends StatelessWidget {
                           ),
                         ),
                       ),
-                      UserAvatar(userId: s.idUser, size: 26),
+                      UserAvatar(userId: s.idUser, size: 26, name: s.playerName),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Text(
-                          s.idUser == myUserId ? "Tú" : s.playerName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: AppTypography.body,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.scorifyText,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              s.idUser == myUserId ? "Tú" : s.playerName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontFamily: AppTypography.body,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.scorifyText,
+                              ),
+                            ),
+                            // Club con su escudo (como en la web).
+                            ClubLine(
+                              idUser: s.idUser,
+                              club: s.clubName,
+                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted),
+                            ),
+                          ],
                         ),
                       ),
                       num("${s.played}"),
@@ -1030,7 +1048,7 @@ class _Side extends StatelessWidget {
       children: [
         ClipOval(
           child: id != null
-              ? UserAvatar(userId: id, size: 44)
+              ? UserAvatar(userId: id, size: 44, name: name == "Tú" ? null : name)
               : Container(
                   width: 44,
                   height: 44,
@@ -1055,6 +1073,30 @@ class _Side extends StatelessWidget {
             height: 1.25,
           ),
         ),
+        // Club con su escudo, centrado bajo el nombre (como en la web).
+        if (id != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 3),
+            child: ValueListenableBuilder(
+              valueListenable: ClubCrests.map,
+              builder: (context, m, _) {
+                final club = (m[id]?.club ?? "").trim();
+                if (club.isEmpty) return const SizedBox.shrink();
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ClubCrest(idUser: id, size: 13),
+                    Flexible(
+                      child: Text(club,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted)),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
         if (subtitle != null) ...[
           const SizedBox(height: 4),
           Row(

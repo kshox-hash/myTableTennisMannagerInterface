@@ -36,6 +36,20 @@ const homeGradientEmerald = AppColors.cardGradient;
 TextStyle _num(double size, {Color c = AppColors.scorifyText}) =>
     TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: size * 0.76, fontWeight: FontWeight.w700, color: c, height: 1.0, fontFeatures: const [FontFeature.tabularFigures()]);
 
+/// Títulos "premium": Manrope, tracking cerrado.
+TextStyle _lux(double size, FontWeight w) => TextStyle(
+    fontFamily: AppTypography.display, fontSize: size, fontWeight: w, color: Colors.white, letterSpacing: -0.6, height: 1.15);
+
+/// Versalitas espaciadas para etiquetas y datos.
+TextStyle _caps(double size, Color c) => TextStyle(
+    fontFamily: AppTypography.display,
+    fontSize: size,
+    fontWeight: FontWeight.w600,
+    color: c,
+    letterSpacing: 2.0,
+    height: 1.3,
+    fontFeatures: const [FontFeature.tabularFigures()]);
+
 TextStyle _t(double size, {FontWeight w = FontWeight.w400, Color c = AppColors.scorifyText, double? ls, double? h}) =>
     TextStyle(fontFamily: AppTypography.body, fontSize: size, fontWeight: w, color: c, letterSpacing: ls, height: h);
 
@@ -65,48 +79,37 @@ class _HomeCardState extends State<HomeCard> {
 
   @override
   Widget build(BuildContext context) {
-    const radius = Panel.radius; // esquinas casi rectas (estilo panel)
+    const radius = 0.0; // esquinas rectas
     final r = BorderRadius.circular(radius);
     // Tarjeta destacada (la central: bienvenida / próximo partido): borde
     // neón verde fino, sin halo. Las demás, planas.
     final featured = widget.gradient == _glassFeatured;
+    // Tarjetas sólidas y sin borde: color opaco (no se ve el fondo a través)
+    // y sin filete ni borde neón.
     return AnimatedScale(
       scale: _down ? 0.98 : 1,
       duration: const Duration(milliseconds: 110),
-      child: DecoratedBox(
-        position: DecorationPosition.foreground,
-        decoration: featured
-            ? BoxDecoration(
-                borderRadius: r,
-                border: Border.all(color: _mint.withValues(alpha: 0.75), width: 1.2),
-                // Sin halo: el resplandor difuminado se cortaba de golpe al
-                // hacer scroll / en el borde de la lista ("se rompe").
-              )
-            : const BoxDecoration(),
-        child: CardBorder(
-        radius: radius,
-        highlight: widget.gradient == _glassFeatured,
-        child: ClipRRect(
-          borderRadius: r,
-          child: Material(
-            color: Colors.transparent,
-            child: Ink(
-              decoration: BoxDecoration(gradient: widget.gradient ?? _glass),
-              child: InkWell(
-                onTap: widget.onTap,
-                onTapDown: (_) => _press(true),
-                onTapUp: (_) => _press(false),
-                onTapCancel: () => _press(false),
-                child: Padding(padding: widget.padding, child: widget.child),
-              ),
-            ),
-          ),
+      // Plano: color liso, sin sombra ni filo de luz.
+      child: Material(
+        color: _solidCard,
+        child: InkWell(
+          onTap: widget.onTap,
+          onTapDown: (_) => _press(true),
+          onTapUp: (_) => _press(false),
+          onTapCancel: () => _press(false),
+          child: Padding(padding: widget.padding, child: widget.child),
         ),
-      ),
       ),
     );
   }
 }
+
+/// Colores sólidos de las tarjetas del Inicio (las mismas tintas de antes, sin transparencia).
+// Paleta "dark premium" cobalto: la misma luz azul fría del fondo del Inicio.
+const _solidCard = Color(0xE0243142); // tarjeta (88 %, como scorifyCardFill)
+const _cardTop = Color(0xFF0A1830);
+const _solidFeatured = Color(0xFF2D3138);
+const _tileAccent = Color(0xFF6F9BEA); // azul de las franjas de la textura
 
 /// Título de sección dentro de la tarjeta: ícono + texto en mayúsculas de
 /// color, y una acción a la derecha ("Ver estadísticas ›").
@@ -1688,6 +1691,9 @@ class HomeTile extends StatelessWidget {
   final String action;
   final VoidCallback onTap;
 
+  /// Si el número es 0, se muestra esto en vez de un "0" gigante.
+  final String? emptyText;
+
   /// Degradado de fondo (homeGradientTeal / homeGradientEmerald).
   final Gradient? gradient;
   const HomeTile({
@@ -1699,10 +1705,12 @@ class HomeTile extends StatelessWidget {
     required this.caption,
     required this.action,
     required this.onTap,
+    this.emptyText,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Las dos tarjetas de abajo usan los paneles de imagen (assets/images/card_paneles.png).
     return HomeCard(
       onTap: onTap,
       gradient: gradient,
@@ -1710,46 +1718,36 @@ class HomeTile extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.hardEdge,
         children: [
+          // Premium: sin ícono ni enlace; el número grande y fino manda,
+          // con el nombre en mayúsculas chicas y el detalle debajo.
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(icon, size: 24, color: AppColors.scorifyTextMuted),
-                const SizedBox(height: 10),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(value, style: _num(38)),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        caption,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: _t(12, c: AppColors.scorifyTextMuted),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
-                  child: Text(title, maxLines: 1, style: _t(14, w: FontWeight.w600)),
+                  child: Text(title.toUpperCase(), maxLines: 1, style: _t(10.5, w: FontWeight.w700, c: _tileAccent, ls: 1.6)),
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Text(
-                      action,
-                      style: _t(12.5, w: FontWeight.w600, c: _mint),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.arrow_forward_rounded, size: 15, color: _mint),
-                  ],
-                ),
+                const SizedBox(height: 10),
+                if (value == "0" && emptyText != null) ...[
+                  // Sin datos: una frase en vez de un 0 grande (no se ve "muerto").
+                  Text(emptyText!, maxLines: 2, style: _lux(16, FontWeight.w300)),
+                ] else ...[
+                  Text(value,
+                      style: TextStyle(
+                        fontFamily: AppTypography.display,
+                        fontSize: 48,
+                        height: 1.0,
+                        letterSpacing: -1.5,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.white,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      )),
+                  const SizedBox(height: 6),
+                  Text(caption, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12, c: const Color(0x99FFFFFF))),
+                ],
               ],
             ),
           ),
@@ -1769,7 +1767,9 @@ class HomeEmptyCard extends StatelessWidget {
   final String? hint;
   final String? action;
   final VoidCallback? onAction;
-  const HomeEmptyCard({super.key, required this.title, required this.icon, required this.message, this.hint, this.action, this.onAction});
+  /// Línea con datos reales bajo el título de la card "Tu próximo desafío".
+  final String? detail;
+  const HomeEmptyCard({super.key, required this.title, required this.icon, required this.message, this.hint, this.action, this.onAction, this.detail});
 
   /// "Bienvenido a MyTTM": la marca como el logo, "My" en blanco y "TTM" en
   /// verde, cursiva y negrita.
@@ -1794,6 +1794,8 @@ class HomeEmptyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Sin inscripciones: solo el botón-imagen "Buscar campeonatos", sin la tarjeta que lo encerraba.
+    if (action == "Buscar campeonatos") return _ImageButton(onTap: onAction, detail: detail);
     // Tarjeta destacada (filo iluminado con halo): ícono grande, título con
     // la marca resaltada, el mensaje y el botón principal en degradado.
     return HomeCard(
@@ -1825,16 +1827,81 @@ class HomeEmptyCard extends StatelessWidget {
           ],
           if (action != null) ...[
             const SizedBox(height: 16),
-            AppButton(
-              label: action!,
-              icon: Icons.search_rounded,
-              trailingIcon: Icons.chevron_right_rounded,
-              onPressed: onAction,
-              height: 50,
-            ),
+            // "Buscar campeonatos": el botón es una imagen.
+            action == "Buscar campeonatos"
+                ? _ImageButton(onTap: onAction)
+                : AppButton(
+                    label: action!,
+                    icon: Icons.search_rounded,
+                    trailingIcon: Icons.chevron_right_rounded,
+                    onPressed: onAction,
+                    height: 50,
+                  ),
           ],
         ],
       ),
     );
   }
 }
+
+/// Tarjeta "Buscar campeonatos" premium: degradado con la paleta de la
+/// referencia (azul noche → índigo → violeta, con luz cian y un toque
+/// magenta), mucho más luminosa que el fondo para que resalte, y un halo
+/// suave alrededor que la despega de la imagen.
+class _ImageButton extends StatelessWidget {
+  final VoidCallback? onTap;
+  final String? detail;
+  const _ImageButton({this.onTap, this.detail});
+
+  @override
+  Widget build(BuildContext context) {
+    // Héroe con el ADN del login: foto del jugador, degradado oscuro abajo y
+    // una sola acción. Para quien todavía no tiene campeonatos.
+    return SizedBox(
+      height: 420,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          const ClipRect(
+            child: Image(
+              image: AssetImage("assets/images/login_player.jpg"),
+              fit: BoxFit.cover,
+              alignment: Alignment(0, -0.25),
+              filterQuality: FilterQuality.medium,
+            ),
+          ),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0, 0.45, 0.78, 1],
+                colors: [Color(0x00000000), Color(0x1A000000), Color(0xCC0B1017), Color(0xFF0B1017)],
+              ),
+            ),
+          ),
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 20,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("TU PRÓXIMO DESAFÍO", style: _t(11, w: FontWeight.w800, c: const Color(0xFF8EC5FF), ls: 1.6)),
+                const SizedBox(height: 6),
+                Text("Encuentra tu torneo y demuestra lo que vales.",
+                    style: _t(22, w: FontWeight.w800, c: Colors.white, h: 1.2)),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: AppButton(label: "Buscar campeonatos", onPressed: onTap, height: 46, icon: Icons.search_rounded),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

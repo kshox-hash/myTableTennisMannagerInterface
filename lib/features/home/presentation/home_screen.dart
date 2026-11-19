@@ -14,6 +14,8 @@ import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/shell/shell_preload.dart";
 import "package:myttmi/features/tournament/models/tournament_model.dart";
 import "package:myttmi/features/home/widget/home_v2.dart";
+import "package:myttmi/features/home/widget/home_player_sections.dart";
+import "package:myttmi/core/clubs/club_crests.dart";
 import "package:myttmi/features/player/models/tournament_match_model.dart";
 import "package:myttmi/features/calendar/api/calendar_api.dart";
 import "package:myttmi/features/calendar/models/calendar_event.dart";
@@ -74,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen>
   // partido de grupo) y cuántos son en el grupo.
   // Mi fila en la tabla de CADA categoría donde estoy jugando grupos (antes
   // solo la del próximo partido destacado: con 3 categorías se veía una).
-  List<({PlayerNextMatch match, PlayerStanding standing, int size})> _myGroups = const [];
+  List<({PlayerNextMatch match, PlayerStanding standing, int size, List<PlayerStanding> all, bool silver, int qualifiers})> _myGroups = const [];
   // Partidos que me toca arbitrar (asignados por el organizador o por QR).
   List<RefereeMatch> _refMatches = const [];
   // "En vivo": cómo va cada categoría que estoy jugando (líderes,
@@ -107,6 +109,9 @@ class _HomeScreenState extends State<HomeScreen>
     return live == null ? _following : _following.where((f) => f.idTournament != live.idTournament).toList();
   }
   Tournament? _challenge;
+  /// Torneos con inscripción abierta (para la card "Tu próximo desafío").
+  int _openCount = 0;
+  DateTime? _nextOpen;
   // Partidos jugados, del más reciente al más antiguo.
   List<PlayerMatchHistoryItem> _history = const [];
 
@@ -116,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen>
   // área segura cambian según el celular.
   final _gapTop = GlobalKey();
   final _gapBottom = GlobalKey();
-  double _bottomPad = 58;
+  double _bottomPad = 16; // hueco bajo las tarjetas (antes 58)
   int _centerTries = 0;
   double _centerForHeight = 0;
 
@@ -331,6 +336,8 @@ class _HomeScreenState extends State<HomeScreen>
       mineList = [for (final e in current) if (seen.add(e.tournamentId)) e];
     } catch (_) {}
     Tournament? challenge;
+    var openCount = 0;
+    DateTime? nextOpen;
     try {
       final page = await pageF;
       final upcoming = page.items.where((t) {
@@ -344,10 +351,15 @@ class _HomeScreenState extends State<HomeScreen>
       // aparecía su propia copa como "Próximo desafío": confundía.
       final mineT = upcoming.where((t) => t.categories.any((c) => c.isEnrolled && c.phase != "finished"));
       challenge = mineT.isNotEmpty ? mineT.first : null;
+      final open = upcoming.where((t) => t.categories.any((c) => c.phase == "enrollment" && !c.isEnrolled)).toList();
+      openCount = open.length;
+      nextOpen = open.isEmpty ? null : DateTime.tryParse(open.first.eventDate ?? "");
     } catch (_) {}
     if (!mounted) return;
     setState(() {
       _challenge = challenge;
+      _openCount = openCount;
+      _nextOpen = nextOpen;
       _week = week;
       _mine = mineList;
     });
@@ -517,12 +529,16 @@ class _HomeScreenState extends State<HomeScreen>
     final groupMatches = [if (d.nextMatch != null) d.nextMatch!, ...d.otherNextMatches]
         .where((m) => m.matchType == "group" && seen.add(m.idCategory))
         .toList();
+    // Escudos de los clubes de esas categorías (para la tabla "Mi grupo").
+    for (final m in groupMatches) {
+      ClubCrests.load(m.idTournament, m.idCategory);
+    }
     try {
       final views = await Future.wait(groupMatches.map((m) => _playerApi.getCategoryView(m.idTournament, m.idCategory)));
-      final out = <({PlayerNextMatch match, PlayerStanding standing, int size})>[];
+      final out = <({PlayerNextMatch match, PlayerStanding standing, int size, List<PlayerStanding> all, bool silver, int qualifiers})>[];
       for (var i = 0; i < groupMatches.length; i++) {
         final mine = views[i].standings.where((r) => r.idUser == me);
-        if (mine.isNotEmpty) out.add((match: groupMatches[i], standing: mine.first, size: views[i].standings.length));
+        if (mine.isNotEmpty) out.add((match: groupMatches[i], standing: mine.first, size: views[i].standings.length, all: views[i].standings, silver: views[i].hasSilver, qualifiers: views[i].qualifiersPerGroup ?? 2));
       }
       if (mounted) setState(() => _myGroups = out);
     } catch (_) {}
@@ -597,6 +613,9 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final nm = _dashboard?.nextMatch;
+    // Sin nada propio (ni partido, grupo, resultados, campeonatos ni en vivo):
+    // el contenido va centrado en la pantalla en vez de quedar pegado arriba.
+    final homeEmpty = nm == null && _myGroups.isEmpty && _history.isEmpty && _mine.isEmpty && _liveSummaries.isEmpty && _refMatches.isEmpty;
     _recenter();
 
 
@@ -651,7 +670,7 @@ class _HomeScreenState extends State<HomeScreen>
                           ).then((_) => _load()),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      if (homeEmpty) const Spacer() else const SizedBox(height: 4),
                       // 2026-11-08: el contenido va ARRIBA (donde llega el
                       // pulgar y mira el ojo); el espacio que sobra queda al
                       // final. Centrado dejaba un hueco grande bajo el
@@ -723,6 +742,9 @@ class _HomeScreenState extends State<HomeScreen>
                               ? "Tu campeonato está en curso: tu próximo partido aparecerá apenas lo programen."
                               : "Inscríbete en uno y aquí verás tu próximo partido, la mesa, tu rival y tu grupo.",
                           action: _live == null ? "Buscar campeonatos" : null,
+                          detail: _openCount == 0
+                              ? "Pronto se abren nuevos torneos"
+                              : "$_openCount ${_openCount == 1 ? "torneo abierto" : "torneos abiertos"}${_nextOpen != null ? " · el próximo el ${_whenShort(_nextOpen!)}" : ""}",
                           onAction: () => AppShellScope.of(context)?.switchTab(3, link: true),
                         ),
                       ] else ...[
@@ -745,28 +767,33 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         ],
                       ],
-                      // Tus grupos (solo en fase de grupos): una categoría, la
-                      // tarjeta grande; varias, una fila por categoría.
-                      ...[
-                        if (_myGroups.length == 1) ...[
-                          const SizedBox(height: 12),
-                          HomeGroupCard(
-                            groupName: _myGroups.first.match.groupName ?? "",
-                            position: _myGroups.first.standing.played == 0 ? null : _myGroups.first.standing.position,
-                            total: _myGroups.first.size,
-                            won: _myGroups.first.standing.won,
-                            lost: _myGroups.first.standing.lost,
-                            setsFor: _myGroups.first.standing.setsFor,
-                            setsAgainst: _myGroups.first.standing.setsAgainst,
-                            onTap: () => _openCategory(_myGroups.first.match),
-                          ),
-                        ] else if (_myGroups.length > 1) ...[
-                          const SizedBox(height: 12),
-                          _MyGroupsCard(groups: _myGroups, onOpen: _openCategory),
-                        ],
-                        const SizedBox(height: 12),
+                      // Mi grupo: la tabla (mi fila resaltada). Una por categoría.
+                      for (final g in _myGroups) ...[
+                        HomeSectionTitle("Mi grupo", action: "Ver categoría", onAction: () => _openCategory(g.match)),
+                        HomeGroupTable(
+                          groupName: g.match.groupName ?? "",
+                          category: g.match.categoryDisplay,
+                          standings: g.all,
+                          myId: _profile?.idUser ?? "",
+                          hasSilver: g.silver,
+                          qualifiers: g.qualifiers,
+                          onTap: () => _openCategory(g.match),
+                        ),
                       ],
+                      // Últimos resultados (3).
+                      if (_history.isNotEmpty) ...[
+                        HomeSectionTitle("Últimos resultados",
+                            action: "Historial", onAction: () => Navigator.pushNamed(context, AppRoutes.history)),
+                        HomeRecentResults(
+                          items: _history.take(3).toList(),
+                          myId: _profile?.idUser ?? "",
+                          onOpen: (m) => Navigator.pushNamed(context, AppRoutes.matchDetail,
+                              arguments: {"matchType": m.matchType, "matchId": m.idMatch}),
+                        ),
+                      ],
+                      const SizedBox(height: 12),
                       if (_liveSummaries.isNotEmpty) ...[
+                        const HomeSectionTitle("En vivo"),
                         HomeLiveCard(summaries: _liveSummaries),
                         const SizedBox(height: 12),
                       ],
@@ -780,48 +807,13 @@ class _HomeScreenState extends State<HomeScreen>
                         const SizedBox(height: 12),
                       ],
                     ]),
-                    ...staggerChildren([
-                      IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: HomeTile(
-                                gradient: homeGradientTeal,
-                                icon: Icons.emoji_events_rounded,
-                                // Inscritos + los que sigo de visita.
-                                value: "${_mine.length + _following.length}",
-                                caption: _following.isEmpty
-                                    ? (_mine.length == 1 ? "inscrito" : "inscritos")
-                                    : _mine.isEmpty
-                                        ? "de visita"
-                                        : "${_mine.length} ${_mine.length == 1 ? "inscrito" : "inscritos"} · ${_following.length} de visita",
-                                title: "Mis campeonatos",
-                                action: _mine.isEmpty && _following.isEmpty ? "Explorar" : "Ver",
-                                onTap: () => _mine.isEmpty
-                                    ? (_following.isEmpty ? AppShellScope.of(context)?.switchTab(3, link: true) : _openFollowing())
-                                    : _mine.length == 1 && _following.isEmpty
-                                        ? _openTournament(_mine.first.tournamentId)
-                                        : _pickTournament(),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: HomeTile(
-                                gradient: homeGradientEmerald,
-                                icon: Icons.calendar_month_rounded,
-                                value: "${_week.length}",
-                                caption: "en 14 días",
-                                title: "Próximos eventos",
-                                action: "Calendario",
-                                onTap: () => AppShellScope.of(context)?.switchTab(1, link: true),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ]),
-                    Spacer(key: _gapBottom),
+                    // Mis campeonatos: lista compacta (fecha, nombre, categoría, en curso).
+                    if (_mine.isNotEmpty) ...[
+                      HomeSectionTitle("Mis campeonatos",
+                          action: "Calendario", onAction: () => AppShellScope.of(context)?.switchTab(1, link: true)),
+                      HomeMyTournaments(events: _mine.take(4).toList(), onOpen: (e) => _openTournament(e.tournamentId)),
+                    ],
+                    if (homeEmpty) Spacer(key: _gapBottom) else SizedBox(key: _gapBottom, height: 0),
                     // Relleno medido en _recenter: deja el bloque centrado en la
                     // pantalla, con el hexágono del fondo.
                     SizedBox(height: _bottomPad),
@@ -940,7 +932,7 @@ class _MatchesCarouselState extends State<_MatchesCarousel> {
 /// "Tus grupos": una fila por categoría en la que juego grupos — grupo,
 /// posición y partidos ganados/perdidos. Tocando la fila se abre esa categoría.
 class _MyGroupsCard extends StatelessWidget {
-  final List<({PlayerNextMatch match, PlayerStanding standing, int size})> groups;
+  final List<({PlayerNextMatch match, PlayerStanding standing, int size, List<PlayerStanding> all, bool silver, int qualifiers})> groups;
   final ValueChanged<PlayerNextMatch> onOpen;
   const _MyGroupsCard({required this.groups, required this.onOpen});
 

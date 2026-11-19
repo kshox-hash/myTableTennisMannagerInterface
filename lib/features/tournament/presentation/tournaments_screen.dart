@@ -188,6 +188,12 @@ class _TournamentsScreenState extends State<TournamentsScreen>
     }
   }
 
+  Future<void> _loadAll() async {
+    for (var guard = 0; guard < 20 && mounted && _page < _totalPages; guard++) {
+      await _loadMore();
+    }
+  }
+
   void _search() {
     FocusScope.of(context).unfocus();
     _query = _searchCtrl.text.trim();
@@ -355,7 +361,13 @@ class _TournamentsScreenState extends State<TournamentsScreen>
             child: _FilterChip(
               label: e.value,
               selected: _activeFilter == e.key,
-              onTap: () => setState(() => _activeFilter = e.key),
+              onTap: () {
+                setState(() => _activeFilter = e.key);
+                // El filtro trabaja sobre lo cargado: con un filtro, se traen
+                // todas las páginas (si no, "Finalizados" salía vacío porque
+                // los terminados quedan al final de la lista).
+                if (e.key != _ActiveFilter.all) _loadAll();
+              },
             ),
           ),
         ],

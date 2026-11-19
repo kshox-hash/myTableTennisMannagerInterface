@@ -1,4 +1,6 @@
 import 'package:myttmi/core/ui/section_card.dart';
+import "package:myttmi/core/clubs/club_crests.dart";
+import "package:myttmi/core/ui/stagger_in.dart";
 import "package:myttmi/core/storage/session_storage.dart";
 import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/routes/app_routes.dart";
@@ -90,20 +92,65 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
 
                       final p = snap.data!;
                       return ListView(
-                        children: [
-                          Center(
-                            child: Column(
+                        children: staggerChildren([
+                          // "Carta" de jugador: su foto grande (o sus iniciales sobre
+                          // el degradado cobalto) con el nombre y el club encima.
+                          SizedBox(
+                            height: 250,
+                            child: Stack(
+                              fit: StackFit.expand,
                               children: [
-                                UserAvatar(userId: p.idUser, url: p.avatarUrl, size: 76),
-                                const SizedBox(height: 12),
-                                Text(
-                                  p.displayName,
-                                  style: AppTypography.h1.copyWith(
-                                    fontSize: 20,
+                                if ((p.avatarUrl ?? "").trim().isNotEmpty)
+                                  Image.network(p.avatarUrl!, fit: BoxFit.cover, alignment: const Alignment(0, -0.3),
+                                      errorBuilder: (_, __, ___) => const SizedBox.shrink())
+                                else
+                                  const DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [Color(0xFF0F2A5E), Color(0xFF0A1830), Color(0xFF0B1017)],
+                                      ),
+                                    ),
+                                  ),
+                                if ((p.avatarUrl ?? "").trim().isEmpty)
+                                  Align(
+                                    alignment: const Alignment(0, -0.35),
+                                    child: UserAvatar(userId: p.idUser, size: 96, name: p.displayName),
+                                  ),
+                                const DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      stops: [0.35, 1],
+                                      colors: [Color(0x00000000), Color(0xE60B1017)],
+                                    ),
                                   ),
                                 ),
-                                if (p.club != null)
-                                  Text(p.club!, style: AppTypography.bodyMuted),
+                                Positioned(
+                                  left: 18,
+                                  right: 18,
+                                  bottom: 16,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(p.displayName,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppTypography.h1.copyWith(fontSize: 26, fontWeight: FontWeight.w800, height: 1.1)),
+                                      if (p.club != null) ...[
+                                        const SizedBox(height: 4),
+                                        ClubLine(
+                                          idUser: p.idUser,
+                                          club: p.club,
+                                          crestSize: 16,
+                                          style: AppTypography.bodyMuted.copyWith(fontSize: 13, color: const Color(0xCCFFFFFF)),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -177,7 +224,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                               );
                             },
                           ),
-                        ],
+                        ]),
                       );
                     },
                   ),

@@ -10,6 +10,9 @@ class CyberTransition {
   /// de dos pantallas completas cruzándose a la vez.
   static const double crossoverAt = 0.45;
 
+  /// Curva "premium": arranca decidida y frena muy suave al final.
+  static const Curve premium = Cubic(0.22, 1, 0.36, 1);
+
   static Animation<double> fadeOut(Animation<double> parent) {
     final curved = CurvedAnimation(parent: parent, curve: Curves.easeInOutCubic);
     return TweenSequence<double>([
@@ -95,21 +98,37 @@ class CyberPageRoute<T> extends PageRouteBuilder<T> {
   // de página completa y, cuando llegan los datos, la pantalla entera.
   CyberPageRoute({required WidgetBuilder builder, super.settings, this.waitForData = true})
       : super(
-          transitionDuration: const Duration(milliseconds: 170),
-          reverseTransitionDuration: const Duration(milliseconds: 140),
+          // Estilo "premium" (como Nike Run Club): la pantalla que se va baja
+          // un poco mientras se desvanece; la nueva aparece desde abajo,
+          // subiendo y apareciendo, con una curva muy suave al final.
+          transitionDuration: const Duration(milliseconds: 460),
+          reverseTransitionDuration: const Duration(milliseconds: 380),
           pageBuilder: (context, animation, secondaryAnimation) =>
               waitForData ? LoadingCurtain(child: builder(context)) : builder(context),
-          // Liviana: solo fundido + un leve desplazamiento de la que entra. La
-          // de atrás queda quieta (antes se escalaba y se le aplicaba un
-          // Opacity a toda la pantalla, que obliga a pintarla en una capa
-          // aparte en cada cuadro — lo más caro de la transición).
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            final enter = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
+            // Entra: arranca un poco después (la otra ya se está yendo).
+            final enter = CurvedAnimation(
+              parent: animation,
+              curve: const Interval(0.18, 1, curve: CyberTransition.premium),
+              reverseCurve: const Interval(0, 0.8, curve: Curves.easeInCubic),
+            );
+            // Se va: la de atrás baja y se apaga en la primera mitad.
+            final leave = CurvedAnimation(
+              parent: secondaryAnimation,
+              curve: const Interval(0, 0.55, curve: Curves.easeInCubic),
+              reverseCurve: const Interval(0.2, 1, curve: CyberTransition.premium),
+            );
             return FadeTransition(
-              opacity: enter,
+              opacity: Tween(begin: 1.0, end: 0.0).animate(leave),
               child: SlideTransition(
-                position: Tween(begin: const Offset(0, 0.03), end: Offset.zero).animate(enter),
-                child: child,
+                position: Tween(begin: Offset.zero, end: const Offset(0, 0.035)).animate(leave),
+                child: FadeTransition(
+                  opacity: enter,
+                  child: SlideTransition(
+                    position: Tween(begin: const Offset(0, 0.06), end: Offset.zero).animate(enter),
+                    child: child,
+                  ),
+                ),
               ),
             );
           },

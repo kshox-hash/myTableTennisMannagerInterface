@@ -7,7 +7,7 @@ import "package:myttmi/core/constants/app_typography.dart";
 /// degradados. Los nombres se mantienen del estilo "panel" anterior para no
 /// tocar los call sites.
 abstract final class Panel {
-  static const double radius = 14;
+  static const double radius = 0; // rectas en toda la app (como el login)
 
   /// Filete (casi no se usa: las tarjetas van sin borde).
   static const edge = AppColors.scorifyCardBorder;
@@ -26,7 +26,7 @@ abstract final class Panel {
   static const field = AppColors.scorifySurface2;
   static const fieldBorder = Colors.transparent;
 
-  static const double buttonRadius = 10;
+  static const double buttonRadius = 0; // botones rectos (como el login)
   static const buttonBorder = Colors.transparent;
 
   /// Botón secundario: gris liso.

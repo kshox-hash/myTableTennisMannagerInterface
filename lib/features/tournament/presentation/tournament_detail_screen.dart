@@ -1,4 +1,6 @@
 import "package:myttmi/core/monitoring.dart";
+import "package:myttmi/core/clubs/club_crests.dart";
+import "package:myttmi/core/ui/stagger_in.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/ui/card_border.dart";
 import "package:myttmi/core/ui/panel_style.dart";
@@ -252,7 +254,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                     child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsets.only(bottom: 24),
-                      children: [
+                      children: staggerChildren([
                         _HeroCard(tournament: t, started: _started, anyOpen: _anyOpen),
                         const SizedBox(height: 14),
                         // Seguir como visita: solo si no juega (el inscrito ya
@@ -310,7 +312,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                             ),
                             const SizedBox(height: 12),
                           ],
-                      ],
+                      ]),
                     ),
                   ),
             ),
@@ -354,8 +356,12 @@ class _HeroCard extends StatelessWidget {
                     ? ("Inscripciones abiertas", AppColors.scorifyMint, AppColors.scorifyOnMint)
                     : ("Inscripciones cerradas", AppColors.scorifyPending, AppColors.scorifyOnMint);
 
+    // Cabecera con foto (ADN del login): el jugador detrás y el degradado
+    // oscuro de GlassCard para que los datos se lean encima.
     return GlassCard(
-      padding: const EdgeInsets.all(18),
+      backgroundImage: const AssetImage("assets/images/login_player.jpg"),
+      backgroundAlignment: const Alignment(0.2, -0.35),
+      padding: const EdgeInsets.fromLTRB(18, 110, 18, 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -474,6 +480,7 @@ class _CategoryCardState extends State<_CategoryCard> {
   void initState() {
     super.initState();
     if (widget.category.phase == "finished") {
+      ClubCrests.load(widget.tournamentId, widget.category.idCategory);
       PlayerApi().getCategoryStandings(widget.tournamentId, widget.category.idCategory).then((r) {
         if (!mounted) return;
         final top = r.standings.where((s) => s.position <= 3).toList()..sort((a, b) => a.position.compareTo(b.position));
@@ -484,48 +491,89 @@ class _CategoryCardState extends State<_CategoryCard> {
 
   Widget _podiumBlock() {
     final p = _podium!;
-    const medals = ["🥇", "🥈", "🥉"];
+    final champ = p.where((r) => r.position == 1).firstOrNull;
+    final rest = p.where((r) => r.position != 1).toList();
+    const gold = Color(0xFFE6B94C), silver = Color(0xFFC0C7CF), bronze = Color(0xFFCD8B55);
+    Color medal(int pos) => pos == 1 ? gold : pos == 2 ? silver : bronze;
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(color: AppColors.scorifySurface2, borderRadius: BorderRadius.circular(Panel.radius)),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final r in p)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
+          // Campeón: lo que más se quiere saber, destacado.
+          if (champ != null)
+            Container(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+              color: gold.withValues(alpha: 0.12),
               child: Row(
                 children: [
-                  SizedBox(width: 26, child: Text(r.position >= 1 && r.position <= 3 ? medals[r.position - 1] : "${r.position}º", style: const TextStyle(fontSize: 16))),
-                  // Nombre completo arriba y el club debajo (en una sola línea
-                  // competían por el ancho y se cortaban los dos).
+                  // Ícono (no emoji): copa dorada dentro de un círculo con tinte.
+                  Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: gold.withValues(alpha: 0.18)),
+                    child: const Icon(Icons.emoji_events_rounded, color: gold, size: 22),
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          r.playerName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontFamily: AppTypography.body,
-                            fontSize: r.position == 1 ? 15 : 13.5,
-                            fontWeight: r.position == 1 ? FontWeight.w800 : FontWeight.w600,
-                            color: r.position == 1 ? AppColors.scorifyText : AppColors.scorifyTextMuted,
-                          ),
-                        ),
-                        if ((r.clubName ?? "").isNotEmpty)
-                          Text(r.clubName!, maxLines: 1, overflow: TextOverflow.ellipsis, style: _meta.copyWith(fontSize: 11)),
+                        Text("CAMPEÓN", style: _meta.copyWith(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.4, color: gold)),
+                        const SizedBox(height: 2),
+                        Text(champ.playerName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                        ClubLine(idUser: champ.idUser, club: champ.clubName, style: _meta.copyWith(fontSize: 11.5)),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
+          // 2.º y 3.º: filas compactas, el puesto en su color de medalla.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 6, 14, 8),
+            child: Column(
+              children: [
+                for (final r in rest)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 24,
+                          height: 24,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(shape: BoxShape.circle, color: medal(r.position).withValues(alpha: 0.18)),
+                          child: Text("${r.position}", style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w800, color: medal(r.position))),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(r.playerName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                              ClubLine(idUser: r.idUser, club: r.clubName, crestSize: 12, style: _meta.copyWith(fontSize: 11, color: AppColors.scorifyTextFaint)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -802,7 +850,7 @@ class _CategoryCardState extends State<_CategoryCard> {
               if (c.phase != "enrollment")
                 TextButton(
                   onPressed: widget.onOpen,
-                  child: Text("Ver mi categoría", style: _meta.copyWith(color: AppColors.scorifyMint, fontWeight: FontWeight.w600)),
+                  child: Text("Ver resumen de la categoría", style: _meta.copyWith(color: AppColors.scorifyMint, fontWeight: FontWeight.w600)),
                 ),
             ],
           ),
@@ -940,7 +988,7 @@ class _Fact extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: _meta.copyWith(fontSize: 11)),
+          Text(label.toUpperCase(), style: _meta.copyWith(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1, color: AppColors.scorifyTextFaint)),
           const SizedBox(height: 2),
           Text(
             value,

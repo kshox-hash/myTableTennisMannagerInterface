@@ -70,7 +70,7 @@ class _AppShellState extends State<AppShell>
   // un solo widget: el IndexedStack se apaga, en el punto más bajo se
   // cambia el índice (no se ve, así que no hay salto brusco) y se vuelve
   // a encender — en vez de un cambio instantáneo sin transición.
-  static const _pulseDuration = Duration(milliseconds: 150);
+  static const _pulseDuration = Duration(milliseconds: 420);
   late final AnimationController _pulse = AnimationController(
     vsync: this,
     duration: _pulseDuration,
@@ -313,6 +313,8 @@ class _AppShellState extends State<AppShell>
         asset: _index == 0 ? PrismBackground.homeAsset : null,
         // El Inicio con el fondo "normal"; las demás pestañas, más oscuro.
         bright: _index == 0,
+        // Campeonatos (a donde lleva "Tu próximo desafío"): sin foto, degradado cobalto.
+        gradientOnly: _index == 0 || _index == 3,
         child: SafeArea(
           child: FadeTransition(
             opacity: opacity,
@@ -326,8 +328,9 @@ class _AppShellState extends State<AppShell>
                 final dy = t == 0 || t == 1
                     ? 0.0
                     : t < cut
-                        ? -8 * Curves.easeIn.transform(t / cut)
-                        : 18 * (1 - Curves.easeOutCubic.transform((t - cut) / (1 - cut)));
+                        // La que se va baja un poco; la que entra sube desde abajo.
+                        ? 14 * Curves.easeInCubic.transform(t / cut)
+                        : 22 * (1 - CyberTransition.premium.transform((t - cut) / (1 - cut)));
                 return Transform.translate(offset: Offset(0, dy), child: inner);
               },
               child: Stack(

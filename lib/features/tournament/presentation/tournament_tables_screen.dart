@@ -186,7 +186,7 @@ class _TableCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                "🏓 Mesa ${slot.tableNumber}",
+                "Mesa ${slot.tableNumber}",
                 style: AppTypography.bodyText.copyWith(
                   fontWeight: FontWeight.w600,
                 ),

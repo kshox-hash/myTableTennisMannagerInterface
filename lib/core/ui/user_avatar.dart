@@ -10,16 +10,19 @@ class UserAvatar extends StatelessWidget {
   final String? userId;
   final String? url;
   final double size;
-  const UserAvatar({super.key, required this.userId, this.url, this.size = 40});
+  /// Nombre (si se sabe): sin foto, se muestran sus iniciales.
+  final String? name;
+  const UserAvatar({super.key, required this.userId, this.url, this.size = 40, this.name});
 
   @override
   Widget build(BuildContext context) {
-    final fallback = userId == null || userId!.isEmpty
-        ? Container(width: size, height: size, color: AppColors.scorifySurface2)
-        : Identicon(seed: userId!, size: size);
     // Si esta pantalla no trae la foto, se usa la que ya se vio en otra
     // (AvatarCache); si la trae, queda anotada para las demás.
     AvatarCache.remember(userId, url);
+    AvatarCache.rememberName(userId, name);
+    final fallback = userId == null || userId!.isEmpty
+        ? Container(width: size, height: size, color: AppColors.scorifySurface2)
+        : Identicon(seed: userId!, size: size);
     final u = safeImageUrl((url ?? "").trim().isNotEmpty ? url : AvatarCache.urlFor(userId));
     // Decodificada chica (no la foto completa: en listas largas era lo que
     // trababa el scroll) y en dos tamaños fijos, para que la misma foto se

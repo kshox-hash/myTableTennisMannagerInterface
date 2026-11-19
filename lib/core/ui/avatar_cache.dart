@@ -20,11 +20,26 @@ class AvatarCache {
 
   static String? urlFor(String? userId) => userId == null ? null : _urls[userId];
 
+  /// Nombres (para el avatar con iniciales de quien no tiene foto).
+  static final Map<String, String> _names = {};
+  static void rememberName(Object? userId, Object? name) {
+    if (userId is! String || userId.isEmpty) return;
+    if (name is! String || name.trim().isEmpty) return;
+    _names[userId] = name.trim();
+  }
+
+  static String? nameFor(String? userId) => userId == null ? null : _names[userId];
+
   /// Anota las fotos que traiga una fila de partido/tabla del servidor.
   static void rememberRow(Map<String, dynamic> json) {
     remember(json["id_user"], json["avatar_url"]);
     remember(json["player1_id"], json["player1_avatar_url"]);
     remember(json["player2_id"], json["player2_avatar_url"]);
     remember(json["opponent_id"], json["opponent_avatar_url"]);
+    final full = [json["first_name"], json["last_name"]].whereType<String>().join(" ");
+    rememberName(json["id_user"], json["player_name"] ?? (full.isEmpty ? null : full));
+    rememberName(json["player1_id"], json["player1_name"]);
+    rememberName(json["player2_id"], json["player2_name"]);
+    rememberName(json["opponent_id"], json["opponent_name"]);
   }
 }

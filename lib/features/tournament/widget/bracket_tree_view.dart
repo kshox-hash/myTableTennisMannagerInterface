@@ -1,4 +1,5 @@
 import "package:myttmi/core/constants/match_status_labels.dart";
+import "package:myttmi/core/clubs/club_crests.dart";
 import "package:myttmi/core/ui/panel_style.dart";
 import "package:myttmi/core/ui/player_actions.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
@@ -55,7 +56,7 @@ class _BracketTreeViewState extends State<BracketTreeView> {
   final GlobalKey _championKey = GlobalKey();
   List<_ConnectorLine> _lines = [];
 
-  static const _boxHeight = 104.0;
+  static const _boxHeight = 120.0; // encabezado + 2 filas de 46 (nombre + club con escudo)
   static const _boxGap = 14.0;
   static const _step = _boxHeight + _boxGap;
 
@@ -426,6 +427,7 @@ class _MatchBox extends StatelessWidget {
                       : _PlayerRow(
                           idUser: match.player1Id,
                           name: match.player1Name,
+                          club: match.player1Club,
                           score: played ? match.setsPlayer1 : null,
                           isWinner: played && match.winnerId == match.player1Id,
                           highlighted: highlightedPlayerId != null && highlightedPlayerId == match.player1Id,
@@ -437,6 +439,7 @@ class _MatchBox extends StatelessWidget {
                       : _PlayerRow(
                           idUser: match.player2Id,
                           name: match.player2Name,
+                          club: match.player2Club,
                           score: played ? match.setsPlayer2 : null,
                           isWinner: played && match.winnerId == match.player2Id,
                           highlighted: highlightedPlayerId != null && highlightedPlayerId == match.player2Id,
@@ -461,7 +464,7 @@ class _ByeRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 38,
+      height: 46,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       alignment: Alignment.centerLeft,
       color: AppColors.scorifySurface2,
@@ -483,6 +486,7 @@ class _ByeRow extends StatelessWidget {
 class _PlayerRow extends StatelessWidget {
   final String idUser;
   final String name;
+  final String? club;
   final int? score;
   final bool isWinner;
   final bool highlighted;
@@ -492,6 +496,7 @@ class _PlayerRow extends StatelessWidget {
   const _PlayerRow({
     required this.idUser,
     required this.name,
+    this.club,
     this.score,
     required this.isWinner,
     required this.highlighted,
@@ -506,7 +511,7 @@ class _PlayerRow extends StatelessWidget {
     return InkWell(
       onTap: idUser.isEmpty ? null : onTap,
       child: Container(
-        height: 38,
+        height: 46,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           color: highlighted ? AppColors.scorifyMint : (tinted ? Colors.black.withValues(alpha: 0.15) : null),
@@ -532,10 +537,14 @@ class _PlayerRow extends StatelessWidget {
                       ),
                     ),
                   )
-                : UserAvatar(userId: idUser, size: 24),
+                : UserAvatar(userId: idUser, size: 24, name: name),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
                 name.isEmpty ? "Por definir" : name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -549,6 +558,20 @@ class _PlayerRow extends StatelessWidget {
                           ? AppColors.scorifyTextMuted
                           : AppColors.scorifyText,
                 ),
+              ),
+                  // Club con su escudo bajo el nombre (como en la web).
+                  if (idUser.isNotEmpty)
+                    ClubLine(
+                      idUser: idUser,
+                      club: club,
+                      crestSize: 12,
+                      style: TextStyle(
+                        fontFamily: AppTypography.body,
+                        fontSize: 10.5,
+                        color: highlighted ? AppColors.scorifyOnMint : AppColors.scorifyTextMuted,
+                      ),
+                    ),
+                ],
               ),
             ),
             if (idUser.isNotEmpty)

@@ -26,13 +26,15 @@ class SpinHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(padding: EdgeInsets.zero, child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
-      child: Row(
+      // Logo centrado en el encabezado; menú a la izquierda y campana/perfil a la derecha.
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          if (AppShellScope.of(context)?.openMenu != null) ...[
-            _IconButton(icon: Icons.menu_rounded, onTap: AppShellScope.of(context)!.openMenu!),
-            const SizedBox(width: 10),
-          ],
           const BrandLogo(markSize: 26, wordmarkSize: 17),
+          Row(
+        children: [
+          if (AppShellScope.of(context)?.openMenu != null)
+            _IconButton(icon: Icons.menu_rounded, onTap: AppShellScope.of(context)!.openMenu!),
           const Spacer(),
           if (onFavorites != null) ...[
             ValueListenableBuilder<List<FavoriteMatch>>(
@@ -54,6 +56,8 @@ class SpinHeader extends StatelessWidget {
           // Tu foto: abre tu perfil (antes estaba en el menú lateral).
           const MyAvatarButton(size: 42),
           if (onSettings != null) ...[const SizedBox(width: 8), _IconButton(icon: Icons.settings_rounded, onTap: onSettings!)],
+        ],
+          ),
         ],
       ),
     ));

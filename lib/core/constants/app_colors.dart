@@ -17,9 +17,9 @@ import 'package:flutter/material.dart';
 /// casi negro. "En vivo" sigue celeste y las victorias lima, para no
 /// confundirse con el acento.
 class AppColors {
-  static const Color scorifyBg = Color(0xFF02070B); // fondo base (debajo del degradado y en transiciones)
-  static const Color scorifyDeep = Color(0xFF07141C); // hojas, diálogos (opaco)
-  static const Color scorifyNavbar = Color(0xFF040B10); // barra inferior
+  static const Color scorifyBg = Color(0xFF0B1017); // fondo base (debajo del degradado y en transiciones)
+  static const Color scorifyDeep = Color(0xFF1A2431); // hojas, diálogos (opaco)
+  static const Color scorifyNavbar = Color(0xFF0E141C); // barra inferior
   static const Color scorifySurface2 = Color(0x1FFFFFFF); // bloques internos: velo blanco (sirve sobre cualquier tono)
 
   // Acento principal: celeste de marca. Botones, enlaces, pestaña activa.
@@ -54,7 +54,7 @@ class AppColors {
   static const Color scorifyNegative = Color(0xFFFF5C5C);
   static const Color scorifyPending = Color(0xFFEAB308);
   static const Color scorifyBadge = Color(0xFFFF4D5E); // contador de notifs
-  static const Color scorifyCardFill = Color(0xF20E1C26); // tarjeta: verde grisáceo al 95 %, un paso más claro que el fondo para que se despegue
+  static const Color scorifyCardFill = Color(0xE0243142); // 88 %: deja respirar la atmósfera del fondo // tarjeta: verde grisáceo al 95 %, un paso más claro que el fondo para que se despegue
   static const Color scorifyInput = Color(0x1FFFFFFF); // campos de texto: velo blanco
 
   // Fondo de las tarjetas: gris liso (se deja como "degradado" de un solo
@@ -66,7 +66,7 @@ class AppColors {
   /// Tarjeta principal (próximo partido, el campeonato en su detalle): un
   /// paso más clara, también lisa.
   static const LinearGradient featuredGradient = LinearGradient(
-    colors: [Color(0xF2132A39), Color(0xF2132A39)],
+    colors: [Color(0xFF2B3A4F), Color(0xFF2B3A4F)],
   );
 
   /// Fondo de la app: degradado en diagonal, verde esmeralda arriba a la
@@ -88,6 +88,7 @@ class AppColors {
 
   /// Botón principal.
   static const LinearGradient primaryButton = LinearGradient(
-    colors: [Color(0xFF6CD3F7), Color(0xFF1E8FCB)],
+    // Plano (sin degradado), como el botón "Entrar" del login.
+    colors: [scorifyMint, scorifyMint],
   );
 }

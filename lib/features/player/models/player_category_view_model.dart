@@ -148,6 +148,8 @@ class PlayerCategoryView {
   final bool finishedEarly;
   /// Cuántos de cada grupo pasan a la llave (null = el servidor no lo manda).
   final int? qualifiersPerGroup;
+  /// Copa de Oro con Plata: el puesto siguiente a los clasificados va a Plata.
+  final bool hasSilver;
 
   PlayerCategoryView({
     required this.phase,
@@ -160,6 +162,7 @@ class PlayerCategoryView {
     this.isRoundRobin = false,
     this.finishedEarly = false,
     this.qualifiersPerGroup,
+    this.hasSilver = false,
   });
 
   factory PlayerCategoryView.fromJson(Map<String, dynamic> json) {
@@ -181,6 +184,7 @@ class PlayerCategoryView {
       isRoundRobin: json["competition_format"] == "round_robin",
       finishedEarly: json["finished_early"] == true,
       qualifiersPerGroup: intOrNull(json["qualifiers_per_group"]),
+      hasSilver: json["has_silver"] == true,
     );
   }
 }

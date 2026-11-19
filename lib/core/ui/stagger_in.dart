@@ -11,10 +11,10 @@ class StaggerIn extends StatefulWidget {
   final Widget child;
   const StaggerIn({super.key, required this.index, required this.child});
 
-  static const _step = Duration(milliseconds: 25);
-  static const _maxDelayed = 4; // después del 4.º bloque ya no se espera más
-  static const _duration = Duration(milliseconds: 220);
-  static const animate = false;
+  static const _step = Duration(milliseconds: 70);
+  static const _maxDelayed = 6; // después del 6.º bloque ya no se espera más
+  static const _duration = Duration(milliseconds: 560);
+  static const animate = true; // entrada en cascada estilo Nike Run Club
 
   @override
   State<StaggerIn> createState() => _StaggerInState();
@@ -22,7 +22,7 @@ class StaggerIn extends StatefulWidget {
 
 class _StaggerInState extends State<StaggerIn> with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(vsync: this, duration: StaggerIn._duration);
-  late final Animation<double> _t = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
+  late final Animation<double> _t = CurvedAnimation(parent: _c, curve: const Cubic(0.22, 1, 0.36, 1));
 
   @override
   void initState() {
@@ -68,7 +68,7 @@ class _StaggerInState extends State<StaggerIn> with SingleTickerProviderStateMix
       child: AnimatedBuilder(
         animation: _t,
         child: widget.child,
-        builder: (_, child) => Transform.translate(offset: Offset(0, 10 * (1 - _t.value)), child: child),
+        builder: (_, child) => Transform.translate(offset: Offset(0, 22 * (1 - _t.value)), child: child),
       ),
     );
   }

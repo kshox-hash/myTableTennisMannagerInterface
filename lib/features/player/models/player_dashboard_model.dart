@@ -89,7 +89,7 @@ class PlayerNextMatch {
   /// mesa asignada, esperando al rival, posición en la cola, o el estado
   /// crudo del partido si no aplica ninguno de esos casos.
   String get queueLabel {
-    if (tableNumber != null) return "🏓 Mesa $tableNumber";
+    if (tableNumber != null) return "Mesa $tableNumber";
     if (queueBlocked) {
       return blockingTableNumber != null
           ? "Tu rival está jugando en la mesa $blockingTableNumber — te toca cuando termine"

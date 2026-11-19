@@ -39,19 +39,21 @@ class AuthTextField extends StatelessWidget {
         labelStyle: AppTypography.bodyMuted,
         prefixIcon: Icon(icon, color: AppColors.scorifyTextMuted, size: 20),
         filled: true,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: 14),
         // Plano y opaco: sin borde y sin transparencia, para que el fondo
         // con imagen no se cuele y el campo se distinga solo por el relleno.
         fillColor: fillColor,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(Panel.radius),
+          borderRadius: BorderRadius.zero,
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(Panel.radius),
+          borderRadius: BorderRadius.zero,
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(Panel.radius),
+          borderRadius: BorderRadius.zero,
           borderSide: const BorderSide(color: AppColors.loginAccent, width: 1.4),
         ),
       ),

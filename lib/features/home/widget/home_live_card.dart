@@ -1,4 +1,6 @@
 import "package:flutter/material.dart";
+import "package:myttmi/core/ui/premium_motion.dart";
+import "package:myttmi/features/home/widget/home_v2.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 import "package:myttmi/core/ui/panel_style.dart";
@@ -32,24 +34,31 @@ class _HomeLiveCardState extends State<HomeLiveCard> {
     final all = widget.summaries;
     final s = all[_i.clamp(0, all.length - 1)];
 
-    return SectionCard(
-      title: "En vivo · ${s.tournamentName}",
-      icon: Icons.sensors_rounded,
-      titleColor: AppColors.scorifyNegative,
-      trailing: all.length < 2
-          ? null
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+    // Misma tarjeta plana que el resto del Inicio (el título de sección
+    // "EN VIVO" lo pone el Inicio arriba).
+    return HomeCard(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const LiveDot(color: AppColors.scorifyNegative),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(s.tournamentName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontFamily: "Montserrat", fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+              ),
+              if (all.length > 1) ...[
                 _Arrow(icon: Icons.chevron_left_rounded, onTap: _i == 0 ? null : () => setState(() => _i--)),
                 Text("${_i + 1}/${all.length}", style: AppTypography.bodyMuted.copyWith(fontSize: 11)),
                 _Arrow(icon: Icons.chevron_right_rounded, onTap: _i == all.length - 1 ? null : () => setState(() => _i++)),
               ],
-            ),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+            ],
+          ),
+          const SizedBox(height: 6),
           Row(
             children: [
               Expanded(child: Text(s.categoryLabel, style: AppTypography.bodyMuted.copyWith(fontSize: 12, fontWeight: FontWeight.w600))),
