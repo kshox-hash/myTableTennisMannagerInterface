@@ -155,7 +155,8 @@ class HomeGroupTable extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           // Escudo del club al lado del nombre (como en la web) y el club debajo.
-          ClubCrest(idUser: r.idUser, size: 16),
+          // Espacio fijo para el escudo: todas las filas alinean el nombre (aunque no haya club).
+          SizedBox(width: 21, child: Align(alignment: Alignment.centerLeft, child: ClubCrest(idUser: r.idUser, size: 16))),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,7 +208,7 @@ class HomeRecentResults extends StatelessWidget {
     final mine = iAmP1 ? m.setsPlayer1 : m.setsPlayer2;
     final theirs = iAmP1 ? m.setsPlayer2 : m.setsPlayer1;
     final won = m.winnerId != null && m.winnerId == myId;
-    final stage = m.groupName != null ? "Grupo ${m.groupName}" : "Llave";
+    final stage = m.groupName != null ? "Grupo ${m.groupName!.replaceFirst(RegExp("^GR-?", caseSensitive: false), "")}" : "Llave";
     return InkWell(
       onTap: () => onOpen(m),
       child: Padding(

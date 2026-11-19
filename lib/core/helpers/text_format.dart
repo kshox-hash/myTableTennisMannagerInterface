@@ -6,6 +6,10 @@
 /// "la", "y"…). Una palabra que ya trae mayúsculas internas y no está toda
 /// en mayúscula ("MyTTM", "McDonald") se respeta tal cual.
 String prettyTitle(String raw) {
+  // Si ya viene bien escrito (mayúsculas y minúsculas mezcladas), se respeta:
+  // "Copa Primavera (en curso)" no se toca (antes salía "(en Curso)").
+  final letters = raw.replaceAll(RegExp(r"[^A-Za-zÁÉÍÓÚÑáéíóúñ]"), "");
+  if (letters != letters.toLowerCase() && letters != letters.toUpperCase()) return raw.trim();
   const small = {"de", "del", "la", "las", "el", "los", "y", "en", "a", "al", "o", "e", "con", "por", "para"};
   final words = raw.trim().split(RegExp(r"\s+"));
   final out = <String>[];

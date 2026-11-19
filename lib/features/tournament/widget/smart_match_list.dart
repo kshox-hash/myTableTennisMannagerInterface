@@ -261,7 +261,7 @@ class _SmartMatchListState extends State<SmartMatchList> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Material(
-        color: highlight ? const Color(0xFF2B3A4F) : AppColors.scorifyCardFill,
+        color: highlight ? const Color(0xFF1C2738) : AppColors.scorifyCardFill,
         child: InkWell(
           onTap: () => Navigator.pushNamed(context, AppRoutes.matchDetail, arguments: {"matchType": m.matchType, "matchId": m.idMatch}),
           child: Padding(

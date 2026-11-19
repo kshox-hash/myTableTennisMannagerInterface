@@ -79,7 +79,7 @@ class SpinNextMatchPanel extends StatelessWidget {
       icon: Icons.sports_tennis_rounded,
       titleColor: AppColors.scorifyMint,
       // Mismo color plano que las demás tarjetas del Inicio.
-      gradient: const LinearGradient(colors: [Color(0xE0243142), Color(0xE0243142)]),
+      gradient: const LinearGradient(colors: [Color(0xFF172030), Color(0xFF172030)]),
       fill: true,
       onTap: onTap,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),

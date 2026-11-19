@@ -228,7 +228,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                     name: m.player1Name,
                                     club: m.player1Club,
                                     seed: m.player1Seed,
-                                    sets: liveSets1,
+                                    sets: played || live ? liveSets1 : null,
                                     setPoints: [
                                       for (final x in m.setScores ?? const [])
                                         (mine: x.p1, theirs: x.p2),
@@ -253,7 +253,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                     name: m.player2Name,
                                     club: m.player2Club,
                                     seed: m.player2Seed,
-                                    sets: liveSets2,
+                                    sets: played || live ? liveSets2 : null,
                                     setPoints: [
                                       for (final x in m.setScores ?? const [])
                                         (mine: x.p2, theirs: x.p1),
@@ -341,7 +341,8 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                       label: "Mesa jugada",
                                       value: "${m.playedTableNumber}",
                                     ),
-                                  if (m.refereeName != null)
+                                  // Sin el "Jugador sin nombre" de cuentas incompletas.
+                                  if ((m.refereeName ?? "").trim().isNotEmpty && !m.refereeName!.contains("sin nombre"))
                                     _InfoRow(
                                       label: "Árbitro",
                                       value: m.refereeName!,
@@ -376,7 +377,8 @@ class _PlayerRow extends StatelessWidget {
   final String name;
   final String? club;
   final int? seed;
-  final int sets;
+  /// null = partido sin empezar: no se muestra marcador (antes salía "0 0").
+  final int? sets;
   final bool isWinner;
   final List<({int mine, int theirs})> setPoints;
   /// Transición de la foto desde la tarjeta del Inicio.
@@ -388,7 +390,7 @@ class _PlayerRow extends StatelessWidget {
     required this.name,
     this.club,
     this.seed,
-    required this.sets,
+    this.sets,
     required this.isWinner,
     this.setPoints = const [],
   });
@@ -449,6 +451,7 @@ class _PlayerRow extends StatelessWidget {
               ),
             ),
           ),
+        if (sets != null)
         Container(
           width: 40,
           height: 40,
@@ -462,7 +465,7 @@ class _PlayerRow extends StatelessWidget {
           ),
           // Al entrar un set nuevo, el número cambia deslizándose.
           child: AnimatedNumber(
-            "$sets",
+            "${sets ?? 0}",
             style: TextStyle(
               fontFamily: AppTypography.body,
               fontSize: 20,

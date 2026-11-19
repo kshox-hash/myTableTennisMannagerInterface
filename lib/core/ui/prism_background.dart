@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
-import 'package:myttmi/core/ui/ash_field.dart';
 
-/// Fondo de la app: la atmósfera del login (oscuro profundo, luz azul arriba
-/// y cenizas blancas tenues) en todas las pantallas.
+/// Fondo de la app: oscuro profundo con una luz azul suave arriba (sin
+/// cenizas: ensuciaban el diseño; quedan solo en el login).
 /// Los parámetros se mantienen para no tocar las 28 pantallas que lo usan;
 /// ya no cambian nada.
 class PrismBackground extends StatelessWidget {
@@ -67,10 +66,6 @@ class PrismBackground extends StatelessWidget {
               ),
             ),
           ),
-          // Cenizas como en el login (misma cantidad e intensidad): una sola capa,
-          // su costo no depende de cuántas tarjetas haya encima.
-          const IgnorePointer(child: RepaintBoundary(child: AshField(count: 30, near: false))),
-          const IgnorePointer(child: RepaintBoundary(child: AshField(count: 6, near: true))),
           RepaintBoundary(child: child),
         ],
       ),

@@ -1,9 +1,7 @@
 import "package:flutter/material.dart";
-import "package:myttmi/core/ui/ash_field.dart";
 
-/// Fondo del login: la foto del jugador (sin parallax), cenizas blancas que
-/// suben suave (estilo premium) y un degradado oscuro abajo para que el
-/// formulario se lea.
+/// Fondo del login: la foto del jugador (sin parallax) y un degradado oscuro
+/// abajo para que el formulario se lea.
 class LoginBackground extends StatelessWidget {
   final Widget child;
   const LoginBackground({super.key, required this.child});
@@ -45,8 +43,6 @@ class LoginBackground extends StatelessWidget {
               ),
             ),
           ),
-          const IgnorePointer(child: RepaintBoundary(child: AshField(count: 30, near: false))),
-          const IgnorePointer(child: RepaintBoundary(child: AshField(count: 6, near: true))),
           RepaintBoundary(child: child),
         ],
       ),

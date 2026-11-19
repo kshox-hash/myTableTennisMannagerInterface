@@ -838,7 +838,7 @@ class _InfoTile extends StatelessWidget {
       decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(Panel.radius)),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.scorifyMint, size: 20),
+          Icon(icon, color: AppColors.scorifyTextMuted, size: 20), // gris: el dato manda, no el ícono
           const SizedBox(width: 10),
           Expanded(
             child: Column(

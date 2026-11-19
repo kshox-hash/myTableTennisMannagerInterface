@@ -106,7 +106,7 @@ class _HomeCardState extends State<HomeCard> {
 
 /// Colores sólidos de las tarjetas del Inicio (las mismas tintas de antes, sin transparencia).
 // Paleta "dark premium" cobalto: la misma luz azul fría del fondo del Inicio.
-const _solidCard = Color(0xE0243142); // tarjeta (88 %, como scorifyCardFill)
+const _solidCard = Color(0xFF172030); // tarjeta (como scorifyCardFill)
 const _cardTop = Color(0xFF0A1830);
 const _solidFeatured = Color(0xFF2D3138);
 const _tileAccent = Color(0xFF6F9BEA); // azul de las franjas de la textura
@@ -358,6 +358,15 @@ class HomeMatchCard extends StatelessWidget {
     );
     // Panel tipo "ficha": etiqueta en mayúsculas con su bajada a la
     // izquierda y el dato en una caja oscura con filete a la derecha.
+    Widget cell(String label, String value) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: _t(10, w: FontWeight.w800, c: AppColors.scorifyTextFaint, ls: 1.1)),
+            const SizedBox(height: 3),
+            Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(14.5, w: FontWeight.w700, c: Colors.white)),
+          ],
+        );
+
     Widget field(String label, String hint, String value) => Padding(
       padding: const EdgeInsets.symmetric(vertical: 7),
       child: Row(
@@ -444,7 +453,7 @@ class HomeMatchCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 14, 12, 0),
             child: Row(
               children: [
-                Expanded(child: Text("Próximo partido", style: _t(13.5, w: FontWeight.w600, c: AppColors.scorifyTextMuted))),
+                Expanded(child: Text("PRÓXIMO PARTIDO", style: _t(11, w: FontWeight.w800, c: const Color(0xFF8EC5FF), ls: 1.3))),
                 _LiveStatus(startsAt: startsAt, tableNumber: tableNumber),
               ],
             ),
@@ -494,16 +503,37 @@ class HomeMatchCard extends StatelessWidget {
                     ],
                   ),
                 ],
-                const SizedBox(height: 14),
-                divider(),
-                field("Fecha", "CUÁNDO SE JUEGA", when.replaceAll("\n", " · ")),
-                divider(),
-                field("Mesa", "DÓNDE TE TOCA", table),
-                if (hasPlace) ...[
-                  divider(),
-                  field("Lugar", "DIRECCIÓN", place!.trim()),
-                ],
-                divider(),
+                const SizedBox(height: 16),
+                // Datos en limpio: fecha y mesa lado a lado; el lugar en una línea.
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  color: AppColors.scorifySurface2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(child: cell("FECHA", when.replaceAll("\n", " · "))),
+                          const SizedBox(width: 12),
+                          Expanded(child: cell("MESA", table)),
+                        ],
+                      ),
+                      if (hasPlace) ...[
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            const Icon(Icons.place_outlined, size: 15, color: AppColors.scorifyTextMuted),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(place!.trim(),
+                                  maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(12.5, c: AppColors.scorifyTextMuted)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 12),
                 Row(
                   children: [

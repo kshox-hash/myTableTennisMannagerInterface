@@ -628,17 +628,19 @@ class _Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: 22, bottom: 10),
+    padding: const EdgeInsets.only(top: 24, bottom: 10),
     child: Row(
       children: [
         Expanded(
+          // Mismo título de sección que el resto de la app (mayúsculas azul hielo).
           child: Text(
-            title,
+            title.toUpperCase(),
             style: const TextStyle(
               fontFamily: AppTypography.body,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColors.scorifyText,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.3,
+              color: Color(0xFF8EC5FF),
             ),
           ),
         ),
@@ -974,54 +976,48 @@ class _MatchCard extends StatelessWidget {
       "Partido ${m.matchNumber}",
     ].join(" · ");
 
+    // Compacta (una fila, como "Últimos resultados" del Inicio): antes cada
+    // partido ocupaba media pantalla con avatares grandes y "Ver perfil".
+    final badgeColor = played ? (iWon ? const Color(0xFF3DDC97) : const Color(0xFFFF6B6B)) : AppColors.scorifyTextMuted;
     return GlassCard(
       onTap: onTap,
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-      child: Column(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      child: Row(
         children: [
-          Row(
-            children: [
-              Expanded(child: Text(meta, style: _muted)),
-              _Pill(pillText, bg: pillBg, fg: pillFg),
-            ],
+          Container(
+            width: 30,
+            height: 30,
+            alignment: Alignment.center,
+            color: played ? badgeColor.withValues(alpha: 0.16) : AppColors.scorifySurface2,
+            child: Text(
+              played ? (iWon ? "G" : "P") : (m.tableNumber != null ? "${m.tableNumber}" : "–"),
+              style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w800, color: played ? badgeColor : AppColors.scorifyText),
+            ),
           ),
-          const SizedBox(height: 14),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _Side(userId: myUserId, name: "Tú"),
-              ),
-              SizedBox(
-                width: 84,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: Text(
-                    played ? "$mySets - $theirSets" : "VS",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: AppTypography.body,
-                      fontSize: played ? 24 : 18,
-                      fontWeight: FontWeight.w600,
-                      color: played
-                          ? AppColors.scorifyText
-                          : AppColors.scorifyTextMuted,
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: _Side(
-                  userId: m.opponentId,
-                  name: m.opponentName ?? "Por definir",
-                  subtitle: m.opponentId != null ? "Ver perfil" : null,
-                  onTap: m.opponentId != null
-                      ? () =>
-                            _openProfile(context, m.opponentId, m.opponentName)
-                      : null,
-                ),
-              ),
-            ],
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("vs ${m.opponentName ?? "Por definir"}",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
+                const SizedBox(height: 2),
+                Text(played ? meta : "$meta · $pillText",
+                    maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted.copyWith(fontSize: 11.5)),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            played ? "$mySets-$theirSets" : "VS",
+            style: TextStyle(
+              fontFamily: AppTypography.display,
+              fontSize: played ? 18 : 13,
+              fontWeight: FontWeight.w800,
+              color: played && iWon ? Colors.white : AppColors.scorifyTextMuted,
+            ),
           ),
         ],
       ),

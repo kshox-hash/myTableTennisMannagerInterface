@@ -287,9 +287,10 @@ class _Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: 22, bottom: 10),
-        child: Text(title,
-            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+        // Mismo título de sección que el resto de la app (mayúsculas azul hielo).
+        padding: const EdgeInsets.only(top: 24, bottom: 10),
+        child: Text(title.toUpperCase(),
+            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: Color(0xFF8EC5FF))),
       );
 }
 
@@ -373,7 +374,7 @@ class _EventCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.place_rounded, size: 14, color: AppColors.scorifyMint),
+                      const Icon(Icons.place_rounded, size: 14, color: AppColors.scorifyTextMuted),
                       const SizedBox(width: 4),
                       Expanded(child: Text(loc, maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted)),
                     ],
@@ -387,7 +388,7 @@ class _EventCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: !e.finished && (e.inProgress || days <= 1) ? AppColors.scorifyButterfly : AppColors.scorifySurface2,
+                color: !e.finished && (e.inProgress || days <= 1) ? AppColors.scorifyButterfly.withValues(alpha: 0.16) : AppColors.scorifySurface2,
                 borderRadius: BorderRadius.circular(Panel.radius),
               ),
               child: Text(
@@ -396,7 +397,7 @@ class _EventCard extends StatelessWidget {
                   fontFamily: AppTypography.body,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: !e.finished && (e.inProgress || days <= 1) ? AppColors.scorifyOnButterfly : AppColors.scorifyTextMuted,
+                  color: !e.finished && (e.inProgress || days <= 1) ? AppColors.scorifyButterfly : AppColors.scorifyTextMuted,
                 ),
               ),
             ),
