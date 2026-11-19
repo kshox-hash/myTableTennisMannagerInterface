@@ -43,7 +43,9 @@ class _ConnectorLine {
 /// un jugador lo resalta en todos los cruces donde aparece.
 class BracketTreeView extends StatefulWidget {
   final List<TournamentMatch> matches;
-  const BracketTreeView({super.key, required this.matches});
+  /// Nivel del campeonato (local / regional / nacional): elige la copa del final.
+  final String? rankingLevel;
+  const BracketTreeView({super.key, required this.matches, this.rankingLevel});
 
   @override
   State<BracketTreeView> createState() => _BracketTreeViewState();
@@ -305,7 +307,7 @@ class _BracketTreeViewState extends State<BracketTreeView> {
                   if (championId != null)
                     SizedBox(
                       height: treeHeight,
-                      child: Center(child: _ChampionCard(key: _championKey, name: championName!)),
+                      child: Center(child: _ChampionCard(key: _championKey, name: championName!, championId: championId, rankingLevel: widget.rankingLevel)),
                     ),
                 ],
               ),
@@ -613,37 +615,54 @@ class _PlayerRow extends StatelessWidget {
   }
 }
 
+/// Al final de la llave, la copa del campeonato (la misma imagen que la
+/// web: local / regional / nacional) y debajo el campeón con su club.
 class _ChampionCard extends StatelessWidget {
   final String name;
-  const _ChampionCard({super.key, required this.name});
+  final String? championId;
+  final String? rankingLevel;
+  const _ChampionCard({super.key, required this.name, this.championId, this.rankingLevel});
+
+  static const _gold = Color(0xFFE6B84A);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 130,
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-      // Campeón (estilo panel): caja oscura con filete lima, sin bloque sólido.
-      decoration: panelBox(color: AppColors.scorifyButterfly),
+    final level = (rankingLevel == "nacional" || rankingLevel == "regional") ? rankingLevel! : "local";
+    return SizedBox(
+      width: 200,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.emoji_events_rounded,
-            color: AppColors.scorifyButterfly,
-            size: 26,
-          ),
+          Image.asset("assets/images/trophy-$level.webp", height: level == "nacional" ? 190 : 170, filterQuality: FilterQuality.medium),
+          const SizedBox(height: 10),
+          const Text("CAMPEÓN",
+              style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 3.2, color: _gold)),
           const SizedBox(height: 6),
+          Container(
+            width: 48,
+            height: 1,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(colors: [Color(0x00E6B84A), _gold, Color(0x00E6B84A)]),
+            ),
+          ),
+          const SizedBox(height: 8),
           Text(
             name,
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: AppColors.scorifyText,
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
-            ),
+            style: const TextStyle(fontFamily: AppTypography.body, color: AppColors.scorifyText, fontWeight: FontWeight.w800, fontSize: 17, height: 1.2),
           ),
+          if (championId != null) ...[
+            const SizedBox(height: 4),
+            Center(
+              child: ClubLine(
+                idUser: championId!,
+                crestSize: 14,
+                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, color: AppColors.scorifyTextMuted),
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -413,14 +413,17 @@ class _GeneralStandingsList extends StatelessWidget {
         // Podio: campeón destacado; 2.º y 3.º compactos con su color de medalla.
         if (podium.isNotEmpty)
           Container(
-            color: AppColors.scorifyCardFill,
+            color: const Color(0xFF0F1620),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 for (final r in podium.where((r) => r.position == 1))
                   Container(
                     padding: const EdgeInsets.all(14),
-                    color: _gold.withValues(alpha: 0.12),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF2A2210),
+                      border: Border(left: BorderSide(color: _gold, width: 3)),
+                    ),
                     child: Row(
                       children: [
                         Container(

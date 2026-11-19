@@ -496,7 +496,8 @@ class _CategoryCardState extends State<_CategoryCard> {
     const gold = Color(0xFFE6B94C), silver = Color(0xFFC0C7CF), bronze = Color(0xFFCD8B55);
     Color medal(int pos) => pos == 1 ? gold : pos == 2 ? silver : bronze;
     return Container(
-      decoration: BoxDecoration(color: const Color(0x14000000), borderRadius: BorderRadius.circular(Panel.radius)),
+      // Más oscuro que la tarjeta: el podio se despega.
+      decoration: BoxDecoration(color: const Color(0xFF0F1620), borderRadius: BorderRadius.circular(Panel.radius)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -504,7 +505,11 @@ class _CategoryCardState extends State<_CategoryCard> {
           if (champ != null)
             Container(
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-              color: gold.withValues(alpha: 0.10),
+              // Dorado oscuro sólido con filo dorado a la izquierda (antes un tinte que se veía gris).
+              decoration: const BoxDecoration(
+                color: Color(0xFF2A2210),
+                border: Border(left: BorderSide(color: gold, width: 3)),
+              ),
               child: Row(
                 children: [
                   // Ícono (no emoji): copa dorada dentro de un círculo con tinte.

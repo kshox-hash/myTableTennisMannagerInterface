@@ -77,6 +77,8 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
   String _stageFilter = "all";
   static const _stageLabels = {"all": "Grupos y llaves", "group": "Grupos", "bracket": "Llaves"};
   late _ViewMode _mode;
+  /// Nivel del campeonato (elige la copa al final de la llave).
+  String? _rankingLevel;
   // Llaves queda bloqueada hasta que exista algún partido de llave (mientras
   // se juegan los grupos no hay nada que mostrar ahí).
   bool _hasBracket = false;
@@ -110,6 +112,9 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
       _ => _ViewMode.list,
     };
     _load();
+    TournamentApi().getTournamentById(widget.tournamentId).then((t) {
+      if (mounted) setState(() => _rankingLevel = t.rankingLevel);
+    }).catchError((_) {});
     _api.getAllTournamentMatches(widget.tournamentId).then((all) {
       // Escudos de los clubes de cada categoría (grupos y llave).
       for (final c in {for (final m in all) m.idCategory}) {
@@ -217,7 +222,7 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
                         final matches = _cat == null ? all : all.where((m) => m.idCategory == _cat).toList();
 
                         if (_mode == _ViewMode.bracket) {
-                          return _BracketByCategory(matches: matches);
+                          return _BracketByCategory(matches: matches, rankingLevel: _rankingLevel);
                         }
                         if (_mode == _ViewMode.groups) {
                           return _GroupsByCategory(tournamentId: widget.tournamentId, matches: matches);
@@ -513,7 +518,8 @@ class _GroupsByCategoryState extends State<_GroupsByCategory> {
 /// una con su propio cuadro.
 class _BracketByCategory extends StatelessWidget {
   final List<TournamentMatch> matches;
-  const _BracketByCategory({required this.matches});
+  final String? rankingLevel;
+  const _BracketByCategory({required this.matches, this.rankingLevel});
 
   @override
   Widget build(BuildContext context) {
@@ -539,7 +545,7 @@ class _BracketByCategory extends StatelessWidget {
       children: [
         for (final entry in byCategory.entries) ...[
           _CategoryTitle(entry.value.first.categoryLabel),
-          BracketTreeView(matches: entry.value),
+          BracketTreeView(matches: entry.value, rankingLevel: rankingLevel),
           const SizedBox(height: 20),
         ],
       ],
