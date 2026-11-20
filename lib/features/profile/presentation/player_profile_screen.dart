@@ -109,7 +109,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                                       gradient: LinearGradient(
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
-                                        colors: [Color(0xFF0F2A5E), Color(0xFF0A1830), Color(0xFF0B1017)],
+                                        colors: [Color(0xFF0F2A5E), Color(0xFF0A1830), Color(0xFF07090D)],
                                       ),
                                     ),
                                   ),

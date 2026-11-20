@@ -30,6 +30,8 @@ class _SmartMatchListState extends State<SmartMatchList> {
   String? _myId;
   String _q = "";
   bool _showAllPlayed = false;
+  /// Filtro por etapa: null = todas, "G:nombre" = un grupo, "llave" = llave.
+  String? _stage;
   /// Turno en la cola de mesas (idMatch → 1, 2, 3…).
   Map<String, int> _queue = const {};
 
@@ -42,7 +44,10 @@ class _SmartMatchListState extends State<SmartMatchList> {
   @override
   void didUpdateWidget(covariant SmartMatchList old) {
     super.didUpdateWidget(old);
-    if (old.categoryId != widget.categoryId) _load();
+    if (old.categoryId != widget.categoryId) {
+      _stage = null;
+      _load();
+    }
   }
 
   Future<void> _load() async {
@@ -85,8 +90,9 @@ class _SmartMatchListState extends State<SmartMatchList> {
     if (all == null) return const LoadingState(); // esqueleto que late (no un círculo girando)
 
     final q = _q.trim().toLowerCase();
-    final list = all
-        .where(_real)
+    final realAll = all.where(_real).toList();
+    final list = realAll
+        .where(_inStage)
         .where((m) => q.isEmpty || m.player1Name.toLowerCase().contains(q) || m.player2Name.toLowerCase().contains(q))
         .toList();
     bool mine(TournamentMatch m) => _myId != null && (m.player1Id == _myId || m.player2Id == _myId);
@@ -127,6 +133,7 @@ class _SmartMatchListState extends State<SmartMatchList> {
               border: const OutlineInputBorder(borderSide: BorderSide.none, borderRadius: BorderRadius.zero),
             ),
           ),
+          _stageBar(realAll),
           if (list.isEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 40),
@@ -206,13 +213,80 @@ class _SmartMatchListState extends State<SmartMatchList> {
     );
   }
 
+  String _groupShort(String g) => g.replaceFirst(RegExp(r"^GR-?", caseSensitive: false), "");
+
   String _context(TournamentMatch m) {
     final stage = m.groupName != null
-        ? "Grupo ${m.groupName!.replaceFirst(RegExp(r"^GR-?", caseSensitive: false), "")}"
+        ? "Grupo ${_groupShort(m.groupName!)}"
         : m.round == 0
             ? "Pre-llave"
             : (m.round != null ? matchRoundLabel(m.round!, m.totalRounds) : "Llave");
-    return "$stage · ${m.categoryType}";
+    // Con una categoría elegida arriba no se repite en cada fila.
+    return widget.categoryId != null ? stage : "$stage · ${m.categoryType}";
+  }
+
+  bool _inStage(TournamentMatch m) {
+    final st = _stage;
+    if (st == null) return true;
+    if (st == "llave") return m.groupName == null;
+    return m.groupName != null && "G:${m.groupName}" == st;
+  }
+
+  /// Filtro por grupo (solo con una categoría elegida y más de una etapa):
+  /// barra negra con filete, como los demás filtros.
+  Widget _stageBar(List<TournamentMatch> real) {
+    final groups = <String>{for (final m in real) if (m.groupName != null) m.groupName!}.toList()
+      ..sort((a, b) {
+        final na = int.tryParse(_groupShort(a)), nb = int.tryParse(_groupShort(b));
+        return (na != null && nb != null) ? na.compareTo(nb) : a.compareTo(b);
+      });
+    final hasBracket = real.any((m) => m.groupName == null);
+    final opts = <(String?, String)>[
+      (null, "Todos"),
+      for (final g in groups) ("G:$g", "Grupo ${_groupShort(g)}"),
+      if (hasBracket) ("llave", "Llave"),
+    ];
+    if (widget.categoryId == null || opts.length <= 2) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Container(
+          decoration: BoxDecoration(color: const Color(0x99000000), border: Border.all(color: const Color(0x40FFFFFF))),
+          child: Row(
+            children: [
+              for (var i = 0; i < opts.length; i++) ...[
+                if (i > 0) Container(width: 1, height: 18, color: const Color(0x1AFFFFFF)),
+                InkWell(
+                  onTap: () => setState(() => _stage = opts[i].$1),
+                  child: Container(
+                    height: 38,
+                    constraints: const BoxConstraints(minWidth: 56),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: _stage == opts[i].$1 ? const Color(0x14FFFFFF) : Colors.transparent,
+                      border: _stage == opts[i].$1
+                          ? const Border(bottom: BorderSide(color: AppColors.scorifyMint, width: 2))
+                          : null,
+                    ),
+                    child: Text(
+                      opts[i].$2,
+                      style: TextStyle(
+                        fontFamily: AppTypography.body,
+                        fontSize: 13,
+                        fontWeight: _stage == opts[i].$1 ? FontWeight.w700 : FontWeight.w600,
+                        color: _stage == opts[i].$1 ? Colors.white : AppColors.scorifyTextMuted,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _row(TournamentMatch m, {bool highlight = false}) {
@@ -220,8 +294,6 @@ class _SmartMatchListState extends State<SmartMatchList> {
     final live = !done && m.tableNumber != null;
     // A la izquierda: mesa (en juego), "Mesa N" jugada, o vacío.
     final turn = _queue[m.idMatch];
-    final leftTop = live ? "${m.tableNumber}" : (done ? "" : (turn != null ? "#$turn" : "—"));
-    final leftLabel = live ? "MESA" : (done ? "" : "COLA");
     Widget player(String name, String id, int sets) {
       final won = done && m.winnerId == id;
       final lost = done && m.winnerId != null && m.winnerId != id;
@@ -269,29 +341,29 @@ class _SmartMatchListState extends State<SmartMatchList> {
             padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
             child: Row(
               children: [
-                // Columna de estado: número de mesa grande si se está jugando.
-                SizedBox(
-                  width: 40,
-                  child: done
-                      ? _resultBadge(m)
-                      : Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(leftTop,
-                                style: TextStyle(
-                                  fontFamily: AppTypography.display,
-                                  fontSize: live ? 20 : 15,
-                                  fontWeight: FontWeight.w800,
-                                  color: live ? AppColors.scorifyNegative : AppColors.scorifyTextMuted,
-                                  height: 1,
-                                )),
-                            const SizedBox(height: 2),
-                            Text(leftLabel,
-                                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 8.5, fontWeight: FontWeight.w800, letterSpacing: 0.8, color: AppColors.scorifyTextFaint)),
-                          ],
-                        ),
-                ),
-                const SizedBox(width: 10),
+                // A la izquierda solo lo que importa: la mesa si se está
+                // jugando, o G/P/FIN si ya terminó. Por jugar: nada (antes
+                // decía "#12 COLA" / "— COLA" y no se entendía).
+                if (live) ...[
+                  SizedBox(
+                    width: 44,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text("MESA",
+                            style: TextStyle(fontFamily: AppTypography.body, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.8, color: AppColors.scorifyNegative)),
+                        const SizedBox(height: 2),
+                        Text("${m.tableNumber}",
+                            style: const TextStyle(fontFamily: AppTypography.display, fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white, height: 1)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                ] else if (done) ...[
+                  SizedBox(width: 40, child: _resultBadge(m)),
+                  const SizedBox(width: 10),
+                ] else
+                  const SizedBox(width: 4),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -307,6 +379,19 @@ class _SmartMatchListState extends State<SmartMatchList> {
                     ],
                   ),
                 ),
+                if (!done && !live && turn != null) ...[
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      const Text("TURNO",
+                          style: TextStyle(fontFamily: AppTypography.body, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.8, color: AppColors.scorifyTextFaint)),
+                      const SizedBox(height: 2),
+                      Text("$turn",
+                          style: const TextStyle(fontFamily: AppTypography.display, fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.scorifyTextMuted, height: 1)),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

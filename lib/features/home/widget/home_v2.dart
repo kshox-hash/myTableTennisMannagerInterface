@@ -106,7 +106,7 @@ class _HomeCardState extends State<HomeCard> {
 
 /// Colores sólidos de las tarjetas del Inicio (las mismas tintas de antes, sin transparencia).
 // Paleta "dark premium" cobalto: la misma luz azul fría del fondo del Inicio.
-const _solidCard = Color(0xFF172030); // tarjeta (como scorifyCardFill)
+const _solidCard = Color(0xFF10161F); // tarjeta (como scorifyCardFill)
 const _cardTop = Color(0xFF0A1830);
 const _solidFeatured = Color(0xFF2D3138);
 const _tileAccent = Color(0xFF6F9BEA); // azul de las franjas de la textura
@@ -1799,7 +1799,9 @@ class HomeEmptyCard extends StatelessWidget {
   final VoidCallback? onAction;
   /// Línea con datos reales bajo el título de la card "Tu próximo desafío".
   final String? detail;
-  const HomeEmptyCard({super.key, required this.title, required this.icon, required this.message, this.hint, this.action, this.onAction, this.detail});
+  /// Encabezado del Inicio para ponerlo encima de la foto ("Buscar campeonatos").
+  final Widget? header;
+  const HomeEmptyCard({super.key, required this.title, required this.icon, required this.message, this.hint, this.action, this.onAction, this.detail, this.header});
 
   /// "Bienvenido a MyTTM": la marca como el logo, "My" en blanco y "TTM" en
   /// verde, cursiva y negrita.
@@ -1825,7 +1827,7 @@ class HomeEmptyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Sin inscripciones: solo el botón-imagen "Buscar campeonatos", sin la tarjeta que lo encerraba.
-    if (action == "Buscar campeonatos") return _ImageButton(onTap: onAction, detail: detail);
+    if (action == "Buscar campeonatos") return _ImageButton(onTap: onAction, detail: detail, header: header);
     // Tarjeta destacada (filo iluminado con halo): ícono grande, título con
     // la marca resaltada, el mensaje y el botón principal en degradado.
     return HomeCard(
@@ -1881,55 +1883,121 @@ class HomeEmptyCard extends StatelessWidget {
 class _ImageButton extends StatelessWidget {
   final VoidCallback? onTap;
   final String? detail;
-  const _ImageButton({this.onTap, this.detail});
+  final Widget? header;
+  const _ImageButton({this.onTap, this.detail, this.header});
 
   @override
   Widget build(BuildContext context) {
-    // Héroe con el ADN del login: foto del jugador, degradado oscuro abajo y
-    // una sola acción. Para quien todavía no tiene campeonatos.
+    // Héroe con el ADN del login, igual que la cabecera del campeonato: foto
+    // de borde a borde (se sale del margen de 16 del Inicio), el jugador
+    // corrido a la derecha y oscurecido solo a la izquierda (texto) y abajo
+    // (botón). Arriba y abajo la foto se desvanece y se funde con el fondo.
+    const bg = AppColors.scorifyBg;
+    final w = MediaQuery.sizeOf(context).width;
+    // Igual que la cabecera de Campeonato: la foto llega hasta arriba, con el
+    // encabezado encima (sin corte ni degradado) y el
+    // jugador de la cintura para arriba, corrido a la derecha.
+    // Se sale 16 px hacia arriba para tapar el margen superior del Inicio.
+    const boxH = 500.0;
     return SizedBox(
-      height: 420,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          const ClipRect(
-            child: Image(
-              image: AssetImage("assets/images/login_player.jpg"),
-              fit: BoxFit.cover,
-              alignment: Alignment(0, -0.25),
-              filterQuality: FilterQuality.medium,
-            ),
-          ),
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
+      height: boxH,
+      child: OverflowBox(
+        minWidth: w,
+        maxWidth: w,
+        minHeight: boxH + 16,
+        maxHeight: boxH + 16,
+        alignment: Alignment.bottomCenter,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Abajo la foto se desvanece y se funde con el fondo (sin línea).
+            ShaderMask(
+              blendMode: BlendMode.dstIn,
+              shaderCallback: (r) => const LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: [0, 0.45, 0.78, 1],
-                colors: [Color(0x00000000), Color(0x1A000000), Color(0xCC0B1017), Color(0xFF0B1017)],
+                colors: [Colors.white, Colors.white, Colors.transparent],
+                stops: [0, 0.8, 1],
+              ).createShader(r),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                ClipRect(
+                  child: Transform.scale(
+                    scale: 1.5,
+                    alignment: Alignment.topLeft,
+                    child: const Image(
+                      image: AssetImage("assets/images/login_player.jpg"),
+                      fit: BoxFit.cover,
+                      alignment: Alignment(0, 0),
+                      filterQuality: FilterQuality.medium,
+                    ),
+                  ),
+                ),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [bg.withValues(alpha: 0.85), bg.withValues(alpha: 0.45), bg.withValues(alpha: 0)],
+                      stops: const [0, 0.38, 0.62],
+                    ),
+                  ),
+                ),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [bg.withValues(alpha: 0), bg.withValues(alpha: 0.15), bg.withValues(alpha: 0.75), bg.withValues(alpha: 0.95)],
+                      stops: const [0, 0.45, 0.78, 1],
+                    ),
+                  ),
+                ),
+                ],
               ),
             ),
-          ),
-          Positioned(
-            left: 20,
-            right: 20,
-            bottom: 20,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("TU PRÓXIMO DESAFÍO", style: _t(11, w: FontWeight.w800, c: const Color(0xFF8EC5FF), ls: 1.6)),
-                const SizedBox(height: 6),
-                Text("Encuentra tu torneo y demuestra lo que vales.",
-                    style: _t(22, w: FontWeight.w800, c: Colors.white, h: 1.2)),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: AppButton(label: "Buscar campeonatos", onPressed: onTap, height: 46, icon: Icons.search_rounded),
-                ),
-              ],
+            if (header != null) Positioned(top: 16, left: 16, right: 16, child: header!),
+            Positioned(
+              left: 20,
+              right: 20,
+              bottom: 28,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SearchButton(onTap: onTap),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// "Buscar campeonatos" con el mismo estilo que "Continuar con Google" del
+/// login: negro translúcido, filete fino, esquinas rectas y texto centrado,
+/// sin íconos.
+class _SearchButton extends StatelessWidget {
+  final VoidCallback? onTap;
+  const _SearchButton({this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: OutlinedButton(
+        onPressed: onTap,
+        style: OutlinedButton.styleFrom(
+          backgroundColor: const Color(0x99000000),
+          foregroundColor: Colors.white,
+          side: const BorderSide(color: Color(0x40FFFFFF)),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        ),
+        child: const Text(
+          "Buscar campeonatos",
+          style: TextStyle(fontFamily: "Montserrat", fontSize: 14, fontWeight: FontWeight.w600),
+        ),
       ),
     );
   }

@@ -357,10 +357,17 @@ class _TournamentsScreenState extends State<TournamentsScreen>
     };
     // Una sola fila de ancho parejo: con 4 opciones un Wrap bajaba
     // "Finalizados" a una segunda línea en celulares angostos.
-    return Row(
+    // Barra segmentada premium: negro translúcido con filete fino y esquinas
+    // rectas (como el botón "Buscar campeonatos" del Inicio).
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0x99000000),
+        border: Border.all(color: const Color(0x40FFFFFF)),
+      ),
+      child: Row(
       children: [
         for (final e in labels.entries) ...[
-          if (e.key != _ActiveFilter.all) const SizedBox(width: 6),
+          if (e.key != _ActiveFilter.all) Container(width: 1, height: 22, color: const Color(0x1AFFFFFF)),
           Expanded(
             child: _FilterChip(
               label: e.value,
@@ -376,6 +383,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
           ),
         ],
       ],
+      ),
     );
   }
 
@@ -414,33 +422,56 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(decoration: selectedPillDecoration(selected), child: Material(
-      color: selected ? Colors.transparent : AppColors.scorifySurface2,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.buttonRadius))),
+    // Segmento de la barra: el elegido con un velo blanco tenue, texto blanco
+    // y una línea azul con brillo abajo; los demás en gris, sin fondo.
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
-        onTap: () {
-          onTap();
-        },
-        customBorder: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(Panel.buttonRadius))),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 9),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontFamily: AppTypography.body,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: selected
-                    ? AppColors.scorifyText
-                    : AppColors.scorifyTextMuted,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          height: 44,
+          color: selected ? const Color(0x14FFFFFF) : Colors.transparent,
+          child: Stack(
+            children: [
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        fontFamily: AppTypography.body,
+                        fontSize: 13,
+                        fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                        color: selected ? Colors.white : AppColors.scorifyTextMuted,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 180),
+                  opacity: selected ? 1 : 0,
+                  child: Container(
+                    height: 2,
+                    decoration: BoxDecoration(
+                      color: AppColors.scorifyMint,
+                      boxShadow: [BoxShadow(color: AppColors.scorifyMint.withValues(alpha: 0.7), blurRadius: 8)],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
-    ));
+    );
   }
 }
 

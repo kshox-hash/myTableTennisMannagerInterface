@@ -52,7 +52,7 @@ class PrismBackground extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF0E1726), Color(0xFF0B1017), Color(0xFF070A0F)],
+                colors: [Color(0xFF0A0F18), Color(0xFF07090D), Color(0xFF040508)],
                 stops: [0, 0.45, 1],
               ),
             ),
@@ -62,7 +62,7 @@ class PrismBackground extends StatelessWidget {
               gradient: RadialGradient(
                 center: Alignment(0, -1.15),
                 radius: 1.0,
-                colors: [Color(0x332A6BFF), Color(0x002A6BFF)],
+                colors: [Color(0x1A2A6BFF), Color(0x002A6BFF)],
               ),
             ),
           ),

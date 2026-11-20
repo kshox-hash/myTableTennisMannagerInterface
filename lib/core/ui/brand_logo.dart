@@ -27,6 +27,8 @@ class BrandLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     // Logo oficial = el del login (3D metálico): la M y la palabra "MyTTM"
     // recortadas de assets/images/3.0x/logo-stacked.png y puestas en línea.
+    // Vienen en 1x/2x/3x/4x (assets/images/N.0x): se usan a ~28 px y achicar
+    // una sola imagen grande borraba el contorno y los brillos del 3D.
     final wordH = (wordmarkSize ?? markSize * 0.62) * 1.3;
     return Row(
       mainAxisSize: MainAxisSize.min,

@@ -17,9 +17,9 @@ import 'package:flutter/material.dart';
 /// casi negro. "En vivo" sigue celeste y las victorias lima, para no
 /// confundirse con el acento.
 class AppColors {
-  static const Color scorifyBg = Color(0xFF0B1017); // fondo base (debajo del degradado y en transiciones)
-  static const Color scorifyDeep = Color(0xFF131B26); // hojas, diálogos (opaco)
-  static const Color scorifyNavbar = Color(0xFF0E141C); // barra inferior
+  static const Color scorifyBg = Color(0xFF07090D); // fondo base (debajo del degradado y en transiciones)
+  static const Color scorifyDeep = Color(0xFF0E131B); // hojas, diálogos (opaco)
+  static const Color scorifyNavbar = Color(0xFF080B10); // barra inferior
   static const Color scorifySurface2 = Color(0x0FFFFFFF); // bloques internos: velo blanco (sirve sobre cualquier tono)
 
   // Acento principal: celeste de marca. Botones, enlaces, pestaña activa.
@@ -54,7 +54,7 @@ class AppColors {
   static const Color scorifyNegative = Color(0xFFFF5C5C);
   static const Color scorifyPending = Color(0xFFEAB308);
   static const Color scorifyBadge = Color(0xFFFF4D5E); // contador de notifs
-  static const Color scorifyCardFill = Color(0xFF172030); // tarjeta: oscura y sólida (en el celular los tonos claros se perdían) // tarjeta: verde grisáceo al 95 %, un paso más claro que el fondo para que se despegue
+  static const Color scorifyCardFill = Color(0xFF10161F); // tarjeta: oscura y sólida (en el celular los tonos claros se perdían) // tarjeta: verde grisáceo al 95 %, un paso más claro que el fondo para que se despegue
   static const Color scorifyInput = Color(0x14FFFFFF); // campos de texto: velo blanco
 
   // Fondo de las tarjetas: gris liso (se deja como "degradado" de un solo
@@ -66,7 +66,7 @@ class AppColors {
   /// Tarjeta principal (próximo partido, el campeonato en su detalle): un
   /// paso más clara, también lisa.
   static const LinearGradient featuredGradient = LinearGradient(
-    colors: [Color(0xFF1C2738), Color(0xFF1C2738)],
+    colors: [Color(0xFF151C27), Color(0xFF151C27)],
   );
 
   /// Fondo de la app: degradado en diagonal, verde esmeralda arriba a la

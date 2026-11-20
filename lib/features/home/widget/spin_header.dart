@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:myttmi/features/shell/app_shell.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
 import 'package:myttmi/core/constants/app_typography.dart';
-import 'package:myttmi/core/ui/brand_logo.dart';
 import 'package:myttmi/core/favorites/favorite_matches.dart';
 import 'package:myttmi/core/ui/top_header.dart';
 
@@ -30,7 +29,7 @@ class SpinHeader extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          const BrandLogo(markSize: 26, wordmarkSize: 17),
+          // Sin logo ni nombre en el encabezado (pedido del usuario).
           Row(
         children: [
           if (AppShellScope.of(context)?.openMenu != null)

@@ -102,11 +102,39 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
   bool _participantsLoaded = false;
   String? _subscribingId;
 
+  /// Con más de estas categorías se muestran como filas compactas.
+  static const _compactFrom = 3;
+  /// Con más de estas, aparece el filtro (Todas / Damas / Varones / Abiertas).
+  static const _filtersFrom = 6;
+  String _catFilter = "all";
+  /// Categoría abierta: null = la por defecto (la primera tuya), "" = ninguna.
+  String? _expandedId;
+
   @override
   void initState() {
     super.initState();
     _tournament = widget.tournament;
     _refresh();
+  }
+
+  /// Filtradas y con las tuyas primero (el resto en el orden del organizador).
+  List<TournamentCategory> _visibleCats(List<TournamentCategory> cats) {
+    final out = cats.where((c) => switch (_catFilter) {
+          "female" => c.gender == "female",
+          "male" => c.gender == "male",
+          "open" => !_tournament.isCancelled && _acceptsEnrollment(c),
+          _ => true,
+        }).toList();
+    final mine = out.where((c) => c.isEnrolled).toList();
+    return [...mine, ...out.where((c) => !c.isEnrolled)];
+  }
+
+  String? _expandedCatId(List<TournamentCategory> cats) {
+    if (_expandedId != null) return _expandedId!.isEmpty ? null : _expandedId;
+    for (final c in cats) {
+      if (c.isEnrolled) return c.idCategory;
+    }
+    return null;
   }
 
   // Trae el torneo fresco (cupos/inscritos al día) y la lista de inscritos.
@@ -217,33 +245,38 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
     final t = _tournament;
     final cats = t.categories;
 
+    final header = TopHeader(
+      title: t.isLeague ? "Liga" : "Campeonato",
+      actions: [
+        // Los campeonatos son privados: se suman jugadores
+        // compartiendo este link (abre la app si la tienen).
+        HeaderIconButton(
+          icon: Icons.ios_share_rounded,
+          onTap: () => SharePlus.instance.share(
+            ShareParams(
+              text: "${t.tournamentName}\n${AppConfig.webBaseUrl}/torneos/${t.idTournament}",
+              subject: t.tournamentName,
+            ),
+          ),
+        ),
+      ],
+    );
+
     return Scaffold(
       backgroundColor: AppColors.scorifyBg,
       body: PrismBackground(
+        // Sin SafeArea arriba: la tarjeta con foto llega hasta el borde
+        // superior, detrás del encabezado (sin margen arriba ni a los lados).
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: ScrollingHeaderPage(
-              header: [
-                const SizedBox(height: 16),
-                TopHeader(
-                  title: t.isLeague ? "Liga" : "Campeonato",
-                  actions: [
-                    // Los campeonatos son privados: se suman jugadores
-                    // compartiendo este link (abre la app si la tienen).
-                    HeaderIconButton(
-                      icon: Icons.ios_share_rounded,
-                      onTap: () => SharePlus.instance.share(
-                        ShareParams(
-                          text: "${t.tournamentName}\n${AppConfig.webBaseUrl}/torneos/${t.idTournament}",
-                          subject: t.tournamentName,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-              ],
+          top: false,
+          child: ScrollingHeaderPage(
+              header: _participantsLoaded
+                  ? [_HeroCard(tournament: t, started: _started, anyOpen: _anyOpen, header: header)]
+                  : [
+                      SizedBox(height: MediaQuery.paddingOf(context).top + 16),
+                      Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: header),
+                      const SizedBox(height: 14),
+                    ],
               // Primera carga: esqueleto en vez de los datos de la lista (cupos
               // e inscritos viejos que después saltan).
               body: !_participantsLoaded
@@ -253,10 +286,9 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                     onRefresh: _refresh,
                     child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.only(bottom: 24),
+                      padding: const EdgeInsets.only(top: 14, bottom: 24),
                       children: staggerChildren([
-                        _HeroCard(tournament: t, started: _started, anyOpen: _anyOpen),
-                        const SizedBox(height: 14),
+                        for (final w in <Widget>[
                         // Seguir como visita: solo si no juega (el inscrito ya
                         // recibe sus propios avisos) y el campeonato sigue en pie.
                         if (!t.isCancelled && !cats.any((c) => c.isEnrolled)) ...[
@@ -296,6 +328,52 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                         const SizedBox(height: 12),
                         if (cats.isEmpty)
                           Text("Este campeonato no tiene categorías aún.", style: AppTypography.bodyMuted)
+                        // Muchas categorías: filtro + filas compactas que se
+                        // abren al tocarlas (una a la vez); las tuyas primero.
+                        else if (cats.length > _compactFrom) ...[
+                          if (cats.length > _filtersFrom) ...[
+                            _CategoryFilterBar(value: _catFilter, onChanged: (v) => setState(() => _catFilter = v)),
+                            const SizedBox(height: 12),
+                          ],
+                          if (_visibleCats(cats).isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Text("No hay categorías con este filtro.", style: AppTypography.bodyMuted),
+                            ),
+                          for (final c in _visibleCats(cats)) ...[
+                            if (_expandedCatId(cats) == c.idCategory) ...[
+                              _CategoryRow(
+                                category: c,
+                                enrolled: _participants.where((p) => p.idCategory == c.idCategory).length,
+                                cancelled: t.isCancelled,
+                                expanded: true,
+                                onTap: () => setState(() => _expandedId = ""),
+                              ),
+                              _CategoryCard(
+                                tournamentId: t.idTournament,
+                                category: c,
+                                tournamentCancelled: t.isCancelled,
+                                participants: _participants.where((p) => p.idCategory == c.idCategory).toList(),
+                                participantsLoaded: _participantsLoaded,
+                                subscribing: _subscribingId == c.idCategory,
+                                onSubscribe: () => _subscribe(c),
+                                onUnsubscribe: () => _unsubscribe(c),
+                                onOpen: () => _goMyCategory(c),
+                                onSeeAll: () => _go(AppRoutes.tournamentPlayers),
+                              ),
+                              const SizedBox(height: 8),
+                            ] else ...[
+                              _CategoryRow(
+                                category: c,
+                                enrolled: _participants.where((p) => p.idCategory == c.idCategory).length,
+                                cancelled: t.isCancelled,
+                                expanded: false,
+                                onTap: () => setState(() => _expandedId = c.idCategory),
+                              ),
+                              const SizedBox(height: 6),
+                            ],
+                          ],
+                        ]
                         else
                           for (final c in cats) ...[
                             _CategoryCard(
@@ -312,10 +390,10 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                             ),
                             const SizedBox(height: 12),
                           ],
+                        ]) Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: w),
                       ]),
                     ),
                   ),
-            ),
           ),
         ),
       ),
@@ -336,7 +414,9 @@ class _HeroCard extends StatelessWidget {
   final Tournament tournament;
   final bool started;
   final bool anyOpen;
-  const _HeroCard({required this.tournament, required this.started, required this.anyOpen});
+  /// Encabezado (← Campeonato · compartir) que va encima de la foto.
+  final Widget header;
+  const _HeroCard({required this.tournament, required this.started, required this.anyOpen, required this.header});
 
   @override
   Widget build(BuildContext context) {
@@ -356,15 +436,54 @@ class _HeroCard extends StatelessWidget {
                     ? ("Inscripciones abiertas", AppColors.scorifyMint, AppColors.scorifyOnMint)
                     : ("Inscripciones cerradas", AppColors.scorifyPending, AppColors.scorifyOnMint);
 
-    // Cabecera con foto (ADN del login): el jugador detrás y el degradado
-    // oscuro de GlassCard para que los datos se lean encima.
-    return GlassCard(
+    // Cabecera con foto (ADN del login) de borde a borde y desde arriba del
+    // todo: el encabezado va encima. Mismo encuadre y oscurecido que la
+    // tarjeta; abajo termina con un filete, sin esquinas redondeadas.
+    final topInset = MediaQuery.paddingOf(context).top;
+    return DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.scorifyCardBorderStrong))),
+      child: GlassCard(
       backgroundImage: const AssetImage("assets/images/login_player.jpg"),
-      backgroundAlignment: const Alignment(0.2, -0.35),
-      padding: const EdgeInsets.fromLTRB(18, 110, 18, 18),
+      // El jugador corrido a la derecha y con la cara despejada: el
+      // oscurecido va solo del lado del texto (izquierda) y abajo (cifras).
+      backgroundAlignment: const Alignment(0, 0.1),
+      backgroundScale: 1.35,
+      square: true,
+      scrims: [
+        // Arriba, apenas, para que se lean la flecha y el título.
+        LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppColors.scorifyBg.withValues(alpha: 0.6), AppColors.scorifyBg.withValues(alpha: 0)],
+          stops: const [0, 0.22],
+        ),
+        LinearGradient(
+          colors: [
+            AppColors.scorifyBg.withValues(alpha: 0.85),
+            AppColors.scorifyBg.withValues(alpha: 0.45),
+            AppColors.scorifyBg.withValues(alpha: 0),
+          ],
+          stops: const [0, 0.38, 0.62],
+        ),
+        LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.scorifyBg.withValues(alpha: 0),
+            AppColors.scorifyBg.withValues(alpha: 0.15),
+            AppColors.scorifyBg.withValues(alpha: 0.75),
+            AppColors.scorifyBg.withValues(alpha: 0.95),
+          ],
+          stops: const [0, 0.45, 0.78, 1],
+        ),
+      ],
+      padding: EdgeInsets.fromLTRB(16, topInset + 16, 16, 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          header,
+          const SizedBox(height: 90),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -383,10 +502,22 @@ class _HeroCard extends StatelessWidget {
             t.tournamentName,
             style: const TextStyle(
               fontFamily: AppTypography.body,
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
-              color: AppColors.scorifyText,
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.4,
+              height: 1.15,
+              color: Colors.white,
+              shadows: [Shadow(color: Color(0x99000000), blurRadius: 12, offset: Offset(0, 2))],
+            ),
+          ),
+          const SizedBox(height: 10),
+          // Filete de acento bajo el título (azul de marca → hielo).
+          Container(
+            width: 40,
+            height: 3,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(2),
+              gradient: const LinearGradient(colors: [AppColors.scorifyMint, AppColors.scorifyCyan]),
             ),
           ),
           const SizedBox(height: 14),
@@ -402,7 +533,23 @@ class _HeroCard extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(child: _InfoRow(icon: Icons.place_rounded, text: t.address!)),
-                  Text("Cómo llegar", style: AppTypography.bodyMuted.copyWith(color: AppColors.scorifyMint, fontWeight: FontWeight.w600)),
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 8, left: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.scorifyMint.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: AppColors.scorifyMint.withValues(alpha: 0.45)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text("Cómo llegar", style: _meta.copyWith(color: AppColors.scorifyCyan, fontWeight: FontWeight.w700)),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.north_east_rounded, size: 13, color: AppColors.scorifyCyan),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -412,15 +559,43 @@ class _HeroCard extends StatelessWidget {
             Text(t.description!, style: AppTypography.bodyMuted),
           ],
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            decoration: panelBox(),
-            child: Row(
-              children: [
-                _Kpi(value: "${t.categories.length}", label: t.categories.length == 1 ? "Categoría" : "Categorías"),
-                _Kpi(value: "$enrolled", label: enrolled == 1 ? "Inscrito" : "Inscritos"),
-                _Kpi(value: quota != null ? "$quota" : "∞", label: "Cupos"),
-              ],
+          // Franja de cifras: vidrio oscuro con filete azul arriba y divisores.
+          ClipRRect(
+            borderRadius: BorderRadius.circular(Panel.radius),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0x8C070B12),
+                borderRadius: BorderRadius.circular(Panel.radius),
+                border: Border.all(color: AppColors.scorifyCardBorder),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    height: 2,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(colors: [
+                        AppColors.scorifyMint.withValues(alpha: 0),
+                        AppColors.scorifyMint,
+                        AppColors.scorifyMint.withValues(alpha: 0),
+                      ]),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: IntrinsicHeight(
+                      child: Row(
+                        children: [
+                          _Kpi(value: "${t.categories.length}", label: t.categories.length == 1 ? "Categoría" : "Categorías"),
+                          const VerticalDivider(width: 1, thickness: 1, color: AppColors.scorifyCardBorder),
+                          _Kpi(value: "$enrolled", label: enrolled == 1 ? "Inscrito" : "Inscritos"),
+                          const VerticalDivider(width: 1, thickness: 1, color: AppColors.scorifyCardBorder),
+                          _Kpi(value: quota != null ? "$quota" : "∞", label: "Cupos"),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           // Contacto con el organizador (si dejó su WhatsApp en la web).
@@ -433,6 +608,7 @@ class _HeroCard extends StatelessWidget {
             ),
           ],
         ],
+      ),
       ),
     );
   }
@@ -935,7 +1111,7 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 16, color: AppColors.scorifyTextMuted),
+          Icon(icon, size: 16, color: AppColors.scorifyMint),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -968,14 +1144,17 @@ class _Kpi extends StatelessWidget {
             value,
             style: const TextStyle(
               fontFamily: AppTypography.display, letterSpacing: -0.5,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
               height: 1.0,
-              color: AppColors.scorifyText,
+              color: Colors.white,
             ),
           ),
-          const SizedBox(height: 2),
-          Text(label, style: _meta),
+          const SizedBox(height: 6),
+          Text(
+            label.toUpperCase(),
+            style: _meta.copyWith(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.1, color: AppColors.scorifyTextMuted),
+          ),
         ],
       ),
     );
@@ -1036,17 +1215,32 @@ class _QuickLink extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(Panel.radius),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14),
+          padding: const EdgeInsets.symmetric(vertical: 16),
           child: Column(
             children: [
-              Icon(icon, color: AppColors.scorifyText, size: 22),
-              const SizedBox(height: 6),
+              // Ícono en un círculo azul translúcido con filete (más "pro").
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppColors.scorifyMint.withValues(alpha: 0.28), AppColors.scorifyMintDark.withValues(alpha: 0.12)],
+                  ),
+                  border: Border.all(color: AppColors.scorifyMint.withValues(alpha: 0.5)),
+                  boxShadow: [BoxShadow(color: AppColors.scorifyMint.withValues(alpha: 0.25), blurRadius: 14)],
+                ),
+                child: Icon(icon, color: Colors.white, size: 20),
+              ),
+              const SizedBox(height: 8),
               Text(
                 label,
                 style: const TextStyle(
                   fontFamily: AppTypography.body,
                   fontSize: 13,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.scorifyText,
                 ),
               ),
@@ -1221,6 +1415,178 @@ class _FollowCardState extends State<_FollowCard> {
                     child: Text(following ? "Siguiendo ✓" : "Seguir"),
                   ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Fase de la categoría para mostrarla (texto corto y color del punto).
+(String, Color) _phaseOf(TournamentCategory c, bool cancelled) {
+  final closedByOrganizer = c.phase == "enrollment" && c.status != "active";
+  final lateOpen = c.phase == "groups" && c.status == "active";
+  return switch (c.phase) {
+    _ when cancelled => ("Cancelada", AppColors.scorifyNegative),
+    "enrollment" when closedByOrganizer => ("Inscripción cerrada", AppColors.scorifyPending),
+    "enrollment" => ("Inscripciones", AppColors.scorifyMint),
+    "groups" when lateOpen => ("Grupos · abierta", AppColors.scorifyMint),
+    "groups" => ("Grupos", AppColors.scorifyButterfly),
+    "bracket" => ("Llave", AppColors.scorifyPending),
+    "finished" => ("Finalizada", AppColors.scorifyTextMuted),
+    _ => (c.phase, AppColors.scorifyTextMuted),
+  };
+}
+
+/// Fila compacta de una categoría (cuando hay muchas): nombre y género a la
+/// izquierda; fase, inscritos y flecha a la derecha. Al tocarla se abre la
+/// tarjeta completa debajo.
+class _CategoryRow extends StatelessWidget {
+  final TournamentCategory category;
+  final int enrolled;
+  final bool cancelled;
+  final bool expanded;
+  final VoidCallback onTap;
+  const _CategoryRow({
+    required this.category,
+    required this.enrolled,
+    required this.cancelled,
+    required this.expanded,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = category;
+    final (phase, phaseColor) = _phaseOf(c, cancelled);
+    final count = c.quotas != null ? "$enrolled/${c.quotas}" : "$enrolled";
+    return Material(
+      color: expanded ? const Color(0x14FFFFFF) : const Color(0x99000000),
+      shape: Border.all(color: expanded ? const Color(0x59FFFFFF) : const Color(0x33FFFFFF)),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            c.categoryLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white),
+                          ),
+                        ),
+                        if (c.isEnrolled) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            color: AppColors.scorifyMint.withValues(alpha: 0.18),
+                            child: const Text("Juegas",
+                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.scorifyCyan)),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(_genderLabel(c.gender), style: _meta.copyWith(color: AppColors.scorifyTextMuted)),
+                        Text("  ·  ", style: _meta.copyWith(color: AppColors.scorifyTextFaint)),
+                        Container(width: 6, height: 6, decoration: BoxDecoration(color: phaseColor, shape: BoxShape.circle)),
+                        const SizedBox(width: 5),
+                        Flexible(
+                          child: Text(phase,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: _meta.copyWith(color: phaseColor, fontWeight: FontWeight.w600)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(count, style: const TextStyle(fontFamily: AppTypography.display, fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white)),
+                  Text("inscritos", style: _meta.copyWith(fontSize: 10, color: AppColors.scorifyTextFaint)),
+                ],
+              ),
+              const SizedBox(width: 6),
+              AnimatedRotation(
+                turns: expanded ? 0.5 : 0,
+                duration: const Duration(milliseconds: 180),
+                child: const Icon(Icons.expand_more_rounded, color: AppColors.scorifyTextMuted, size: 22),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Filtro de categorías (igual que los filtros de Campeonatos): barra negra
+/// con filete; la elegida en blanco con una línea azul abajo.
+class _CategoryFilterBar extends StatelessWidget {
+  final String value;
+  final ValueChanged<String> onChanged;
+  const _CategoryFilterBar({required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    const opts = {"all": "Todas", "female": "Damas", "male": "Varones", "open": "Abiertas"};
+    return Container(
+      decoration: BoxDecoration(color: const Color(0x99000000), border: Border.all(color: const Color(0x40FFFFFF))),
+      child: Row(
+        children: [
+          for (final e in opts.entries) ...[
+            if (e.key != "all") Container(width: 1, height: 20, color: const Color(0x1AFFFFFF)),
+            Expanded(
+              child: InkWell(
+                onTap: () => onChanged(e.key),
+                child: Container(
+                  height: 40,
+                  color: value == e.key ? const Color(0x14FFFFFF) : Colors.transparent,
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: Text(
+                          e.value,
+                          style: TextStyle(
+                            fontFamily: AppTypography.body,
+                            fontSize: 13,
+                            fontWeight: value == e.key ? FontWeight.w700 : FontWeight.w600,
+                            color: value == e.key ? Colors.white : AppColors.scorifyTextMuted,
+                          ),
+                        ),
+                      ),
+                      if (value == e.key)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            height: 2,
+                            decoration: BoxDecoration(
+                              color: AppColors.scorifyMint,
+                              boxShadow: [BoxShadow(color: AppColors.scorifyMint.withValues(alpha: 0.7), blurRadius: 8)],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

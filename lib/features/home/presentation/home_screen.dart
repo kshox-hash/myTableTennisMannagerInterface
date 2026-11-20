@@ -615,6 +615,23 @@ class _HomeScreenState extends State<HomeScreen>
     final nm = _dashboard?.nextMatch;
     // Sin nada propio (ni partido, grupo, resultados, campeonatos ni en vivo):
     // el contenido va centrado en la pantalla en vez de quedar pegado arriba.
+    // Inicio sin nada: la foto con "Buscar campeonatos" (mismas condiciones
+    // que eligen HomeEmptyCard con esa acción más abajo).
+    final heroHome = !(_loadFailed && _dashboard == null) &&
+        nm == null && _live == null && _challenge == null && _liveFollow == null &&
+        (_playingNow || _refMatches.isEmpty);
+    final header = ValueListenableBuilder<int>(
+      valueListenable: NotificationPopups.unread,
+      builder: (context, unread, _) => SpinHeader(
+        notificationsCount: unread,
+        // Panel lateral en vez de página completa; al cerrarlo se
+        // refresca el contador de no leídas.
+        onNotifications: () => Navigator.push(
+          context,
+          SidePanelRoute(child: const NotificationsScreen()),
+        ).then((_) => _load()),
+      ),
+    );
     final homeEmpty = nm == null && _myGroups.isEmpty && _history.isEmpty && _mine.isEmpty && _liveSummaries.isEmpty && _refMatches.isEmpty;
     _recenter();
 
@@ -658,19 +675,9 @@ class _HomeScreenState extends State<HomeScreen>
                     child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      ValueListenableBuilder<int>(
-                        valueListenable: NotificationPopups.unread,
-                        builder: (context, unread, _) => SpinHeader(
-                          notificationsCount: unread,
-                          // Panel lateral en vez de página completa; al cerrarlo se
-                          // refresca el contador de no leídas.
-                          onNotifications: () => Navigator.push(
-                            context,
-                            SidePanelRoute(child: const NotificationsScreen()),
-                          ).then((_) => _load()),
-                        ),
-                      ),
-                      if (homeEmpty) const Spacer() else const SizedBox(height: 4),
+                      // Con la foto de "Buscar campeonatos" el encabezado va
+                      // encima de la foto (como en Campeonato), no arriba suelto.
+                      if (!heroHome) ...[header, const SizedBox(height: 4)],
                       // 2026-11-08: el contenido va ARRIBA (donde llega el
                       // pulgar y mira el ojo); el espacio que sobra queda al
                       // final. Centrado dejaba un hueco grande bajo el
@@ -746,6 +753,7 @@ class _HomeScreenState extends State<HomeScreen>
                               ? "Pronto se abren nuevos torneos"
                               : "$_openCount ${_openCount == 1 ? "torneo abierto" : "torneos abiertos"}${_nextOpen != null ? " · el próximo el ${_whenShort(_nextOpen!)}" : ""}",
                           onAction: () => AppShellScope.of(context)?.switchTab(3, link: true),
+                          header: heroHome ? header : null,
                         ),
                       ] else ...[
                         matches,

@@ -345,14 +345,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           children: [
                             _ProfileHero(profile: p, onEdit: () => _startEditing(p)),
                             const SizedBox(height: 14),
-                            GridView.count(
-                              crossAxisCount: 2,
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              mainAxisSpacing: 10,
-                              crossAxisSpacing: 10,
-                              childAspectRatio: 2.3,
-                              children: [
+                            // Datos en un solo panel negro con filete (como el
+                            // botón de Google del login), grilla 2×2 con divisores.
+                            _InfoPanel(
+                              tiles: [
                                 _InfoTile(icon: Icons.cake_rounded, label: "Edad", value: p.age == null ? "—" : "${p.age} años"),
                                 _InfoTile(icon: Icons.wc_rounded, label: "Género", value: _genderLabel(p.gender)),
                                 _InfoTile(
@@ -833,27 +829,65 @@ class _InfoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(gradient: AppColors.cardGradient, borderRadius: BorderRadius.circular(Panel.radius)),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.scorifyTextMuted, size: 20), // gris: el dato manda, no el ícono
-          const SizedBox(width: 10),
+          Icon(icon, color: AppColors.scorifyTextMuted, size: 20),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
-                const SizedBox(height: 2),
+                Text(
+                  label.toUpperCase(),
+                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.1, color: AppColors.scorifyTextMuted),
+                ),
+                const SizedBox(height: 4),
                 Text(value,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white)),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Panel de datos del perfil, como el botón de Google del login: negro
+/// translúcido con filete fino, sin azul, y los datos en 2×2 con divisores.
+class _InfoPanel extends StatelessWidget {
+  final List<Widget> tiles;
+  const _InfoPanel({required this.tiles});
+
+  @override
+  Widget build(BuildContext context) {
+    const divider = Color(0x1AFFFFFF);
+    Widget row(Widget a, Widget b) => IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: a),
+              const VerticalDivider(width: 1, thickness: 1, color: divider),
+              Expanded(child: b),
+            ],
+          ),
+        );
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0x99000000),
+        border: Border.all(color: const Color(0x40FFFFFF)),
+      ),
+      child: Column(
+        children: [
+          for (var i = 0; i < tiles.length; i += 2) ...[
+            if (i > 0) const Divider(height: 1, thickness: 1, color: divider),
+            row(tiles[i], i + 1 < tiles.length ? tiles[i + 1] : const SizedBox()),
+          ],
         ],
       ),
     );

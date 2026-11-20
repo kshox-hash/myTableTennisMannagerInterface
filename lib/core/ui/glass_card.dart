@@ -29,6 +29,15 @@ class GlassCard extends StatelessWidget {
   final ImageProvider? backgroundImage;
   final Alignment backgroundAlignment;
 
+  /// Zoom de la foto desde el borde izquierdo (>1 corre al sujeto a la derecha).
+  final double backgroundScale;
+
+  /// Reemplaza el scrim por defecto (se pintan en orden, uno encima de otro).
+  final List<Gradient>? scrims;
+
+  /// De borde a borde: sin esquinas redondeadas ni filete de tarjeta.
+  final bool square;
+
   const GlassCard({
     super.key,
     required this.child,
@@ -40,6 +49,9 @@ class GlassCard extends StatelessWidget {
     this.borderColor,
     this.backgroundImage,
     this.backgroundAlignment = Alignment.center,
+    this.backgroundScale = 1,
+    this.scrims,
+    this.square = false,
   });
 
   static const _radius = Panel.radius;
@@ -58,12 +70,19 @@ class GlassCard extends StatelessWidget {
         fit: StackFit.passthrough,
         children: [
           Positioned.fill(
-            child: Image(
-              image: backgroundImage!,
-              fit: BoxFit.cover,
-              alignment: backgroundAlignment,
+            child: Transform.scale(
+              scale: backgroundScale,
+              alignment: Alignment.topLeft,
+              child: Image(
+                image: backgroundImage!,
+                fit: BoxFit.cover,
+                alignment: backgroundAlignment,
+              ),
             ),
           ),
+          if (scrims != null)
+            for (final g in scrims!) Positioned.fill(child: DecoratedBox(decoration: BoxDecoration(gradient: g)))
+          else
           // Scrim: oscurece la foto de abajo hacia arriba para que el texto
           // siga siendo legible sin importar qué tan clara sea la imagen.
           Positioned.fill(
@@ -88,9 +107,9 @@ class GlassCard extends StatelessWidget {
     }
 
     // Tocable: se hunde apenas al presionar, como los botones.
-    return PressScale(enabled: onTap != null, child: CardBorder(radius: _radius, child: Container(
+    final box = Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(_radius),
+        borderRadius: square ? null : BorderRadius.circular(_radius),
         border: borderColor == null ? null : Border.all(color: borderColor!), // el filete lo pinta CardBorder
         color: fillColor,
         gradient: (fillColor == null && backgroundImage == null)
@@ -103,6 +122,7 @@ class GlassCard extends StatelessWidget {
         color: Colors.transparent,
         child: onTap == null ? fill : InkWell(onTap: onTap, child: fill),
       ),
-    )));
+    );
+    return PressScale(enabled: onTap != null, child: square ? box : CardBorder(radius: _radius, child: box));
   }
 }
