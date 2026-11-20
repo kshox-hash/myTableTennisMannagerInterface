@@ -264,7 +264,7 @@ class _CelebrationDialogState extends State<_CelebrationDialog> {
                   color: AppColors.scorifyCardFill,
                   borderRadius: BorderRadius.circular(4),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.08),
+                    color: AppColors.scorifyInk.withValues(alpha: 0.08),
                   ),
                 ),
                 clipBehavior: Clip.antiAlias,
@@ -278,12 +278,12 @@ class _CelebrationDialogState extends State<_CelebrationDialog> {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: champion
-                                  ? const [
+                                  ? [
                                       Color(0xFF8A5C12),
                                       Color(0xFFFFD479),
                                       Color(0xFF8A5C12),
                                     ]
-                                  : const [
+                                  : [
                                       AppColors.scorifyButterfly,
                                       AppColors.scorifyMint,
                                     ],
@@ -332,7 +332,7 @@ class _CelebrationDialogState extends State<_CelebrationDialog> {
                                     borderRadius: BorderRadius.circular(3),
                                     color: i == _index
                                         ? AppColors.scorifyMint
-                                        : Colors.white.withValues(alpha: 0.2),
+                                        : AppColors.scorifyInk.withValues(alpha: 0.2),
                                   ),
                                 ),
                               IconButton(
@@ -378,7 +378,7 @@ class _CelebrationDialogState extends State<_CelebrationDialog> {
                               if (_multi && !_onSummary)
                                 TextButton(
                                   onPressed: () => _go(widget.items.length),
-                                  child: const Text(
+                                  child: Text(
                                     "Ver resumen",
                                     style: TextStyle(
                                       color: AppColors.scorifyTextMuted,
@@ -395,7 +395,7 @@ class _CelebrationDialogState extends State<_CelebrationDialog> {
                       right: 8,
                       child: IconButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.close_rounded,
                           color: AppColors.scorifyTextMuted,
                         ),
@@ -486,7 +486,7 @@ class _ResultPage extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             sub,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.scorifyTextMuted,
               fontSize: 13,
             ),
@@ -509,12 +509,12 @@ class _ResultPage extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 14),
-          Divider(height: 1, color: Colors.white.withValues(alpha: 0.07)),
+          Divider(height: 1, color: AppColors.scorifyInk.withValues(alpha: 0.07)),
           const SizedBox(height: 12),
           Text(
             (data["tournament_name"] ?? "").toString(),
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.scorifyText,
               fontSize: 14,
               fontWeight: FontWeight.w700,
@@ -522,7 +522,7 @@ class _ResultPage extends StatelessWidget {
           ),
           Text(
             (data["category_label"] ?? "").toString(),
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.scorifyTextMuted,
               fontSize: 12,
             ),
@@ -544,8 +544,8 @@ class _ResultPage extends StatelessWidget {
                 ),
                 text: "$title en ${data["tournament_name"] ?? ""} · MyTTM",
               ),
-              icon: const Icon(Icons.ios_share_rounded, size: 18, color: AppColors.scorifyMint),
-              label: const Text("Compartir", style: TextStyle(color: AppColors.scorifyMint, fontWeight: FontWeight.w700)),
+              icon: Icon(Icons.ios_share_rounded, size: 18, color: AppColors.scorifyMint),
+              label: Text("Compartir", style: TextStyle(color: AppColors.scorifyMint, fontWeight: FontWeight.w700)),
             ),
           ],
           if (podium.isNotEmpty) ...[
@@ -561,7 +561,7 @@ class _ResultPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text(
+                Text(
                   "Podio",
                   style: TextStyle(
                     color: AppColors.scorifyTextMuted,
@@ -579,7 +579,7 @@ class _ResultPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.06),
+                      color: AppColors.scorifyInk.withValues(alpha: 0.06),
                     ),
                   ),
                 ),
@@ -604,7 +604,7 @@ class _ResultPage extends StatelessWidget {
                             p["name"].toString(),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.scorifyText,
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -643,7 +643,7 @@ class _SummaryPage extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(22, 30, 22, 0),
       child: Column(
         children: [
-          const Text(
+          Text(
             "Tus resultados",
             style: TextStyle(
               color: AppColors.scorifyText,
@@ -655,7 +655,7 @@ class _SummaryPage extends StatelessWidget {
           Text(
             "Terminaron ${items.length} campeonatos en los que jugaste",
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.scorifyTextMuted,
               fontSize: 13,
             ),
@@ -672,7 +672,7 @@ class _SummaryPage extends StatelessWidget {
                 itemCount: items.length,
                 separatorBuilder: (_, __) => Divider(
                   height: 1,
-                  color: Colors.white.withValues(alpha: 0.06),
+                  color: AppColors.scorifyInk.withValues(alpha: 0.06),
                 ),
                 itemBuilder: (_, i) {
                   final c = items[i];
@@ -707,7 +707,7 @@ class _SummaryPage extends StatelessWidget {
                                         0)
                                       TextSpan(
                                         text: "  +${c["ranking_points"]} pts",
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: AppColors.scorifyButterfly,
                                           fontSize: 11,
                                           fontWeight: FontWeight.w700,
@@ -720,7 +720,7 @@ class _SummaryPage extends StatelessWidget {
                                 "${c["tournament_name"]} · ${c["category_label"]}",
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: AppColors.scorifyTextMuted,
                                   fontSize: 12,
                                 ),

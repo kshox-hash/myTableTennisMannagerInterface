@@ -312,8 +312,6 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen> {
                             children: [
                               Expanded(child: _QuickLink(icon: Icons.sports_tennis_rounded, label: "Partidos", onTap: () => _go(AppRoutes.tournamentMatches))),
                               const SizedBox(width: 10),
-                              Expanded(child: _QuickLink(icon: Icons.table_bar_rounded, label: "Mesas", onTap: () => _go(AppRoutes.tournamentTables))),
-                              const SizedBox(width: 10),
                               Expanded(child: _QuickLink(icon: Icons.people_alt_rounded, label: "Jugadores", onTap: () => _go(AppRoutes.tournamentPlayers))),
                             ],
                           ),
@@ -436,54 +434,22 @@ class _HeroCard extends StatelessWidget {
                     ? ("Inscripciones abiertas", AppColors.scorifyMint, AppColors.scorifyOnMint)
                     : ("Inscripciones cerradas", AppColors.scorifyPending, AppColors.scorifyOnMint);
 
-    // Cabecera con foto (ADN del login) de borde a borde y desde arriba del
-    // todo: el encabezado va encima. Mismo encuadre y oscurecido que la
-    // tarjeta; abajo termina con un filete, sin esquinas redondeadas.
+    // Cabecera de borde a borde con el encabezado arriba; abajo termina con un
+    // filete, sin esquinas redondeadas.
     final topInset = MediaQuery.paddingOf(context).top;
     return DecoratedBox(
       position: DecorationPosition.foreground,
-      decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.scorifyCardBorderStrong))),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.scorifyCardBorderStrong))),
       child: GlassCard(
-      backgroundImage: const AssetImage("assets/images/login_player.jpg"),
-      // El jugador corrido a la derecha y con la cara despejada: el
-      // oscurecido va solo del lado del texto (izquierda) y abajo (cifras).
-      backgroundAlignment: const Alignment(0, 0.1),
-      backgroundScale: 1.35,
+      // Sin foto (solo el login la tiene): fondo de la página y filete abajo.
+      fillColor: Colors.transparent,
       square: true,
-      scrims: [
-        // Arriba, apenas, para que se lean la flecha y el título.
-        LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppColors.scorifyBg.withValues(alpha: 0.6), AppColors.scorifyBg.withValues(alpha: 0)],
-          stops: const [0, 0.22],
-        ),
-        LinearGradient(
-          colors: [
-            AppColors.scorifyBg.withValues(alpha: 0.85),
-            AppColors.scorifyBg.withValues(alpha: 0.45),
-            AppColors.scorifyBg.withValues(alpha: 0),
-          ],
-          stops: const [0, 0.38, 0.62],
-        ),
-        LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppColors.scorifyBg.withValues(alpha: 0),
-            AppColors.scorifyBg.withValues(alpha: 0.15),
-            AppColors.scorifyBg.withValues(alpha: 0.75),
-            AppColors.scorifyBg.withValues(alpha: 0.95),
-          ],
-          stops: const [0, 0.45, 0.78, 1],
-        ),
-      ],
       padding: EdgeInsets.fromLTRB(16, topInset + 16, 16, 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           header,
-          const SizedBox(height: 90),
+          const SizedBox(height: 18),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -500,14 +466,15 @@ class _HeroCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             t.tournamentName,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.body,
               fontSize: 26,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.4,
               height: 1.15,
-              color: Colors.white,
-              shadows: [Shadow(color: Color(0x99000000), blurRadius: 12, offset: Offset(0, 2))],
+              color: AppColors.scorifyInk,
+              // Sombra solo en oscuro (en claro ensuciaba el título).
+              shadows: AppColors.isLight ? null : const [Shadow(color: Color(0x99000000), blurRadius: 12, offset: Offset(0, 2))],
             ),
           ),
           const SizedBox(height: 10),
@@ -517,7 +484,7 @@ class _HeroCard extends StatelessWidget {
             height: 3,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(2),
-              gradient: const LinearGradient(colors: [AppColors.scorifyMint, AppColors.scorifyCyan]),
+              gradient: LinearGradient(colors: [AppColors.scorifyMint, AppColors.scorifyCyan]),
             ),
           ),
           const SizedBox(height: 14),
@@ -546,7 +513,7 @@ class _HeroCard extends StatelessWidget {
                       children: [
                         Text("Cómo llegar", style: _meta.copyWith(color: AppColors.scorifyCyan, fontWeight: FontWeight.w700)),
                         const SizedBox(width: 4),
-                        const Icon(Icons.north_east_rounded, size: 13, color: AppColors.scorifyCyan),
+                        Icon(Icons.north_east_rounded, size: 13, color: AppColors.scorifyCyan),
                       ],
                     ),
                   ),
@@ -564,7 +531,7 @@ class _HeroCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(Panel.radius),
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0x8C070B12),
+                color: AppColors.isLight ? AppColors.scorifyCardFill : const Color(0x8C070B12),
                 borderRadius: BorderRadius.circular(Panel.radius),
                 border: Border.all(color: AppColors.scorifyCardBorder),
               ),
@@ -586,9 +553,9 @@ class _HeroCard extends StatelessWidget {
                       child: Row(
                         children: [
                           _Kpi(value: "${t.categories.length}", label: t.categories.length == 1 ? "Categoría" : "Categorías"),
-                          const VerticalDivider(width: 1, thickness: 1, color: AppColors.scorifyCardBorder),
+                          VerticalDivider(width: 1, thickness: 1, color: AppColors.scorifyCardBorder),
                           _Kpi(value: "$enrolled", label: enrolled == 1 ? "Inscrito" : "Inscritos"),
-                          const VerticalDivider(width: 1, thickness: 1, color: AppColors.scorifyCardBorder),
+                          VerticalDivider(width: 1, thickness: 1, color: AppColors.scorifyCardBorder),
                           _Kpi(value: quota != null ? "$quota" : "∞", label: "Cupos"),
                         ],
                       ),
@@ -673,7 +640,7 @@ class _CategoryCardState extends State<_CategoryCard> {
     Color medal(int pos) => pos == 1 ? gold : pos == 2 ? silver : bronze;
     return Container(
       // Más oscuro que la tarjeta: el podio se despega.
-      decoration: BoxDecoration(color: const Color(0xFF0F1620), borderRadius: BorderRadius.circular(Panel.radius)),
+      decoration: BoxDecoration(color: AppColors.isLight ? const Color(0xFFF4F4F6) : const Color(0xFF0F1620), borderRadius: BorderRadius.circular(Panel.radius)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -682,8 +649,8 @@ class _CategoryCardState extends State<_CategoryCard> {
             Container(
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
               // Dorado oscuro sólido con filo dorado a la izquierda (antes un tinte que se veía gris).
-              decoration: const BoxDecoration(
-                color: Color(0xFF2A2210),
+              decoration: BoxDecoration(
+                color: AppColors.isLight ? Color(0xFFFFF4DA) : Color(0xFF2A2210),
                 border: Border(left: BorderSide(color: gold, width: 3)),
               ),
               child: Row(
@@ -706,7 +673,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                         Text(champ.playerName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
+                            style: TextStyle(fontFamily: AppTypography.body, fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.scorifyText)),
                         ClubLine(idUser: champ.idUser, club: champ.clubName, style: _meta.copyWith(fontSize: 11.5)),
                       ],
                     ),
@@ -739,7 +706,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                               Text(r.playerName,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                               ClubLine(idUser: r.idUser, club: r.clubName, crestSize: 12, style: _meta.copyWith(fontSize: 11, color: AppColors.scorifyTextFaint)),
                             ],
                           ),
@@ -793,7 +760,7 @@ class _CategoryCardState extends State<_CategoryCard> {
               Expanded(
                 child: Text(
                   c.categoryLabel,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: AppTypography.body,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -824,11 +791,11 @@ class _CategoryCardState extends State<_CategoryCard> {
             const SizedBox(height: 10),
             Row(
               children: [
-                const Icon(Icons.event_rounded, size: 15, color: AppColors.scorifyMint),
+                Icon(Icons.event_rounded, size: 15, color: AppColors.scorifyMint),
                 const SizedBox(width: 6),
                 Text(
                   "Se juega: ${_categoryDay(c.playDate, c.startTime)}",
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                 ),
               ],
             ),
@@ -868,7 +835,7 @@ class _CategoryCardState extends State<_CategoryCard> {
     if (players.isEmpty) {
       return Row(
         children: [
-          const Icon(Icons.person_add_alt_1_rounded, size: 16, color: AppColors.scorifyTextMuted),
+          Icon(Icons.person_add_alt_1_rounded, size: 16, color: AppColors.scorifyTextMuted),
           const SizedBox(width: 8),
           Expanded(child: Text("Aún no hay inscritos. ¡Sé el primero!", style: _meta)),
         ],
@@ -943,7 +910,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                                       players[i].playerName,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontFamily: AppTypography.body,
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
@@ -962,7 +929,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                               IconButton(
                                 tooltip: "Ver perfil",
                                 visualDensity: VisualDensity.compact,
-                                icon: const Icon(Icons.visibility_rounded, size: 20, color: AppColors.scorifyMint),
+                                icon: Icon(Icons.visibility_rounded, size: 20, color: AppColors.scorifyMint),
                                 onPressed: () => Navigator.pushNamed(
                                   context,
                                   AppRoutes.playerProfile,
@@ -977,7 +944,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                           alignment: Alignment.centerLeft,
                           child: TextButton.icon(
                             onPressed: widget.onSeeAll,
-                            icon: const Icon(Icons.people_alt_rounded, size: 18, color: AppColors.scorifyMint),
+                            icon: Icon(Icons.people_alt_rounded, size: 18, color: AppColors.scorifyMint),
                             label: Text(
                               "Ver los ${players.length} inscritos",
                               style: _meta.copyWith(color: AppColors.scorifyMint, fontWeight: FontWeight.w600),
@@ -1002,10 +969,10 @@ class _CategoryCardState extends State<_CategoryCard> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              const _Pill(label: "Estás inscrito ✓", bg: Color(0x332FD67B), fg: AppColors.scorifyButterfly),
+              _Pill(label: "Estás inscrito ✓", bg: Color(0x332FD67B), fg: AppColors.scorifyButterfly),
               // Pago de la inscripción (lo marca el organizador en la mesa de control).
               c.isPaid
-                  ? const _Pill(label: "Inscripción pagada ✓", bg: AppColors.scorifyButterfly, fg: AppColors.scorifyOnButterfly)
+                  ? _Pill(label: "Inscripción pagada ✓", bg: AppColors.scorifyButterfly, fg: AppColors.scorifyOnButterfly)
                   : _Pill(
                       label: c.inscriptionPrice > 0 ? "Pago pendiente · ${_money(c.inscriptionPrice)}" : "Inscripción gratis",
                       bg: c.inscriptionPrice > 0 ? const Color(0x33EAB308) : AppColors.scorifySurface2,
@@ -1092,7 +1059,7 @@ class _CategoryCardState extends State<_CategoryCard> {
   }
 }
 
-const TextStyle _meta = TextStyle(
+TextStyle get _meta => TextStyle(
   fontFamily: AppTypography.body,
   fontSize: 12,
   fontWeight: FontWeight.w400,
@@ -1116,7 +1083,7 @@ class _InfoRow extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: AppTypography.body,
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
@@ -1142,12 +1109,12 @@ class _Kpi extends StatelessWidget {
         children: [
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.display, letterSpacing: -0.5,
               fontSize: 26,
               fontWeight: FontWeight.w800,
               height: 1.0,
-              color: Colors.white,
+              color: AppColors.scorifyInk,
             ),
           ),
           const SizedBox(height: 6),
@@ -1176,7 +1143,7 @@ class _Fact extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.body,
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -1237,7 +1204,7 @@ class _QuickLink extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: AppTypography.body,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
@@ -1267,7 +1234,7 @@ class _NoticeBanner extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline_rounded, size: 18, color: AppColors.scorifyMint),
+          Icon(Icons.info_outline_rounded, size: 18, color: AppColors.scorifyMint),
           const SizedBox(width: 10),
           Expanded(child: Text(text, style: _meta.copyWith(color: AppColors.scorifyText, height: 1.4))),
         ],
@@ -1285,12 +1252,12 @@ class _SectionLabel extends StatelessWidget {
     // Mismo título de sección que el resto de la app (mayúsculas azul hielo).
     return Text(
       text.toUpperCase(),
-      style: const TextStyle(
+      style: TextStyle(
         fontFamily: AppTypography.body,
         fontSize: 11,
         fontWeight: FontWeight.w800,
         letterSpacing: 1.3,
-        color: Color(0xFF8EC5FF),
+        color: AppColors.scorifySection,
       ),
     );
   }
@@ -1309,7 +1276,7 @@ class _PlayerAvatar extends StatelessWidget {
       width: size + 4,
       height: size + 4,
       padding: const EdgeInsets.all(2),
-      decoration: const BoxDecoration(color: AppColors.scorifyCardFill, shape: BoxShape.circle),
+      decoration: BoxDecoration(color: AppColors.scorifyCardFill, shape: BoxShape.circle),
       child: UserAvatar(userId: player.idUser, url: player.avatarUrl, size: size),
     );
   }
@@ -1385,7 +1352,7 @@ class _FollowCardState extends State<_FollowCard> {
               children: [
                 Text(
                   following ? "Sigues este campeonato" : "¿No juegas? Síguelo",
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.scorifyText),
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.scorifyText),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -1402,7 +1369,7 @@ class _FollowCardState extends State<_FollowCard> {
           SizedBox(
             height: 36,
             child: _following == null
-                ? const SizedBox(width: 36, child: Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.scorifyMint))))
+                ? SizedBox(width: 36, child: Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.scorifyMint))))
                 : TextButton(
                     onPressed: _busy ? null : _toggle,
                     style: TextButton.styleFrom(
@@ -1460,8 +1427,8 @@ class _CategoryRow extends StatelessWidget {
     final (phase, phaseColor) = _phaseOf(c, cancelled);
     final count = c.quotas != null ? "$enrolled/${c.quotas}" : "$enrolled";
     return Material(
-      color: expanded ? const Color(0x14FFFFFF) : const Color(0x99000000),
-      shape: Border.all(color: expanded ? const Color(0x59FFFFFF) : const Color(0x33FFFFFF)),
+      color: expanded ? AppColors.scorifySelected : AppColors.scorifyCardFill,
+      shape: Border.all(color: expanded ? AppColors.scorifyCardBorderStrong : AppColors.scorifyHairline),
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -1479,7 +1446,7 @@ class _CategoryRow extends StatelessWidget {
                             c.categoryLabel,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white),
+                            style: TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.scorifyInk),
                           ),
                         ),
                         if (c.isEnrolled) ...[
@@ -1487,7 +1454,7 @@ class _CategoryRow extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             color: AppColors.scorifyMint.withValues(alpha: 0.18),
-                            child: const Text("Juegas",
+                            child: Text("Juegas",
                                 style: TextStyle(fontFamily: AppTypography.body, fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.scorifyCyan)),
                           ),
                         ],
@@ -1515,7 +1482,7 @@ class _CategoryRow extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(count, style: const TextStyle(fontFamily: AppTypography.display, fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white)),
+                  Text(count, style: TextStyle(fontFamily: AppTypography.display, fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.scorifyInk)),
                   Text("inscritos", style: _meta.copyWith(fontSize: 10, color: AppColors.scorifyTextFaint)),
                 ],
               ),
@@ -1523,7 +1490,7 @@ class _CategoryRow extends StatelessWidget {
               AnimatedRotation(
                 turns: expanded ? 0.5 : 0,
                 duration: const Duration(milliseconds: 180),
-                child: const Icon(Icons.expand_more_rounded, color: AppColors.scorifyTextMuted, size: 22),
+                child: Icon(Icons.expand_more_rounded, color: AppColors.scorifyTextMuted, size: 22),
               ),
             ],
           ),
@@ -1544,17 +1511,17 @@ class _CategoryFilterBar extends StatelessWidget {
   Widget build(BuildContext context) {
     const opts = {"all": "Todas", "female": "Damas", "male": "Varones", "open": "Abiertas"};
     return Container(
-      decoration: BoxDecoration(color: const Color(0x99000000), border: Border.all(color: const Color(0x40FFFFFF))),
+      decoration: BoxDecoration(color: AppColors.scorifyCardFill, border: Border.all(color: AppColors.scorifyHairline)),
       child: Row(
         children: [
           for (final e in opts.entries) ...[
-            if (e.key != "all") Container(width: 1, height: 20, color: const Color(0x1AFFFFFF)),
+            if (e.key != "all") Container(width: 1, height: 20, color: AppColors.scorifyHairline),
             Expanded(
               child: InkWell(
                 onTap: () => onChanged(e.key),
                 child: Container(
                   height: 40,
-                  color: value == e.key ? const Color(0x14FFFFFF) : Colors.transparent,
+                  color: value == e.key ? AppColors.scorifySelected : Colors.transparent,
                   child: Stack(
                     children: [
                       Center(
@@ -1564,7 +1531,7 @@ class _CategoryFilterBar extends StatelessWidget {
                             fontFamily: AppTypography.body,
                             fontSize: 13,
                             fontWeight: value == e.key ? FontWeight.w700 : FontWeight.w600,
-                            color: value == e.key ? Colors.white : AppColors.scorifyTextMuted,
+                            color: value == e.key ? AppColors.scorifyInk : AppColors.scorifyTextMuted,
                           ),
                         ),
                       ),

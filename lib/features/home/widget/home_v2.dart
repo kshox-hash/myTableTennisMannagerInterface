@@ -18,27 +18,27 @@ import "package:myttmi/features/home/widget/home_layout.dart";
 /// Inicio (diseño nuevo): perfil en una fila, próximo partido destacado,
 /// rendimiento con anillo, racha actual y últimos resultados.
 
-const _mint = AppColors.scorifyMint;
+Color get _mint => AppColors.scorifyMint;
 
 // Tarjetas del Inicio: marino con filete azul (rediseño 2026-10), las
 // mismas de AppColors. La principal (mi temporada) lleva tinte azul.
-const _glass = AppColors.cardGradient;
-const _glassFeatured = AppColors.featuredGradient;
-const _lime = AppColors.scorifyButterfly;
+LinearGradient get _glass => AppColors.cardGradient;
+LinearGradient get _glassFeatured => AppColors.featuredGradient;
+Color get _lime => AppColors.scorifyButterfly;
 
 // Degradados de las tarjetas de Inicio: la principal con tinte azul, el
 // resto marino como cualquier tarjeta.
-const homeGradientMain = AppColors.featuredGradient;
-const homeGradientTeal = AppColors.cardGradient;
-const homeGradientEmerald = AppColors.cardGradient;
+LinearGradient get homeGradientMain => AppColors.featuredGradient;
+LinearGradient get homeGradientTeal => AppColors.cardGradient;
+LinearGradient get homeGradientEmerald => AppColors.cardGradient;
 
 /// Números grandes (marcadores, KPIs): Manrope negrita, cifras tabulares.
-TextStyle _num(double size, {Color c = AppColors.scorifyText}) =>
-    TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: size * 0.76, fontWeight: FontWeight.w700, color: c, height: 1.0, fontFeatures: const [FontFeature.tabularFigures()]);
+TextStyle _num(double size, {Color? c}) =>
+    TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: size * 0.76, fontWeight: FontWeight.w700, color: c ?? AppColors.scorifyText, height: 1.0, fontFeatures: const [FontFeature.tabularFigures()]);
 
 /// Títulos "premium": Manrope, tracking cerrado.
 TextStyle _lux(double size, FontWeight w) => TextStyle(
-    fontFamily: AppTypography.display, fontSize: size, fontWeight: w, color: Colors.white, letterSpacing: -0.6, height: 1.15);
+    fontFamily: AppTypography.display, fontSize: size, fontWeight: w, color: AppColors.scorifyInk, letterSpacing: -0.6, height: 1.15);
 
 /// Versalitas espaciadas para etiquetas y datos.
 TextStyle _caps(double size, Color c) => TextStyle(
@@ -50,8 +50,8 @@ TextStyle _caps(double size, Color c) => TextStyle(
     height: 1.3,
     fontFeatures: const [FontFeature.tabularFigures()]);
 
-TextStyle _t(double size, {FontWeight w = FontWeight.w400, Color c = AppColors.scorifyText, double? ls, double? h}) =>
-    TextStyle(fontFamily: AppTypography.body, fontSize: size, fontWeight: w, color: c, letterSpacing: ls, height: h);
+TextStyle _t(double size, {FontWeight w = FontWeight.w400, Color? c, double? ls, double? h}) =>
+    TextStyle(fontFamily: AppTypography.body, fontSize: size, fontWeight: w, color: c ?? AppColors.scorifyText, letterSpacing: ls, height: h);
 
 /// Tarjeta del Inicio: fondo en degradado tenue y borde sutil.
 class HomeCard extends StatefulWidget {
@@ -106,7 +106,7 @@ class _HomeCardState extends State<HomeCard> {
 
 /// Colores sólidos de las tarjetas del Inicio (las mismas tintas de antes, sin transparencia).
 // Paleta "dark premium" cobalto: la misma luz azul fría del fondo del Inicio.
-const _solidCard = Color(0xFF10161F); // tarjeta (como scorifyCardFill)
+Color get _solidCard => AppColors.scorifyCardFill; // tarjeta
 const _cardTop = Color(0xFF0A1830);
 const _solidFeatured = Color(0xFF2D3138);
 const _tileAccent = Color(0xFF6F9BEA); // azul de las franjas de la textura
@@ -116,10 +116,10 @@ const _tileAccent = Color(0xFF6F9BEA); // azul de las franjas de la textura
 class HomeCardTitle extends StatelessWidget {
   final IconData icon;
   final String title;
-  final Color color;
+  final Color? color;
   final String? action;
   final VoidCallback? onAction;
-  const HomeCardTitle({super.key, required this.icon, required this.title, this.color = AppColors.scorifyTextMuted, this.action, this.onAction});
+  const HomeCardTitle({super.key, required this.icon, required this.title, this.color, this.action, this.onAction});
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +131,7 @@ class HomeCardTitle extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(icon, size: 17, color: color),
+            Icon(icon, size: 17, color: color ?? AppColors.scorifyTextMuted),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -220,7 +220,7 @@ class HomeProfileRow extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.all(2),
-                  decoration: const BoxDecoration(shape: BoxShape.circle, gradient: appButtonGradient),
+                  decoration: BoxDecoration(shape: BoxShape.circle, gradient: appButtonGradient),
                   child: UserAvatar(userId: userId, url: avatarUrl, size: 54),
                 ),
                 if ((country ?? "").isNotEmpty) Positioned(right: -2, bottom: -2, child: CountryFlag(country: country!, size: 16)),
@@ -241,7 +241,7 @@ class HomeProfileRow extends StatelessWidget {
                           style: _t(18, w: FontWeight.w600, h: 1.2),
                         ),
                       ),
-                      const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
+                      Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
                     ],
                   ),
                   const SizedBox(height: 4),
@@ -363,7 +363,7 @@ class HomeMatchCard extends StatelessWidget {
           children: [
             Text(label, style: _t(10, w: FontWeight.w800, c: AppColors.scorifyTextFaint, ls: 1.1)),
             const SizedBox(height: 3),
-            Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(14.5, w: FontWeight.w700, c: Colors.white)),
+            Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: _t(14.5, w: FontWeight.w700, c: AppColors.scorifyInk)),
           ],
         );
 
@@ -410,7 +410,7 @@ class HomeMatchCard extends StatelessWidget {
         decoration: BoxDecoration(
           // Flat: principal celeste sólido, secundario gris liso.
           borderRadius: BorderRadius.circular(Panel.buttonRadius),
-          color: onTap == null ? Panel.field : (primary ? null : const Color(0x1FFFFFFF)),
+          color: onTap == null ? Panel.field : (primary ? null : AppColors.scorifyHairline),
           gradient: onTap != null && primary ? AppColors.primaryButton : null,
         ),
         child: Material(
@@ -442,7 +442,7 @@ class HomeMatchCard extends StatelessWidget {
       decoration: BoxDecoration(
         // Flat: tarjeta destacada gris lisa, sin filete.
         borderRadius: BorderRadius.circular(Panel.radius),
-        color: const Color(0xCC0E2233),
+        color: AppColors.isLight ? AppColors.scorifyCardFill : const Color(0xCC0E2233),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -453,7 +453,7 @@ class HomeMatchCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 14, 12, 0),
             child: Row(
               children: [
-                Expanded(child: Text("PRÓXIMO PARTIDO", style: _t(11, w: FontWeight.w800, c: const Color(0xFF8EC5FF), ls: 1.3))),
+                Expanded(child: Text("PRÓXIMO PARTIDO", style: _t(11, w: FontWeight.w800, c: AppColors.scorifySection, ls: 1.3))),
                 _LiveStatus(startsAt: startsAt, tableNumber: tableNumber),
               ],
             ),
@@ -490,7 +490,7 @@ class HomeMatchCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.compare_arrows_rounded, size: 16, color: _mint),
+                      Icon(Icons.compare_arrows_rounded, size: 16, color: _mint),
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
@@ -522,7 +522,7 @@ class HomeMatchCard extends StatelessWidget {
                         const SizedBox(height: 10),
                         Row(
                           children: [
-                            const Icon(Icons.place_outlined, size: 15, color: AppColors.scorifyTextMuted),
+                            Icon(Icons.place_outlined, size: 15, color: AppColors.scorifyTextMuted),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(place!.trim(),
@@ -574,7 +574,7 @@ class HomePerformanceCard extends StatelessWidget {
         ],
       ),
     );
-    Widget sep() => Container(width: 1, height: 44, color: Colors.white.withValues(alpha: 0.10));
+    Widget sep() => Container(width: 1, height: 44, color: AppColors.scorifyInk.withValues(alpha: 0.10));
     return HomeCard(
       padding: EdgeInsets.zero,
       child: Stack(
@@ -804,7 +804,7 @@ class _ResultTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withValues(alpha: 0.04),
+      color: AppColors.scorifyInk.withValues(alpha: 0.04),
       borderRadius: BorderRadius.circular(Panel.radius),
       child: InkWell(
         onTap: r.onTap,
@@ -858,7 +858,19 @@ class HomeOpenItem {
   final String when; // "Sáb. 12 Oct"
   final String? place;
   final VoidCallback onTap;
-  HomeOpenItem({required this.name, required this.when, this.place, required this.onTap});
+  final int? players;
+  final IconData? icon;
+  /// Etiquetas chicas junto al nombre: (texto, color).
+  final List<(String, Color)> tags;
+  HomeOpenItem({
+    required this.name,
+    required this.when,
+    this.place,
+    required this.onTap,
+    this.players,
+    this.icon,
+    this.tags = const [],
+  });
 }
 
 /// "Inscripciones abiertas": la invitación principal a jugar.
@@ -891,7 +903,7 @@ class HomeOpenTournamentsCard extends StatelessWidget {
                 return SizedBox(
                   width: items.length == 1 ? MediaQuery.sizeOf(context).width - 60 : 230,
                   child: Material(
-                    color: Colors.white.withValues(alpha: 0.04),
+                    color: AppColors.scorifyInk.withValues(alpha: 0.04),
                     borderRadius: BorderRadius.circular(Panel.radius),
                     child: InkWell(
                       onTap: it.onTap,
@@ -910,7 +922,7 @@ class HomeOpenTournamentsCard extends StatelessWidget {
                             const Spacer(),
                             Row(
                               children: [
-                                const Icon(Icons.event_rounded, size: 14, color: _mint),
+                                Icon(Icons.event_rounded, size: 14, color: _mint),
                                 const SizedBox(width: 4),
                                 Text(it.when, style: _t(12)),
                               ],
@@ -919,7 +931,7 @@ class HomeOpenTournamentsCard extends StatelessWidget {
                               const SizedBox(height: 2),
                               Row(
                                 children: [
-                                  const Icon(Icons.place_rounded, size: 14, color: _mint),
+                                  Icon(Icons.place_rounded, size: 14, color: _mint),
                                   const SizedBox(width: 4),
                                   Expanded(
                                     child: Text(
@@ -976,7 +988,7 @@ class HomeWeekCard extends StatelessWidget {
               child: Text("No tienes eventos en los próximos 14 días.", style: _t(13, c: AppColors.scorifyTextMuted)),
             ),
           for (var i = 0; i < items.length; i++) ...[
-            if (i > 0) Divider(height: 1, color: Colors.white.withValues(alpha: 0.08)),
+            if (i > 0) Divider(height: 1, color: AppColors.scorifyInk.withValues(alpha: 0.08)),
             InkWell(
               onTap: items[i].onTap,
               borderRadius: BorderRadius.circular(Panel.radius),
@@ -1018,7 +1030,7 @@ class HomeWeekCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
+                    Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
                   ],
                 ),
               ),
@@ -1109,7 +1121,7 @@ class HomeOnboardingCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: steps.isEmpty ? 0 : done / steps.length,
               minHeight: 5,
-              backgroundColor: Colors.white.withValues(alpha: 0.08),
+              backgroundColor: AppColors.scorifyInk.withValues(alpha: 0.08),
               color: _mint,
             ),
           ),
@@ -1128,7 +1140,7 @@ class HomeOnboardingCard extends StatelessWidget {
                       decoration: s.done
                           ? panelBox(color: _mint, circle: true)
                           : BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.scorifyTextMuted, width: 1.5)),
-                      child: s.done ? const Icon(Icons.check_rounded, size: 16, color: _mint) : null,
+                      child: s.done ? Icon(Icons.check_rounded, size: 16, color: _mint) : null,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -1137,7 +1149,7 @@ class HomeOnboardingCard extends StatelessWidget {
                         style: _t(14, w: FontWeight.w500, c: s.done ? AppColors.scorifyTextMuted : AppColors.scorifyText),
                       ),
                     ),
-                    if (!s.done) const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
+                    if (!s.done) Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
                   ],
                 ),
               ),
@@ -1211,7 +1223,7 @@ class HomeSeasonCard extends StatelessWidget {
         ],
       ),
     );
-    Widget sep() => Container(width: 1, height: 44, color: Colors.white.withValues(alpha: 0.10));
+    Widget sep() => Container(width: 1, height: 44, color: AppColors.scorifyInk.withValues(alpha: 0.10));
     return HomeCard(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
       child: Column(
@@ -1344,7 +1356,7 @@ class HomeMyTournamentsCard extends StatelessWidget {
             )
           else
             for (var i = 0; i < items.length; i++) ...[
-              if (i > 0) Divider(height: 1, color: Colors.white.withValues(alpha: 0.08)),
+              if (i > 0) Divider(height: 1, color: AppColors.scorifyInk.withValues(alpha: 0.08)),
               InkWell(
                 onTap: items[i].onTap,
                 borderRadius: BorderRadius.circular(Panel.radius),
@@ -1383,7 +1395,7 @@ class HomeMyTournamentsCard extends StatelessWidget {
                           style: _t(11.5, w: FontWeight.w600, c: items[i].live ? _lime : _mint),
                         ),
                       ),
-                      const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
+                      Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
                     ],
                   ),
                 ),
@@ -1772,7 +1784,7 @@ class HomeTile extends StatelessWidget {
                         height: 1.0,
                         letterSpacing: -1.5,
                         fontWeight: FontWeight.w300,
-                        color: Colors.white,
+                        color: AppColors.scorifyInk,
                         fontFeatures: const [FontFeature.tabularFigures()],
                       )),
                   const SizedBox(height: 6),
@@ -1876,10 +1888,8 @@ class HomeEmptyCard extends StatelessWidget {
   }
 }
 
-/// Tarjeta "Buscar campeonatos" premium: degradado con la paleta de la
-/// referencia (azul noche → índigo → violeta, con luz cian y un toque
-/// magenta), mucho más luminosa que el fondo para que resalte, y un halo
-/// suave alrededor que la despega de la imagen.
+/// Inicio sin campeonatos: el encabezado (☰ · M · campana · perfil) y el
+/// botón "Buscar campeonatos", sin foto de fondo.
 class _ImageButton extends StatelessWidget {
   final VoidCallback? onTap;
   final String? detail;
@@ -1888,88 +1898,12 @@ class _ImageButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Héroe con el ADN del login, igual que la cabecera del campeonato: foto
-    // de borde a borde (se sale del margen de 16 del Inicio), el jugador
-    // corrido a la derecha y oscurecido solo a la izquierda (texto) y abajo
-    // (botón). Arriba y abajo la foto se desvanece y se funde con el fondo.
-    const bg = AppColors.scorifyBg;
-    final w = MediaQuery.sizeOf(context).width;
-    // Igual que la cabecera de Campeonato: la foto llega hasta arriba, con el
-    // encabezado encima (sin corte ni degradado) y el
-    // jugador de la cintura para arriba, corrido a la derecha.
-    // Se sale 16 px hacia arriba para tapar el margen superior del Inicio.
-    const boxH = 500.0;
-    return SizedBox(
-      height: boxH,
-      child: OverflowBox(
-        minWidth: w,
-        maxWidth: w,
-        minHeight: boxH + 16,
-        maxHeight: boxH + 16,
-        alignment: Alignment.bottomCenter,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Abajo la foto se desvanece y se funde con el fondo (sin línea).
-            ShaderMask(
-              blendMode: BlendMode.dstIn,
-              shaderCallback: (r) => const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.white, Colors.white, Colors.transparent],
-                stops: [0, 0.8, 1],
-              ).createShader(r),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                ClipRect(
-                  child: Transform.scale(
-                    scale: 1.5,
-                    alignment: Alignment.topLeft,
-                    child: const Image(
-                      image: AssetImage("assets/images/login_player.jpg"),
-                      fit: BoxFit.cover,
-                      alignment: Alignment(0, 0),
-                      filterQuality: FilterQuality.medium,
-                    ),
-                  ),
-                ),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [bg.withValues(alpha: 0.85), bg.withValues(alpha: 0.45), bg.withValues(alpha: 0)],
-                      stops: const [0, 0.38, 0.62],
-                    ),
-                  ),
-                ),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [bg.withValues(alpha: 0), bg.withValues(alpha: 0.15), bg.withValues(alpha: 0.75), bg.withValues(alpha: 0.95)],
-                      stops: const [0, 0.45, 0.78, 1],
-                    ),
-                  ),
-                ),
-                ],
-              ),
-            ),
-            if (header != null) Positioned(top: 16, left: 16, right: 16, child: header!),
-            Positioned(
-              left: 20,
-              right: 20,
-              bottom: 28,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _SearchButton(onTap: onTap),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // El botón "Buscar campeonatos" va al final del Inicio (HomeSearchButton).
+        if (header != null) ...[header!, const SizedBox(height: 20)],
+      ],
     );
   }
 }
@@ -1977,9 +1911,9 @@ class _ImageButton extends StatelessWidget {
 /// "Buscar campeonatos" con el mismo estilo que "Continuar con Google" del
 /// login: negro translúcido, filete fino, esquinas rectas y texto centrado,
 /// sin íconos.
-class _SearchButton extends StatelessWidget {
+class HomeSearchButton extends StatelessWidget {
   final VoidCallback? onTap;
-  const _SearchButton({this.onTap});
+  const HomeSearchButton({super.key, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -2003,3 +1937,128 @@ class _SearchButton extends StatelessWidget {
   }
 }
 
+
+/// Inicio: una sección en filas (Mis inscripciones, Siguiendo) con el color
+/// de las tarjetas. Si no hay nada, una fila con [emptyText].
+class HomeOpenRows extends StatelessWidget {
+  final String title;
+  final String emptyText;
+  final String actionLabel;
+  final List<HomeOpenItem> items;
+  final VoidCallback onAll;
+  /// Total real (se muestran solo algunas filas): va junto al título.
+  final int? total;
+  const HomeOpenRows({
+    super.key,
+    this.total,
+    required this.title,
+    required this.emptyText,
+    this.actionLabel = "Ver todos",
+    required this.items,
+    required this.onAll,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text.rich(
+                TextSpan(children: [
+                  TextSpan(text: title.toUpperCase(), style: _t(11, w: FontWeight.w800, c: AppColors.scorifySection, ls: 1.3)),
+                  if (total != null && total! > 0)
+                    TextSpan(text: "  ${total}", style: _t(11, w: FontWeight.w700, c: AppColors.scorifyTextFaint)),
+                ]),
+              ),
+            ),
+            InkWell(
+              onTap: onAll,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+                child: Text(actionLabel, style: _t(13, w: FontWeight.w700, c: AppColors.scorifyMint)),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (items.isEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            decoration: BoxDecoration(color: AppColors.scorifyCardFill, border: Border.all(color: AppColors.scorifyHairline)),
+            child: Text(emptyText, style: _t(13, c: AppColors.scorifyTextMuted)),
+          ),
+        for (final it in items) ...[
+          Material(
+            color: AppColors.scorifyCardFill,
+            shape: Border.all(color: AppColors.scorifyHairline),
+            child: InkWell(
+              onTap: it.onTap,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+                child: Row(
+                  children: [
+                    if (it.icon != null) ...[
+                      Icon(it.icon, size: 20, color: AppColors.scorifyMint),
+                      const SizedBox(width: 12),
+                    ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(it.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: _t(15, w: FontWeight.w700, c: AppColors.scorifyInk)),
+                          // Etiquetas en su propia línea: al lado del nombre lo cortaban.
+                          if (it.tags.isNotEmpty) ...[
+                            const SizedBox(height: 5),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              children: [
+                                for (final tag in it.tags)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    color: tag.$2.withValues(alpha: 0.18),
+                                    child: Text(tag.$1, style: _t(10, w: FontWeight.w800, c: tag.$2)),
+                                  ),
+                              ],
+                            ),
+                          ],
+                          const SizedBox(height: 4),
+                          Text(
+                            [it.when, if ((it.place ?? "").trim().isNotEmpty) it.place!].join("  ·  "),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: _t(12, c: AppColors.scorifyTextMuted),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (it.players != null) ...[
+                    const SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text("${it.players}",
+                            style: TextStyle(fontFamily: AppTypography.display, fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.scorifyInk)),
+                        Text("inscritos", style: _t(10, c: AppColors.scorifyTextFaint)),
+                      ],
+                    ),
+                    ],
+                    const SizedBox(width: 6),
+                    Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted, size: 22),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+        ],
+      ],
+    );
+  }
+}

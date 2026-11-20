@@ -17,7 +17,7 @@ enum AppButtonVariant { primary, outline, danger }
 // brillante y se veía chillón). Vertical, como un botón con algo de volumen.
 // Por ahora color liso (prioridad a la fluidez; el diseño se retoma después).
 // Lima → turquesa, como la referencia premium que eligió el usuario.
-const appButtonGradient = AppColors.primaryButton;
+LinearGradient get appButtonGradient => AppColors.primaryButton;
 
 class AppButton extends StatefulWidget {
   final String label;

@@ -81,10 +81,10 @@ class _PageSkeletonState extends State<PageSkeleton> with SingleTickerProviderSt
     super.dispose();
   }
 
-  Widget _block(double height, {double? width, double radius = 14, Color color = AppColors.scorifyCardFill}) => Container(
+  Widget _block(double height, {double? width, double radius = 14, Color? color}) => Container(
         width: width,
         height: height,
-        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(radius)),
+        decoration: BoxDecoration(color: color ?? AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(radius)),
       );
 
   Widget _bar(double width, double height) => _block(height, width: width, radius: 6, color: AppColors.scorifySurface2);
@@ -98,7 +98,7 @@ class _PageSkeletonState extends State<PageSkeleton> with SingleTickerProviderSt
             Container(
               width: 40,
               height: 40,
-              decoration: const BoxDecoration(color: AppColors.scorifySurface2, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: AppColors.scorifySurface2, shape: BoxShape.circle),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -178,7 +178,7 @@ class _PageSkeletonState extends State<PageSkeleton> with SingleTickerProviderSt
             shaderCallback: (rect) => LinearGradient(
               begin: Alignment(x - 0.6, -0.3),
               end: Alignment(x + 0.6, 0.3),
-              colors: const [Color(0x00FFFFFF), Color(0x14FFFFFF), Color(0x00FFFFFF)],
+              colors: [Color(0x00FFFFFF), AppColors.scorifySelected, Color(0x00FFFFFF)],
             ).createShader(rect),
             child: child,
           );

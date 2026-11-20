@@ -19,7 +19,7 @@ const _months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio",
 const _monthsShort = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
 const _weekdays = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
 
-const TextStyle _muted = TextStyle(
+TextStyle get _muted => TextStyle(
   fontFamily: AppTypography.body,
   fontSize: 12,
   fontWeight: FontWeight.w400,
@@ -34,7 +34,9 @@ String _genderLabel(String g) => switch (g) {
     };
 
 class CalendarScreen extends StatefulWidget {
-  const CalendarScreen({super.key});
+  /// Dentro de la sección "Campeonatos" como "Míos" (sin su título).
+  final bool embedded;
+  const CalendarScreen({super.key, this.embedded = false});
 
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
@@ -166,8 +168,10 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
       physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: staggerChildren([
-        const TopHeader(title: "Calendario", subtitle: "Tus campeonatos inscritos, día a día.", showBack: false),
-        const SizedBox(height: 14),
+        if (!widget.embedded) ...[
+          const TopHeader(title: "Calendario", subtitle: "Tus campeonatos inscritos, día a día.", showBack: false),
+          const SizedBox(height: 14),
+        ],
 
         if (_upcoming.isNotEmpty) ...[
           _Section(_upcoming.any((e) => e.inProgress) ? "Tus campeonatos" : "Tus próximos campeonatos"),
@@ -194,7 +198,7 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
                   Expanded(
                     child: Text(
                       "${_months[_focusedMonth.month - 1]} ${_focusedMonth.year}",
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                     ),
                   ),
                   _RoundIcon(icon: Icons.chevron_left_rounded, onTap: () => _goMonth(-1)),
@@ -238,9 +242,9 @@ class _CalendarScreenState extends State<CalendarScreen> with TabAutoRefreshMixi
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                const Icon(Icons.event_available_rounded, color: AppColors.scorifyTextMuted, size: 20),
+                Icon(Icons.event_available_rounded, color: AppColors.scorifyTextMuted, size: 20),
                 const SizedBox(width: 10),
-                const Expanded(child: Text("No tienes campeonatos este día.", style: _muted)),
+                Expanded(child: Text("No tienes campeonatos este día.", style: _muted)),
               ],
             ),
           )
@@ -290,7 +294,7 @@ class _Section extends StatelessWidget {
         // Mismo título de sección que el resto de la app (mayúsculas azul hielo).
         padding: const EdgeInsets.only(top: 24, bottom: 10),
         child: Text(title.toUpperCase(),
-            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: Color(0xFF8EC5FF))),
+            style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: AppColors.scorifySection)),
       );
 }
 
@@ -352,9 +356,9 @@ class _EventCard extends StatelessWidget {
               child: Column(
                 children: [
                   Text(_monthsShort[e.date.month - 1],
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyMint, letterSpacing: 0.3)),
+                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyMint, letterSpacing: 0.3)),
                   Text("${e.date.day}",
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 24, fontWeight: FontWeight.w600, color: AppColors.scorifyText, height: 1.15)),
+                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 24, fontWeight: FontWeight.w600, color: AppColors.scorifyText, height: 1.15)),
                 ],
               ),
             ),
@@ -367,14 +371,14 @@ class _EventCard extends StatelessWidget {
                 Text(e.tournamentName,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText, height: 1.25)),
+                    style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText, height: 1.25)),
                 const SizedBox(height: 4),
                 Text("${e.categoryName} · ${_genderLabel(e.gender)}", maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted),
                 if (loc.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.place_rounded, size: 14, color: AppColors.scorifyTextMuted),
+                      Icon(Icons.place_rounded, size: 14, color: AppColors.scorifyTextMuted),
                       const SizedBox(width: 4),
                       Expanded(child: Text(loc, maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted)),
                     ],

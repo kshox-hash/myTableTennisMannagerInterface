@@ -357,7 +357,7 @@ class _VsRow extends StatelessWidget {
             ),
             Text(
               "${iAmP1 ? m.setsPlayer1 : m.setsPlayer2}-${iAmP1 ? m.setsPlayer2 : m.setsPlayer1}",
-              style: const TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 14, height: 1, fontWeight: FontWeight.w700, color: AppColors.scorifyText),
+              style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 14, height: 1, fontWeight: FontWeight.w700, color: AppColors.scorifyText),
             ),
           ],
         ),

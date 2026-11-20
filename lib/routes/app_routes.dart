@@ -75,6 +75,7 @@ class AppRoutes {
               tournamentId: args["tournamentId"] as String,
               tournamentName: args["tournamentName"] as String,
               initialMode: args["initialMode"] as String?,
+              initialCategoryId: args["categoryId"] as String?,
             ),
           );
         }

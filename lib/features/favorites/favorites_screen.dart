@@ -225,9 +225,9 @@ class _Empty extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.favorite_border_rounded, size: 44, color: AppColors.scorifyTextMuted),
+            Icon(Icons.favorite_border_rounded, size: 44, color: AppColors.scorifyTextMuted),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               "Aún no guardas partidos",
               style: TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
             ),
@@ -278,7 +278,7 @@ class _LiveCard extends StatelessWidget {
           child: d == null
               ? Center(
                   child: loading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.scorifyMint))
+                      ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.scorifyMint))
                       : Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -330,7 +330,7 @@ class _LiveCard extends StatelessWidget {
             InkResponse(
               onTap: onRemove,
               radius: 16,
-              child: const Icon(Icons.favorite_rounded, size: 18, color: AppColors.scorifyNegative),
+              child: Icon(Icons.favorite_rounded, size: 18, color: AppColors.scorifyNegative),
             ),
           ],
         ),

@@ -27,7 +27,7 @@ import "package:myttmi/routes/app_routes.dart";
 
 enum _ViewMode { list, groups, bracket }
 
-const TextStyle _muted = TextStyle(
+TextStyle get _muted => TextStyle(
   fontFamily: AppTypography.body,
   fontSize: 12,
   fontWeight: FontWeight.w400,
@@ -57,11 +57,16 @@ class TournamentMatchesScreen extends StatefulWidget {
   /// link de "Resultados"); null usa la lista de partidos por defecto.
   final String? initialMode;
 
+  /// Categoría con la que abre (p. ej. desde el resumen de una categoría);
+  /// si no viene, la tuya o la primera.
+  final String? initialCategoryId;
+
   const TournamentMatchesScreen({
     super.key,
     required this.tournamentId,
     required this.tournamentName,
     this.initialMode,
+    this.initialCategoryId,
   });
 
   @override
@@ -100,7 +105,10 @@ class _TournamentMatchesScreenState extends State<TournamentMatchesScreen> {
       final opts = categoryOptions(t.categories);
       setState(() {
         _cats = opts;
-        _cat = CategoryFilterBar.initial(opts, t.categories.where((c) => c.isEnrolled).map((c) => c.idCategory));
+        final wanted = widget.initialCategoryId;
+        _cat = wanted != null && t.categories.any((c) => c.idCategory == wanted)
+            ? wanted
+            : CategoryFilterBar.initial(opts, t.categories.where((c) => c.isEnrolled).map((c) => c.idCategory));
         _catsLoaded = true;
       });
     }).catchError((_) {
@@ -470,8 +478,8 @@ class _GroupsByCategoryState extends State<_GroupsByCategory> {
                 // Buscador: ir directo a una persona o a un grupo.
                 TextField(
                   onChanged: (v) => setState(() => _q = v),
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, color: AppColors.scorifyText),
-                  decoration: const InputDecoration(
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, color: AppColors.scorifyText),
+                  decoration: InputDecoration(
                     hintText: "Buscar jugador o grupo (ej. 3)",
                     hintStyle: TextStyle(fontFamily: AppTypography.body, fontSize: 14, color: AppColors.scorifyTextFaint),
                     prefixIcon: Icon(Icons.search_rounded, color: AppColors.scorifyTextMuted, size: 20),
@@ -563,7 +571,7 @@ class _CategoryTitle extends StatelessWidget {
         // Mismo título de sección que el resto de la app.
         child: Text(
           text.toUpperCase(),
-          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: Color(0xFF8EC5FF)),
+          style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: AppColors.scorifySection),
         ),
       );
 }
@@ -597,7 +605,7 @@ class _Segmented extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         if (it.locked) ...[
-                          const Icon(Icons.lock_rounded, size: 14, color: AppColors.scorifyTextFaint),
+                          Icon(Icons.lock_rounded, size: 14, color: AppColors.scorifyTextFaint),
                           const SizedBox(width: 4),
                         ],
                         Text(
@@ -754,7 +762,7 @@ class _PagedMatchListState extends State<_PagedMatchList> {
         itemBuilder: (context, i) {
           if (i == rows.length) {
             if (_loading) {
-              return const Padding(
+              return Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
                 child: Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.scorifyMint))),
               );
@@ -783,7 +791,7 @@ class _PagedMatchListState extends State<_PagedMatchList> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(parts.last,
-                        style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                        style: TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                   ),
                   Text(parts.first, style: _muted),
                 ],

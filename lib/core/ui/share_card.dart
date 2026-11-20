@@ -69,8 +69,8 @@ class ShareCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle t(double s, {FontWeight w = FontWeight.w600, Color c = AppColors.scorifyText, double? ls}) =>
-        TextStyle(fontFamily: AppTypography.body, fontSize: s, fontWeight: w, color: c, letterSpacing: ls, decoration: TextDecoration.none);
+    TextStyle t(double s, {FontWeight w = FontWeight.w600, Color? c, double? ls}) =>
+        TextStyle(fontFamily: AppTypography.body, fontSize: s, fontWeight: w, color: c ?? AppColors.scorifyText, letterSpacing: ls, decoration: TextDecoration.none);
     return Container(
       width: 360,
       height: 640,
@@ -103,7 +103,7 @@ class ShareCard extends StatelessWidget {
             Text(subline!, style: t(16, w: FontWeight.w400, c: AppColors.scorifyTextMuted)),
           ],
           const SizedBox(height: 20),
-          Container(height: 3, width: 64, decoration: const BoxDecoration(gradient: appButtonGradient)),
+          Container(height: 3, width: 64, decoration: BoxDecoration(gradient: appButtonGradient)),
           const SizedBox(height: 16),
           Text(tournament, style: t(16)),
           if (date != null) ...[

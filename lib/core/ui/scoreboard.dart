@@ -87,7 +87,7 @@ class Scoreboard extends StatelessWidget {
               ),
               if (cols > 0) ...[
                 const SizedBox(width: 8),
-                Container(width: 1, height: nameSize + 4, color: const Color(0x1FFFFFFF)),
+                Container(width: 1, height: nameSize + 4, color: AppColors.scorifyHairline),
                 const SizedBox(width: 2),
                 for (var k = 0; k < cols; k++)
                   SizedBox(

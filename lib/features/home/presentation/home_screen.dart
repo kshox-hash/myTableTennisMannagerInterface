@@ -1,3 +1,6 @@
+import "package:myttmi/features/shell/section_hubs.dart";
+import "package:myttmi/features/favorites/favorites_screen.dart";
+import "package:myttmi/core/favorites/favorite_matches.dart";
 import "package:myttmi/core/ui/list_states.dart";
 import "package:myttmi/core/constants/match_status_labels.dart";
 import "dart:async";
@@ -112,6 +115,8 @@ class _HomeScreenState extends State<HomeScreen>
   /// Torneos con inscripción abierta (para la card "Tu próximo desafío").
   int _openCount = 0;
   DateTime? _nextOpen;
+  /// Hasta 4 campeonatos con inscripción abierta (Inicio sin campeonatos).
+  List<Tournament> _openList = const [];
   // Partidos jugados, del más reciente al más antiguo.
   List<PlayerMatchHistoryItem> _history = const [];
 
@@ -329,15 +334,16 @@ class _HomeScreenState extends State<HomeScreen>
         for (final e in pending.where((e) => e.date.isBefore(day.add(const Duration(days: 14)))))
           if (weekSeen.add(e.tournamentId)) e,
       ];
-      // Un renglón por campeonato: en curso (aunque haya empezado antes) o por jugar.
+      // Una entrada por categoría (las filas del Inicio las agrupan por campeonato).
       final seen = <String>{};
       final current = events.where((e) => !e.finished && (e.inProgress || !e.date.isBefore(day))).toList()
         ..sort((a, b) => a.inProgress == b.inProgress ? a.date.compareTo(b.date) : (a.inProgress ? -1 : 1));
-      mineList = [for (final e in current) if (seen.add(e.tournamentId)) e];
+      mineList = [for (final e in current) if (seen.add("${e.tournamentId}|${e.categoryId}")) e];
     } catch (_) {}
     Tournament? challenge;
     var openCount = 0;
     DateTime? nextOpen;
+    var openList = <Tournament>[];
     try {
       final page = await pageF;
       final upcoming = page.items.where((t) {
@@ -353,6 +359,7 @@ class _HomeScreenState extends State<HomeScreen>
       challenge = mineT.isNotEmpty ? mineT.first : null;
       final open = upcoming.where((t) => t.categories.any((c) => c.phase == "enrollment" && !c.isEnrolled)).toList();
       openCount = open.length;
+      openList = open.take(4).toList();
       nextOpen = open.isEmpty ? null : DateTime.tryParse(open.first.eventDate ?? "");
     } catch (_) {}
     if (!mounted) return;
@@ -360,11 +367,61 @@ class _HomeScreenState extends State<HomeScreen>
       _challenge = challenge;
       _openCount = openCount;
       _nextOpen = nextOpen;
+      _openList = openList;
       _week = week;
       _mine = mineList;
     });
   }
 
+
+  /// Mis inscripciones en filas: una por campeonato (no por categoría), los
+  /// que se juegan hoy o están en juego primero, 3 como máximo.
+  List<HomeOpenItem> _myRows() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final byT = <String, List<CalendarEvent>>{};
+    for (final e in _mine) {
+      byT.putIfAbsent(e.tournamentId, () => []).add(e);
+    }
+    final groups = byT.values.toList()
+      ..sort((a, b) {
+        bool hot(List<CalendarEvent> g) => g.any((e) => e.inProgress || e.date == today);
+        if (hot(a) != hot(b)) return hot(a) ? -1 : 1;
+        return a.first.date.compareTo(b.first.date);
+      });
+    final nm = _dashboard?.nextMatch;
+    return [
+      for (final g in groups.take(3))
+        () {
+          final first = g.first;
+          final playing = g.any((e) => e.inProgress);
+          final isToday = g.any((e) => e.date == today);
+          // Hoy: tu mesa o tu turno si tu próximo partido es de este campeonato.
+          String? where;
+          if (nm != null && nm.idTournament == first.tournamentId) {
+            if (nm.tableNumber != null) {
+              where = "Mesa ${nm.tableNumber}";
+            } else if (nm.queuePosition != null) {
+              where = "Turno ${nm.queuePosition}";
+            }
+          }
+          return HomeOpenItem(
+            name: first.tournamentName,
+            // "En juego"/"Hoy" ya va como etiqueta: abajo, tu mesa o turno, o la fecha.
+            when: where ?? (playing || isToday ? "Hoy" : _whenShort(first.date)),
+            place: g.length == 1 ? first.categoryName : "${g.length} categorías",
+            icon: Icons.how_to_reg_rounded,
+            tags: [
+              if (playing || isToday) (playing ? "EN JUEGO" : "HOY", playing ? AppColors.scorifyNegative : AppColors.scorifyButterfly),
+              if (g.any((e) => e.needsPayment)) ("FALTA PAGAR", AppColors.scorifyPending),
+            ],
+            onTap: () => _openTournament(first.tournamentId),
+          );
+        }(),
+    ];
+  }
+
+  int get _myTournamentCount => {for (final e in _mine) e.tournamentId}.length;
 
   /// "Sáb. 27 Sep".
   String _whenShort(DateTime d) {
@@ -417,12 +474,12 @@ class _HomeScreenState extends State<HomeScreen>
               ListTile(
                 leading: Icon(Icons.scoreboard_rounded, color: r.tableNumber != null ? AppColors.scorifyLive : AppColors.scorifyMint),
                 title: Text("${r.player1Name} vs ${r.player2Name}",
-                    style: const TextStyle(color: AppColors.scorifyText, fontWeight: FontWeight.w600)),
+                    style: TextStyle(color: AppColors.scorifyText, fontWeight: FontWeight.w600)),
                 subtitle: Text(
                   [r.tableNumber != null ? "Mesa ${r.tableNumber}" : "Esperando mesa", r.categoryDisplay].join(" · "),
-                  style: const TextStyle(color: AppColors.scorifyTextMuted),
+                  style: TextStyle(color: AppColors.scorifyTextMuted),
                 ),
-                trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint),
+                trailing: Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint),
                 onTap: () => Navigator.pop(sheet, r),
               ),
             const SizedBox(height: 8),
@@ -461,18 +518,18 @@ class _HomeScreenState extends State<HomeScreen>
                   e.inProgress ? Icons.sports_tennis_rounded : Icons.event_rounded,
                   color: e.inProgress ? AppColors.scorifyLive : AppColors.scorifyMint,
                 ),
-                title: Text(e.tournamentName, style: const TextStyle(color: AppColors.scorifyText, fontWeight: FontWeight.w600)),
-                subtitle: Text(e.inProgress ? "En juego" : "Por jugar", style: const TextStyle(color: AppColors.scorifyTextMuted)),
-                trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint),
+                title: Text(e.tournamentName, style: TextStyle(color: AppColors.scorifyText, fontWeight: FontWeight.w600)),
+                subtitle: Text(e.inProgress ? "En juego" : "Por jugar", style: TextStyle(color: AppColors.scorifyTextMuted)),
+                trailing: Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint),
                 onTap: () => Navigator.pop(sheet, e.tournamentId),
               ),
             // Los que sigo de visita, después de los míos.
             for (final f in _following)
               ListTile(
-                leading: const Icon(Icons.notifications_active_rounded, color: AppColors.scorifyMint),
-                title: Text(f.name, style: const TextStyle(color: AppColors.scorifyText, fontWeight: FontWeight.w600)),
-                subtitle: const Text("De visita", style: TextStyle(color: AppColors.scorifyTextMuted)),
-                trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint),
+                leading: Icon(Icons.notifications_active_rounded, color: AppColors.scorifyMint),
+                title: Text(f.name, style: TextStyle(color: AppColors.scorifyText, fontWeight: FontWeight.w600)),
+                subtitle: Text("De visita", style: TextStyle(color: AppColors.scorifyTextMuted)),
+                trailing: Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint),
                 onTap: () => Navigator.pop(sheet, f.idTournament),
               ),
             const SizedBox(height: 8),
@@ -755,6 +812,76 @@ class _HomeScreenState extends State<HomeScreen>
                           onAction: () => AppShellScope.of(context)?.switchTab(3, link: true),
                           header: heroHome ? header : null,
                         ),
+                        // Sin campeonatos en juego: tus partidos programados, tus
+                        // inscripciones, lo que sigues y, al final, buscar campeonatos.
+                        if (heroHome) ...[
+                          HomeOpenRows(
+                            title: "Próximos partidos",
+                            emptyText: "Cuando te programen un partido, aparecerá aquí con su mesa y tu rival.",
+                            actionLabel: "Mis partidos",
+                            items: [
+                              for (final m in [?_dashboard?.nextMatch, ...?_dashboard?.otherNextMatches].take(3))
+                                HomeOpenItem(
+                                  name: "vs ${m.opponentName ?? "Por definir"}",
+                                  when: m.tableNumber != null
+                                      ? "Mesa ${m.tableNumber}"
+                                      : (m.queuePosition != null ? "Turno ${m.queuePosition}" : "Por programar"),
+                                  place: "${m.tournamentName} · ${m.categoryDisplay}",
+                                  icon: Icons.sports_tennis_rounded,
+                                  onTap: () => Navigator.pushNamed(context, AppRoutes.matchDetail,
+                                      arguments: {"matchType": m.matchType, "matchId": m.idMatch}),
+                                ),
+                            ],
+                            onAll: () {
+                              MyGameHub.segment.value = 1;
+                              AppShellScope.of(context)?.switchTab(2, link: true);
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          HomeOpenRows(
+                            title: "Mis inscripciones",
+                            total: _myTournamentCount,
+                            emptyText: "No tienes inscripciones activas.",
+                            actionLabel: "Ver todas",
+                            items: _myRows(),
+                            onAll: () => AppShellScope.of(context)?.switchTab(1, link: true),
+                          ),
+                          const SizedBox(height: 16),
+                          ValueListenableBuilder<List<FavoriteMatch>>(
+                            valueListenable: FavoriteMatches.items,
+                            builder: (context, favs, _) => HomeOpenRows(
+                              title: "Siguiendo",
+                              total: _following.length + (favs.isEmpty ? 0 : 1),
+                              emptyText: "Todavía no sigues campeonatos ni partidos.",
+                              items: [
+                                if (favs.isNotEmpty)
+                                  HomeOpenItem(
+                                    name: "Partidos guardados",
+                                    when: "${favs.length} ${favs.length == 1 ? "partido" : "partidos"} en vivo",
+                                    icon: Icons.favorite_rounded,
+                                    onTap: () => Navigator.push(context, CyberPageRoute(builder: (_) => const FavoritesScreen())),
+                                  ),
+                                for (final f in _following.take(favs.isNotEmpty ? 2 : 3))
+                                  HomeOpenItem(
+                                    name: f.name,
+                                    when: f.eventDate != null ? _whenShort(f.eventDate!) : "Fecha por definir",
+                                    place: f.address,
+                                    icon: Icons.notifications_active_rounded,
+                                    tags: [
+                                      if (f.idTournament == _liveFollow?.idTournament) ("EN JUEGO", AppColors.scorifyNegative),
+                                    ],
+                                    onTap: () => _openTournament(f.idTournament),
+                                  ),
+                              ],
+                              onAll: () {
+                                CompetitionsHub.segment.value = 2;
+                                AppShellScope.of(context)?.switchTab(3, link: true);
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 28),
+                          HomeSearchButton(onTap: () => AppShellScope.of(context)?.switchTab(3, link: true)),
+                        ],
                       ] else ...[
                         matches,
                         // Más de un partido por jugar: acceso a la lista completa.
@@ -806,7 +933,7 @@ class _HomeScreenState extends State<HomeScreen>
                         const SizedBox(height: 12),
                       ],
                       // Campeonatos que sigo como visita (sin jugar).
-                      if (_followingRest.isNotEmpty) ...[
+                      if (!heroHome && _followingRest.isNotEmpty) ...[
                         _FollowingCard(
                           items: _followingRest,
                           onOpen: (f) => _openTournament(f.idTournament),
@@ -816,10 +943,16 @@ class _HomeScreenState extends State<HomeScreen>
                       ],
                     ]),
                     // Mis campeonatos: lista compacta (fecha, nombre, categoría, en curso).
-                    if (_mine.isNotEmpty) ...[
-                      HomeSectionTitle("Mis campeonatos",
-                          action: "Calendario", onAction: () => AppShellScope.of(context)?.switchTab(1, link: true)),
-                      HomeMyTournaments(events: _mine.take(4).toList(), onOpen: (e) => _openTournament(e.tournamentId)),
+                    if (!heroHome && _mine.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      HomeOpenRows(
+                        title: "Mis inscripciones",
+                        total: _myTournamentCount,
+                        emptyText: "No tienes inscripciones activas.",
+                        actionLabel: "Ver todas",
+                        items: _myRows(),
+                        onAll: () => AppShellScope.of(context)?.switchTab(1, link: true),
+                      ),
                     ],
                     if (homeEmpty) Spacer(key: _gapBottom) else SizedBox(key: _gapBottom, height: 0),
                     // Relleno medido en _recenter: deja el bloque centrado en la
@@ -907,7 +1040,7 @@ class _MatchesCarouselState extends State<_MatchesCarousel> {
                       ? Center(
                           child: Text(
                             "${_page + 1} / ${pages.length}",
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted),
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted),
                           ),
                         )
                       : Row(
@@ -967,7 +1100,7 @@ class _MyGroupsCard extends StatelessWidget {
                       decoration: panelBox(),
                       child: Text(
                         g.standing.played == 0 || g.standing.position == null ? "–" : "${g.standing.position}°",
-                        style: const TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.scorifyText, height: 1),
+                        style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.scorifyText, height: 1),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -989,7 +1122,7 @@ class _MyGroupsCard extends StatelessWidget {
                     Text("${g.standing.won}G · ${g.standing.lost}P",
                         style: AppTypography.bodyText.copyWith(fontWeight: FontWeight.w600)),
                     const SizedBox(width: 6),
-                    const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint),
+                    Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint),
                   ],
                 ),
               ),
@@ -1049,15 +1182,15 @@ class _FollowingCard extends StatelessWidget {
                         f.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                        style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Text(
                       _when(f.eventDate),
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyMint),
+                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyMint),
                     ),
-                    const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint, size: 20),
+                    Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextFaint, size: 20),
                   ],
                 ),
               ),
@@ -1089,15 +1222,15 @@ class _FollowLiveHero extends StatelessWidget {
               Container(
                 width: 8,
                 height: 8,
-                decoration: const BoxDecoration(color: AppColors.scorifyLive, shape: BoxShape.circle),
+                decoration: BoxDecoration(color: AppColors.scorifyLive, shape: BoxShape.circle),
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 "EN JUEGO HOY",
                 style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.4, color: AppColors.scorifyLive),
               ),
               const Spacer(),
-              const Text(
+              Text(
                 "Lo sigues",
                 style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted),
               ),
@@ -1108,13 +1241,13 @@ class _FollowLiveHero extends StatelessWidget {
             item.name,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 22, fontWeight: FontWeight.w800, height: 1.15, color: AppColors.scorifyText),
+            style: TextStyle(fontFamily: AppTypography.body, fontSize: 22, fontWeight: FontWeight.w800, height: 1.15, color: AppColors.scorifyText),
           ),
           if (item.address != null && item.address!.trim().isNotEmpty) ...[
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.place_rounded, size: 15, color: AppColors.scorifyTextMuted),
+                Icon(Icons.place_rounded, size: 15, color: AppColors.scorifyTextMuted),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(

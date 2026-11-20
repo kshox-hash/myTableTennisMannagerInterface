@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/theme_toggle.dart";
 import 'package:myttmi/core/ui/panel_style.dart';
 import 'package:flutter/material.dart';
 import 'package:myttmi/features/notifications/presentation/notifications_screen.dart';
@@ -70,9 +71,11 @@ class TopHeader extends StatelessWidget {
           const SizedBox(width: 10),
           ...actions!,
         ],
-        // Secciones principales: la campana, igual que en el Inicio.
+        // Secciones principales: ☀/🌙 y la campana, igual que en el Inicio.
         if (onBack == null && !showBack && shell?.openMenu != null) ...[
           const SizedBox(width: 10),
+          const ThemeToggleButton(),
+          const SizedBox(width: 8),
           ValueListenableBuilder<int>(
             valueListenable: NotificationPopups.unread,
             builder: (context, unread, _) => Stack(
@@ -177,7 +180,7 @@ class BackCircleButton extends StatelessWidget {
         customBorder: const CircleBorder(),
         // Flecha normal, sin círculo ni borde (el usuario no quiso el
         // botón redondo); el área tocable sigue siendo de 40×40.
-        child: const SizedBox(
+        child: SizedBox(
           width: 40,
           height: 40,
           child: Icon(Icons.arrow_back_rounded, color: AppColors.scorifyText, size: 24),
@@ -198,7 +201,7 @@ class PagerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = onTap != null;
     return Material(
-      color: Colors.white.withValues(alpha: 0.06),
+      color: AppColors.scorifyInk.withValues(alpha: 0.06),
       borderRadius: BorderRadius.circular(Panel.radius),
       child: InkWell(
         onTap: onTap,
@@ -209,7 +212,7 @@ class PagerButton extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(Panel.radius),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+            border: Border.all(color: AppColors.scorifyInk.withValues(alpha: 0.12)),
           ),
           child: Icon(next ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
               size: 20, color: AppColors.scorifyText.withValues(alpha: enabled ? 0.9 : 0.25)),

@@ -85,7 +85,7 @@ class _RefereeScanScreenState extends State<RefereeScanScreen> {
                           color: AppColors.scorifyDeep,
                           padding: const EdgeInsets.all(24),
                           alignment: Alignment.center,
-                          child: const Text(
+                          child: Text(
                             "No se pudo abrir la cámara. Revisa que MyTTM tenga permiso de cámara en Ajustes.",
                             textAlign: TextAlign.center,
                             style: TextStyle(color: AppColors.scorifyText),
@@ -107,7 +107,7 @@ class _RefereeScanScreenState extends State<RefereeScanScreen> {
                         Container(
                           color: Colors.black54,
                           alignment: Alignment.center,
-                          child: const CircularProgressIndicator(color: AppColors.scorifyButterfly),
+                          child: CircularProgressIndicator(color: AppColors.scorifyButterfly),
                         ),
                     ],
                   ),

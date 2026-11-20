@@ -30,7 +30,7 @@ class PrismBackground extends StatelessWidget {
         bright = false,
         gradientOnly = false;
 
-  static const color = AppColors.scorifyBg;
+  static Color get color => AppColors.scorifyBg;
 
   /// Se conserva por compatibilidad (el Inicio lo pasa): ya no hay imagen.
   static const homeAsset = 'home';
@@ -47,22 +47,26 @@ class PrismBackground extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const DecoratedBox(
+          DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF0A0F18), Color(0xFF07090D), Color(0xFF040508)],
-                stops: [0, 0.45, 1],
+                colors: AppColors.isLight
+                    ? const [Color(0xFFEFF5F8), Color(0xFFF7F7F8), Color(0xFFF4F4F6)]
+                    : const [Color(0xFF0A0F18), Color(0xFF07090D), Color(0xFF040508)],
+                stops: const [0, 0.45, 1],
               ),
             ),
           ),
-          const DecoratedBox(
+          DecoratedBox(
             decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: Alignment(0, -1.15),
+                center: const Alignment(0, -1.15),
                 radius: 1.0,
-                colors: [Color(0x1A2A6BFF), Color(0x002A6BFF)],
+                colors: AppColors.isLight
+                    ? const [Color(0x140088A6), Color(0x000088A6)]
+                    : const [Color(0x1A2A6BFF), Color(0x002A6BFF)],
               ),
             ),
           ),

@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/theme_toggle.dart";
 import 'package:flutter/material.dart';
 import 'package:myttmi/features/shell/app_shell.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
@@ -29,7 +30,14 @@ class SpinHeader extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Sin logo ni nombre en el encabezado (pedido del usuario).
+          // Solo la M del logo al medio (sin la palabra MyTTM).
+          Image.asset(
+            "assets/images/logo-mark-3d.png",
+            height: 34,
+            filterQuality: FilterQuality.medium,
+            isAntiAlias: true,
+            semanticLabel: "MyTTM",
+          ),
           Row(
         children: [
           if (AppShellScope.of(context)?.openMenu != null)
@@ -46,6 +54,8 @@ class SpinHeader extends StatelessWidget {
             ),
             const SizedBox(width: 10),
           ],
+          const ThemeToggleButton(size: 42),
+          const SizedBox(width: 8),
           _IconButton(
             icon: Icons.notifications_none_rounded,
             count: notificationsCount,

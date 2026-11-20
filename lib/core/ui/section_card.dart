@@ -80,7 +80,7 @@ class SectionCard extends StatelessWidget {
 List<Widget> dividedRows(Iterable<Widget> rows) {
   final out = <Widget>[];
   for (final r in rows) {
-    if (out.isNotEmpty) out.add(const Divider(height: 1, thickness: 1, color: Color(0x14FFFFFF)));
+    if (out.isNotEmpty) out.add(Divider(height: 1, thickness: 1, color: AppColors.scorifySelected));
     out.add(r);
   }
   return out;
@@ -99,7 +99,7 @@ class SectionLabel extends StatelessWidget {
       children: [
         // Igual que los títulos de sección del Inicio (mayúsculas azul hielo, sin ícono).
         Text(text.toUpperCase(),
-            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: Color(0xFF8EC5FF))),
+            style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: AppColors.scorifySection)),
       ],
     );
   }

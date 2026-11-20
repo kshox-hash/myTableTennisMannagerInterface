@@ -76,20 +76,35 @@ class AppDrawer extends StatelessWidget {
       // lado que da hacia el centro de la app, con la línea encendida.
       shape: const RoundedRectangleBorder(),
       child: DecoratedBox(
-        decoration: const BoxDecoration(border: Border(right: BorderSide(color: Panel.topLine))),
+        decoration: BoxDecoration(border: Border(right: BorderSide(color: Panel.topLine))),
         child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(22, 20, 22, 14),
-              child: Align(alignment: Alignment.centerLeft, child: BrandLogo(markSize: 28, wordmarkSize: 19)),
+              // En modo claro la palabra "MyTTM" (imagen blanca) no se veía: M + texto oscuro.
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: AppColors.isLight
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const BrandLogo(markSize: 28, showWordmark: false),
+                          const SizedBox(width: 8),
+                          Text("MyTTM",
+                              style: TextStyle(fontFamily: AppTypography.body, fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.scorifyInk)),
+                        ],
+                      )
+                    : const BrandLogo(markSize: 28, wordmarkSize: 19),
+              ),
             ),
             for (final it in main) tile(it),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: Divider(height: 1, color: Color(0x1FFFFFFF)),
-            ),
+            if (more.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                child: Divider(height: 1, color: AppColors.scorifyHairline),
+              ),
             for (final it in more) tile(it),
             const Spacer(),
             tile(DrawerItem(Icons.logout_rounded, "Cerrar sesión", onLogout)),

@@ -115,6 +115,8 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
         "tournamentId": widget.tournamentId,
         "tournamentName": widget.tournamentName,
         "initialMode": toBracket ? "bracket" : "groups",
+        // Abre en ESTA categoría (antes abría la tuya o la primera).
+        "categoryId": widget.categoryId,
       },
     );
   }
@@ -215,6 +217,16 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                               me: me,
                             ),
 
+                            // Accesos directos arriba (antes "Ver llave completa"
+                            // quedaba al final, después de todos los grupos y la tabla).
+                            _QuickAccess(
+                              showGroups: !view.isRoundRobin || view.phase == "groups" || data.allGroups.isNotEmpty,
+                              groupsLabel: view.isRoundRobin ? "Tabla del grupo" : "Grupos",
+                              showBracket: !view.isRoundRobin && (view.phase == "bracket" || view.phase == "finished"),
+                              onGroups: () => _goViewMore("groups"),
+                              onBracket: () => _goViewMore("bracket"),
+                            ),
+
                             if (view.phase == "groups" &&
                                 view.standings.isNotEmpty) ...[
                               _Section(
@@ -223,7 +235,7 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                                     : "Tu grupo",
                                 trailing: TextButton(
                                   onPressed: () => _goViewMore(view.phase),
-                                  child: const Text(
+                                  child: Text(
                                     "Ver todos los grupos",
                                     style: TextStyle(
                                       fontFamily: AppTypography.body,
@@ -253,66 +265,13 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                                   color: AppColors.scorifyCardFill,
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.info_outline_rounded, size: 16, color: AppColors.scorifyMint),
+                                      Icon(Icons.info_outline_rounded, size: 16, color: AppColors.scorifyMint),
                                       const SizedBox(width: 10),
                                       Expanded(child: Text(parts.join(" · "), style: AppTypography.bodyMuted.copyWith(color: AppColors.scorifyText))),
                                     ],
                                   ),
                                 );
                               }),
-                            ],
-
-                            if (data.allGroups.isNotEmpty) ...[
-                              const _Section("Grupos"),
-                              for (final g in data.allGroups)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: GroupCard(group: g, myUserId: data.myUserId, qualifiers: data.qualifiersPerGroup, hasSilver: data.hasSilver),
-                                ),
-                            ],
-
-                            if (generalStandings.isNotEmpty) ...[
-                              const SizedBox(height: 20),
-                              SectionHeader(
-                                title: data.generalStandings.source == "bracket"
-                                    ? "Posiciones finales"
-                                    : "Tabla general",
-                              ),
-                              const SizedBox(height: 10),
-                              _GeneralStandingsList(
-                                standings: generalStandings,
-                                myUserId: data.myUserId,
-                              ),
-                            ],
-
-                            if (view.phase == "bracket" ||
-                                view.phase == "finished") ...[
-                              const SizedBox(height: 20),
-                              GlassCard(
-                                // Todos contra todos: no hay llave, se ve la tabla del grupo único.
-                                onTap: () => _goViewMore(view.isRoundRobin ? "groups" : view.phase),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      view.isRoundRobin ? Icons.table_rows_rounded : Icons.account_tree_rounded,
-                                      color: AppColors.scorifyMint,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        view.phase == "groups" || view.isRoundRobin
-                                            ? (view.isRoundRobin ? "Ver tabla del grupo" : "Ver todos los grupos")
-                                            : "Ver llave completa",
-                                        style: AppTypography.h2,
-                                      ),
-                                    ),
-                                    Icon(
-                                      Icons.chevron_right_rounded,
-                                      color: AppColors.scorifyTextFaint,
-                                    ),
-                                  ],
-                                ),
-                              ),
                             ],
 
                             // Mi recorrido: ronda a ronda por la llave, con el
@@ -361,6 +320,29 @@ class _MyCategoryScreenState extends State<MyCategoryScreen> {
                                   ),
                                 ),
                               ),
+                            ],
+
+                            if (generalStandings.isNotEmpty) ...[
+                              const SizedBox(height: 20),
+                              SectionHeader(
+                                title: data.generalStandings.source == "bracket"
+                                    ? "Posiciones finales"
+                                    : "Tabla general",
+                              ),
+                              const SizedBox(height: 10),
+                              _GeneralStandingsList(
+                                standings: generalStandings,
+                                myUserId: data.myUserId,
+                              ),
+                            ],
+
+                            if (data.allGroups.isNotEmpty) ...[
+                              const _Section("Grupos"),
+                              for (final g in data.allGroups)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: GroupCard(group: g, myUserId: data.myUserId, qualifiers: data.qualifiersPerGroup, hasSilver: data.hasSilver),
+                                ),
                             ],
 
                             if (isEmpty)
@@ -413,15 +395,15 @@ class _GeneralStandingsList extends StatelessWidget {
         // Podio: campeón destacado; 2.º y 3.º compactos con su color de medalla.
         if (podium.isNotEmpty)
           Container(
-            color: const Color(0xFF0F1620),
+            color: AppColors.isLight ? const Color(0xFFF4F4F6) : const Color(0xFF0F1620),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 for (final r in podium.where((r) => r.position == 1))
                   Container(
                     padding: const EdgeInsets.all(14),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF2A2210),
+                    decoration: BoxDecoration(
+                      color: AppColors.isLight ? Color(0xFFFFF4DA) : Color(0xFF2A2210),
                       border: Border(left: BorderSide(color: _gold, width: 3)),
                     ),
                     child: Row(
@@ -474,7 +456,7 @@ class _GeneralStandingsList extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(2, 16, 2, 6),
             child: Text(
               _tier(start, start + tiers[start]!.length - 1),
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.1, color: AppColors.scorifyTextFaint),
+              style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.1, color: AppColors.scorifyTextFaint),
             ),
           ),
           Container(
@@ -482,7 +464,7 @@ class _GeneralStandingsList extends StatelessWidget {
             child: Column(
               children: [
                 for (var i = 0; i < tiers[start]!.length; i++) ...[
-                  if (i > 0) const Divider(height: 1, thickness: 1, color: Color(0x0FFFFFFF), indent: 14, endIndent: 14),
+                  if (i > 0) Divider(height: 1, thickness: 1, color: AppColors.scorifySurface2, indent: 14, endIndent: 14),
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
@@ -521,7 +503,7 @@ class _GeneralStandingsList extends StatelessWidget {
           idUser: r.idUser,
           club: r.clubName,
           crestSize: 12,
-          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted),
+          style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted),
         ),
       ],
     );
@@ -628,7 +610,7 @@ class _JourneyCard extends StatelessWidget {
                             "vs ${m.opponentName ?? "Por definir"}",
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.scorifyText,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -662,7 +644,7 @@ class _JourneyCard extends StatelessWidget {
 
 // ── Diseño de "Mi categoría" (mismo estilo que el detalle del campeonato) ──
 
-const TextStyle _muted = TextStyle(
+TextStyle get _muted => TextStyle(
   fontFamily: AppTypography.body,
   fontSize: 12,
   fontWeight: FontWeight.w400,
@@ -708,12 +690,12 @@ class _Section extends StatelessWidget {
           // Mismo título de sección que el resto de la app (mayúsculas azul hielo).
           child: Text(
             title.toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.body,
               fontSize: 11,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.3,
-              color: Color(0xFF8EC5FF),
+              color: AppColors.scorifySection,
             ),
           ),
         ),
@@ -775,7 +757,7 @@ class _CategoryHero extends StatelessWidget {
                   fg: AppColors.scorifyText,
                 ),
               if (!isEnrolled)
-                const _Pill(
+                _Pill(
                   "Viendo como espectador",
                   bg: AppColors.scorifySurface2,
                   fg: AppColors.scorifyTextMuted,
@@ -785,7 +767,7 @@ class _CategoryHero extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             categoryLabel,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.body,
               fontSize: 22,
               fontWeight: FontWeight.w600,
@@ -828,7 +810,7 @@ class _CategoryHero extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(finalPosition == 1 ? "¡CAMPEÓN!" : "PUESTO FINAL",
-                          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: Color(0xFF8EC5FF))),
+                          style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: AppColors.scorifySection)),
                       if (totalPlayers != null)
                         Text("de $totalPlayers jugadores", style: _muted.copyWith(fontSize: 13)),
                     ],
@@ -868,11 +850,11 @@ class _CategoryHero extends StatelessWidget {
 class _Kpi extends StatelessWidget {
   final String value;
   final String label;
-  final Color color;
+  final Color? color;
   const _Kpi({
     required this.value,
     required this.label,
-    this.color = AppColors.scorifyText,
+    this.color,
   });
 
   @override
@@ -886,7 +868,7 @@ class _Kpi extends StatelessWidget {
             fontSize: 20,
             fontWeight: FontWeight.w700,
             height: 1.0,
-            color: color,
+            color: color ?? AppColors.scorifyText,
           ),
         ),
         const SizedBox(height: 2),
@@ -911,7 +893,7 @@ class _GroupTable extends StatelessWidget {
     if (anyPlayed) {
       rows.sort((a, b) => (a.position ?? 99).compareTo(b.position ?? 99));
     }
-    const head = TextStyle(
+    final head = TextStyle(
       fontFamily: AppTypography.body,
       fontSize: 11,
       fontWeight: FontWeight.w600,
@@ -934,7 +916,7 @@ class _GroupTable extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
       child: Column(
         children: [
-          const Padding(
+          Padding(
             padding: EdgeInsets.fromLTRB(8, 0, 8, 6),
             child: Row(
               children: [
@@ -1002,7 +984,7 @@ class _GroupTable extends StatelessWidget {
                               s.idUser == myUserId ? "Tú" : s.playerName,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: AppTypography.body,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -1013,7 +995,7 @@ class _GroupTable extends StatelessWidget {
                             ClubLine(
                               idUser: s.idUser,
                               club: s.clubName,
-                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted),
+                              style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted),
                             ),
                           ],
                         ),
@@ -1116,7 +1098,7 @@ class _MatchCard extends StatelessWidget {
                 Text("vs ${m.opponentName ?? "Por definir"}",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
+                    style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
                 const SizedBox(height: 2),
                 Text(played ? meta : "$meta · $pillText",
                     maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted.copyWith(fontSize: 11.5)),
@@ -1130,7 +1112,7 @@ class _MatchCard extends StatelessWidget {
               fontFamily: AppTypography.display,
               fontSize: played ? 18 : 13,
               fontWeight: FontWeight.w800,
-              color: played && iWon ? Colors.white : AppColors.scorifyTextMuted,
+              color: played && iWon ? AppColors.scorifyInk : AppColors.scorifyTextMuted,
             ),
           ),
         ],
@@ -1163,7 +1145,7 @@ class _Side extends StatelessWidget {
                   width: 44,
                   height: 44,
                   color: AppColors.scorifySurface2,
-                  child: const Icon(
+                  child: Icon(
                     Icons.person_outline_rounded,
                     color: AppColors.scorifyTextMuted,
                   ),
@@ -1175,7 +1157,7 @@ class _Side extends StatelessWidget {
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: AppTypography.body,
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -1200,7 +1182,7 @@ class _Side extends StatelessWidget {
                       child: Text(club,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted)),
+                          style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted)),
                     ),
                   ],
                 );
@@ -1212,7 +1194,7 @@ class _Side extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.visibility_rounded,
                 size: 14,
                 color: AppColors.scorifyMint,
@@ -1236,6 +1218,62 @@ class _Side extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(Panel.radius),
       child: Padding(padding: const EdgeInsets.all(2), child: content),
+    );
+  }
+}
+
+/// Accesos directos del resumen de la categoría: barra negra con filete
+/// (como el botón de Google del login), Grupos y Llave lado a lado.
+class _QuickAccess extends StatelessWidget {
+  final bool showGroups;
+  final String groupsLabel;
+  final bool showBracket;
+  final VoidCallback onGroups;
+  final VoidCallback onBracket;
+  const _QuickAccess({
+    required this.showGroups,
+    required this.groupsLabel,
+    required this.showBracket,
+    required this.onGroups,
+    required this.onBracket,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final items = <(IconData, String, VoidCallback)>[
+      if (showGroups) (Icons.table_rows_rounded, groupsLabel, onGroups),
+      if (showBracket) (Icons.account_tree_rounded, "Llave", onBracket),
+    ];
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Container(
+        decoration: BoxDecoration(color: AppColors.scorifyCardFill, border: Border.all(color: AppColors.scorifyHairline)),
+        child: Row(
+          children: [
+            for (var i = 0; i < items.length; i++) ...[
+              if (i > 0) Container(width: 1, height: 22, color: AppColors.scorifyHairline),
+              Expanded(
+                child: InkWell(
+                  onTap: items[i].$3,
+                  child: SizedBox(
+                    height: 48,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(items[i].$1, size: 18, color: AppColors.scorifyTextMuted),
+                        const SizedBox(width: 8),
+                        Text(items[i].$2,
+                            style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.scorifyInk)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

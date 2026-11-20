@@ -91,7 +91,7 @@ class PushService {
         titlePadding: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
         title: const PanelTitleBar(title: "¿Te avisamos cuando te toque jugar?"),
-        content: const Text(
+        content: Text(
           "Te llega un aviso con tu mesa y tu rival, tus resultados y cuándo empieza tu campeonato. Solo lo importante.",
           style: TextStyle(color: AppColors.scorifyTextMuted, height: 1.4),
         ),

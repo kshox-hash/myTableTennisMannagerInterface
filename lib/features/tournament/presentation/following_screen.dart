@@ -7,12 +7,17 @@ import "package:myttmi/core/ui/prism_background.dart";
 import "package:myttmi/core/ui/top_header.dart";
 import "package:myttmi/features/tournament/api/tournament_api.dart";
 import "package:myttmi/routes/app_routes.dart";
+import "package:myttmi/core/favorites/favorite_matches.dart";
+import "package:myttmi/routes/cyber_page_route.dart";
+import "package:myttmi/features/favorites/favorites_screen.dart";
 
 /// "Campeonatos que sigo": los que sigues como visita (sin jugar). Desde acá
 /// se abre su ficha, donde están los grupos, la llave y los resultados, y
 /// el botón para dejar de seguirlo.
 class FollowingScreen extends StatefulWidget {
-  const FollowingScreen({super.key});
+  /// Dentro de la sección "Campeonatos" como "Siguiendo".
+  final bool embedded;
+  const FollowingScreen({super.key, this.embedded = false});
 
   @override
   State<FollowingScreen> createState() => _FollowingScreenState();
@@ -54,19 +59,51 @@ class _FollowingScreenState extends State<FollowingScreen> {
   @override
   Widget build(BuildContext context) {
     final items = _items;
-    return Scaffold(
-      backgroundColor: AppColors.scorifyBg,
-      body: PrismBackground(
-        child: SafeArea(
-          child: RefreshIndicator(
+    final list = RefreshIndicator(
             color: AppColors.scorifyMint,
             onRefresh: _load,
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
               children: [
-                const TopHeader(title: "Campeonatos que sigo", subtitle: "Sin jugarlos: te avisamos de lo importante."),
-                const SizedBox(height: 16),
+                if (!widget.embedded) ...[
+                  const TopHeader(title: "Campeonatos que sigo", subtitle: "Sin jugarlos: te avisamos de lo importante."),
+                  const SizedBox(height: 16),
+                ] else ...[
+                  // Partidos guardados (♥): antes era otra opción del menú.
+                  ValueListenableBuilder<List<FavoriteMatch>>(
+                    valueListenable: FavoriteMatches.items,
+                    builder: (context, favs, _) => GlassCard(
+                      onTap: () => Navigator.push(context, CyberPageRoute(builder: (_) => const FavoritesScreen())),
+                      padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+                      child: Row(
+                        children: [
+                          Icon(Icons.favorite_rounded, color: AppColors.scorifyBadge, size: 22),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Partidos guardados",
+                                    style: TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
+                                const SizedBox(height: 3),
+                                Text(
+                                  favs.isEmpty ? "Toca ♥ en un partido para seguirlo en vivo" : "${favs.length} ${favs.length == 1 ? "partido" : "partidos"} en vivo",
+                                  style: AppTypography.bodyMuted.copyWith(fontSize: 12.5),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Text("CAMPEONATOS QUE SIGUES",
+                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: AppColors.scorifySection)),
+                  const SizedBox(height: 10),
+                ],
                 if (_error != null)
                   ErrorStateView(message: _error!, onRetry: _load)
                 else if (items == null)
@@ -83,7 +120,7 @@ class _FollowingScreenState extends State<FollowingScreen> {
                       padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
                       child: Row(
                         children: [
-                          const Icon(Icons.notifications_active_rounded, color: AppColors.scorifyMint, size: 22),
+                          Icon(Icons.notifications_active_rounded, color: AppColors.scorifyMint, size: 22),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
@@ -93,7 +130,7 @@ class _FollowingScreenState extends State<FollowingScreen> {
                                   f.name,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.scorifyText),
+                                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.scorifyText),
                                 ),
                                 const SizedBox(height: 3),
                                 Text(
@@ -109,7 +146,7 @@ class _FollowingScreenState extends State<FollowingScreen> {
                               ],
                             ),
                           ),
-                          const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
+                          Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
                         ],
                       ),
                     ),
@@ -117,9 +154,11 @@ class _FollowingScreenState extends State<FollowingScreen> {
                   ],
               ],
             ),
-          ),
-        ),
-      ),
+          );
+    if (widget.embedded) return list;
+    return Scaffold(
+      backgroundColor: AppColors.scorifyBg,
+      body: PrismBackground(child: SafeArea(child: list)),
     );
   }
 }

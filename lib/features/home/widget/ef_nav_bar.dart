@@ -39,7 +39,7 @@ class EFBottomNav extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: backgroundColor ?? AppColors.scorifyNavbar,
-        border: const Border(top: BorderSide(color: Panel.topLine)),
+        border: Border(top: BorderSide(color: Panel.topLine)),
       ),
       child: SafeArea(
         top: false,

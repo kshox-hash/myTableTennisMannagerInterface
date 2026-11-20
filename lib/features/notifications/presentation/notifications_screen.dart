@@ -186,7 +186,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                 ),
                                 child: Text(
                                   entry,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontFamily: AppTypography.body,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -242,7 +242,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                             const SizedBox(height: 2),
                                             Text(
                                               n.message,
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontFamily: AppTypography.body,
                                                 fontSize: 13,
                                                 height: 1.35,
@@ -274,7 +274,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                             left: 12,
                                             top: 6,
                                           ),
-                                          decoration: const BoxDecoration(
+                                          decoration: BoxDecoration(
                                             color: AppColors.scorifyMint,
                                             shape: BoxShape.circle,
                                           ),

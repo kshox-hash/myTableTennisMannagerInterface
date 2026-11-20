@@ -1,17 +1,17 @@
-import 'package:myttmi/core/ui/panel_style.dart';
+import "package:myttmi/features/shell/settings_screen.dart";
+import "package:myttmi/features/referee/referee_scan_screen.dart";
+import "package:myttmi/features/shell/section_hubs.dart";
+import "package:myttmi/features/home/widget/ef_nav_bar.dart";
 import 'package:flutter/foundation.dart';
 import 'package:myttmi/core/app_update.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:myttmi/core/constants/app_config.dart';
-import 'package:myttmi/features/referee/referee_scan_screen.dart';
 import 'package:myttmi/features/shell/splash_gate.dart';
 import 'package:myttmi/core/storage/session_storage.dart';
 import 'package:myttmi/core/ui/confirm_dialog.dart';
 import 'package:myttmi/features/profile/models/profile_model.dart';
 import 'package:myttmi/features/profile/api/profile_api.dart';
-import 'package:myttmi/features/favorites/favorites_screen.dart';
-import 'package:myttmi/features/tournament/presentation/following_screen.dart';
 import 'package:myttmi/routes/app_routes.dart';
 import 'package:myttmi/features/shell/app_drawer.dart';
 import 'package:myttmi/core/constants/app_colors.dart';
@@ -20,11 +20,8 @@ import 'package:myttmi/core/push/push_service.dart';
 import 'package:myttmi/features/notifications/notification_popups.dart';
 import 'package:myttmi/core/ui/app_toast.dart';
 import 'package:myttmi/core/ui/prism_background.dart';
-import 'package:myttmi/features/calendar/presentation/calendar_screen.dart';
 import 'package:myttmi/features/home/presentation/home_screen.dart';
-import 'package:myttmi/features/stats/presentation/stats_screen.dart';
 import 'package:myttmi/features/ranking/presentation/ranking_screen.dart';
-import 'package:myttmi/features/tournament/presentation/tournaments_screen.dart';
 import "package:myttmi/features/player/presentation/celebration_dialog.dart";
 import 'package:myttmi/routes/cyber_page_route.dart';
 
@@ -58,13 +55,19 @@ class _AppShellState extends State<AppShell>
   // recién la primera vez que se visita y después queda viva (IndexedStack).
   final Set<int> _opened = {0};
 
+  // Índices fijos (otras pantallas llaman switchTab(3) para Campeonatos):
+  // 0 Inicio · 1 (antes Calendario: ahora redirige a Campeonatos › Míos) ·
+  // 2 Mi juego · 3 Campeonatos · 4 Ranking.
   static const _tabs = [
     HomeScreen(),
-    CalendarScreen(),
-    StatsScreen(),
-    TournamentsScreen(),
+    SizedBox.shrink(),
+    MyGameHub(),
+    CompetitionsHub(),
     RankingScreen(),
   ];
+
+  /// Barra de abajo: Inicio · Campeonatos · Ranking · Mi juego.
+  static const _navTabs = [0, 3, 4, 2];
 
   // Mismo lenguaje que CyberPageRoute (ver cyber_page_route.dart) pero para
   // un solo widget: el IndexedStack se apaga, en el punto más bajo se
@@ -80,6 +83,17 @@ class _AppShellState extends State<AppShell>
   // ("Ver estadísticas" en el Inicio). Tocando la barra de abajo no hay.
   int? _returnTab;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  /// Navegador de las pestañas: lo que se abre desde una pestaña (campeonato,
+  /// perfil, partido…) va acá adentro, así la barra de abajo no desaparece.
+  final _tabNav = GlobalKey<NavigatorState>();
+  bool _nestedCanPop = false;
+  late final _nestedObserver = _NestedObserver(() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final can = _tabNav.currentState?.canPop() ?? false;
+      if (can != _nestedCanPop) setState(() => _nestedCanPop = can);
+    });
+  });
   Future<void> _loadMe() async {
     try {
       CurrentUser.me.value = await ProfileApi().getMe();
@@ -87,67 +101,45 @@ class _AppShellState extends State<AppShell>
   }
 
   Future<void> _openProfile() async {
-    await Navigator.pushNamed(context, AppRoutes.profile);
+    await _tabNav.currentState?.pushNamed(AppRoutes.profile);
     _loadMe();
   }
 
-  /// Ajustes: arbitrar con QR y sonidos.
+  /// Ajustes: pantalla con Arbitraje, Ayuda y Cuenta (antes una hoja).
   Future<void> _openSettings() async {
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Panel.sheetColor,
-      shape: Panel.sheetShape,
-      builder: (sheet) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 10),
-            ListTile(
-              leading: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.scorifyText),
-              title: const Text("Arbitrar con QR", style: TextStyle(color: AppColors.scorifyText)),
-              onTap: () {
-                Navigator.pop(sheet);
-                Navigator.push(context, CyberPageRoute(builder: (_) => const RefereeScanScreen()));
-              },
+    await _tabNav.currentState?.push(CyberPageRoute(
+      builder: (_) => SettingsScreen(
+        versionLabel: AppUpdate.label,
+        sections: [
+          ("Arbitraje", [
+            SettingsOption(
+              icon: Icons.qr_code_scanner_rounded,
+              title: "Arbitrar con QR",
+              subtitle: "Escanea el código de la mesa para anotar el partido",
+              onTap: () => _tabNav.currentState?.push(CyberPageRoute(builder: (_) => const RefereeScanScreen())),
             ),
-            ListTile(
-              leading: const Icon(Icons.privacy_tip_outlined, color: AppColors.scorifyText),
-              title: const Text("Política de privacidad", style: TextStyle(color: AppColors.scorifyText)),
-              trailing: const Icon(Icons.open_in_new_rounded, size: 18, color: AppColors.scorifyTextMuted),
-              onTap: () {
-                Navigator.pop(sheet);
-                launchUrl(Uri.parse(AppConfig.privacyUrl), mode: LaunchMode.externalApplication);
-              },
+          ]),
+          ("Ayuda", [
+            SettingsOption(
+              icon: Icons.help_outline_rounded,
+              title: "Ayuda y contacto",
+              subtitle: "Reportar un problema o hacer una consulta",
+              onTap: _contactSupport,
             ),
-            ListTile(
-              leading: const Icon(Icons.help_outline_rounded, color: AppColors.scorifyText),
-              title: const Text("Ayuda y contacto", style: TextStyle(color: AppColors.scorifyText)),
-              subtitle: const Text("Reportar un problema o hacer una consulta", style: TextStyle(color: AppColors.scorifyTextMuted)),
-              onTap: () {
-                Navigator.pop(sheet);
-                _contactSupport();
-              },
+            SettingsOption(
+              icon: Icons.privacy_tip_outlined,
+              title: "Política de privacidad",
+              external: true,
+              onTap: () => launchUrl(Uri.parse(AppConfig.privacyUrl), mode: LaunchMode.externalApplication),
             ),
-            const Divider(height: 1, color: AppColors.scorifySurface2),
-            ListTile(
-              leading: const Icon(Icons.delete_forever_rounded, color: AppColors.scorifyNegative),
-              title: const Text("Eliminar cuenta", style: TextStyle(color: AppColors.scorifyNegative)),
-              onTap: () {
-                Navigator.pop(sheet);
-                _deleteAccount();
-              },
-            ),
-            if (AppUpdate.label.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Text("MyTTM ${AppUpdate.label}",
-                    textAlign: TextAlign.center, style: const TextStyle(color: AppColors.scorifyTextFaint, fontSize: 12)),
-              ),
-            const SizedBox(height: 8),
-          ],
-        ),
+          ]),
+          ("Cuenta", [
+            SettingsOption(icon: Icons.logout_rounded, title: "Cerrar sesión", onTap: _logout),
+            SettingsOption(icon: Icons.delete_forever_rounded, title: "Eliminar cuenta", danger: true, onTap: _deleteAccount),
+          ]),
+        ],
       ),
-    );
+    ));
   }
 
   // Correo a soporte con la versión y el celular ya escritos (lo primero que
@@ -214,6 +206,12 @@ class _AppShellState extends State<AppShell>
   }
 
   void _switchTab(int index, {bool link = false}) {
+    // "Calendario" ya no es pestaña propia: es "Míos" dentro de Campeonatos.
+    if (index == 1) {
+      CompetitionsHub.segment.value = 1;
+      index = 3;
+    }
+    _tabNav.currentState?.popUntil((r) => r.isFirst);
     if (index == _index) return;
     final from = _index;
     // Al Inicio no se "vuelve": es la raíz.
@@ -281,32 +279,38 @@ class _AppShellState extends State<AppShell>
     final glow = CyberTransition.glow(_pulse);
 
     return PopScope(
-      canPop: _index == 0,
+      canPop: _index == 0 && !_nestedCanPop,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && _index != 0) _switchTab(_returnTab ?? 0);
+        if (didPop) return;
+        final nav = _tabNav.currentState;
+        if (nav != null && nav.canPop()) {
+          nav.pop();
+        } else if (_index != 0) {
+          _switchTab(_returnTab ?? 0);
+        }
       },
       child: Scaffold(
       key: _scaffoldKey,
       backgroundColor: AppColors.scorifyBg,
-      // Menú lateral (☰) en vez de la barra de navegación de abajo.
+      // Secciones en la barra de abajo; el menú (☰) queda para lo que no
+      // es una sección: arbitrar, ajustes y cerrar sesión.
       drawer: AppDrawer(
         main: [
-          DrawerItem(Icons.home_rounded, "Inicio", () => _switchTab(0), selected: _index == 0),
-          DrawerItem(Icons.calendar_month_rounded, "Calendario", () => _switchTab(1), selected: _index == 1),
-          DrawerItem(Icons.trending_up_rounded, "Mi rendimiento", () => _switchTab(2), selected: _index == 2),
-          DrawerItem(Icons.leaderboard_rounded, "Ranking", () => _switchTab(4), selected: _index == 4),
           DrawerItem(Icons.person_rounded, "Mi perfil", _openProfile),
-          DrawerItem(Icons.emoji_events_rounded, "Campeonatos", () => _switchTab(3), selected: _index == 3),
-        ],
-        more: [
-          DrawerItem(Icons.history_rounded, "Historial", () => Navigator.pushNamed(context, AppRoutes.history)),
-          DrawerItem(Icons.favorite_border_rounded, "Partidos guardados",
-              () => Navigator.push(context, CyberPageRoute(builder: (_) => const FavoritesScreen()))),
-          DrawerItem(Icons.notifications_active_outlined, "Campeonatos que sigo",
-              () => Navigator.push(context, CyberPageRoute(builder: (_) => const FollowingScreen()))),
           DrawerItem(Icons.settings_rounded, "Ajustes", _openSettings),
         ],
+        more: const [],
         onLogout: _logout,
+      ),
+      bottomNavigationBar: EFBottomNav(
+        currentIndex: _navTabs.contains(_index) ? _navTabs.indexOf(_index) : 0,
+        onTap: (i) => _switchTab(_navTabs[i]),
+        items: const [
+          EFNavItem(label: "Inicio", icon: Icons.home_rounded),
+          EFNavItem(label: "Campeonatos", icon: Icons.emoji_events_rounded),
+          EFNavItem(label: "Ranking", icon: Icons.leaderboard_rounded),
+          EFNavItem(label: "Mi juego", icon: Icons.trending_up_rounded),
+        ],
       ),
       body: PrismBackground(
         // Inicio tiene su propio fondo; el resto de las pestañas, el general.
@@ -341,11 +345,18 @@ class _AppShellState extends State<AppShell>
                     returnTab: _returnTab,
                     openMenu: () => _scaffoldKey.currentState?.openDrawer(),
                     openProfile: _openProfile,
-                    child: IndexedStack(
-                      index: _index,
-                      children: [
-                        for (var i = 0; i < _tabs.length; i++) _opened.contains(i) ? _tabs[i] : const SizedBox.shrink(),
-                      ],
+                    child: Navigator(
+                      key: _tabNav,
+                      observers: [_nestedObserver],
+                      onGenerateRoute: (settings) {
+                        if (settings.name == Navigator.defaultRouteName) {
+                          return PageRouteBuilder(
+                            settings: settings,
+                            pageBuilder: (_, __, ___) => _TabsHost(tabs: _tabs, opened: _opened),
+                          );
+                        }
+                        return AppRoutes.onGenerateRoute(settings);
+                      },
                     ),
                   ),
                   CyberTransition.glowOverlay(glow),
@@ -403,4 +414,38 @@ class AppShellScope extends InheritedWidget {
       switchTab != oldWidget.switchTab ||
       currentIndex != oldWidget.currentIndex ||
       returnTab != oldWidget.returnTab;
+}
+
+/// Raíz del navegador interno: las pestañas (vivas una vez abiertas). Lee la
+/// pestaña activa de AppShellScope, así se redibuja al cambiar.
+class _TabsHost extends StatelessWidget {
+  final List<Widget> tabs;
+  final Set<int> opened;
+  const _TabsHost({required this.tabs, required this.opened});
+
+  @override
+  Widget build(BuildContext context) {
+    final index = AppShellScope.of(context)?.currentIndex ?? 0;
+    return IndexedStack(
+      index: index,
+      children: [
+        for (var i = 0; i < tabs.length; i++) opened.contains(i) ? tabs[i] : const SizedBox.shrink(),
+      ],
+    );
+  }
+}
+
+/// Avisa al shell cuando se abre o cierra algo en el navegador interno
+/// (para que "volver" sepa si cierra una pantalla o cambia de pestaña).
+class _NestedObserver extends NavigatorObserver {
+  final VoidCallback onChange;
+  _NestedObserver(this.onChange);
+  @override
+  void didPush(Route route, Route? previousRoute) => onChange();
+  @override
+  void didPop(Route route, Route? previousRoute) => onChange();
+  @override
+  void didRemove(Route route, Route? previousRoute) => onChange();
+  @override
+  void didReplace({Route? newRoute, Route? oldRoute}) => onChange();
 }

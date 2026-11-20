@@ -43,13 +43,13 @@ class _HomeLiveCardState extends State<HomeLiveCard> {
         children: [
           Row(
             children: [
-              const LiveDot(color: AppColors.scorifyNegative),
+              LiveDot(color: AppColors.scorifyNegative),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(s.tournamentName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: "Montserrat", fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+                    style: TextStyle(fontFamily: "Montserrat", fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.scorifyInk)),
               ),
               if (all.length > 1) ...[
                 _Arrow(icon: Icons.chevron_left_rounded, onTap: _i == 0 ? null : () => setState(() => _i--)),
@@ -81,7 +81,7 @@ class _HomeLiveCardState extends State<HomeLiveCard> {
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () => Navigator.push(context, CyberPageRoute(waitForData: false, builder: (_) => LivePlayersScreen(summary: s))),
-                child: const Text(
+                child: Text(
                   "Ver todos los jugadores ›",
                   style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyMint),
                 ),

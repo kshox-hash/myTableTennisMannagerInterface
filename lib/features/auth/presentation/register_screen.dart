@@ -67,7 +67,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
+            colorScheme: ColorScheme.dark(
               primary: AppColors.scorifyMint,
               onPrimary: AppColors.scorifyOnMint,
               surface: AppColors.scorifyDeep,
@@ -194,7 +194,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               decoration: InputDecoration(
                                 labelText: "Fecha de nacimiento",
                                 labelStyle: AppTypography.bodyMuted,
-                                prefixIcon: const Icon(Icons.cake_rounded, color: AppColors.scorifyTextMuted, size: 20),
+                                prefixIcon: Icon(Icons.cake_rounded, color: AppColors.scorifyTextMuted, size: 20),
                                 filled: true,
                                 fillColor: AppColors.scorifyInput,
                                 border: OutlineInputBorder(
@@ -203,7 +203,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(Panel.radius),
-                                  borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
+                                  borderSide: BorderSide(color: AppColors.scorifyCardBorder),
                                 ),
                               ),
                               child: Text(
@@ -222,7 +222,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             decoration: InputDecoration(
                               labelText: "Género",
                               labelStyle: AppTypography.bodyMuted,
-                              prefixIcon: const Icon(Icons.wc_rounded, color: AppColors.scorifyTextMuted, size: 20),
+                              prefixIcon: Icon(Icons.wc_rounded, color: AppColors.scorifyTextMuted, size: 20),
                               filled: true,
                               fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
@@ -231,7 +231,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(Panel.radius),
-                                borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
+                                borderSide: BorderSide(color: AppColors.scorifyCardBorder),
                               ),
                             ),
                             items: const [
@@ -250,7 +250,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             decoration: InputDecoration(
                               labelText: "Mano con la que juegas",
                               labelStyle: AppTypography.bodyMuted,
-                              prefixIcon: const Icon(Icons.sports_tennis_rounded, color: AppColors.scorifyTextMuted, size: 20),
+                              prefixIcon: Icon(Icons.sports_tennis_rounded, color: AppColors.scorifyTextMuted, size: 20),
                               filled: true,
                               fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
@@ -259,7 +259,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(Panel.radius),
-                                borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
+                                borderSide: BorderSide(color: AppColors.scorifyCardBorder),
                               ),
                             ),
                             items: _handLabel.entries
@@ -284,7 +284,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             decoration: InputDecoration(
                               labelText: "País",
                               labelStyle: AppTypography.bodyMuted,
-                              prefixIcon: const Icon(Icons.public_rounded, color: AppColors.scorifyTextMuted, size: 20),
+                              prefixIcon: Icon(Icons.public_rounded, color: AppColors.scorifyTextMuted, size: 20),
                               filled: true,
                               fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
@@ -293,7 +293,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(Panel.radius),
-                                borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
+                                borderSide: BorderSide(color: AppColors.scorifyCardBorder),
                               ),
                             ),
                             items: kCountries
@@ -317,7 +317,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             decoration: InputDecoration(
                               labelText: "Club (opcional)",
                               labelStyle: AppTypography.bodyMuted,
-                              prefixIcon: const Icon(Icons.groups_2_rounded, color: AppColors.scorifyTextMuted, size: 20),
+                              prefixIcon: Icon(Icons.groups_2_rounded, color: AppColors.scorifyTextMuted, size: 20),
                               filled: true,
                               fillColor: AppColors.scorifyInput,
                               border: OutlineInputBorder(
@@ -326,7 +326,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(Panel.radius),
-                                borderSide: const BorderSide(color: AppColors.scorifyCardBorder),
+                                borderSide: BorderSide(color: AppColors.scorifyCardBorder),
                               ),
                             ),
                             hint: Text(
@@ -368,7 +368,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           const SizedBox(height: 20),
                           loading
-                              ? const Center(
+                              ? Center(
                                   child: SizedBox(
                                     width: 22,
                                     height: 22,

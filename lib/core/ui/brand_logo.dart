@@ -9,7 +9,7 @@ class BrandLogo extends StatelessWidget {
   final double markSize;
   final bool showWordmark;
   final double? wordmarkSize;
-  final Color wordmarkColor;
+  final Color? wordmarkColor;
 
   /// Versión monocromo (isotipo blanco + "TTM" azul hielo) para la paleta cobalto.
   final bool mono;
@@ -19,7 +19,7 @@ class BrandLogo extends StatelessWidget {
     this.markSize = 32,
     this.showWordmark = true,
     this.wordmarkSize,
-    this.wordmarkColor = AppColors.scorifyText,
+    this.wordmarkColor,
     this.mono = false, // M oficial (celeste + verde lima)
   });
 

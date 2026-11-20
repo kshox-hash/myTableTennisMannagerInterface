@@ -31,6 +31,8 @@ class TournamentMatch {
   final int? nextRound;
   final int? nextMatchNumber;
   final int? nextMatchSlot;
+  /// Puntos de cada set: (jugador 1, jugador 2). Vacío si no se cargaron.
+  final List<(int, int)> setScores;
 
   TournamentMatch({
     required this.idMatch,
@@ -59,6 +61,7 @@ class TournamentMatch {
     this.nextRound,
     this.nextMatchNumber,
     this.nextMatchSlot,
+    this.setScores = const [],
   });
 
   String get categoryLabel =>
@@ -95,6 +98,12 @@ class TournamentMatch {
       nextRound: intOrNull(json["next_round"]),
       nextMatchNumber: intOrNull(json["next_match_number"]),
       nextMatchSlot: intOrNull(json["next_match_slot"]),
+      setScores: [
+        if (json["set_scores"] is List)
+          for (final e in json["set_scores"] as List)
+            if (e is Map && e["p1"] != null && e["p2"] != null)
+              (intOrDefault(e["p1"]), intOrDefault(e["p2"])),
+      ],
     );
   }
 }

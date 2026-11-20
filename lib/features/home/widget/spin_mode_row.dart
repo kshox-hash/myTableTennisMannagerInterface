@@ -58,7 +58,7 @@ class SpinModeRow extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.scorifyText,
                             fontSize: 14,
                             fontWeight: FontWeight.w700,

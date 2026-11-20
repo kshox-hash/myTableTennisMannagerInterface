@@ -226,7 +226,7 @@ class ForceUpdateScreen extends StatelessWidget {
                 children: [
                   const BrandLogo(markSize: 72, showWordmark: false),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     "Actualiza MyTTM",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontFamily: AppTypography.body, fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.scorifyText),

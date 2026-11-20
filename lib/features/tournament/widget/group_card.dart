@@ -25,7 +25,7 @@ class GroupCard extends StatelessWidget {
   const GroupCard({super.key, required this.group, this.myUserId, this.isMyGroup = false, this.qualifiers, this.hasSilver = false});
 
   static const _silver = Color(0xFFC0C7CF); // Plata (igual que la web)
-  static const _gold = AppColors.scorifyButterfly; // clasifica: lima de la web
+  static Color get _gold => AppColors.scorifyButterfly; // clasifica: lima de la web
 
   // "GR-3" → "Grupo 3"
   static String _label(String name) {
@@ -33,10 +33,10 @@ class GroupCard extends StatelessWidget {
     return "Grupo ${m != null ? m.group(1) : name}";
   }
 
-  static const _num = TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyText);
-  static const _numMuted = TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted);
-  static const _numStrong = TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.scorifyText);
-  static const _head = TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.scorifyTextFaint);
+  static TextStyle get _num => TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyText);
+  static TextStyle get _numMuted => TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.scorifyTextMuted);
+  static TextStyle get _numStrong => TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.scorifyText);
+  static TextStyle get _head => TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.scorifyTextFaint);
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +54,8 @@ class GroupCard extends StatelessWidget {
         return r != 0 ? r : a.matchNumber.compareTo(b.matchNumber);
       });
 
-    Widget stat(String v, {double w = 28, TextStyle style = _num}) =>
-        SizedBox(width: w, child: Text(v, textAlign: TextAlign.center, style: style));
+    Widget stat(String v, {double w = 28, TextStyle? style}) =>
+        SizedBox(width: w, child: Text(v, textAlign: TextAlign.center, style: style ?? _num));
     // Los botones de cada jugador (ver recorrido) solo existen dentro de
     // "Partidos": fuera de ahí la columna no se reserva. Antes el encabezado
     // guardaba 24 px aunque los botones no estuvieran y PJ/G/P quedaban
@@ -70,7 +70,7 @@ class GroupCard extends StatelessWidget {
       trailing: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         child: Text("${members.length} ${members.length == 1 ? "jugador" : "jugadores"}",
-            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
+            style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
       ),
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
       child: Column(
@@ -82,7 +82,7 @@ class GroupCard extends StatelessWidget {
             child: Row(
               children: [
                 const SizedBox(width: 22 + 8 + 26 + 10),
-                const Expanded(child: Text("Jugador", style: _head)),
+                Expanded(child: Text("Jugador", style: _head)),
                 stat("PJ", style: _head),
                 stat("G", style: _head),
                 stat("P", style: _head),
@@ -131,7 +131,7 @@ class GroupCard extends StatelessWidget {
         children: [
           Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
           const SizedBox(width: 6),
-          Text(text, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w500, color: AppColors.scorifyTextFaint)),
+          Text(text, style: TextStyle(fontFamily: AppTypography.body, fontSize: 10.5, fontWeight: FontWeight.w500, color: AppColors.scorifyTextFaint)),
         ],
       );
 
@@ -196,7 +196,7 @@ class GroupCard extends StatelessWidget {
                     ClubLine(
                       idUser: m.idUser,
                       club: m.clubName,
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted),
+                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted),
                     ),
                   ],
                 ),
@@ -230,7 +230,7 @@ class GroupCard extends StatelessWidget {
     } else if (!played && m.tableNumber != null) {
       trailing = PanelChip(label: "Mesa ${m.tableNumber}", color: AppColors.scorifyLive, fontSize: 11);
     } else if (!played) {
-      trailing = const Text(
+      trailing = Text(
         "Por jugar",
         style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyTextFaint),
       );
@@ -279,16 +279,16 @@ class _FoldedResultsState extends State<_FoldedResults> {
             color: AppColors.scorifySurface2,
             child: Row(
               children: [
-                const Icon(Icons.sports_tennis_rounded, size: 15, color: AppColors.scorifyTextMuted),
+                Icon(Icons.sports_tennis_rounded, size: 15, color: AppColors.scorifyTextMuted),
                 const SizedBox(width: 8),
-                Text("Resultados", style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
+                Text("Resultados", style: TextStyle(fontFamily: AppTypography.body, fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text("${widget.played} de ${widget.count} jugados",
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, color: AppColors.scorifyTextMuted)),
+                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, color: AppColors.scorifyTextMuted)),
                 ),
                 Text(_open ? "Ocultar" : "Ver",
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.scorifyMint)),
+                    style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.scorifyMint)),
                 Icon(_open ? Icons.expand_less_rounded : Icons.expand_more_rounded, size: 18, color: AppColors.scorifyMint),
               ],
             ),

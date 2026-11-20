@@ -10,39 +10,45 @@ abstract final class Panel {
   static const double radius = 0; // rectas en toda la app (como el login)
 
   /// Filete (casi no se usa: las tarjetas van sin borde).
-  static const edge = AppColors.scorifyCardBorder;
-  static const edgeStrong = AppColors.scorifyCardBorderStrong;
+  static Color get edge => AppColors.scorifyCardBorder;
+  static Color get edgeStrong => AppColors.scorifyCardBorderStrong;
 
   /// Antes era la línea encendida; ahora un separador apenas visible.
-  static const topLine = Color(0x14FFFFFF);
+  static Color get topLine => AppColors.scorifySelected;
 
   /// Antes la franja gris del título; ahora transparente (título suelto).
   static const titleStrip = Colors.transparent;
 
-  static const gradient = AppColors.cardGradient;
-  static const featuredGradient = AppColors.featuredGradient;
+  static LinearGradient get gradient => AppColors.cardGradient;
+  static LinearGradient get featuredGradient => AppColors.featuredGradient;
 
   /// Cajas de dato / campos de texto: un gris más claro que la tarjeta.
-  static const field = AppColors.scorifySurface2;
+  static Color get field => AppColors.scorifySurface2;
   static const fieldBorder = Colors.transparent;
 
   static const double buttonRadius = 0; // botones rectos (como el login)
   static const buttonBorder = Colors.transparent;
 
   /// Botón secundario: gris liso.
-  static const buttonGradient = LinearGradient(colors: [Color(0x1FFFFFFF), Color(0x1FFFFFFF)]);
+  static LinearGradient get buttonGradient => LinearGradient(colors: [AppColors.scorifyHairline, AppColors.scorifyHairline]);
 
   /// "Elegido / activo" (pestaña, filtro, opción del menú): celeste muy
   /// tenue, liso. El botón principal NO usa esto: es celeste sólido.
-  static const primaryButtonGradient = LinearGradient(colors: [Color(0xFF12293A), Color(0xFF12293A)]);
+  static LinearGradient get primaryButtonGradient {
+    final c = AppColors.isLight ? const Color(0xFFE3F2F6) : const Color(0xFF12293A);
+    return LinearGradient(colors: [c, c]);
+  }
   static const primaryButtonBorder = Colors.transparent;
 
   /// Botón de peligro: rojo tenue, liso.
-  static const dangerButtonGradient = LinearGradient(colors: [Color(0xFF3A1D20), Color(0xFF3A1D20)]);
+  static LinearGradient get dangerButtonGradient {
+    final c = AppColors.isLight ? const Color(0xFFFBE7E7) : const Color(0xFF3A1D20);
+    return LinearGradient(colors: [c, c]);
+  }
   static const dangerButtonBorder = Colors.transparent;
 
   /// Ventanas emergentes y paneles que suben desde abajo.
-  static const sheetColor = AppColors.scorifyDeep;
+  static Color get sheetColor => AppColors.scorifyDeep;
   static const ShapeBorder sheetShape = RoundedRectangleBorder(
     borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
   );
@@ -66,9 +72,9 @@ class PanelGlowLine extends StatelessWidget {
 class PanelTitleBar extends StatelessWidget {
   final String title;
   final IconData? icon;
-  final Color iconColor;
+  final Color? iconColor;
   final Widget? trailing;
-  const PanelTitleBar({super.key, required this.title, this.icon, this.iconColor = AppColors.scorifyTextMuted, this.trailing});
+  const PanelTitleBar({super.key, required this.title, this.icon, this.iconColor, this.trailing});
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +89,7 @@ class PanelTitleBar extends StatelessWidget {
               title.toUpperCase(),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: Color(0xFF8EC5FF)),
+              style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: AppColors.scorifySection),
             ),
           ),
           if (trailing != null) trailing!,

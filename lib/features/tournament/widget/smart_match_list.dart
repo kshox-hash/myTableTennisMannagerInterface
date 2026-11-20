@@ -11,7 +11,7 @@ import "package:myttmi/features/tournament/api/tournament_api.dart";
 import "package:myttmi/routes/app_routes.dart";
 
 /// Vista "Partidos" ordenada por importancia:
-/// MIS PARTIDOS → EN JUEGO AHORA → PRÓXIMOS → JUGADOS (los últimos 5 + "Ver todos").
+/// MIS PARTIDOS → EN JUEGO AHORA → RESULTADOS (los últimos 5 + "Ver todos") → PRÓXIMOS.
 /// Con buscador de jugador. Filas livianas: una línea por jugador, ganador en
 /// negrita, sets a la derecha, una sola línea de contexto chica.
 class SmartMatchList extends StatefulWidget {
@@ -121,11 +121,11 @@ class _SmartMatchListState extends State<SmartMatchList> {
           // Buscador de jugador.
           TextField(
             onChanged: (v) => setState(() => _q = v),
-            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, color: AppColors.scorifyText),
+            style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, color: AppColors.scorifyText),
             decoration: InputDecoration(
               hintText: "Buscar jugador",
-              hintStyle: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, color: AppColors.scorifyTextFaint),
-              prefixIcon: const Icon(Icons.search_rounded, color: AppColors.scorifyTextMuted, size: 20),
+              hintStyle: TextStyle(fontFamily: AppTypography.body, fontSize: 14, color: AppColors.scorifyTextFaint),
+              prefixIcon: Icon(Icons.search_rounded, color: AppColors.scorifyTextMuted, size: 20),
               filled: true,
               fillColor: AppColors.scorifyCardFill,
               isDense: true,
@@ -147,12 +147,8 @@ class _SmartMatchListState extends State<SmartMatchList> {
             _title("En juego ahora", dot: AppColors.scorifyNegative, count: live.length),
             for (final m in live) _row(m),
           ],
-          if (upcoming.isNotEmpty) ...[
-            _title("Próximos", count: upcoming.length),
-            for (final m in upcoming) _row(m),
-          ],
           if (played.isNotEmpty) ...[
-            _title("Jugados", count: played.length),
+            _title("Resultados", count: played.length),
             for (final m in playedShown) _row(m),
             if (playedShown.length < played.length)
               InkWell(
@@ -163,16 +159,20 @@ class _SmartMatchListState extends State<SmartMatchList> {
                   color: AppColors.scorifyCardFill,
                   alignment: Alignment.center,
                   child: Text("Ver todos (${played.length})",
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.scorifyMint)),
+                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.scorifyMint)),
                 ),
               ),
+          ],
+          if (upcoming.isNotEmpty) ...[
+            _title("Próximos", count: upcoming.length),
+            for (final m in upcoming) _row(m),
           ],
         ],
       ),
     );
   }
 
-  Widget _title(String text, {Color color = const Color(0xFF8EC5FF), Color? dot, int? count}) {
+  Widget _title(String text, {Color? color, Color? dot, int? count}) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(2, 24, 2, 10), // 24 entre secciones
       child: Row(
@@ -182,10 +182,10 @@ class _SmartMatchListState extends State<SmartMatchList> {
             const SizedBox(width: 4),
           ],
           Text(text.toUpperCase(),
-              style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: color)),
+              style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: color ?? AppColors.scorifySection)),
           if (count != null) ...[
             const SizedBox(width: 6),
-            Text("$count", style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyTextFaint)),
+            Text("$count", style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyTextFaint)),
           ],
         ],
       ),
@@ -196,7 +196,7 @@ class _SmartMatchListState extends State<SmartMatchList> {
   Widget _resultBadge(TournamentMatch m) {
     final mineMatch = _myId != null && (m.player1Id == _myId || m.player2Id == _myId);
     if (!mineMatch) {
-      return const Text("FIN",
+      return Text("FIN",
           textAlign: TextAlign.center,
           style: TextStyle(fontFamily: AppTypography.body, fontSize: 9.5, fontWeight: FontWeight.w800, letterSpacing: 0.8, color: AppColors.scorifyTextFaint));
     }
@@ -252,11 +252,11 @@ class _SmartMatchListState extends State<SmartMatchList> {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Container(
-          decoration: BoxDecoration(color: const Color(0x99000000), border: Border.all(color: const Color(0x40FFFFFF))),
+          decoration: BoxDecoration(color: AppColors.scorifyCardFill, border: Border.all(color: AppColors.scorifyHairline)),
           child: Row(
             children: [
               for (var i = 0; i < opts.length; i++) ...[
-                if (i > 0) Container(width: 1, height: 18, color: const Color(0x1AFFFFFF)),
+                if (i > 0) Container(width: 1, height: 18, color: AppColors.scorifyHairline),
                 InkWell(
                   onTap: () => setState(() => _stage = opts[i].$1),
                   child: Container(
@@ -265,9 +265,9 @@ class _SmartMatchListState extends State<SmartMatchList> {
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: _stage == opts[i].$1 ? const Color(0x14FFFFFF) : Colors.transparent,
+                      color: _stage == opts[i].$1 ? AppColors.scorifySelected : Colors.transparent,
                       border: _stage == opts[i].$1
-                          ? const Border(bottom: BorderSide(color: AppColors.scorifyMint, width: 2))
+                          ? Border(bottom: BorderSide(color: AppColors.scorifyMint, width: 2))
                           : null,
                     ),
                     child: Text(
@@ -276,7 +276,7 @@ class _SmartMatchListState extends State<SmartMatchList> {
                         fontFamily: AppTypography.body,
                         fontSize: 13,
                         fontWeight: _stage == opts[i].$1 ? FontWeight.w700 : FontWeight.w600,
-                        color: _stage == opts[i].$1 ? Colors.white : AppColors.scorifyTextMuted,
+                        color: _stage == opts[i].$1 ? AppColors.scorifyInk : AppColors.scorifyTextMuted,
                       ),
                     ),
                   ),
@@ -294,7 +294,7 @@ class _SmartMatchListState extends State<SmartMatchList> {
     final live = !done && m.tableNumber != null;
     // A la izquierda: mesa (en juego), "Mesa N" jugada, o vacío.
     final turn = _queue[m.idMatch];
-    Widget player(String name, String id, int sets) {
+    Widget player(String name, String id, int sets, int side) {
       final won = done && m.winnerId == id;
       final lost = done && m.winnerId != null && m.winnerId != id;
       return Row(
@@ -312,6 +312,24 @@ class _SmartMatchListState extends State<SmartMatchList> {
               ),
             ),
           ),
+          // Puntos de cada set (como un marcador): blanco el set que ganó
+          // este jugador, gris el que perdió.
+          if (done)
+            for (final sc in m.setScores)
+              SizedBox(
+                width: 24,
+                child: Text(
+                  "${side == 1 ? sc.$1 : sc.$2}",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: AppTypography.display,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: (side == 1 ? sc.$1 > sc.$2 : sc.$2 > sc.$1) ? AppColors.scorifyInk : AppColors.scorifyTextFaint,
+                  ),
+                ),
+              ),
+          if (done && m.setScores.isNotEmpty) const SizedBox(width: 6),
           // Sets: el ganador en un cuadrito lima (como la web), el perdedor apagado.
           if (done)
             Container(
@@ -334,7 +352,7 @@ class _SmartMatchListState extends State<SmartMatchList> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Material(
-        color: highlight ? const Color(0xFF1C2738) : AppColors.scorifyCardFill,
+        color: highlight ? (AppColors.isLight ? const Color(0xFFF1F8FA) : (AppColors.isLight ? const Color(0xFFF1F8FA) : const Color(0xFF1C2738))) : AppColors.scorifyCardFill,
         child: InkWell(
           onTap: () => Navigator.pushNamed(context, AppRoutes.matchDetail, arguments: {"matchType": m.matchType, "matchId": m.idMatch}),
           child: Padding(
@@ -350,11 +368,11 @@ class _SmartMatchListState extends State<SmartMatchList> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text("MESA",
+                        Text("MESA",
                             style: TextStyle(fontFamily: AppTypography.body, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.8, color: AppColors.scorifyNegative)),
                         const SizedBox(height: 2),
                         Text("${m.tableNumber}",
-                            style: const TextStyle(fontFamily: AppTypography.display, fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white, height: 1)),
+                            style: TextStyle(fontFamily: AppTypography.display, fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.scorifyInk, height: 1)),
                       ],
                     ),
                   ),
@@ -368,14 +386,14 @@ class _SmartMatchListState extends State<SmartMatchList> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      player(m.player1Name, m.player1Id, m.setsPlayer1),
+                      player(m.player1Name, m.player1Id, m.setsPlayer1, 1),
                       const SizedBox(height: 4),
-                      player(m.player2Name, m.player2Id, m.setsPlayer2),
+                      player(m.player2Name, m.player2Id, m.setsPlayer2, 2),
                       const SizedBox(height: 5),
                       Text(_context(m),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextFaint)),
+                          style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextFaint)),
                     ],
                   ),
                 ),
@@ -384,11 +402,11 @@ class _SmartMatchListState extends State<SmartMatchList> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      const Text("TURNO",
+                      Text("TURNO",
                           style: TextStyle(fontFamily: AppTypography.body, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.8, color: AppColors.scorifyTextFaint)),
                       const SizedBox(height: 2),
                       Text("$turn",
-                          style: const TextStyle(fontFamily: AppTypography.display, fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.scorifyTextMuted, height: 1)),
+                          style: TextStyle(fontFamily: AppTypography.display, fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.scorifyTextMuted, height: 1)),
                     ],
                   ),
                 ],

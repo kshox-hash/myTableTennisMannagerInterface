@@ -82,7 +82,9 @@ String _formatRange(String start, String? end) {
 }
 
 class TournamentsScreen extends StatefulWidget {
-  const TournamentsScreen({super.key});
+  /// Dentro de la sección "Campeonatos" (el título lo pone la sección).
+  final bool embedded;
+  const TournamentsScreen({super.key, this.embedded = false});
 
   @override
   State<TournamentsScreen> createState() => _TournamentsScreenState();
@@ -236,8 +238,10 @@ class _TournamentsScreenState extends State<TournamentsScreen>
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 children: [
-                  const TopHeader(title: "Campeonatos", showBack: false),
-                  const SizedBox(height: 14),
+                  if (!widget.embedded) ...[
+                    const TopHeader(title: "Campeonatos", showBack: false),
+                    const SizedBox(height: 14),
+                  ],
                   ...staggerChildren([
                   Text(
                     "Descubre tu próximo campeonato de tenis de mesa.",
@@ -281,7 +285,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
                       const SizedBox(height: 12),
                     ],
                   if (_loadingMore)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.symmetric(vertical: 20),
                       child: Center(
                         child: CircularProgressIndicator(
@@ -316,9 +320,9 @@ class _TournamentsScreenState extends State<TournamentsScreen>
                 child: DropdownButtonFormField<String>(
                   initialValue: _region ?? "",
                   isExpanded: true,
-                  dropdownColor: AppColors.scorifySurface2,
+                  dropdownColor: AppColors.scorifyDeep,
                   borderRadius: BorderRadius.circular(Panel.radius),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.keyboard_arrow_down_rounded,
                     color: AppColors.scorifyTextMuted,
                   ),
@@ -361,13 +365,13 @@ class _TournamentsScreenState extends State<TournamentsScreen>
     // rectas (como el botón "Buscar campeonatos" del Inicio).
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0x99000000),
-        border: Border.all(color: const Color(0x40FFFFFF)),
+        color: AppColors.scorifyCardFill,
+        border: Border.all(color: AppColors.scorifyHairline),
       ),
       child: Row(
       children: [
         for (final e in labels.entries) ...[
-          if (e.key != _ActiveFilter.all) Container(width: 1, height: 22, color: const Color(0x1AFFFFFF)),
+          if (e.key != _ActiveFilter.all) Container(width: 1, height: 22, color: AppColors.scorifyHairline),
           Expanded(
             child: _FilterChip(
               label: e.value,
@@ -403,7 +407,7 @@ class _TournamentsScreenState extends State<TournamentsScreen>
       enabledBorder: border,
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(Panel.radius),
-        borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.4),
+        borderSide: BorderSide(color: AppColors.scorifyMint, width: 1.4),
       ),
     );
   }
@@ -431,7 +435,7 @@ class _FilterChip extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           height: 44,
-          color: selected ? const Color(0x14FFFFFF) : Colors.transparent,
+          color: selected ? AppColors.scorifySelected : Colors.transparent,
           child: Stack(
             children: [
               Center(
@@ -445,7 +449,7 @@ class _FilterChip extends StatelessWidget {
                         fontFamily: AppTypography.body,
                         fontSize: 13,
                         fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                        color: selected ? Colors.white : AppColors.scorifyTextMuted,
+                        color: selected ? AppColors.scorifyInk : AppColors.scorifyTextMuted,
                       ),
                     ),
                   ),
@@ -507,7 +511,7 @@ class _TournamentCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   t.tournamentName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: AppTypography.body,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -543,7 +547,7 @@ class _TournamentCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     // Secundario: no compite con el nombre del torneo.
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: AppTypography.body,
                       fontSize: 12.5,
                       fontWeight: FontWeight.w500,
@@ -635,7 +639,7 @@ class _Meta extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: AppTypography.body,
             fontSize: 12,
             fontWeight: FontWeight.w400,

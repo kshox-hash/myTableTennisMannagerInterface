@@ -5,7 +5,7 @@ import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/constants/app_typography.dart";
 
 /// Turquesa de gráficos y estadísticas (solo ahí; no en botones ni textos).
-const statAqua = AppColors.scorifyMint;
+Color get statAqua => AppColors.scorifyMint;
 
 /// Medidor circular con brillo (estilo FIFA): arco de fondo tenue, arco de
 /// avance en color con un halo suave y el valor al centro.
@@ -17,7 +17,7 @@ class StatGauge extends StatelessWidget {
   final String? label; // etiqueta en mayúsculas debajo del medidor
   final double size;
   final double stroke;
-  final Color color;
+  final Color? color;
   final bool open;
   final double valueSize;
 
@@ -29,7 +29,7 @@ class StatGauge extends StatelessWidget {
     this.label,
     this.size = 64,
     this.stroke = 5,
-    this.color = statAqua,
+    this.color,
     this.open = true,
     this.valueSize = 18,
   });
@@ -40,7 +40,7 @@ class StatGauge extends StatelessWidget {
       width: size,
       height: size,
       child: CustomPaint(
-        painter: _GaugePainter(fraction.clamp(0.0, 1.0), color, stroke, open),
+        painter: _GaugePainter(fraction.clamp(0.0, 1.0), color ?? statAqua, stroke, open),
         child: Center(
           child: Padding(
             padding: EdgeInsets.only(top: open ? size * 0.06 : 0),
@@ -51,7 +51,7 @@ class StatGauge extends StatelessWidget {
                     // Número en la fuente de marcadores (Manrope negrita), como los demás.
                     style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: valueSize * 1.05, height: 1.0, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
                 if (caption != null)
-                  Text(caption!, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted)),
+                  Text(caption!, style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, color: AppColors.scorifyTextMuted)),
               ],
             ),
           ),
@@ -65,7 +65,7 @@ class StatGauge extends StatelessWidget {
         gauge,
         const SizedBox(height: 2),
         Text(label!,
-            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.3, color: AppColors.scorifyTextMuted)),
+            style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.3, color: AppColors.scorifyTextMuted)),
       ],
     );
   }
@@ -89,7 +89,7 @@ class _GaugePainter extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = stroke
           ..strokeCap = StrokeCap.round
-          ..color = Colors.white.withValues(alpha: 0.08));
+          ..color = AppColors.scorifyInk.withValues(alpha: 0.08));
     if (value <= 0) return;
     final sweep = total * value;
     // Liso, sin halo difuminado (el desenfoque era caro de pintar).

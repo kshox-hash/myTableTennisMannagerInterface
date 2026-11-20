@@ -230,7 +230,7 @@ class _BracketTreeViewState extends State<BracketTreeView> {
   Widget build(BuildContext context) {
     final rounds = _buildRounds();
     if (rounds.isEmpty) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.only(top: 30),
         child: Text("Todavía no hay llave para esta categoría.", style: AppTypography.bodyMuted),
       );
@@ -275,7 +275,7 @@ class _BracketTreeViewState extends State<BracketTreeView> {
                               child: Text(
                                 _roundTitle(r.round, totalRounds),
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: AppColors.scorifyTextMuted),
+                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: AppColors.scorifyTextMuted),
                               ),
                             ),
                             SizedBox(
@@ -334,7 +334,7 @@ class _PendingBox extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text("Partido $number",
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyTextFaint)),
+              style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyTextFaint)),
           const SizedBox(height: 6),
           ClipRRect(
             borderRadius: BorderRadius.circular(Panel.radius),
@@ -408,13 +408,13 @@ class _MatchBox extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.scorifyButterfly, shape: BoxShape.circle)),
+              Container(width: 6, height: 6, decoration: BoxDecoration(color: AppColors.scorifyButterfly, shape: BoxShape.circle)),
               const SizedBox(width: 6),
               Text("Partido ${match.matchNumber}",
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyButterfly)),
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyButterfly)),
               if (match.tableNumber != null && !played)
                 Text("  · Mesa ${match.tableNumber}",
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
+                    style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
             ],
           ),
           const SizedBox(height: 6),
@@ -651,7 +651,7 @@ class _ChampionCard extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontFamily: AppTypography.body, color: AppColors.scorifyText, fontWeight: FontWeight.w800, fontSize: 17, height: 1.2),
+            style: TextStyle(fontFamily: AppTypography.body, color: AppColors.scorifyText, fontWeight: FontWeight.w800, fontSize: 17, height: 1.2),
           ),
           if (championId != null) ...[
             const SizedBox(height: 4),
@@ -659,7 +659,7 @@ class _ChampionCard extends StatelessWidget {
               child: ClubLine(
                 idUser: championId!,
                 crestSize: 14,
-                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, color: AppColors.scorifyTextMuted),
+                style: TextStyle(fontFamily: AppTypography.body, fontSize: 11.5, color: AppColors.scorifyTextMuted),
               ),
             ),
           ],

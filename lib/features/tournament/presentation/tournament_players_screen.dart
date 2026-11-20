@@ -160,7 +160,7 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
                               decoration: InputDecoration(
                                 hintText: "Buscar jugador o club",
                                 hintStyle: AppTypography.bodyMuted,
-                                prefixIcon: const Icon(Icons.search_rounded, color: AppColors.scorifyTextMuted, size: 20),
+                                prefixIcon: Icon(Icons.search_rounded, color: AppColors.scorifyTextMuted, size: 20),
                                 filled: true,
                                 fillColor: AppColors.scorifyInput,
                                 isDense: true,
@@ -211,11 +211,11 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
                                       Container(
                                         width: 42,
                                         height: 42,
-                                        decoration: const BoxDecoration(color: AppColors.scorifyMint, shape: BoxShape.circle),
-                                        child: const Icon(Icons.groups_rounded, color: AppColors.scorifyOnMint, size: 22),
+                                        decoration: BoxDecoration(color: AppColors.scorifyMint, shape: BoxShape.circle),
+                                        child: Icon(Icons.groups_rounded, color: AppColors.scorifyOnMint, size: 22),
                                       ),
                                       const SizedBox(width: 14),
-                                      const Expanded(
+                                      Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
@@ -227,7 +227,7 @@ class _TournamentPlayersScreenState extends State<TournamentPlayersScreen> {
                                           ],
                                         ),
                                       ),
-                                      const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyMint),
+                                      Icon(Icons.chevron_right_rounded, color: AppColors.scorifyMint),
                                     ],
                                   ),
                                 ),
@@ -284,13 +284,13 @@ class _CategoryPlayersState extends State<_CategoryPlayers> {
                 children: [
                   Expanded(
                     child: Text(widget.label,
-                        style: const TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                        style: TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: panelBox(),
                     child: Text("${players.length} inscritos",
-                        style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                        style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                   ),
                   const SizedBox(width: 6),
                   Icon(_open ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded, color: AppColors.scorifyMint),
@@ -315,7 +315,7 @@ class _CategoryPlayersState extends State<_CategoryPlayers> {
                       SizedBox(
                         width: 24,
                         child: Text("${i + 1}",
-                            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted)),
+                            style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted)),
                       ),
                       UserAvatar(userId: players[i].idUser, url: players[i].avatarUrl, size: 36),
                       const SizedBox(width: 12),
@@ -326,15 +326,15 @@ class _CategoryPlayersState extends State<_CategoryPlayers> {
                             Text(players[i].playerName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                             Text((players[i].clubName ?? "").trim().isEmpty ? "Sin club" : players[i].clubName!,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
+                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
                           ],
                         ),
                       ),
-                      const Icon(Icons.visibility_rounded, size: 19, color: AppColors.scorifyMint),
+                      Icon(Icons.visibility_rounded, size: 19, color: AppColors.scorifyMint),
                     ],
                   ),
                 ),

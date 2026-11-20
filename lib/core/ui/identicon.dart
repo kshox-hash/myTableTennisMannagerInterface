@@ -1,3 +1,4 @@
+import "package:myttmi/core/constants/app_colors.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/avatar_cache.dart";
 
@@ -28,6 +29,17 @@ class Identicon extends StatelessWidget {
     (Color(0xFF3D6A8E), Color(0xFF1C3347)), // azul marino
   ];
 
+  /// Modo claro: los mismos tonos en pastel (fondo) con la inicial en el
+  /// tono oscuro (como los avatares de la web clara). (fondo claro, fondo, texto)
+  static const _tonesLight = <(Color, Color, Color)>[
+    (Color(0xFFE3ECF8), Color(0xFFD3E0F2), Color(0xFF2B4A7A)), // cobalto
+    (Color(0xFFE5ECF1), Color(0xFFD6E0E8), Color(0xFF3A5266)), // acero
+    (Color(0xFFE0EEF1), Color(0xFFCFE4E9), Color(0xFF2C5A66)), // petróleo
+    (Color(0xFFE7E8F3), Color(0xFFD9DBEC), Color(0xFF474C75)), // índigo gris
+    (Color(0xFFE5EAF0), Color(0xFFD5DEE8), Color(0xFF3E5470)), // pizarra azul
+    (Color(0xFFE1ECF5), Color(0xFFD0E2EF), Color(0xFF2C5678)), // azul marino
+  ];
+
   static int _hash(String input) {
     var hash = 0;
     for (var i = 0; i < input.length; i++) {
@@ -38,7 +50,10 @@ class Identicon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (light, dark) = _tones[_hash(seed) % _tones.length];
+    final i = _hash(seed) % _tones.length;
+    final isLightMode = AppColors.isLight;
+    final (light, dark) = isLightMode ? (_tonesLight[i].$1, _tonesLight[i].$2) : _tones[i];
+    final fg = isLightMode ? _tonesLight[i].$3 : Colors.white;
     final name = AvatarCache.nameFor(seed);
     final parts = (name ?? "").split(RegExp(r"\s+")).where((w) => w.isNotEmpty).toList();
     final initials = parts.isEmpty ? null : (parts.first[0] + (parts.length > 1 ? parts[1][0] : "")).toUpperCase();
@@ -60,12 +75,12 @@ class Identicon extends StatelessWidget {
                     fontSize: size * 0.38,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.3,
-                    color: Colors.white.withValues(alpha: 0.95),
+                    color: fg.withValues(alpha: 0.95),
                   )),
             )
           : Align(
         alignment: const Alignment(0, 0.55),
-        child: Icon(Icons.person_rounded, size: size * 0.86, color: Colors.white.withValues(alpha: 0.88)),
+        child: Icon(Icons.person_rounded, size: size * 0.86, color: fg.withValues(alpha: isLightMode ? 0.55 : 0.88)),
       ),
     );
   }

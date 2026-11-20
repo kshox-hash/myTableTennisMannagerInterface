@@ -32,6 +32,7 @@ Future<void> main() async {
   await FavoriteMatches.load();
   await ResponseCache.init();
   DeepLinks.init();
+  await AppColors.loadTheme();
   runApp(const MyApp());
 }
 
@@ -40,7 +41,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Modo claro / oscuro (Ajustes › Apariencia): al cambiarlo se rearma la
+    // app entera con la paleta nueva (los colores de AppColors dependen del modo).
+    return ValueListenableBuilder<bool>(
+      valueListenable: AppColors.light,
+      builder: (context, light, _) => _app(light),
+    );
+  }
+
+  Widget _app(bool light) {
+    final brightness = light ? Brightness.light : Brightness.dark;
     return MaterialApp(
+      key: ValueKey(light),
       title: "MyTTM",
       debugShowCheckedModeBanner: false,
       // Base oscura acorde al sistema "Marcador" — antes era el
@@ -48,12 +60,12 @@ class MyApp extends StatelessWidget {
       // que se filtraba en cualquier pantalla o widget Material sin retocar.
       theme: ThemeData(
         useMaterial3: true,
-        brightness: Brightness.dark,
+        brightness: brightness,
         scaffoldBackgroundColor: AppColors.scorifyBg,
         fontFamily: 'Montserrat',
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppColors.scorifyMint,
-          brightness: Brightness.dark,
+          brightness: brightness,
           surface: AppColors.scorifyDeep,
           primary: AppColors.scorifyMint,
           onPrimary: AppColors.scorifyOnMint,
@@ -69,9 +81,9 @@ class MyApp extends StatelessWidget {
           ),
         ),
         // Flat: diálogos y hojas grises lisos, redondeados, sin sombra ni tinte.
-        dialogTheme: const DialogThemeData(backgroundColor: AppColors.scorifyDeep, surfaceTintColor: Colors.transparent, shape: Panel.dialogShape),
-        bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Panel.sheetColor, surfaceTintColor: Colors.transparent, shape: Panel.sheetShape),
-        cardTheme: const CardThemeData(color: AppColors.scorifyCardFill, surfaceTintColor: Colors.transparent, elevation: 0, margin: EdgeInsets.zero),
+        dialogTheme: DialogThemeData(backgroundColor: AppColors.scorifyDeep, surfaceTintColor: Colors.transparent, shape: Panel.dialogShape),
+        bottomSheetTheme: BottomSheetThemeData(backgroundColor: Panel.sheetColor, surfaceTintColor: Colors.transparent, shape: Panel.sheetShape),
+        cardTheme: CardThemeData(color: AppColors.scorifyCardFill, surfaceTintColor: Colors.transparent, elevation: 0, margin: EdgeInsets.zero),
         dividerColor: AppColors.scorifyCardBorder,
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -90,7 +102,14 @@ class MyApp extends StatelessWidget {
         // AnnotatedRegion: mantiene las barras transparentes en todas las
         // pantallas (algunos widgets de Material las vuelven a pintar).
         return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: kSystemBars,
+          // Íconos de la barra de estado oscuros sobre el fondo claro.
+          value: light
+              ? kSystemBars.copyWith(
+                  statusBarIconBrightness: Brightness.dark,
+                  statusBarBrightness: Brightness.light,
+                  systemNavigationBarIconBrightness: Brightness.dark,
+                )
+              : kSystemBars,
           child: MediaQuery(
             data: mq.copyWith(textScaler: mq.textScaler.clamp(minScaleFactor: 0.9, maxScaleFactor: 1.25)),
             child: child!,

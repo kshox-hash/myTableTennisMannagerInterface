@@ -13,7 +13,9 @@ import "package:myttmi/features/player/api/player_api.dart";
 import "package:myttmi/features/player/models/tournament_match_model.dart";
 
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+  /// Dentro de la sección "Mi juego" (sin pantalla propia ni título).
+  final bool embedded;
+  const HistoryScreen({super.key, this.embedded = false});
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
@@ -85,6 +87,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.embedded) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ScrollingHeaderPage(header: const [SizedBox(height: 14)], body: _body()),
+      );
+    }
     return Scaffold(
       backgroundColor: AppColors.scorifyBg,
       body: PrismBackground(
@@ -122,11 +130,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
             children: [
               Text(v, style: TextStyle(fontFamily: AppTypography.body, fontSize: 24, fontWeight: FontWeight.w600, color: c)),
               Text(l,
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.3, color: AppColors.scorifyTextMuted)),
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.3, color: AppColors.scorifyTextMuted)),
             ],
           ),
         );
-    Widget sep() => Container(width: 1, height: 36, color: Colors.white.withValues(alpha: 0.10));
+    Widget sep() => Container(width: 1, height: 36, color: AppColors.scorifyInk.withValues(alpha: 0.10));
     return RefreshIndicator(
       color: AppColors.scorifyMint,
       onRefresh: _refresh,
@@ -151,7 +159,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ],
           ...matchesByMonth(context, _items, _myId),
           if (_loading)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
               child: Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.scorifyMint))),
             )

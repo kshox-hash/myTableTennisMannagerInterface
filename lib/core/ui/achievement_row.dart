@@ -103,14 +103,14 @@ class AchievementRow extends StatelessWidget {
                   "${_placeLabel(a.position)} · ${a.categoryLabel}",
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   [a.tournamentName, if (date != null) date].join(" · "),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted),
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted),
                 ),
               ],
             ),
@@ -118,7 +118,7 @@ class AchievementRow extends StatelessWidget {
           if (shareAs != null)
             IconButton(
               tooltip: "Compartir",
-              icon: const Icon(Icons.ios_share_rounded, size: 20, color: AppColors.scorifyMint),
+              icon: Icon(Icons.ios_share_rounded, size: 20, color: AppColors.scorifyMint),
               onPressed: () => ShareImage.share(
                 context,
                 ShareCard(
@@ -179,14 +179,14 @@ class _AchievementsCardState extends State<AchievementsCard> {
             : Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                 child: Text("${list.length} ${list.length == 1 ? "podio" : "podios"}",
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
+                    style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
               ),
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (list.isEmpty)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(bottom: 8),
                 child: Text(
                   "Todavía no tienes podios. Cuando quedes entre los 3 primeros de una categoría, tu medalla aparece aquí.",
@@ -206,7 +206,7 @@ class _AchievementsCardState extends State<AchievementsCard> {
               ),
               const SizedBox(height: 10),
               for (var i = 0; i < shown.length; i++) ...[
-                if (i > 0) const Divider(height: 1, thickness: 1, color: Color(0x14FFFFFF)),
+                if (i > 0) Divider(height: 1, thickness: 1, color: AppColors.scorifySelected),
                 AchievementRow(achievement: shown[i], shareAs: widget.shareAs),
               ],
               if (list.length > _preview)
@@ -214,7 +214,7 @@ class _AchievementsCardState extends State<AchievementsCard> {
                   child: TextButton(
                     onPressed: () => setState(() => _all = !_all),
                     child: Text(_all ? "Ver menos" : "Ver todos (${list.length})",
-                        style: const TextStyle(fontFamily: AppTypography.body, fontWeight: FontWeight.w600, color: AppColors.scorifyMint)),
+                        style: TextStyle(fontFamily: AppTypography.body, fontWeight: FontWeight.w600, color: AppColors.scorifyMint)),
                   ),
                 ),
             ],
@@ -241,8 +241,8 @@ class _Count extends StatelessWidget {
           Opacity(opacity: count == 0 ? 0.35 : 1, child: Medal(position: position, size: 34)),
           const SizedBox(height: 6),
           Text("$count",
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
-          Text(label, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
+              style: TextStyle(fontFamily: AppTypography.body, fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+          Text(label, style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w400, color: AppColors.scorifyTextMuted)),
         ],
       ),
     );

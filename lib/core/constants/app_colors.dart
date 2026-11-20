@@ -1,94 +1,110 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// Paleta MYTTM, estilo flat (rediseño 2026-11): fondo en degradado
-/// petróleo → marino casi negro (ver [appBackground]), tarjetas azul petróleo
-/// oscuro semitransparentes (el degradado se asoma apenas), sin filete ni
-/// brillo, y los acentos de marca (celeste, lima) solo donde algo se toca o
-/// significa algo.
+/// Paleta MYTTM con modo oscuro (por defecto) y claro (el de la web:
+/// `:root[data-theme="light"]` en myttmi-web/src/index.css).
 ///
-/// Los NOMBRES de los campos NO cambian (scorifyBg, scorifyMint, etc. se
-/// usan en toda la app) — solo cambian los valores. 2026-11-08: la paleta
-/// pasó al AZUL del fondo (franjas azules sobre negro): `scorifyMint` es el
-/// azul de marca, superficies azul marino casi negro, "en vivo" coral (antes
-/// celeste, se confundía con el acento). El login conserva el verde (ver
-/// [loginAccent]). Antes, 2026-11-07: la paleta
-/// pasó a la gama verde del fondo (imagen verde oscuro): `scorifyMint` es
-/// ahora el VERDE de marca (el de "TTM" del logo), fondos y tarjetas verde
-/// casi negro. "En vivo" sigue celeste y las victorias lima, para no
-/// confundirse con el acento.
+/// Los NOMBRES no cambian (scorifyBg, scorifyMint, etc. se usan en toda la
+/// app): cada color es un getter que devuelve el valor del modo activo. Por
+/// eso ya no son `const` — no usarlos dentro de expresiones const.
+///
+/// Jerarquía de color (cada color significa UNA cosa en toda la app):
+///   celeste (scorifyMint) = lo que se toca: botones, enlaces, pestaña activa
+///   coral (scorifyLive) = está pasando ahora: en mesa, en vivo
+///   lima (scorifyButterfly) = victoria / partido ganado
+///   ámbar (scorifyPending) = pendiente / esperando
+///   rojo (scorifyNegative) = derrota / error
 class AppColors {
-  static const Color scorifyBg = Color(0xFF07090D); // fondo base (debajo del degradado y en transiciones)
-  static const Color scorifyDeep = Color(0xFF0E131B); // hojas, diálogos (opaco)
-  static const Color scorifyNavbar = Color(0xFF080B10); // barra inferior
-  static const Color scorifySurface2 = Color(0x0FFFFFFF); // bloques internos: velo blanco (sirve sobre cualquier tono)
+  /// Modo claro activo. Cambiarlo con [setLight] (lo guarda y redibuja la app).
+  static final ValueNotifier<bool> light = ValueNotifier<bool>(false);
+  static bool get isLight => light.value;
+  static const _prefKey = "myttm:theme_light";
 
-  // Acento principal: celeste de marca. Botones, enlaces, pestaña activa.
-  // Texto oscuro encima (scorifyOnMint).
-  static const Color scorifyMint = Color(0xFF2EA8E0);
-  static const Color scorifyMintDark = Color(0xFF1A6F96);
-  static const Color scorifyCyan = Color(0xFF7FE0F5);
+  /// Lee el modo guardado (llamar antes de runApp).
+  static Future<void> loadTheme() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      light.value = prefs.getBool(_prefKey) ?? false;
+    } catch (_) {}
+  }
+
+  static Future<void> setLight(bool value) async {
+    light.value = value;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_prefKey, value);
+    } catch (_) {}
+  }
+
+  static Color _p(int dark, int light) => Color(isLight ? light : dark);
+
+  static Color get scorifyBg => _p(0xFF07090D, 0xFFF7F7F8); // fondo base
+  static Color get scorifyDeep => _p(0xFF0E131B, 0xFFFFFFFF); // hojas, diálogos (opaco)
+  static Color get scorifyNavbar => _p(0xFF080B10, 0xFFFFFFFF); // barra inferior
+  static Color get scorifySurface2 => _p(0x0FFFFFFF, 0x0F000000); // bloques internos: velo
+
+  // Acento principal: celeste de marca. Texto encima: scorifyOnMint.
+  static Color get scorifyMint => _p(0xFF2EA8E0, 0xFF0088A6);
+  static Color get scorifyMintDark => _p(0xFF1A6F96, 0xFF006F88);
+  static Color get scorifyCyan => _p(0xFF7FE0F5, 0xFF0AA2C4);
 
   // Bordes: casi invisibles, solo para separar cuando hace falta.
-  static const Color scorifyCardBorder = Color(0x1AFFFFFF);
-  static const Color scorifyCardBorderStrong = Color(0x33FFFFFF);
+  static Color get scorifyCardBorder => _p(0x1AFFFFFF, 0xFFE2E2E5);
+  static Color get scorifyCardBorderStrong => _p(0x33FFFFFF, 0xFFD4D4D8);
 
-  // Jerarquía de color (cada color significa UNA cosa en toda la app):
-  //   celeste (scorifyMint) = lo que se toca: botones, enlaces, pestaña activa
-  //   celeste claro (scorifyLive) = está pasando ahora: en mesa, en vivo
-  //   lima (scorifyButterfly) = victoria / partido ganado
-  //   ámbar (scorifyPending) = pendiente / esperando
-  //   rojo (scorifyNegative) = derrota / error
-  static const Color scorifyLive = Color(0xFFFF7A4D);
-  static const Color scorifyOnLive = Color(0xFF2A0E04);
+  static Color get scorifyLive => _p(0xFFFF7A4D, 0xFFE0592A);
+  static Color get scorifyOnLive => _p(0xFF2A0E04, 0xFFFFFFFF);
 
-  // Acento de PARTIDOS / victorias: lima de marca.
-  static const Color scorifyButterfly = Color(0xFFA6D32D);
-  static const Color scorifyOnButterfly = Color(0xFF16210A);
+  static Color get scorifyButterfly => _p(0xFFA6D32D, 0xFF5F9411);
+  static Color get scorifyOnButterfly => _p(0xFF16210A, 0xFFFFFFFF);
 
-  static const Color scorifyText = Color(0xFFF2F2F4);
-  // Grises fríos, un paso más claros: sobre el petróleo los grises neutros
-  // anteriores quedaban justos de legibilidad (contraste AA o mejor).
-  static const Color scorifyTextMuted = Color(0xFFA9B6BD);
-  static const Color scorifyTextFaint = Color(0xFF7D8B93); // labels, timestamps
-  static const Color scorifyOnMint = Color(0xFF03121B); // texto sobre el azul de marca
-  static const Color scorifyNegative = Color(0xFFFF5C5C);
-  static const Color scorifyPending = Color(0xFFEAB308);
-  static const Color scorifyBadge = Color(0xFFFF4D5E); // contador de notifs
-  static const Color scorifyCardFill = Color(0xFF10161F); // tarjeta: oscura y sólida (en el celular los tonos claros se perdían) // tarjeta: verde grisáceo al 95 %, un paso más claro que el fondo para que se despegue
-  static const Color scorifyInput = Color(0x14FFFFFF); // campos de texto: velo blanco
+  static Color get scorifyText => _p(0xFFF2F2F4, 0xFF18181B);
+  /// Texto más fuerte (títulos, cifras): blanco en oscuro, casi negro en claro.
+  static Color get scorifyInk => _p(0xFFFFFFFF, 0xFF0B0B0D);
+  static Color get scorifyTextMuted => _p(0xFFA9B6BD, 0xFF5E5E66);
+  static Color get scorifyTextFaint => _p(0xFF7D8B93, 0xFF8A8A93); // labels, timestamps
+  static Color get scorifyOnMint => _p(0xFF03121B, 0xFFFFFFFF); // texto sobre el azul de marca
+  static Color get scorifyNegative => _p(0xFFFF5C5C, 0xFFD33A3A);
+  static Color get scorifyPending => _p(0xFFEAB308, 0xFFB8860B);
+  static Color get scorifyBadge => _p(0xFFFF4D5E, 0xFFE5334A); // contador de notifs
+  static Color get scorifyCardFill => _p(0xFF10161F, 0xFFFFFFFF); // tarjeta sólida
+  static Color get scorifyInput => _p(0x14FFFFFF, 0xFFECECEE); // campos de texto
+  /// Títulos de sección ("MIS INSCRIPCIONES", "CATEGORÍAS"…).
+  static Color get scorifySection => _p(0xFF8EC5FF, 0xFF00799A);
+  /// Separadores y filetes finos dentro de tarjetas.
+  static Color get scorifyHairline => _p(0x1AFFFFFF, 0xFFE4E4E7);
+  /// Velo de "elegido" (fila o pestaña activa).
+  static Color get scorifySelected => _p(0x14FFFFFF, 0x0F0088A6);
 
-  // Fondo de las tarjetas: gris liso (se deja como "degradado" de un solo
-  // color porque muchas pantallas lo pasan donde se espera un Gradient).
-  static const LinearGradient cardGradient = LinearGradient(
-    colors: [scorifyCardFill, scorifyCardFill],
-  );
+  // Fondo de las tarjetas: liso (se deja como "degradado" de un solo color
+  // porque muchas pantallas lo pasan donde se espera un Gradient).
+  static LinearGradient get cardGradient => LinearGradient(colors: [scorifyCardFill, scorifyCardFill]);
 
-  /// Tarjeta principal (próximo partido, el campeonato en su detalle): un
-  /// paso más clara, también lisa.
-  static const LinearGradient featuredGradient = LinearGradient(
-    colors: [Color(0xFF151C27), Color(0xFF151C27)],
-  );
+  /// Tarjeta principal (próximo partido): un paso más clara (o celeste muy suave en claro).
+  static LinearGradient get featuredGradient {
+    final c = _p(0xFF151C27, 0xFFF1F8FA);
+    return LinearGradient(colors: [c, c]);
+  }
 
-  /// Fondo de la app: degradado en diagonal, verde esmeralda arriba a la
-  /// izquierda → marino casi negro abajo a la derecha (colores medidos de la
-  /// referencia que eligió el usuario). Encima van las vetas de luz
-  /// (PrismBackground). Se pinta una sola vez por pantalla.
-  static const LinearGradient appBackground = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    stops: [0, 0.35, 0.7, 1],
-    colors: [Color(0xFF0B3A55), Color(0xFF06223A), Color(0xFF03101A), Color(0xFF02070B)],
-  );
+  /// Fondo de la app (degradado diagonal).
+  static LinearGradient get appBackground => isLight
+      ? const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFF2F6F8), Color(0xFFF7F7F8)],
+        )
+      : const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          stops: [0, 0.35, 0.7, 1],
+          colors: [Color(0xFF0B3A55), Color(0xFF06223A), Color(0xFF03101A), Color(0xFF02070B)],
+        );
 
-  /// Login (portada). 2026-11-08: pasó al azul de la app (fondo y logo
-  /// azules); se dejan aparte por si la portada vuelve a tener su color.
-  static const Color loginAccent = scorifyMint;
-  static const Color loginOnAccent = scorifyOnMint;
-  static const LinearGradient loginButton = primaryButton;
+  /// Login (portada): siempre oscuro, va sobre la foto del jugador.
+  static const Color loginAccent = Color(0xFF2EA8E0);
+  static const Color loginOnAccent = Color(0xFF03121B);
+  static const LinearGradient loginButton = LinearGradient(colors: [loginAccent, loginAccent]);
 
-  /// Botón principal.
-  static const LinearGradient primaryButton = LinearGradient(
-    // Plano (sin degradado), como el botón "Entrar" del login.
-    colors: [scorifyMint, scorifyMint],
-  );
+  /// Botón principal (plano, como "Entrar" del login).
+  static LinearGradient get primaryButton => LinearGradient(colors: [scorifyMint, scorifyMint]);
 }

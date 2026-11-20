@@ -327,7 +327,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
                             fontWeight: FontWeight.w700,
                             color: decided ? AppColors.scorifyButterfly : AppColors.scorifyText,
                           )),
-                      const Text("Sets",
+                      Text("Sets",
                           style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: AppColors.scorifyTextMuted)),
                     ],
                   ),
@@ -402,7 +402,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
               _thanked
                   ? "${_resultLine(m, s1, s2, wo)} El resultado quedó guardado como oficial. Tu ayuda hace que el campeonato avance a tiempo."
                   : "${_resultLine(m, s1, s2, wo)} El resultado ya está cargado.",
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, height: 1.4, color: AppColors.scorifyText),
+              style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, height: 1.4, color: AppColors.scorifyText),
             ),
           )
         else ...[
@@ -476,7 +476,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
           child: Text(short,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+              style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
         ),
         for (var i = 0; i < ctrls.length; i++) SizedBox(width: 58, child: Center(child: _cell(i, player, ctrls[i], i == current))),
       ],
@@ -518,7 +518,7 @@ class _RefereeScreenState extends State<RefereeScreen> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(Panel.radius), borderSide: BorderSide.none),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(Panel.radius),
-            borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.8),
+            borderSide: BorderSide(color: AppColors.scorifyMint, width: 1.8),
           ),
         ),
       ),
@@ -548,7 +548,7 @@ class _LiveBadgeState extends State<_LiveBadge> with SingleTickerProviderStateMi
   @override
   Widget build(BuildContext context) {
     if (widget.decided) {
-      return const Text("Decidido",
+      return Text("Decidido",
           style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.scorifyButterfly));
     }
     if (!widget.started) return const SizedBox.shrink();
@@ -557,10 +557,10 @@ class _LiveBadgeState extends State<_LiveBadge> with SingleTickerProviderStateMi
       children: [
         FadeTransition(
           opacity: Tween(begin: 0.3, end: 1.0).animate(_p),
-          child: Container(width: 8, height: 8, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.scorifyNegative)),
+          child: Container(width: 8, height: 8, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.scorifyNegative)),
         ),
         const SizedBox(width: 6),
-        const Text("En vivo",
+        Text("En vivo",
             style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.scorifyNegative)),
       ],
     );

@@ -16,7 +16,7 @@ import 'package:myttmi/features/profile/models/profile_model.dart';
 import 'package:myttmi/features/shell/tab_auto_refresh.dart';
 import 'package:myttmi/routes/app_routes.dart';
 
-const TextStyle _muted = TextStyle(
+TextStyle get _muted => TextStyle(
   fontFamily: AppTypography.body,
   fontSize: 12,
   fontWeight: FontWeight.w400,
@@ -176,7 +176,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                           children: [
                                             Text(
                                               played == 0 ? "Aún no juegas partidos" : "Ganas $perTenText de cada 10 partidos",
-                                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, height: 1.25, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                                              style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, height: 1.25, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
@@ -210,7 +210,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                               titleColor: _fire,
                               padding: const EdgeInsets.all(16),
                               child: streak == null
-                                  ? const Text("Juega tu primer partido para empezar una racha.", style: _muted)
+                                  ? Text("Juega tu primer partido para empezar una racha.", style: _muted)
                                   : Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
@@ -226,7 +226,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                                 streak.$2
                                                     ? (streak.$1 == 1 ? "victoria en tu último partido" : "victorias seguidas")
                                                     : (streak.$1 == 1 ? "derrota en tu último partido" : "derrotas seguidas"),
-                                                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, height: 1.2, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, height: 1.2, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                                               ),
                                             ),
                                           ],
@@ -241,7 +241,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                             const Spacer(),
                                             Text(
                                               form.length == 1 ? "Último partido" : "ÚLTIMOS ${form.length}",
-                                              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: AppColors.scorifyTextFaint),
+                                              style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: AppColors.scorifyTextFaint),
                                             ),
                                           ],
                                         ),
@@ -293,7 +293,7 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                               color: setsWon >= setsLost ? AppColors.scorifyText : AppColors.scorifyNegative,
                                             ),
                                           ),
-                                          const Text("Diferencia", style: _muted),
+                                          Text("Diferencia", style: _muted),
                                         ],
                                       ),
                                       Expanded(child: _BigNumber(value: "$setsLost", label: "Perdidos", color: AppColors.scorifyNegative, alignEnd: true)),
@@ -328,11 +328,11 @@ class _StatsScreenState extends State<StatsScreen> with TabAutoRefreshMixin<Stat
                                   ? null
                                   : TextButton(
                                       onPressed: () => Navigator.pushNamed(context, AppRoutes.history),
-                                      child: const Text("Ver historial", style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.scorifyMint)),
+                                      child: Text("Ver historial", style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.scorifyMint)),
                                     ),
                               padding: _recent.isEmpty ? const EdgeInsets.all(16) : const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
                               child: _recent.isEmpty
-                                  ? const Text("Todavía no has jugado ningún partido.", style: _muted)
+                                  ? Text("Todavía no has jugado ningún partido.", style: _muted)
                                   : Column(
                                       children: dividedRows([for (final m in _recent.take(5)) _RecentRow(match: m, myId: _myId ?? "")]),
                                     ),
@@ -364,7 +364,7 @@ class _StatBox extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: AppColors.scorifyTextMuted),
+              style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: AppColors.scorifyTextMuted),
             ),
           ],
         ),
@@ -439,16 +439,16 @@ class _RecentRow extends StatelessWidget {
                   Text("vs $rival",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                   Text([if (_date(m.playedAt).isNotEmpty) _date(m.playedAt), m.tournamentName, cat].join(" · "), maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted.copyWith(fontSize: 11)),
                 ],
               ),
             ),
             const SizedBox(width: 8),
             Text("$mine-$theirs",
-                style: const TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 18, height: 1, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
+                style: TextStyle(fontFamily: AppTypography.display, letterSpacing: -0.5, fontSize: 18, height: 1, fontWeight: FontWeight.w700, color: AppColors.scorifyText)),
             const SizedBox(width: 4),
-            const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.scorifyTextFaint),
+            Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.scorifyTextFaint),
           ],
         ),
       ),
@@ -519,7 +519,7 @@ class _MonthlyChart extends StatelessWidget {
                 children: [
                   Text(
                     w[i] + l[i] == 0 ? "" : "${w[i] + l[i]}",
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted),
+                    style: TextStyle(fontFamily: AppTypography.body, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted),
                   ),
                   const SizedBox(height: 4),
                   SizedBox(

@@ -14,7 +14,8 @@ class AuthTextField extends StatelessWidget {
 
   /// Relleno sólido de los campos de Login/Registro (un paso más claro que
   /// la tarjeta [cardColor] que los contiene).
-  static const fillColor = Color(0xFF13222E);
+  /// En modo claro: blanco con un leve velo (sobre la foto luminosa).
+  static Color get fillColor => AppColors.isLight ? const Color(0xF2FFFFFF) : const Color(0xFF13222E);
   static const cardColor = Color(0xFF07121A);
 
   const AuthTextField({
@@ -47,9 +48,10 @@ class AuthTextField extends StatelessWidget {
           borderRadius: BorderRadius.zero,
           borderSide: BorderSide.none,
         ),
+        // En claro, un filete fino para que el campo blanco no se pierda.
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.zero,
-          borderSide: BorderSide.none,
+          borderSide: AppColors.isLight ? const BorderSide(color: Color(0x1F000000)) : BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.zero,

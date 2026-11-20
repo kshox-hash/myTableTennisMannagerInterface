@@ -10,6 +10,12 @@ class CalendarEvent {
   final String gender;
   // Fase de la categoría: enrollment | groups | bracket | finished.
   final String phase;
+  /// Inscripción pagada y precio de la categoría (0 = gratis).
+  final bool paid;
+  final double price;
+
+  /// Cobra inscripción y todavía no está pagada.
+  bool get needsPayment => price > 0 && !paid;
 
   /// Ya empezó (grupos o llave), aunque la fecha agendada sea después.
   bool get finished => phase == "finished";
@@ -25,6 +31,8 @@ class CalendarEvent {
     required this.categoryName,
     required this.gender,
     this.phase = "enrollment",
+    this.paid = false,
+    this.price = 0,
   });
 
   factory CalendarEvent.fromJson(Map<String, dynamic> json) {
@@ -40,6 +48,8 @@ class CalendarEvent {
       categoryName: json["category_name"]?.toString() ?? _categoryLabel(json),
       gender: json["gender"].toString(),
       phase: (json["phase"] ?? "enrollment").toString(),
+      paid: json["paid"] == true,
+      price: double.tryParse((json["inscription_price"] ?? 0).toString()) ?? 0,
     );
   }
 }

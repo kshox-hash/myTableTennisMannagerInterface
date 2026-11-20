@@ -6,7 +6,6 @@ import "package:myttmi/core/ui/app_button.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/user_avatar.dart";
 import "package:myttmi/core/ui/app_toast.dart";
-import "package:myttmi/routes/cyber_page_route.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/ui/confirm_dialog.dart";
 import "package:myttmi/core/constants/app_typography.dart";
@@ -23,8 +22,6 @@ import "package:myttmi/features/profile/api/clubs_api.dart";
 import "package:myttmi/features/profile/api/profile_api.dart";
 import "package:myttmi/features/profile/models/club_model.dart";
 import "package:myttmi/features/profile/models/profile_model.dart";
-import "package:myttmi/features/shell/splash_gate.dart";
-import "package:myttmi/core/push/push_service.dart";
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -108,7 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
+            colorScheme: ColorScheme.dark(
               primary: AppColors.scorifyMint,
               onPrimary: AppColors.scorifyOnMint,
               surface: AppColors.scorifyDeep,
@@ -120,18 +117,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       },
     );
     if (picked != null) setState(() => _birthDate = picked);
-  }
-
-  Future<void> _logout() async {
-    await PushService.unregister();
-    await SessionStorage().clear();
-    if (!mounted) return;
-
-    Navigator.pushAndRemoveUntil(
-      context,
-      CyberPageRoute(builder: (_) => const SplashGate()),
-      (_) => false,
-    );
   }
 
   Future<void> _refresh() async {
@@ -195,7 +180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       enabledBorder: border,
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(Panel.radius),
-        borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.4),
+        borderSide: BorderSide(color: AppColors.scorifyMint, width: 1.4),
       ),
     );
   }
@@ -214,15 +199,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: ScrollingHeaderPage(
               header: [
                 const SizedBox(height: 16),
-                TopHeader(
-                  title: "Perfil",
-                  actions: [
-                    HeaderIconButton(
-                      icon: Icons.logout_rounded,
-                      onTap: _logout,
-                    ),
-                  ],
-                ),
+                // Sin "cerrar sesión" acá: está en Ajustes y en el menú.
+                const TopHeader(title: "Perfil"),
                 const SizedBox(height: 14),
               ],
               body: FutureBuilder<UserProfile>(
@@ -254,7 +232,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     children: [
                                       UserAvatar(userId: p.idUser, url: p.avatarUrl, size: 44),
                                       const SizedBox(width: 12),
-                                      const Expanded(
+                                      Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
@@ -284,7 +262,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       onTap: _pickBirthDate,
                                       child: InputDecorator(
                                         decoration: _inputDeco(Icons.cake_rounded).copyWith(
-                                          suffixIcon: const Icon(Icons.calendar_month_rounded, color: AppColors.scorifyMint, size: 20),
+                                          suffixIcon: Icon(Icons.calendar_month_rounded, color: AppColors.scorifyMint, size: 20),
                                         ),
                                         child: Text(_formatBirthDate(_birthDate), style: AppTypography.bodyText),
                                       ),
@@ -298,7 +276,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       isExpanded: true,
                                       dropdownColor: AppColors.scorifySurface2,
                                       borderRadius: BorderRadius.circular(Panel.radius),
-                                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.scorifyTextMuted),
+                                      icon: Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.scorifyTextMuted),
                                       style: AppTypography.bodyText,
                                       decoration: _inputDeco(Icons.wc_rounded),
                                       items: const [
@@ -481,7 +459,7 @@ class _ClubSectionState extends State<_ClubSection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (_loading)
-            const Center(
+            Center(
               child: SizedBox(
                 width: 18,
                 height: 18,
@@ -491,7 +469,7 @@ class _ClubSectionState extends State<_ClubSection> {
           else if (widget.currentClub != null)
             Row(
               children: [
-                const Icon(Icons.groups_2_rounded, color: AppColors.scorifyMint, size: 18),
+                Icon(Icons.groups_2_rounded, color: AppColors.scorifyMint, size: 18),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text.rich(
@@ -520,7 +498,7 @@ class _ClubSectionState extends State<_ClubSection> {
                 ),
                 const SizedBox(height: 12),
                 _busy
-                    ? const Center(
+                    ? Center(
                         child: SizedBox(
                           width: 18,
                           height: 18,
@@ -564,7 +542,7 @@ class _ClubSectionState extends State<_ClubSection> {
                 ),
                 const SizedBox(height: 12),
                 _busy
-                    ? const Center(
+                    ? Center(
                         child: SizedBox(
                           width: 18,
                           height: 18,
@@ -672,7 +650,7 @@ class _DuesCardState extends State<_DuesCard> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.fromLTRB(20, 20, 20, 8),
                 child: Text("Mis pagos", style: TextStyle(color: AppColors.scorifyText, fontSize: 18, fontWeight: FontWeight.w700)),
               ),
@@ -681,7 +659,7 @@ class _DuesCardState extends State<_DuesCard> {
                   shrinkWrap: true,
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                   itemCount: d.payments.length,
-                  separatorBuilder: (_, __) => const Divider(color: Color(0x14FFFFFF), height: 1),
+                  separatorBuilder: (_, __) => Divider(color: AppColors.scorifySelected, height: 1),
                   itemBuilder: (_, i) {
                     final p = d.payments[i];
                     final method = p.method != null ? " · ${_methodLabel[p.method] ?? ""}" : "";
@@ -689,21 +667,21 @@ class _DuesCardState extends State<_DuesCard> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: Row(
                         children: [
-                          const Icon(Icons.receipt_long_rounded, color: AppColors.scorifyButterfly, size: 20),
+                          Icon(Icons.receipt_long_rounded, color: AppColors.scorifyButterfly, size: 20),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(_covers(p, d.feeFrequency),
-                                    style: const TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w600)),
+                                    style: TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w600)),
                                 Text("${_day(p.paidOn)}$method",
-                                    style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 12)),
+                                    style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 12)),
                               ],
                             ),
                           ),
                           Text(_money(p.amount),
-                              style: const TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w700)),
+                              style: TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w700)),
                         ],
                       ),
                     );
@@ -747,17 +725,17 @@ class _DuesCardState extends State<_DuesCard> {
               children: [
                 Text(
                   last != null ? "Último pago: ${_covers(last, d.feeFrequency)}" : "Aún no hay pagos registrados",
-                  style: const TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w600),
+                  style: TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   last != null ? "${_money(last.amount)} · ${_feeText(d)}" : _feeText(d),
-                  style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 12, fontWeight: FontWeight.w600),
+                  style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 12, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
           ),
-          if (last != null) const Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
+          if (last != null) Icon(Icons.chevron_right_rounded, color: AppColors.scorifyTextMuted),
         ],
       ),
     );
@@ -782,7 +760,7 @@ class _ProfileHero extends StatelessWidget {
             children: [
               Icon(icon, size: 14, color: AppColors.scorifyMint),
               const SizedBox(width: 4),
-              Text(text, style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+              Text(text, style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
             ],
           ),
         );
@@ -792,14 +770,14 @@ class _ProfileHero extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(4),
-            decoration: const BoxDecoration(color: AppColors.scorifySurface2, shape: BoxShape.circle),
+            decoration: BoxDecoration(color: AppColors.scorifySurface2, shape: BoxShape.circle),
             child: UserAvatar(userId: p.idUser, url: p.avatarUrl, size: 84),
           ),
           const SizedBox(height: 12),
           Text(
             p.displayName,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontFamily: AppTypography.body, fontSize: 22, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+            style: TextStyle(fontFamily: AppTypography.body, fontSize: 22, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
           ),
           const SizedBox(height: 2),
           Text(p.email, style: AppTypography.bodyMuted),
@@ -842,13 +820,13 @@ class _InfoTile extends StatelessWidget {
               children: [
                 Text(
                   label.toUpperCase(),
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.1, color: AppColors.scorifyTextMuted),
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.1, color: AppColors.scorifyTextMuted),
                 ),
                 const SizedBox(height: 4),
                 Text(value,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white)),
+                    style: TextStyle(fontFamily: AppTypography.body, fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.scorifyInk)),
               ],
             ),
           ),
@@ -866,26 +844,26 @@ class _InfoPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const divider = Color(0x1AFFFFFF);
+    final divider = AppColors.scorifyHairline;
     Widget row(Widget a, Widget b) => IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(child: a),
-              const VerticalDivider(width: 1, thickness: 1, color: divider),
+              VerticalDivider(width: 1, thickness: 1, color: divider),
               Expanded(child: b),
             ],
           ),
         );
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0x99000000),
-        border: Border.all(color: const Color(0x40FFFFFF)),
+        color: AppColors.scorifyCardFill,
+        border: Border.all(color: AppColors.scorifyHairline),
       ),
       child: Column(
         children: [
           for (var i = 0; i < tiles.length; i += 2) ...[
-            if (i > 0) const Divider(height: 1, thickness: 1, color: divider),
+            if (i > 0) Divider(height: 1, thickness: 1, color: divider),
             row(tiles[i], i + 1 < tiles.length ? tiles[i + 1] : const SizedBox()),
           ],
         ],
@@ -908,7 +886,7 @@ class _FormField extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 6),
             child: Text(label,
-                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted)),
+                style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.scorifyTextMuted)),
           ),
           child,
         ],

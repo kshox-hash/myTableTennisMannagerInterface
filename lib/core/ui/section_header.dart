@@ -24,8 +24,8 @@ class SectionHeader extends StatelessWidget {
         Expanded(
           child: Text(
             title.toUpperCase(),
-            style: const TextStyle(
-              color: Color(0xFF8EC5FF),
+            style: TextStyle(
+              color: AppColors.scorifySection,
               fontSize: 11,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.3,
@@ -37,7 +37,7 @@ class SectionHeader extends StatelessWidget {
             onTap: onAction,
             child: Text(
               actionLabel!,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
                 color: AppColors.scorifyMint,

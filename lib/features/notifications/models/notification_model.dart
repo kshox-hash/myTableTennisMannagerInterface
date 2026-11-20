@@ -3,7 +3,7 @@ import "package:flutter/material.dart";
 import "package:myttmi/core/constants/app_colors.dart";
 import "package:myttmi/core/helpers/json_parse.dart";
 
-const Map<String, String> _typeIcon = {
+final Map<String, String> _typeIcon = {
   "tournament_finished": "🏁",
   "tournament_reminder": "⏰",
   "referee_assigned": "🧑‍⚖️",
@@ -35,7 +35,7 @@ String notificationIcon(String type) => _typeIcon[type] ?? "🔔";
 
 // Color por familia de notificación — para que el ícono deje de ser un
 // emoji plano y tenga un fondo distinto según el tipo de evento.
-const Map<String, Color> _typeColor = {
+final Map<String, Color> _typeColor = {
   "tournament_finished": AppColors.scorifyTextMuted,
   "tournament_reminder": AppColors.scorifyPending,
   "referee_assigned": AppColors.scorifyButterfly,

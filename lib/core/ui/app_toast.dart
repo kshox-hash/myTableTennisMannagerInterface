@@ -269,7 +269,7 @@ class _PopupState extends State<_Popup> with SingleTickerProviderStateMixin {
                                 body,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, height: 1.3, color: AppColors.scorifyTextMuted),
+                                style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, height: 1.3, color: AppColors.scorifyTextMuted),
                               ),
                             ],
                           ],
@@ -278,7 +278,7 @@ class _PopupState extends State<_Popup> with SingleTickerProviderStateMixin {
                       InkResponse(
                         onTap: () => PopupStack.dismiss(n.id),
                         radius: 16,
-                        child: const Padding(
+                        child: Padding(
                           padding: EdgeInsets.all(4),
                           child: Icon(Icons.close_rounded, size: 16, color: AppColors.scorifyTextMuted),
                         ),

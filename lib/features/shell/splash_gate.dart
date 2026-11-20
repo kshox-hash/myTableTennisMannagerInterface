@@ -228,7 +228,7 @@ class _SplashGateState extends State<SplashGate> {
           Image.asset("assets/images/logo-mark-3d.png", width: 84, filterQuality: FilterQuality.medium, isAntiAlias: true),
           const SizedBox(height: 16),
           // Marca como en el login: "My" blanco + "TTM" verde.
-          const Text.rich(
+          Text.rich(
             TextSpan(
               children: [
                 TextSpan(text: "My", style: TextStyle(color: AppColors.scorifyText)),
@@ -278,7 +278,7 @@ class _SplashGateState extends State<SplashGate> {
       ),
     );
   }
-  static const TextStyle _small = TextStyle(
+  static TextStyle get _small => TextStyle(
     fontFamily: AppTypography.body,
     fontSize: 11,
     fontWeight: FontWeight.w500,

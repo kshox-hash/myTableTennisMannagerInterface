@@ -10,7 +10,7 @@ class AppTypography {
   static const String body = 'Montserrat';
   static const String mono = 'IBM Plex Mono';
 
-  static const TextStyle displayXl = TextStyle(
+  static TextStyle get displayXl => TextStyle(
     fontFamily: display,
     fontWeight: FontWeight.w700,
     fontSize: 40,
@@ -20,7 +20,7 @@ class AppTypography {
     fontFeatures: [FontFeature.tabularFigures()],
   );
 
-  static const TextStyle displayLg = TextStyle(
+  static TextStyle get displayLg => TextStyle(
     fontFamily: display,
     fontWeight: FontWeight.w700,
     fontSize: 28,
@@ -30,7 +30,7 @@ class AppTypography {
     fontFeatures: [FontFeature.tabularFigures()],
   );
 
-  static const TextStyle displayMd = TextStyle(
+  static TextStyle get displayMd => TextStyle(
     fontFamily: display,
     fontWeight: FontWeight.w700,
     fontSize: 20, // escala fija: 40 · 28 · 20 · 16 · 14 · 12 · 11
@@ -40,7 +40,7 @@ class AppTypography {
     fontFeatures: [FontFeature.tabularFigures()],
   );
 
-  static const TextStyle h1 = TextStyle(
+  static TextStyle get h1 => TextStyle(
     fontFamily: body,
     fontWeight: FontWeight.w800,
     fontSize: 22,
@@ -48,28 +48,28 @@ class AppTypography {
     color: AppColors.scorifyText,
   );
 
-  static const TextStyle h2 = TextStyle(
+  static TextStyle get h2 => TextStyle(
     fontFamily: body,
     fontWeight: FontWeight.w700,
     fontSize: 16,
     color: AppColors.scorifyText,
   );
 
-  static const TextStyle bodyText = TextStyle(
+  static TextStyle get bodyText => TextStyle(
     fontFamily: body,
     fontWeight: FontWeight.w400,
     fontSize: 14,
     color: AppColors.scorifyText,
   );
 
-  static const TextStyle bodyMuted = TextStyle(
+  static TextStyle get bodyMuted => TextStyle(
     fontFamily: body,
     fontWeight: FontWeight.w400,
     fontSize: 12,
     color: AppColors.scorifyTextMuted,
   );
 
-  static const TextStyle caption = TextStyle(
+  static TextStyle get caption => TextStyle(
     fontFamily: body,
     fontWeight: FontWeight.w500,
     fontSize: 11,
@@ -78,7 +78,7 @@ class AppTypography {
   );
 
   // Igual que los botones de la web: Montserrat seminegrita, 14 px.
-  static const TextStyle button = TextStyle(
+  static TextStyle get button => TextStyle(
     fontFamily: body,
     fontWeight: FontWeight.w600,
     fontSize: 14,
@@ -86,7 +86,7 @@ class AppTypography {
     color: AppColors.scorifyText,
   );
 
-  static const TextStyle mono14 = TextStyle(
+  static TextStyle get mono14 => TextStyle(
     fontFamily: mono,
     fontWeight: FontWeight.w400,
     fontSize: 13,
@@ -94,7 +94,7 @@ class AppTypography {
     fontFeatures: [FontFeature.tabularFigures()],
   );
 
-  static const TextStyle monoStrong = TextStyle(
+  static TextStyle get monoStrong => TextStyle(
     fontFamily: mono,
     fontWeight: FontWeight.w600,
     fontSize: 14,

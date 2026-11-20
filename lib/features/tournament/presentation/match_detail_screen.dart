@@ -276,7 +276,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Icon(Icons.info_rounded, size: 18, color: AppColors.scorifyPending),
+                                    Icon(Icons.info_rounded, size: 18, color: AppColors.scorifyPending),
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
@@ -287,7 +287,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                                                 loserName: m.winnerId == m.player1Id ? m.player2Name : m.player1Name,
                                                 winnerName: m.winnerId == m.player1Id ? m.player1Name : m.player2Name,
                                               ),
-                                        style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, height: 1.35, color: AppColors.scorifyText),
+                                        style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, height: 1.35, color: AppColors.scorifyText),
                                       ),
                                     ),
                                   ],

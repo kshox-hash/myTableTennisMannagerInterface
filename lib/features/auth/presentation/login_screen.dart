@@ -1,3 +1,4 @@
+import "package:myttmi/core/ui/theme_toggle.dart";
 import "package:myttmi/features/auth/presentation/login_background.dart";
 import "package:myttmi/core/monitoring.dart";
 import "package:myttmi/features/shell/splash_gate.dart";
@@ -111,7 +112,9 @@ class _LoginScreenState extends State<LoginScreen> {
       // Foto del jugador con cenizas blancas; logo y formulario abajo.
       body: LoginBackground(
         child: SafeArea(
-          child: LayoutBuilder(
+          child: Stack(
+            children: [
+              Positioned.fill(child: LayoutBuilder(
             builder: (context, box) => SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
               child: ConstrainedBox(
@@ -126,16 +129,28 @@ class _LoginScreenState extends State<LoginScreen> {
                   // horizontal). Discreto, 190 de ancho; el asset viene en
                   // 1x/2x/3x de ese tamaño (assets/images/2.0x, 3.0x): no se
                   // achica en el teléfono y los bordes no se ven dentados.
-                  const SizedBox(
-                    width: 150,
-                    child: Image(
-                      image: AssetImage("assets/images/logo-stacked.png"),
-                      fit: BoxFit.contain,
-                      filterQuality: FilterQuality.medium,
-                      isAntiAlias: true,
-                      semanticLabel: "MyTTM",
+                  // En claro la palabra "MyTTM" (imagen blanca) no se vería:
+                  // la M y el nombre en texto oscuro.
+                  if (AppColors.isLight)
+                    Column(
+                      children: [
+                        Image.asset("assets/images/logo-mark-3d.png", height: 70, filterQuality: FilterQuality.medium, isAntiAlias: true),
+                        const SizedBox(height: 4),
+                        const Text("MyTTM",
+                            style: TextStyle(fontFamily: "Montserrat", fontSize: 38, fontWeight: FontWeight.w800, letterSpacing: -0.5, color: Color(0xFF0E1A24))),
+                      ],
+                    )
+                  else
+                    const SizedBox(
+                      width: 150,
+                      child: Image(
+                        image: AssetImage("assets/images/logo-stacked.png"),
+                        fit: BoxFit.contain,
+                        filterQuality: FilterQuality.medium,
+                        isAntiAlias: true,
+                        semanticLabel: "MyTTM",
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 10),
                   // Bajada como texto real (dentro de la imagen quedaba
                   // diminuta), con la línea verde a cada lado como el logo.
@@ -144,14 +159,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Container(width: 22, height: 1.5, color: AppColors.loginAccent),
                       const SizedBox(width: 8),
-                      const Text(
+                      Text(
                         "GESTIÓN DE TORNEOS Y CLUBES",
                         style: TextStyle(
                           fontFamily: "Montserrat",
                           fontSize: 11.5,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1.8,
-                          color: Color(0xFFE6ECEA),
+                          color: AppColors.isLight ? const Color(0xFF1F2A30) : const Color(0xFFE6ECEA),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -206,18 +221,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                 height: 46,
                                 radius: 0,
                                 // Plano, como el resto de la app (sin degradado).
-                                gradient: const LinearGradient(colors: [AppColors.scorifyMint, AppColors.scorifyMint]),
-                                foreground: AppColors.loginOnAccent,
+                                gradient: LinearGradient(colors: [AppColors.scorifyMint, AppColors.scorifyMint]),
+                                foreground: AppColors.isLight ? Colors.white : AppColors.loginOnAccent,
                               ),
                         const SizedBox(height: 16),
                         Row(
                           children: [
-                            const Expanded(child: Divider(color: AppColors.scorifySurface2)),
+                            Expanded(child: Divider(color: AppColors.scorifySurface2)),
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 10),
                               child: Text("o", style: AppTypography.bodyMuted),
                             ),
-                            const Expanded(child: Divider(color: AppColors.scorifySurface2)),
+                            Expanded(child: Divider(color: AppColors.scorifySurface2)),
                           ],
                         ),
                         const SizedBox(height: 14),
@@ -230,10 +245,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             // blanco, texto casi negro y la "G" de 4 colores.
                             // Oscuro con borde fino: no le gana a "Entrar" (la acción principal).
                             style: OutlinedButton.styleFrom(
-                              backgroundColor: const Color(0x66000000),
-                              foregroundColor: Colors.white,
+                              backgroundColor: AppColors.isLight ? const Color(0xE6FFFFFF) : const Color(0x66000000),
+                              foregroundColor: AppColors.isLight ? const Color(0xFF18181B) : Colors.white,
                               disabledBackgroundColor: const Color(0x33000000),
-                              side: const BorderSide(color: Color(0x40FFFFFF)),
+                              side: BorderSide(color: AppColors.isLight ? const Color(0x26000000) : const Color(0x40FFFFFF)),
                               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                             ),
                             child: const Row(
@@ -256,7 +271,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           child: Text.rich(
                             TextSpan(children: [
-                              TextSpan(text: "¿No tienes cuenta? ", style: AppTypography.bodyMuted.copyWith(fontSize: 14, color: const Color(0xCCFFFFFF))),
+                              TextSpan(text: "¿No tienes cuenta? ", style: AppTypography.bodyMuted.copyWith(fontSize: 14, color: AppColors.isLight ? const Color(0xFF3F3F46) : const Color(0xCCFFFFFF))),
                               TextSpan(text: "Crea una", style: AppTypography.bodyMuted.copyWith(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.loginAccent)),
                             ]),
                           ),
@@ -269,6 +284,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
+          )),
+              // ☀/🌙 arriba a la derecha.
+              const Positioned(top: 8, right: 12, child: ThemeToggleButton(onPhoto: true)),
+            ],
           ),
         ),
       ),

@@ -49,7 +49,7 @@ class SpinPlayerCard extends StatelessWidget {
                         shape: BoxShape.circle,
                         border: Border.all(color: AppColors.scorifyCardBorder),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.person,
                         color: AppColors.scorifyMint,
                         size: 32,
@@ -65,7 +65,7 @@ class SpinPlayerCard extends StatelessWidget {
                       playerName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.scorifyText,
                         fontSize: 18,
                         fontWeight: FontWeight.w700,

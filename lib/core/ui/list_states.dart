@@ -48,7 +48,7 @@ class _LoadingStateState extends State<LoadingState> with SingleTickerProviderSt
                 decoration: BoxDecoration(color: AppColors.scorifyCardFill, borderRadius: BorderRadius.circular(Panel.radius)),
                 child: Row(
                   children: [
-                    Container(width: 42, height: 42, decoration: const BoxDecoration(color: AppColors.scorifySurface2, shape: BoxShape.circle)),
+                    Container(width: 42, height: 42, decoration: BoxDecoration(color: AppColors.scorifySurface2, shape: BoxShape.circle)),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -114,7 +114,7 @@ class ErrorStateView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 26, horizontal: 20),
       child: Column(
         children: [
-          const Icon(Icons.error_outline_rounded, color: AppColors.scorifyNegative, size: 26),
+          Icon(Icons.error_outline_rounded, color: AppColors.scorifyNegative, size: 26),
           const SizedBox(height: 10),
           // Cada línea por separado: "No pudimos cargar X.\n<error crudo>".
           Text(

@@ -16,7 +16,7 @@ import 'package:myttmi/features/ranking/models/ranking_model.dart';
 import 'package:myttmi/features/shell/tab_auto_refresh.dart';
 import 'package:myttmi/routes/app_routes.dart';
 
-const TextStyle _muted = TextStyle(
+TextStyle get _muted => TextStyle(
   fontFamily: AppTypography.body,
   fontSize: 12,
   fontWeight: FontWeight.w400,
@@ -174,7 +174,7 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
             child: Text(
               label,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+              style: TextStyle(fontFamily: AppTypography.body, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
             ),
           ),
         ),
@@ -207,11 +207,11 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
                   future: future,
                   builder: (context, snap) {
                     if (snap.connectionState != ConnectionState.done) {
-                      return const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator(color: AppColors.scorifyMint)));
+                      return Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator(color: AppColors.scorifyMint)));
                     }
                     final rows = snap.data ?? const <RankingResult>[];
                     if (rows.isEmpty) {
-                      return const Padding(
+                      return Padding(
                         padding: EdgeInsets.all(16),
                         child: Text("No se registran campeonatos con puntos.", style: _muted),
                       );
@@ -232,7 +232,7 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
                                       Text(r.tournamentName,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
+                                          style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText)),
                                       const SizedBox(height: 2),
                                       Text(
                                         [r.round, if (r.category.isNotEmpty) r.category, _levelName(r.level)].join(" · "),
@@ -413,11 +413,11 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
                     filled: true,
                     fillColor: AppColors.scorifyInput,
                     contentPadding: const EdgeInsets.symmetric(vertical: 13),
-                    prefixIcon: const Icon(Icons.search_rounded, color: AppColors.scorifyTextMuted),
+                    prefixIcon: Icon(Icons.search_rounded, color: AppColors.scorifyTextMuted),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(Panel.radius), borderSide: BorderSide.none),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(Panel.radius),
-                      borderSide: const BorderSide(color: AppColors.scorifyMint, width: 1.4),
+                      borderSide: BorderSide(color: AppColors.scorifyMint, width: 1.4),
                     ),
                   ),
                 ),
@@ -432,7 +432,7 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
                     width: 46,
                     height: 46,
                     decoration: panelBox(),
-                    child: const Icon(Icons.help_outline_rounded, size: 21, color: AppColors.scorifyMint),
+                    child: Icon(Icons.help_outline_rounded, size: 21, color: AppColors.scorifyMint),
                   ),
                 ),
               ),
@@ -460,7 +460,7 @@ class _RankingScreenState extends State<RankingScreen> with TabAutoRefreshMixin<
                                 padding: const EdgeInsets.all(16),
                                 child: Row(
                                   children: [
-                                    const Icon(Icons.leaderboard_rounded, color: AppColors.scorifyTextMuted, size: 20),
+                                    Icon(Icons.leaderboard_rounded, color: AppColors.scorifyTextMuted, size: 20),
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
@@ -518,11 +518,11 @@ class _MyRankCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Tu posición", style: _muted),
+                Text("Tu posición", style: _muted),
                 const SizedBox(height: 2),
                 Text(
                   "#${me.rankingPosition} de $total",
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                 ),
               ],
             ),
@@ -615,7 +615,7 @@ class _PodiumStep extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 12, height: 1.3, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 12, height: 1.3, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -653,7 +653,7 @@ class _RankRow extends StatelessWidget {
                 child: Text(
                   "${player.rankingPosition}",
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.scorifyTextMuted),
+                  style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.scorifyTextMuted),
                 ),
               ),
               const SizedBox(width: 6),
@@ -667,7 +667,7 @@ class _RankRow extends StatelessWidget {
                       isMe ? "${player.name} (tú)" : player.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
+                      style: TextStyle(fontFamily: AppTypography.body, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.scorifyText),
                     ),
                     Text(player.clubName ?? "Sin club", maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted),
                   ],

@@ -1,3 +1,4 @@
+import "package:myttmi/core/constants/app_colors.dart";
 import "package:flutter/material.dart";
 import "package:myttmi/core/ui/premium_motion.dart";
 import "package:myttmi/core/clubs/club_crests.dart";
@@ -10,22 +11,22 @@ import "package:myttmi/features/player/models/tournament_match_model.dart";
 /// Secciones del Inicio del jugador: datos primero, color solo para estado.
 /// (Mi grupo · Últimos resultados · Mis campeonatos.)
 
-const _accent = Color(0xFF8EC5FF); // azul hielo: títulos de sección / lo mío
-const _muted = Color(0x99FFFFFF);
-const _faint = Color(0x59FFFFFF);
+Color get _accent => AppColors.scorifySection; // azul hielo: títulos de sección / lo mío
+Color get _muted => AppColors.scorifyTextMuted;
+Color get _faint => AppColors.scorifyTextFaint;
 const _win = Color(0xFF3DDC97); // ganado
 const _loss = Color(0xFFFF6B6B); // perdido
 const _gold = Color(0xFFA6D32D); // clasifica (Oro / llave): lima de la web
 const _silver = Color(0xFFC0C7CF); // clasifica a Plata: plateado de la web
 
-TextStyle _s(double size, {FontWeight w = FontWeight.w500, Color c = Colors.white, double? ls}) =>
-    TextStyle(fontFamily: "Montserrat", fontSize: size, fontWeight: w, color: c, letterSpacing: ls, height: 1.2);
+TextStyle _s(double size, {FontWeight w = FontWeight.w500, Color? c, double? ls}) =>
+    TextStyle(fontFamily: "Montserrat", fontSize: size, fontWeight: w, color: c ?? AppColors.scorifyInk, letterSpacing: ls, height: 1.2);
 
-TextStyle _n(double size, {FontWeight w = FontWeight.w700, Color c = Colors.white}) => TextStyle(
+TextStyle _n(double size, {FontWeight w = FontWeight.w700, Color? c}) => TextStyle(
     fontFamily: AppTypography.display,
     fontSize: size,
     fontWeight: w,
-    color: c,
+    color: c ?? AppColors.scorifyInk,
     height: 1.1,
     fontFeatures: const [FontFeature.tabularFigures()]);
 
@@ -140,7 +141,7 @@ class HomeGroupTable extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 1.5),
       padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 6),
-      color: me ? const Color(0x268EC5FF) : Colors.transparent,
+      color: me ? AppColors.scorifySelected : Colors.transparent,
       child: Row(
         children: [
           Container(
@@ -194,7 +195,7 @@ class HomeRecentResults extends StatelessWidget {
       child: Column(
         children: [
           for (var i = 0; i < items.length; i++) ...[
-            if (i > 0) const Divider(height: 1, thickness: 1, color: Color(0x14FFFFFF), indent: 14, endIndent: 14),
+            if (i > 0) Divider(height: 1, thickness: 1, color: AppColors.scorifySelected, indent: 14, endIndent: 14),
             _line(items[i]),
           ],
         ],
@@ -235,9 +236,9 @@ class HomeRecentResults extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            CountUpText(mine, style: _n(18, c: won ? Colors.white : _muted)),
+            CountUpText(mine, style: _n(18, c: won ? AppColors.scorifyInk : _muted)),
             Text("-", style: _n(18, c: _muted)),
-            CountUpText(theirs, style: _n(18, c: won ? Colors.white : _muted)),
+            CountUpText(theirs, style: _n(18, c: won ? AppColors.scorifyInk : _muted)),
           ],
         ),
       ),
@@ -260,7 +261,7 @@ class HomeMyTournaments extends StatelessWidget {
       child: Column(
         children: [
           for (var i = 0; i < events.length; i++) ...[
-            if (i > 0) const Divider(height: 1, thickness: 1, color: Color(0x14FFFFFF), indent: 14, endIndent: 14),
+            if (i > 0) Divider(height: 1, thickness: 1, color: AppColors.scorifySelected, indent: 14, endIndent: 14),
             _line(events[i]),
           ],
         ],

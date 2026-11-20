@@ -32,7 +32,7 @@ class SpinStatsRow extends StatelessWidget {
                 children: [
                   Text(
                     stats[i].value,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.scorifyText,
                       fontSize: 18,
                       fontWeight: FontWeight.w700,

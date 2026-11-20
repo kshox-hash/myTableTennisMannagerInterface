@@ -79,7 +79,7 @@ class SpinNextMatchPanel extends StatelessWidget {
       icon: Icons.sports_tennis_rounded,
       titleColor: AppColors.scorifyMint,
       // Mismo color plano que las demás tarjetas del Inicio.
-      gradient: const LinearGradient(colors: [Color(0xFF10161F), Color(0xFF10161F)]),
+      gradient: AppColors.cardGradient,
       fill: true,
       onTap: onTap,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
@@ -90,19 +90,19 @@ class SpinNextMatchPanel extends StatelessWidget {
   Widget _empty() {
     return Column(
       children: [
-        const Icon(Icons.sports_tennis_rounded, color: AppColors.scorifyMint, size: 30),
+        Icon(Icons.sports_tennis_rounded, color: AppColors.scorifyMint, size: 30),
         const SizedBox(height: 10),
         Text(
           emptyTitle,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w600),
+          style: TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w600),
         ),
         if (emptySubtitle.isNotEmpty) ...[
           const SizedBox(height: 4),
           Text(
             emptySubtitle,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 12, fontWeight: FontWeight.w600),
+            style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 12, fontWeight: FontWeight.w600),
           ),
         ],
       ],
@@ -121,7 +121,7 @@ class SpinNextMatchPanel extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w600),
+          style: TextStyle(color: AppColors.scorifyText, fontSize: 14, fontWeight: FontWeight.w600),
         ),
         if (stageLabel.isNotEmpty) ...[
           const SizedBox(height: 2),
@@ -130,7 +130,7 @@ class SpinNextMatchPanel extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600),
+            style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600),
           ),
         ],
         const SizedBox(height: 14),
@@ -144,25 +144,25 @@ class SpinNextMatchPanel extends StatelessWidget {
                 children: [
                   const SizedBox(height: 6),
                   if (ready) ...[
-                    const Text(
+                    Text(
                       "Mesa",
                       style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3),
                     ),
                     Text(
                       "$tableNumber",
-                      style: const TextStyle(color: AppColors.scorifyText, fontSize: 40, height: 1.05, fontWeight: FontWeight.w700),
+                      style: TextStyle(color: AppColors.scorifyText, fontSize: 40, height: 1.05, fontWeight: FontWeight.w700),
                     ),
                   ] else if (scheduledAt != null) ...[
                     Text(
                       _dayLabel(scheduledAt!),
-                      style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3),
+                      style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3),
                     ),
                     Text(
                       _hhmm(scheduledAt!),
-                      style: const TextStyle(color: AppColors.scorifyText, fontSize: 32, height: 1.1, fontWeight: FontWeight.w700),
+                      style: TextStyle(color: AppColors.scorifyText, fontSize: 32, height: 1.1, fontWeight: FontWeight.w700),
                     ),
                   ] else
-                    const Text(
+                    Text(
                       "VS",
                       style: TextStyle(color: AppColors.scorifyText, fontSize: 32, height: 1.2, fontWeight: FontWeight.w700, fontStyle: FontStyle.italic),
                     ),
@@ -185,7 +185,7 @@ class SpinNextMatchPanel extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600),
+            style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600),
           ),
         ],
         if (onOpponentProfile != null) ...[
@@ -221,7 +221,7 @@ class _Side extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: panelBox(),
-                child: const Icon(Icons.person_rounded, color: AppColors.scorifyTextMuted),
+                child: Icon(Icons.person_rounded, color: AppColors.scorifyTextMuted),
               ),
         const SizedBox(height: 8),
         Text(
@@ -229,10 +229,10 @@ class _Side extends StatelessWidget {
           maxLines: 2,
           textAlign: TextAlign.center,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(color: AppColors.scorifyText, fontSize: 13, fontWeight: FontWeight.w600, height: 1.2),
+          style: TextStyle(color: AppColors.scorifyText, fontSize: 13, fontWeight: FontWeight.w600, height: 1.2),
         ),
         const SizedBox(height: 2),
-        Text(caption, style: const TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+        Text(caption, style: TextStyle(color: AppColors.scorifyTextMuted, fontSize: 11, fontWeight: FontWeight.w600)),
       ],
     );
   }
