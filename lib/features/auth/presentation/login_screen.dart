@@ -209,8 +209,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 onPressed: _login,
                                 height: 46,
                                 radius: 0,
-                                // Plano, como el resto de la app (sin degradado).
-                                gradient: LinearGradient(colors: [AppColors.scorifyMint, AppColors.scorifyMint]),
+                                // Mismo degradado que "Entrar" en la web.
+                                gradient: AppColors.primaryButton,
                                 foreground: AppColors.isLight ? Colors.white : AppColors.loginOnAccent,
                               ),
                         const SizedBox(height: 16),

@@ -49,14 +49,9 @@ class PrismBackground extends StatelessWidget {
         children: [
           DecoratedBox(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: AppColors.isLight
-                    ? const [Color(0xFFEFF5F8), Color(0xFFF7F7F8), Color(0xFFF4F4F6)]
-                    : const [Color(0xFF0A0F18), Color(0xFF07090D), Color(0xFF040508)],
-                stops: const [0, 0.45, 1],
-              ),
+              // Mismo fondo que la web: celeste suave que se funde en
+              // blanco (claro) o marino con verde y celeste en diagonal (oscuro).
+              gradient: AppColors.appBackground,
             ),
           ),
           DecoratedBox(
@@ -65,8 +60,8 @@ class PrismBackground extends StatelessWidget {
                 center: const Alignment(0, -1.15),
                 radius: 1.0,
                 colors: AppColors.isLight
-                    ? const [Color(0x140088A6), Color(0x000088A6)]
-                    : const [Color(0x1A2A6BFF), Color(0x002A6BFF)],
+                    ? const [Color(0x000088A6), Color(0x000088A6)]
+                    : const [Color(0x0F00B3D6), Color(0x0000B3D6)],
               ),
             ),
           ),
