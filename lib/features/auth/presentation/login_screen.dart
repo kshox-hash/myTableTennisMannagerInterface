@@ -124,33 +124,22 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  // Logo 3D metálico en vertical: la M arriba y "MyTTM ·
-                  // Gestión de torneos y clubes" abajo (armado del logo
-                  // horizontal). Discreto, 190 de ancho; el asset viene en
-                  // 1x/2x/3x de ese tamaño (assets/images/2.0x, 3.0x): no se
-                  // achica en el teléfono y los bordes no se ven dentados.
-                  // En claro la palabra "MyTTM" (imagen blanca) no se vería:
-                  // la M y el nombre en texto oscuro.
-                  if (AppColors.isLight)
-                    Column(
-                      children: [
-                        Image.asset("assets/images/logo-mark-3d.png", height: 70, filterQuality: FilterQuality.medium, isAntiAlias: true),
-                        const SizedBox(height: 4),
-                        const Text("MyTTM",
-                            style: TextStyle(fontFamily: "Montserrat", fontSize: 38, fontWeight: FontWeight.w800, letterSpacing: -0.5, color: Color(0xFF0E1A24))),
-                      ],
-                    )
-                  else
-                    const SizedBox(
-                      width: 150,
-                      child: Image(
-                        image: AssetImage("assets/images/logo-stacked.png"),
-                        fit: BoxFit.contain,
-                        filterQuality: FilterQuality.medium,
-                        isAntiAlias: true,
-                        semanticLabel: "MyTTM",
-                      ),
-                    ),
+                  // El mismo logo en claro y oscuro (la M y el nombre en texto), así
+                  // los dos modos quedan del mismo tamaño; solo cambia el color del nombre.
+                  Column(
+                    children: [
+                      Image.asset(AppColors.isLight ? "assets/images/logo-mark-3d-light.png" : "assets/images/logo-mark-3d.png", height: 70, filterQuality: FilterQuality.medium, isAntiAlias: true),
+                      const SizedBox(height: 4),
+                      Text("MyTTM",
+                          semanticsLabel: "MyTTM",
+                          style: TextStyle(
+                              fontFamily: "Montserrat",
+                              fontSize: 38,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
+                              color: AppColors.isLight ? const Color(0xFF0E1A24) : Colors.white)),
+                    ],
+                  ),
                   const SizedBox(height: 10),
                   // Bajada como texto real (dentro de la imagen quedaba
                   // diminuta), con la línea verde a cada lado como el logo.

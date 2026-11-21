@@ -9,7 +9,11 @@ import "package:flutter/material.dart";
 class AshParticles extends StatefulWidget {
   final int count;
   final Color color;
-  const AshParticles({super.key, this.count = 45, this.color = Colors.white});
+  /// Más grandes y opacas, para que se noten sobre fondos claros.
+  final bool strong;
+  /// Semilla propia: dos capas (detrás y delante del jugador) no repiten posiciones.
+  final int seed;
+  const AshParticles({super.key, this.count = 45, this.color = Colors.white, this.strong = false, this.seed = 7});
 
   @override
   State<AshParticles> createState() => _AshParticlesState();
@@ -29,7 +33,7 @@ class _Ash {
 
 class _AshParticlesState extends State<AshParticles> with SingleTickerProviderStateMixin {
   late final AnimationController _ticker;
-  final _rnd = math.Random(7);
+  late final math.Random _rnd = math.Random(widget.seed);
   late final List<_Ash> _ashes;
   Duration _last = Duration.zero;
   double _time = 0;
@@ -37,9 +41,9 @@ class _AshParticlesState extends State<AshParticles> with SingleTickerProviderSt
   _Ash _spawn({bool anywhere = true}) => _Ash(
         _rnd.nextDouble(),
         anywhere ? _rnd.nextDouble() : 1.02 + _rnd.nextDouble() * 0.1,
-        0.6 + math.pow(_rnd.nextDouble(), 2.2) * 1.2, // casi todas chicas, pocas de ~1,8 px
+        (0.6 + math.pow(_rnd.nextDouble(), 2.2) * 1.2) * (widget.strong ? 1.5 : 1), // casi todas chicas
         0.012 + _rnd.nextDouble() * 0.022,
-        0.18 + _rnd.nextDouble() * 0.42,
+        widget.strong ? 0.6 + _rnd.nextDouble() * 0.4 : 0.18 + _rnd.nextDouble() * 0.42,
         4 + _rnd.nextDouble() * 10,
         0.05 + _rnd.nextDouble() * 0.12,
         _rnd.nextDouble() * math.pi * 2,

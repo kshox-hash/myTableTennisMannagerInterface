@@ -32,7 +32,7 @@ class SpinHeader extends StatelessWidget {
         children: [
           // Solo la M del logo al medio (sin la palabra MyTTM).
           Image.asset(
-            "assets/images/logo-mark-3d.png",
+            AppColors.isLight ? "assets/images/logo-mark-3d-light.png" : "assets/images/logo-mark-3d.png",
             height: 34,
             filterQuality: FilterQuality.medium,
             isAntiAlias: true,

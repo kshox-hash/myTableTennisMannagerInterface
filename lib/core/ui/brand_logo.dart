@@ -34,7 +34,7 @@ class BrandLogo extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Image.asset(
-          "assets/images/logo-mark-3d.png",
+          AppColors.isLight ? "assets/images/logo-mark-3d-light.png" : "assets/images/logo-mark-3d.png",
           height: markSize * 1.1,
           filterQuality: FilterQuality.medium,
           isAntiAlias: true,

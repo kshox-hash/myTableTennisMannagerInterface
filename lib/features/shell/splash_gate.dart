@@ -225,7 +225,7 @@ class _SplashGateState extends State<SplashGate> {
   Widget _brand() => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset("assets/images/logo-mark-3d.png", width: 84, filterQuality: FilterQuality.medium, isAntiAlias: true),
+          Image.asset(AppColors.isLight ? "assets/images/logo-mark-3d-light.png" : "assets/images/logo-mark-3d.png", width: 84, filterQuality: FilterQuality.medium, isAntiAlias: true),
           const SizedBox(height: 16),
           // Marca como en el login: "My" blanco + "TTM" verde.
           Text.rich(
